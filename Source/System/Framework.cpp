@@ -5,7 +5,9 @@
 #include "Framework.h"
 #include "Graphics/Graphics.h"
 #include "Debug/ImGuiRenderer.h"
+#include "Scene/SceneManager.h"
 #include "Scene/SceneTitle.h"
+#include "Scene/SceneGame.h"
 #include "Scene/ModelViewerScene.h"
 #include "Scene/WeightedCollisionScene.h"
 #include "Scene/RaceRankingScene.h"
@@ -26,6 +28,7 @@ static const int syncInterval = 1;
 // コンストラクタ
 Framework::Framework(HWND hWnd)
 	: hWnd(hWnd)
+	, input(hWnd)
 {
 	// グラフィックス初期化
 	Graphics::Instance().Initialize(hWnd);
@@ -46,13 +49,17 @@ Framework::Framework(HWND hWnd)
 	//scene = std::make_unique<SphereVsTriangleCollisionScene>();
 	//scene = std::make_unique<TwoBoneIKScene>();
 	//scene = std::make_unique<LookAtScene>();
-	scene = std::make_unique<SpaceDivisionRaycastScene>();
+	//scene = std::make_unique<SpaceDivisionRaycastScene>();
 	//scene = std::make_unique<SphereCastMoveScene>();
+
+	SceneManager::Instance().ChangeScene(new SceneGame);
 }
 
 // デストラクタ
 Framework::~Framework()
 {
+	SceneManager::Instance().Clear();
+
 	// IMGUI終了化
 	ImGuiRenderer::Finalize();
 }
@@ -60,11 +67,14 @@ Framework::~Framework()
 // 更新処理
 void Framework::Update(float elapsedTime)
 {
+	input.Update();
 	// IMGUIフレーム開始処理	
 	ImGuiRenderer::NewFrame();
 
 	// シーン更新処理
-	scene->Update(elapsedTime);
+	SceneManager::Instance().Update(elapsedTime);
+	input.OnKeyUp();
+	//scene->Update(elapsedTime);
 }
 
 // 描画処理
@@ -78,11 +88,13 @@ void Framework::Render(float elapsedTime)
 	// レンダーターゲット設定
 	Graphics::Instance().SetRenderTargets();
 
+	SceneManager::Instance().Render(elapsedTime);
+
 	// シーン描画処理
-	scene->Render(elapsedTime);
+	//scene->Render(elapsedTime);
 
 	// シーンGUI描画処理
-	scene->DrawGUI();
+	//scene->DrawGUI();
 
 	// シーン切り替えGUI
 	SceneSelectGUI();
@@ -210,6 +222,8 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 		break;
 	case WM_KEYDOWN:
 		if (wParam == VK_ESCAPE) PostMessage(hWnd, WM_CLOSE, 0, 0);
+		input.OnKeyDown();
+		input.SetIsLastGamePad(false);
 		break;
 	case WM_ENTERSIZEMOVE:
 		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.

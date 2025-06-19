@@ -10,12 +10,19 @@
 #include "Model/ModelRenderer.h"
 #include "Shader.h"
 
-//enum class ShaderId
-//{
-//	Basic,
-//	Lambert,
-//	EnumCount
-//};
+enum class FrameBufferId
+{
+	Display,
+	Scene,
+	Luminance,
+	Bloom,
+	GaussianBlur,
+	ToneMapping,
+	RadialBlur,
+	Chromatic,
+
+	EnumCount
+};
 
 // グラフィックス
 class Graphics
@@ -63,6 +70,12 @@ public:
 	// スクリーン高さ取得
 	float GetScreenHeight() const { return screenHeight; }
 
+	// フレームバッファ取得
+	FrameBuffer* GetFrameBuffer(FrameBufferId frameBufferId)
+	{
+		return frameBuffers[static_cast<int>(frameBufferId)].get();
+	}
+
 	// レンダーステート取得
 	RenderState* GetRenderState() { return renderState.get(); }
 
@@ -86,6 +99,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	renderTargetView;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	depthStencilView;
 	D3D11_VIEWPORT									viewport;
+
+	std::unique_ptr<FrameBuffer> frameBuffers[static_cast<int>(FrameBufferId::EnumCount)];
 
 	float	screenWidth = 0;
 	float	screenHeight = 0;

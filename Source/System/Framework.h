@@ -3,6 +3,7 @@
 #include <windows.h>
 #include "HighResolutionTimer.h"
 #include "Scene/Scene.h"
+#include "Input/Input.h"
 
 class Framework
 {
@@ -28,6 +29,7 @@ public:
 private:
 	const HWND				hWnd;
 	HighResolutionTimer		timer;
+	Input					input;
 	std::unique_ptr<Scene>	scene;
 };
 

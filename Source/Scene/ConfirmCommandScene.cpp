@@ -111,27 +111,11 @@ void ConfirmCommandScene::Render(float elapsedTime)
 	rc.deviceContext = dc;
 	rc.renderState = renderState;
 	rc.camera = &camera;
-	//rc.lightManager = &lightManager;
 
 	// モデル描画
 	modelRenderer->Draw(ShaderId::Lambert, character);
 	modelRenderer->Render(rc);
-	/*Shader* shader = Graphics::Instance().GetShader(ShaderId::Lambert);
-	shader->Begin(rc);
-	shader->Draw(rc, character.get());
-	shader->End(rc);*/
-
-	//// レンダーステート設定
-	//dc->OMSetBlendState(renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
-	//dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
-	//dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
-	//// サンプラステート設定
-	//ID3D11SamplerState* samplerStates[] =
-	//{
-	//	rc.renderState->GetSamplerState(SamplerState::LinearWrap)
-	//};
-	//dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
-
+	
 	// キー入力バッファ描画
 	DrawInputKeys(dc, 0, 160, inputKeys);
 }

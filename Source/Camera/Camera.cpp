@@ -1,21 +1,21 @@
 #include "Camera.h"
 
 // コンストラクタ
-Camera::Camera()
-{
-	// カメラ設定
-	SetPerspectiveFov(
-		DirectX::XMConvertToRadians(45),	// 画角
-		1280.0f / 720.0f,					// 画面アスペクト比
-		0.1f,								// ニアクリップ
-		1000.0f								// ファークリップ
-	);
-	SetLookAt(
-		{ 0, 0, -5 },		// 視点
-		{ 0, 0, 0 },		// 注視点
-		{ 0, 1, 0 }			// 上ベクトル
-	);
-}
+//Camera::Camera()
+//{
+//	// カメラ設定
+//	SetPerspectiveFov(
+//		DirectX::XMConvertToRadians(45),	// 画角
+//		1280.0f / 720.0f,					// 画面アスペクト比
+//		0.1f,								// ニアクリップ
+//		1000.0f								// ファークリップ
+//	);
+//	SetLookAt(
+//		{ 0, 0, -5 },		// 視点
+//		{ 0, 0, 0 },		// 注視点
+//		{ 0, 1, 0 }			// 上ベクトル
+//	);
+//}
 
 // 指定方向を向く
 void Camera::SetLookAt(const DirectX::XMFLOAT3& eye, const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT3& up)

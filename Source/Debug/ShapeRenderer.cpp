@@ -80,6 +80,25 @@ void ShapeRenderer::DrawSphere(
 	DirectX::XMStoreFloat4x4(&instance.worldTransform, S * T);
 }
 
+// ‰~’Œ•`‰æ
+void ShapeRenderer::DrawCylinder(
+	const DirectX::XMFLOAT3& position,
+	float radius,
+	float height,
+	const DirectX::XMFLOAT4& color)
+{
+	/*Instance& instance = instances.emplace_back();
+	instance.mesh = &cylinderMesh;
+	DirectX::XMMATRIX World;
+	DirectX::XMMATRIX Transform = DirectX::XMLoadFloat4x4(&transform);
+	World.r[0] = DirectX::XMVectorScale(Transform.r[0], radius);
+	World.r[1] = DirectX::XMVectorScale(Transform.r[1], height);
+	World.r[2] = DirectX::XMVectorScale(Transform.r[2], radius);
+	World.r[3] = Transform.r[3];
+	DirectX::XMStoreFloat4x4(&instance.worldTransform, World);
+	instance.color = color;*/
+}
+
 // ƒJƒvƒZƒ‹•`‰æ
 void ShapeRenderer::DrawCapsule(
 	const DirectX::XMFLOAT4X4& transform,

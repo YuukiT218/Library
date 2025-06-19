@@ -11,6 +11,12 @@ struct DirectionalLight
 class LightManager
 {
 public:
+	static LightManager& Instance()
+	{
+		static LightManager instance;
+		return instance;
+	}
+
 	// ディレクショナルライト設定
 	void SetDirectionalLight(DirectionalLight& light) { directionalLight = light; }
 

@@ -42,8 +42,6 @@ public:
 	};
 	std::vector<NodePose> nodePose; // ノードポーズキャッシュ
 
-	// アニメーションインデックス取得
-	int GetAnimationIndex(const char* name) const;
 
 	// ノードデータ取得
 	const std::vector<Node>& GetNodes() const { return nodes; }
@@ -67,6 +65,18 @@ public:
 	// 現在のアニメーション再生時間取得
 	float GetCurrentAnimationSeconds() const { return currentAnimationSeconds; }
 	void SetCurrentAnimationSeconds(float seconds) { currentAnimationSeconds = seconds; }
+
+	// アニメーションインデックス取得
+	int GetAnimationIndex(const char* name) const;
+
+	// アニメーション名取得
+	const char* GetAnimationName(int animationIndex) const;
+
+	// アニメーション再生時間取得
+	float GetAnimationLength(int animationIndex) const;
+
+	//
+	int GetCurrentAnimationIndex() { return currentAnimationIndex; }
 
 	// アニメーション更新処理
 	void UpdateAnimation(float elapsedTime);

@@ -24,6 +24,13 @@ public:
 		float radius,
 		const DirectX::XMFLOAT4& color);
 
+	// ‰~’Œ•`‰æ
+	void DrawCylinder(
+		const DirectX::XMFLOAT3& position,
+		float radius,
+		float height,
+		const DirectX::XMFLOAT4& color);
+
 	// ƒJƒvƒZƒ‹•`‰æ
 	void DrawCapsule(
 		const DirectX::XMFLOAT4X4& transform,

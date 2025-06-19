@@ -131,7 +131,6 @@ void SphereCastMoveScene::Render(float elapsedTime)
 	PrimitiveRenderer* primitiveRenderer = Graphics::Instance().GetPrimitiveRenderer();
 	ShapeRenderer* shapeRenderer = Graphics::Instance().GetShapeRenderer();
 	ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
-	//Shader* shader = Graphics::Instance().GetShader(ShaderId::Lambert);
 
 	// キャラクタートランスフォーム更新
 	DirectX::XMMATRIX WorldTransform = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
@@ -162,17 +161,11 @@ void SphereCastMoveScene::Render(float elapsedTime)
 	rc.deviceContext = dc;
 	rc.renderState = renderState;
 	rc.camera = &camera;
-	//rc.lightManager = &lightManager;
 
 	// モデル描画
 	modelRenderer->Draw(ShaderId::Lambert, character);
 	modelRenderer->Draw(ShaderId::Lambert, stage);
 	modelRenderer->Render(rc);
-	/*Shader* shader = Graphics::Instance().GetShader(ShaderId::Lambert);
-	shader->Begin(rc);
-	shader->Draw(rc, character.get());
-	shader->Draw(rc, stage.get());
-	shader->End(rc);*/
 }
 
 // GUI描画処理

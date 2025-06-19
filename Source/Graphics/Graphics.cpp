@@ -74,6 +74,13 @@ void Graphics::Initialize(HWND hWnd)
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
+	// フレームバッファ生成
+	frameBuffers[static_cast<int>(FrameBufferId::Display)] = std::make_unique<FrameBuffer>(device.Get(), swapchain.Get());
+	for (int i = static_cast<int>(FrameBufferId::Display) + 1; i < static_cast<int>(FrameBufferId::EnumCount); i++)
+	{
+		frameBuffers[i] = std::make_unique<FrameBuffer>(device.Get(), screenWidth, screenHeight);
+	}
+
 	// レンダーターゲットビューの生成
 	{
 		// スワップチェーンからバックバッファテクスチャを取得する。
