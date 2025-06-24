@@ -8,6 +8,7 @@
 #include "Scene/SceneManager.h"
 #include "Scene/SceneTitle.h"
 #include "Scene/SceneGame.h"
+#include "Scene/SceneLoading.h"
 #include "Scene/ModelViewerScene.h"
 #include "Scene/WeightedCollisionScene.h"
 #include "Scene/RaceRankingScene.h"
@@ -68,13 +69,10 @@ Framework::~Framework()
 void Framework::Update(float elapsedTime)
 {
 	input.Update();
-	// IMGUIフレーム開始処理	
-	ImGuiRenderer::NewFrame();
 
 	// シーン更新処理
 	SceneManager::Instance().Update(elapsedTime);
 	input.OnKeyUp();
-	//scene->Update(elapsedTime);
 }
 
 // 描画処理
@@ -82,22 +80,104 @@ void Framework::Render(float elapsedTime)
 {
 	ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
 
+	// IMGUIフレーム開始処理	
+	ImGuiRenderer::NewFrame();
+
 	// 画面クリア
-	Graphics::Instance().Clear(0.5f, 0.5f, 0.5f, 1);
+	Graphics::Instance().GetFrameBuffer(FrameBufferId::Display)->Clear(dc, DirectX::XMFLOAT4(0, 0, 1, 1));
 
 	// レンダーターゲット設定
-	Graphics::Instance().SetRenderTargets();
-
-	SceneManager::Instance().Render(elapsedTime);
+	Graphics::Instance().GetFrameBuffer(FrameBufferId::Display)->SetRenderTargets(dc);
 
 	// シーン描画処理
-	//scene->Render(elapsedTime);
+	if (currentSceneType == SceneType::Edit)
+	{
+		ImVec2 size = ImGui::GetContentRegionAvail();
+		int width = static_cast<int>(size.x);
+		int height = static_cast<int>(size.y);
 
-	// シーンGUI描画処理
-	//scene->DrawGUI();
+		// サイズ変更（必要な場合のみ）
+		static int prevWidth = 0, prevHeight = 0;
+		if (width != prevWidth || height != prevHeight)
+		{
+			try
+			{
+				Graphics::Instance().ResizeFrameBuffer(FrameBufferId::Scene, width, height);
+				prevWidth = width;
+				prevHeight = height;
+			}
+			catch (const std::exception& e)
+			{
+				std::string msg = "Framebuffer resize failed:\n";
+				msg += e.what();
+				MessageBoxA(nullptr, msg.c_str(), "Error", MB_OK | MB_ICONERROR);
+			}
+		}
 
-	// シーン切り替えGUI
-	SceneSelectGUI();
+		// Scene用にセット
+		Graphics::Instance().GetFrameBuffer(FrameBufferId::Scene)->SetRenderTargets(dc);
+		Graphics::Instance().GetFrameBuffer(FrameBufferId::Scene)->Clear(dc, DirectX::XMFLOAT4(0.2f, 0.2f, 0.25f, 1.0f));
+
+		// シーン描画
+		SceneManager::Instance().Render(elapsedTime);
+		/*auto* editScene = dynamic_cast<SceneEdit*>(SceneManager::Instance().GetCurrentScene());
+		if (editScene) {
+			editScene->Render(elapsedTime, width, height);
+		}*/
+	}
+	else
+	{
+		// 通常通り描画
+		SceneManager::Instance().Render(elapsedTime);
+	}
+
+	// グローバルまたは静的変数として管理（必要に応じて）
+	static bool showSceneSelector = false;
+
+	ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f - 20, 0), ImGuiCond_Always);
+	ImGui::SetNextWindowBgAlpha(0.3f); // ちょっと透明にする
+
+	if (ImGui::Begin("Toggle", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
+		if (ImGui::Button(showSceneSelector ? "Close Selector" : "Open Selector")) {
+			showSceneSelector = !showSceneSelector;
+		}
+	}
+	ImGui::End();
+
+	// Scene Selector ウィンドウ（表示中のみ）
+	if (showSceneSelector) {
+		ImGui::Begin("Scene Selector");
+
+		if (ImGui::Button("Title Scene") && currentSceneType != SceneType::Title) {
+			currentSceneType = SceneType::Title;
+			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle()));
+			ResizeSceneFramebufferToWindow();
+			showSceneSelector = false;
+		}
+
+		if (ImGui::Button("Game Scene") && currentSceneType != SceneType::Game) {
+			currentSceneType = SceneType::Game;
+			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame()));
+			ResizeSceneFramebufferToWindow();
+			showSceneSelector = false;
+		}
+
+		/*if (ImGui::Button("Edit Scene") && currentSceneType != SceneType::Edit) {
+			currentSceneType = SceneType::Edit;
+			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneEdit()));
+			ResizeSceneFramebufferToWindow();
+			showSceneSelector = false;
+		}*/
+
+		/*if (ImGui::Button("Result Scene") && currentSceneType != SceneType::Result) {
+			currentSceneType = SceneType::Result;
+			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneResult()));
+			ResizeSceneFramebufferToWindow();
+			showSceneSelector = false;
+		}*/
+
+		ImGui::End();
+	}
 #if 0
 	// IMGUIデモウインドウ描画（IMGUI機能テスト用）
 	ImGui::ShowDemoWindow();
@@ -172,6 +252,14 @@ void Framework::CalculateFrameStats()
 		frames = 0;
 		time_tlapsed += 1.0f;
 	}
+}
+
+void Framework::ResizeSceneFramebufferToWindow()
+{
+	ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
+	int fbWidth = static_cast<int>(viewportSize.x);
+	int fbHeight = static_cast<int>(viewportSize.y);
+	Graphics::Instance().ResizeFrameBuffer(FrameBufferId::Scene, fbWidth, fbHeight);
 }
 
 // アプリケーションループ

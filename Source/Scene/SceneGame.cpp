@@ -395,9 +395,9 @@ void SceneGame::DrawDebugGUI()
 	ImGui::End();
 
 	// プレイヤーデバッグ描画
-	/*player->DrawDebugGUI();
+	player->DrawDebugGUI();
 
-	EnemyManager::Instance().DrawDebugGUI();
+	/*EnemyManager::Instance().DrawDebugGUI();
 
 	combatUI->DrawDebugGui();
 

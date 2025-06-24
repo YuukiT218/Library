@@ -21,7 +21,7 @@ private:
 	void SceneSelectGUI();
 
 	void CalculateFrameStats();
-
+	void ResizeSceneFramebufferToWindow();
 public:
 	int Run();
 	LRESULT CALLBACK HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -31,5 +31,15 @@ private:
 	HighResolutionTimer		timer;
 	Input					input;
 	std::unique_ptr<Scene>	scene;
+
+	enum class SceneType {
+		Title,
+		Game,
+		Edit,
+		Result
+	};
+
+	SceneType currentSceneType = SceneType::Game;
+	SceneType selectedSceneType = SceneType::Game;
 };
 

@@ -128,6 +128,8 @@
     <ClInclude Include="Source\Camera\CameraParam.h" />
     <ClInclude Include="Source\Character\Character.h" />
     <ClInclude Include="Source\Character\Player.h" />
+    <ClInclude Include="Source\Character\Weapon\Sword.h" />
+    <ClInclude Include="Source\Character\Weapon\Weapon.h" />
     <ClInclude Include="Source\Graphics\BasicShader.h" />
     <ClInclude Include="Source\Camera\Camera.h" />
     <ClInclude Include="Source\Graphics\FrameBuffer.h" />
@@ -187,6 +189,8 @@
     <ClCompile Include="Source\Camera\CameraController.cpp" />
     <ClCompile Include="Source\Character\Character.cpp" />
     <ClCompile Include="Source\Character\Player.cpp" />
+    <ClCompile Include="Source\Character\Weapon\Sword.cpp" />
+    <ClCompile Include="Source\Character\Weapon\Weapon.cpp" />
     <ClCompile Include="Source\Graphics\BasicShader.cpp" />
     <ClCompile Include="Source\Camera\Camera.cpp" />
     <ClCompile Include="Source\Graphics\FrameBuffer.cpp" />

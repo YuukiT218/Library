@@ -295,14 +295,14 @@ void Character::UpdateVelocity(float elapsedTime)
     // 経過フレーム
     float elapsedFrame = 60.0f * elapsedTime;
 
-    //// 垂直速力更新処理
-    //UpdateVerticalVelocity(elapsedFrame);
+    // 垂直速力更新処理
+    UpdateVerticalVelocity(elapsedFrame);
 
     // 水平速力更新処理
     UpdateHorizontalVelocity(elapsedFrame);
 
-    //// 垂直移動更新処理
-    //UpdateVerticalMove(elapsedTime);
+    // 垂直移動更新処理
+    UpdateVerticalMove(elapsedTime);
 
     // 水平移動更新処理
     UpdateHorizontalMove(elapsedTime);

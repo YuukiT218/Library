@@ -7,6 +7,8 @@
 #include <d3d11.h>
 #include "ModelResource.h"
 #include <unordered_map>
+#include <imgui.h>
+
 
 class Model
 {
@@ -42,6 +44,21 @@ public:
 	};
 	std::vector<NodePose> nodePose; // ノードポーズキャッシュ
 
+	struct  EmissiveColors
+	{
+		float emissiveFactor = 1.0f;//発光度
+		DirectX::XMFLOAT4 adjustColor{ 1.0f,1.0f,1.0f,1.0f };//色の調整
+	};
+
+	struct  DissolveConstants
+	{
+		float emissivedissolve = -0.1f;//エミッシブテクスチャ用ディゾルブ
+		float dissolve = -0.1f;	//ディゾルブ
+		float alphaFactor = 1.0f;//アルファ値調整
+		DirectX::XMFLOAT4 OverwriteColor = { 1.0f,1.0f,1.0f,1.0f };//モデルの色を変化
+	};
+
+	void DrawGui();
 
 	// ノードデータ取得
 	const std::vector<Node>& GetNodes() const { return nodes; }
@@ -100,7 +117,18 @@ public:
 	// ノードポーズ取得
 	void GetNodePoses(std::vector<NodePose>& nodePoses) const;
 
+	//質感調整用ImGui
+	void DebugGui(const char* name);
+
 private:
+	//model事の質感補正値
+	float adjustMetalness = 0; //  金属質調整
+	float adjustRoughness = 0; //  粗さ調整
+	//model事の発光補正値
+	EmissiveColors emissive;
+	//ディゾルブ
+	DissolveConstants dissolveConstants;
+
 	int currentAnimationIndex = -1;
 	float currentAnimationSeconds = 0;
 	float oldAnimationSeconds = 0;

@@ -160,6 +160,17 @@ void Graphics::SetRenderTargets()
 	immediateContext->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 }
 
+void Graphics::ResizeFrameBuffer(FrameBufferId id, int width, int height)
+{
+	if (width <= 0 || height <= 0) return;
+
+	auto* fb = GetFrameBuffer(id);
+	if (fb)
+	{
+		fb->Resize(width, height);
+	}
+}
+
 // ‰æ–Ê•\Ž¦
 void Graphics::Present(UINT syncInterval)
 {

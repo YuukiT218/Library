@@ -91,6 +91,8 @@ public:
 	// ƒ‚ƒfƒ‹ƒŒƒ“ƒ_ƒ‰Žæ“¾
 	ModelRenderer* GetModelRenderer() const { return modelRenderer.get(); }
 
+	void ResizeFrameBuffer(FrameBufferId id, int width, int height);
+
 private:
 	HWND											hWnd = nullptr;
 	Microsoft::WRL::ComPtr<ID3D11Device>			device;

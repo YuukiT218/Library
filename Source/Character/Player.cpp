@@ -34,6 +34,8 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     // アニメーションスピード設定
     initAnimSpeed();
 
+    sword = std::make_unique<Sword>(device, "Data/Model/Weapon/Staff.glb");
+
     // プレイヤーの最大体力と体力設定
     maxHealth = 70;
     health = maxHealth;
@@ -186,6 +188,9 @@ void Player::Update(float elapsedTime)
     // プレイヤーとエネミーの衝突処理
     CollisionPlayerVsEnemies();
 
+    // アタッチメント
+    sword->Attach("Character1_LeftHand", model.get());
+
     // オブジェクト行列を更新
     UpdateTransform();
 
@@ -194,6 +199,8 @@ void Player::Update(float elapsedTime)
 
     // モデル行列更新
     model->UpdateTransform(transform);
+
+    sword->Update(elapsedTime);
 
     // 範囲制限
     KeepAreaLimit(position);
@@ -564,6 +571,7 @@ void Player::Render(const RenderContext& rc, ShaderId shaderId)
 {
     ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
     modelRenderer->Draw(ShaderId::Lambert, model);
+    modelRenderer->Draw(ShaderId::Lambert, std::shared_ptr<Model>(sword->GetModel(), [](Model*) {}));
     modelRenderer->Render(rc);
 
     // 体力ゲージ表示
@@ -681,8 +689,11 @@ void Player::DrawDebugGUI()
             ImGui::Separator();
 
             // プレイヤーモデルのパラメータ調整
-            //model->DebugGui(u8"Player");
+            model->DebugGui(u8"Player");
         }
+
+        ImGui::Separator();
+		sword->DrawDebugImGUi();
 
     }
     ImGui::End();
@@ -1384,54 +1395,51 @@ void PlayerComboState::Update(float elapsedTime)
     //    player->GetWeaponRight()->AttackAnimationCollision(player->GetModel(), config);
     //}
 
-    //InputComboType input = InputCombo();
+    InputComboType input = InputCombo();
 
-    //if (!nextShiftReady)
-    //{
-    //    if (frame >= config->attackParam.endTime)
-    //    {
-    //        // 走りステート遷移
-    //        if (InputRunMove())
-    //        {
-    //            ChangeState(PlayerStateId::Run);
-    //        }
-    //        player->GetPlayerModel()->SetBaseAnimationSpeed(comboPoseSpeed);
-    //    }
-    //    else
-    //    {
-    //        player->GetPlayerModel()->SetBaseAnimationSpeed(comboAttackSpeed);
-    //    }
-    //}
+    if (!nextShiftReady)
+    {
+        if (frame >= poseFrame)
+        {
+            // 走りステート遷移
+            if (InputRunMove())
+            {
+                ChangeState(PlayerStateId::Run);
+            }
+            //player->GetPlayerModel()->SetBaseAnimationSpeed(comboPoseSpeed);
+        }
+        else
+        {
+            //player->GetPlayerModel()->SetBaseAnimationSpeed(comboAttackSpeed);
+        }
+    }
 
-    //// 次のコンボステート処理
-    //if (inputToNextState.count(input))
-    //{
+    // 次のコンボステート処理
+    if (inputToNextState.count(input))
+    {
 
-    //    // 先行入力処理
-    //    if (input != InputComboType::None)
-    //    {
-    //        if (config->attribute.flag == AnimationFlag::Attack)
-    //        {
-    //            if (config->attackParam.IsActive(frame) || frame >= config->attackParam.endTime)
-    //            {
-    //                nextShiftReady = true;
-    //                nextInput = input;
-    //            }
-    //        }
-    //    }
-    //}
+        // 先行入力処理
+        if (input != InputComboType::None)
+        {
+            if (frame <= nextShiftFrame)
+            {
+                nextShiftReady = true;
+                nextInput = input;
+            }            
+        }
+    }
 
-    //// 次のコンボステートへ遷移
-    //if (nextShiftReady)
-    //{
-    //    if (frame >= config->attackParam.endTime)
-    //    {
-    //        ChangeState(inputToNextState[nextInput]);
-    //    }
-    //}
+    // 次のコンボステートへ遷移
+    if (nextShiftReady)
+    {
+        if (frame >= nextShiftFrame)
+        {
+            ChangeState(inputToNextState[nextInput]);
+        }
+    }
 
     // 終了後のステート遷移
-    if (frame >= endFrame)
+    if (!player->GetPlayerModel()->IsPlayAnimation())
     {
         ChangeState(PlayerStateId::Idle);
     }
@@ -1444,7 +1452,7 @@ void PlayerComboState::Update(float elapsedTime)
 PlayerCombo1State::PlayerCombo1State(Player* player)
     : PlayerComboState(player)
 {
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorAttackCombo1");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo1");
 
     nextShiftFrame = 0.53f;
     poseFrame = 0.53f;
@@ -1513,7 +1521,7 @@ PlayerCombo2State::PlayerCombo2State(Player* player)
     endFrame = 0.816f;
     comboAttackSpeed = 1.5f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorAttackCombo2");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo2");
 
     forwardFrame = 0.0f;
     forwardPower = 15.0f;
@@ -1574,7 +1582,7 @@ PlayerCombo3State::PlayerCombo3State(Player* player)
     endFrame = 0.9f;
     comboAttackSpeed = 1.0f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorAttackCombo3");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo3");
 
     forwardFrame = 0.46f;
     forwardPower = 13.0f;
@@ -1635,7 +1643,7 @@ PlayerCombo4State::PlayerCombo4State(Player* player)
     endFrame = 1.016f;
     comboAttackSpeed = 1.0f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorAttackCombo4");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo4");
 
     forwardFrame = 0.23f;
     forwardPower = 20.0f;

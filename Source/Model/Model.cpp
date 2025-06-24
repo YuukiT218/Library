@@ -418,3 +418,106 @@ void Model::GetNodePoses(std::vector<NodePose>& nodePoses) const
 		pose.scale = node.scale;
 	}
 }
+
+void Model::DebugGui(const char* name)
+{
+
+	std::vector<ModelResource::Material> materials = resource->GetMaterials();
+	for (int i = 0; i < materials.size(); i++)
+	{
+		ModelResource::Material material = materials.at(i);
+		ImGui::PushID(i);  // ここでIDスコープを変える
+
+		char textureID[128];
+		snprintf(textureID, sizeof(textureID), u8"テクスチャ　%i", i + 1);
+
+		if (ImGui::CollapsingHeader(textureID, ImGuiTreeNodeFlags_Framed))
+		{
+
+			if (ImGui::CollapsingHeader("Albedo Map", ImGuiTreeNodeFlags_Framed))
+			{
+				if (!resource->GetMaterials().at(0).baseTextureFileName.empty()) {//テクスチャの階層
+					ImGui::Text("Albedo : %s", resource->GetMaterials().at(0).baseTextureFileName.c_str());
+				}
+				ImGui::Text("Albedo Texture:");//テクスチャ表示
+				if (resource->GetMaterials().at(0).baseMap) {
+					ImGui::Image(resource->GetMaterials().at(0).baseMap.Get(), ImVec2(128, 128));
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Normal Map", ImGuiTreeNodeFlags_Framed))
+			{
+				if (!resource->GetMaterials().at(0).normalTextureFileName.empty()) {
+					ImGui::Text("Normal : %s", resource->GetMaterials().at(0).normalTextureFileName.c_str());
+				}
+				ImGui::Text("Normal Map:");
+				if (resource->GetMaterials().at(0).normalMap) {
+					ImGui::Image(resource->GetMaterials().at(0).normalMap.Get(), ImVec2(128, 128));
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Emmisive Map", ImGuiTreeNodeFlags_Framed))
+			{
+				if (!resource->GetMaterials().at(0).emissiveTextureFileName.empty()) {
+					ImGui::Text("Emmisive : %s", resource->GetMaterials().at(0).emissiveTextureFileName.c_str());
+				}
+				ImGui::Text("Emmisive Map:");
+				if (resource->GetMaterials().at(0).emissiveMap) {
+					ImGui::Image(resource->GetMaterials().at(0).emissiveMap.Get(), ImVec2(128, 128));
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Metallic Map", ImGuiTreeNodeFlags_Framed))
+			{
+				if (!resource->GetMaterials().at(0).metalnessRoughnessTextureFileName.empty()) {
+					ImGui::Text("Metallic : %s", resource->GetMaterials().at(0).metalnessRoughnessTextureFileName.c_str());
+				}
+
+				ImGui::Text("Metallic Map:");
+				if (resource->GetMaterials().at(0).metalnessRoughnessMap) {
+					ImGui::Image(resource->GetMaterials().at(0).metalnessRoughnessMap.Get(), ImVec2(128, 128));
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Occlusion Map", ImGuiTreeNodeFlags_Framed))
+			{
+				if (!resource->GetMaterials().at(0).occlusionTextureFileName.empty()) {
+					ImGui::Text("Occlusion : %s", resource->GetMaterials().at(0).occlusionTextureFileName.c_str());
+				}
+
+				ImGui::Text("Occkusion Map:");
+				if (resource->GetMaterials().at(0).occlusionMap) {
+					ImGui::Image(resource->GetMaterials().at(0).occlusionMap.Get(), ImVec2(128, 128));
+				}
+			}
+
+			// その他のテクスチャがあれば追加
+		}
+		ImGui::PopID();
+	}
+
+
+	// ラベル文字列のバッファを用意
+	char labelMetalness[128];
+	char labelRoughness[128];
+	char labelDissolve[128];
+	char labelEmissiveDissolve[128];
+	char labelAlpha[128];
+	char labelOverColor[128];
+
+	// 引数の name を前に追加
+	snprintf(labelMetalness, sizeof(labelMetalness), u8"%s 金属質", name);
+	snprintf(labelRoughness, sizeof(labelRoughness), u8"%s 材質の粗さ", name);
+	snprintf(labelDissolve, sizeof(labelDissolve), u8"%s ディゾルブ", name);
+	snprintf(labelEmissiveDissolve, sizeof(labelEmissiveDissolve), u8"%s エミッシブディゾルブ", name);
+	snprintf(labelAlpha, sizeof(labelAlpha), u8"%s アルファ", name);
+	snprintf(labelOverColor, sizeof(labelOverColor), u8"%s オーバーカラー", name);
+
+	// ImGui に渡す
+	ImGui::DragFloat(labelMetalness, &adjustMetalness, 0.01f, 0, 1.0f);
+	ImGui::DragFloat(labelRoughness, &adjustRoughness, 0.01f, 0, 1.0f);
+	ImGui::DragFloat(labelDissolve, &dissolveConstants.dissolve, 0.01f, -0.1f, 1.0f);
+	ImGui::DragFloat(labelEmissiveDissolve, &dissolveConstants.emissivedissolve, 0.01f, -0.1f, 1.0f);
+	ImGui::DragFloat(labelAlpha, &dissolveConstants.alphaFactor, 0.01f, 0.0f, 1.0f);
+	ImGui::ColorEdit4(labelOverColor, &dissolveConstants.OverwriteColor.x);
+}

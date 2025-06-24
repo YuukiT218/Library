@@ -71,6 +71,6 @@ void SceneTitle::Render(float elapsedTime)
 	rc.deviceContext = graphics.GetDeviceContext();
 	rc.renderState = graphics.GetRenderState();
 
-	modelRenderer->Draw(ShaderId::Lambert, character);
-	modelRenderer->Render(rc);
+	/*modelRenderer->Draw(ShaderId::Lambert, character);
+	modelRenderer->Render(rc);*/
 }

@@ -25,9 +25,9 @@ StageMain::StageMain()
 				//ステージがFBXのため左手系(DirectX基準)で描画するために右手系を左手系に変換している
 				//そのため通常の三角形の保存方法をすると三角形が裏面になり法線が反転して
 				//プレイヤーが反転する
-			uint32_t a = mesh.indices.at(i + 2);//uint32_t a = mesh.indices.at(i + 2);
+			uint32_t a = mesh.indices.at(i + 0);//uint32_t a = mesh.indices.at(i + 2);
 			uint32_t b = mesh.indices.at(i + 1);
-			uint32_t c = mesh.indices.at(i + 0);//uint32_t c = mesh.indices.at(i + 0);
+			uint32_t c = mesh.indices.at(i + 2);//uint32_t c = mesh.indices.at(i + 0);
 			DirectX::XMVECTOR A = DirectX::XMLoadFloat3(&mesh.vertices.at(a).position);
 			DirectX::XMVECTOR B = DirectX::XMLoadFloat3(&mesh.vertices.at(b).position);
 			DirectX::XMVECTOR C = DirectX::XMLoadFloat3(&mesh.vertices.at(c).position);
@@ -213,15 +213,26 @@ void StageMain::Debug(const RenderContext& rc)
 		primitiveRenderer->AddVertex(triangle.positions[2], edgeColor);
 		primitiveRenderer->AddVertex(triangle.positions[0], edgeColor);
 	}
+	primitiveRenderer->Render(rc.deviceContext, Camera::Instance().GetView(), Camera::Instance().GetProjection(), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	//// バウンディングボックス描画
+	// 三角形ポリゴン描画
+	const DirectX::XMFLOAT4 polygonColor = { 1, 0, 0, 0.5f };
+	for (CollisionMesh::Triangle& triangle : collisionMesh.triangles)
+	{
+		primitiveRenderer->AddVertex(triangle.positions[0], polygonColor);
+		primitiveRenderer->AddVertex(triangle.positions[1], polygonColor);
+		primitiveRenderer->AddVertex(triangle.positions[2], polygonColor);
+	}
+	primitiveRenderer->Render(rc.deviceContext, Camera::Instance().GetView(), Camera::Instance().GetProjection(), D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// バウンディングボックス描画
 	const DirectX::XMFLOAT4 boxColor = { 0, 1, 0, 1 };
 	const DirectX::XMFLOAT3 boxAngle = { 0, 0, 0 };
 	for (CollisionMesh::Area& area : collisionMesh.areas)
 	{
 		shapeRenderer->DrawBox(area.boundingBox.Center, boxAngle, area.boundingBox.Extents, boxColor);
 	}
-	//shapeRenderer->Render(rc.deviceContext, Camera::Instance().GetView(), Camera::Instance().GetProjection());
+	shapeRenderer->Render(rc.deviceContext, Camera::Instance().GetView(), Camera::Instance().GetProjection());
 }
 
 void StageMain::DebugImGui()

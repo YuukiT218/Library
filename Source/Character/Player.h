@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 #include "Sprite/Sprite.h"
+#include "Character/Weapon/Sword.h"
 //#include "Character/Enemy/Enemy.h"
 
 // 前方宣言
@@ -115,6 +116,7 @@ public:
 	void SetMovement(DirectX::XMFLOAT3& Vec, float moveRate);
 
 	Model* GetModel() { return model.get(); }
+	Sword* GetSword() { return sword.get(); }
 
 	// ステック入力値から移動ベクトルを取得
 	DirectX::XMFLOAT3 GetMoveVec() const;
@@ -141,6 +143,8 @@ protected:
 	void OnDead() override;
 
 private:
+	std::unique_ptr<Sword> sword;
+
 	float nodeRadius[6] =
 	{
 		0.23f,
