@@ -6,7 +6,7 @@ SceneTitle::SceneTitle()
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 	//スプライト初期化
 	sprite = std::make_unique<Sprite>(device, "Data/Sprite/Title.png");
-	character = std::make_shared<Model>(device, "Data/Model/RPG-Character/RPG-Character.glb");
+	//character = std::make_shared<Model>(device, "Data/Model/RPG-Character/RPG-Character.glb");
 }
 
 void SceneTitle::Initialize()

@@ -9,6 +9,7 @@
 #include "Debug/ShapeRenderer.h"
 #include "Model/ModelRenderer.h"
 #include "Shader.h"
+#include "ShadowMap.h"
 
 enum class FrameBufferId
 {
@@ -82,6 +83,9 @@ public:
 	// シェーダー取得
 	Shader* GetShader(ShaderId shaderId) { return shaders[static_cast<int>(shaderId)].get(); }
 
+	// シャドウマップ取得
+	ShadowMap* GetShadowMap() { return shadowMap.get(); }
+
 	// プリミティブレンダラ取得
 	PrimitiveRenderer* GetPrimitiveRenderer() const { return primitiveRenderer.get(); }
 
@@ -112,4 +116,5 @@ private:
 	std::unique_ptr<PrimitiveRenderer>				primitiveRenderer;
 	std::unique_ptr<ShapeRenderer>					shapeRenderer;
 	std::unique_ptr<ModelRenderer>					modelRenderer;
+	std::unique_ptr<ShadowMap>						shadowMap;
 };

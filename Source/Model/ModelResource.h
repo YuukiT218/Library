@@ -13,8 +13,6 @@ public:
 	ModelResource() {}
 	virtual ~ModelResource() {}
 
-	static const std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDescs;
-
 	using NodeId = UINT64;
 
 	struct Node
@@ -52,11 +50,12 @@ public:
 		std::string			occlusionTextureFileName;
 		std::string			metalnessRoughnessTextureFileName;
 		DirectX::XMFLOAT4	baseColor = { 1, 1, 1, 1 };
-		DirectX::XMFLOAT3	emissiveColor = { 1, 1, 1 };
+		DirectX::XMFLOAT4	emissiveColor = { 1, 1, 1, 1 };
 		float				metalness = 0.0f;
 		float				roughness = 0.0f;
 		float				occlusionStrength = 0.0f;
 		float				alphaCutoff = 0.5f;
+		bool				IsEmissive = false;
 		AlphaMode			alphaMode = AlphaMode::Opaque;
 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	baseMap;

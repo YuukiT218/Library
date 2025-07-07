@@ -127,12 +127,29 @@
     <ClInclude Include="Source\Camera\CameraController.h" />
     <ClInclude Include="Source\Camera\CameraParam.h" />
     <ClInclude Include="Source\Character\Character.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\ActionBase.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\ActionDerived.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorData.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\JudgementBase.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\JudgementDerived.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\NodeBase.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\RandomState.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\SequenceState.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\StateBase.h" />
+    <ClInclude Include="Source\Character\Enemy\Enemy.h" />
+    <ClInclude Include="Source\Character\Enemy\SilverDragonkin.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\StateDerived.h" />
     <ClInclude Include="Source\Character\Player.h" />
+    <ClInclude Include="Source\Character\PlayerState.h" />
     <ClInclude Include="Source\Character\Weapon\Sword.h" />
     <ClInclude Include="Source\Character\Weapon\Weapon.h" />
     <ClInclude Include="Source\Graphics\BasicShader.h" />
     <ClInclude Include="Source\Camera\Camera.h" />
     <ClInclude Include="Source\Graphics\FrameBuffer.h" />
+    <ClInclude Include="Source\Graphics\PBRShader.h" />
+    <ClInclude Include="Source\Graphics\ShadowMap.h" />
+    <ClInclude Include="Source\Graphics\SkyBox.h" />
     <ClInclude Include="Source\Input\GamePad.h" />
     <ClInclude Include="Source\Input\Input.h" />
     <ClInclude Include="Source\Input\Mouse.h" />
@@ -141,15 +158,11 @@
     <ClInclude Include="Source\Math\Mathf.h" />
     <ClInclude Include="Source\Model\ModelResource.h" />
     <ClInclude Include="Source\Model\ResourceManager.h" />
-    <ClInclude Include="Source\Scene\ConfirmCommandScene.h" />
     <ClInclude Include="Source\Scene\SceneGame.h" />
     <ClInclude Include="Source\Scene\SceneLoading.h" />
     <ClInclude Include="Source\Scene\SceneManager.h" />
     <ClInclude Include="Source\Scene\SceneResult.h" />
     <ClInclude Include="Source\Scene\SceneTitle.h" />
-    <ClInclude Include="Source\Scene\SpaceDivisionRaycastScene.h" />
-    <ClInclude Include="Source\Scene\SphereCastMoveScene.h" />
-    <ClInclude Include="Source\Scene\SwordTrailScene.h" />
     <ClInclude Include="Source\Stage\Stage.h" />
     <ClInclude Include="Source\Stage\StageMain.h" />
     <ClInclude Include="Source\Stage\StageManager.h" />
@@ -188,12 +201,18 @@
     <ClCompile Include="External\ImGuizmo\ImSequencer.cpp" />
     <ClCompile Include="Source\Camera\CameraController.cpp" />
     <ClCompile Include="Source\Character\Character.cpp" />
+    <ClCompile Include="Source\Character\Enemy\Enemy.cpp" />
+    <ClCompile Include="Source\Character\Enemy\SilverDragonkin.cpp" />
     <ClCompile Include="Source\Character\Player.cpp" />
+    <ClCompile Include="Source\Character\PlayerState.cpp" />
     <ClCompile Include="Source\Character\Weapon\Sword.cpp" />
     <ClCompile Include="Source\Character\Weapon\Weapon.cpp" />
     <ClCompile Include="Source\Graphics\BasicShader.cpp" />
     <ClCompile Include="Source\Camera\Camera.cpp" />
     <ClCompile Include="Source\Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="Source\Graphics\PBRShader.cpp" />
+    <ClCompile Include="Source\Graphics\ShadowMap.cpp" />
+    <ClCompile Include="Source\Graphics\SkyBox.cpp" />
     <ClCompile Include="Source\Input\GamePad.cpp" />
     <ClCompile Include="Source\Input\Input.cpp" />
     <ClCompile Include="Source\Input\Mouse.cpp" />
@@ -201,15 +220,11 @@
     <ClCompile Include="Source\Math\Mathf.cpp" />
     <ClCompile Include="Source\Model\ModelResource.cpp" />
     <ClCompile Include="Source\Model\ResourceManager.cpp" />
-    <ClCompile Include="Source\Scene\ConfirmCommandScene.cpp" />
     <ClCompile Include="Source\Scene\SceneGame.cpp" />
     <ClCompile Include="Source\Scene\SceneLoading.cpp" />
     <ClCompile Include="Source\Scene\SceneManager.cpp" />
     <ClCompile Include="Source\Scene\SceneResult.cpp" />
     <ClCompile Include="Source\Scene\SceneTitle.cpp" />
-    <ClCompile Include="Source\Scene\SpaceDivisionRaycastScene.cpp" />
-    <ClCompile Include="Source\Scene\SphereCastMoveScene.cpp" />
-    <ClCompile Include="Source\Scene\SwordTrailScene.cpp" />
     <ClCompile Include="Source\Stage\StageMain.cpp" />
     <ClCompile Include="Source\Stage\StageManager.cpp" />
     <ClCompile Include="Source\System\Dialog.cpp" />
@@ -233,10 +248,14 @@
   <ItemGroup>
     <None Include="Shader\Basic.hlsli" />
     <None Include="Shader\Lambert.hlsli" />
+    <None Include="Shader\PBR.hlsli" />
     <None Include="Shader\Scene.hlsli" />
+    <None Include="Shader\ShadingFunctions.hlsli" />
+    <None Include="Shader\ShadowMap.hlsli" />
     <None Include="Shader\ShapeRenderer.hlsli" />
     <None Include="Shader\PrimitiveRenderer.hlsli" />
     <None Include="Shader\Skinning.hlsli" />
+    <None Include="Shader\SkyBox.hlsli" />
     <None Include="Shader\Sprite.hlsli" />
   </ItemGroup>
   <ItemGroup>
@@ -256,6 +275,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\PBRPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PBRVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowMapVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\ShapeRendererPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -269,6 +300,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\PrimitiveRendererVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

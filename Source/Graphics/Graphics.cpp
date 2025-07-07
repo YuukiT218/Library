@@ -2,6 +2,7 @@
 #include "Graphics.h"
 #include "BasicShader.h"
 #include "LambertShader.h"
+#include "PBRShader.h"
 
 // 初期化
 void Graphics::Initialize(HWND hWnd)
@@ -137,6 +138,10 @@ void Graphics::Initialize(HWND hWnd)
 	// シェーダー生成
 	shaders[static_cast<int>(ShaderId::Basic)] = std::make_unique<BasicShader>(device.Get());
 	shaders[static_cast<int>(ShaderId::Lambert)] = std::make_unique<LambertShader>(device.Get());
+	shaders[static_cast<int>(ShaderId::PBR)] = std::make_unique<PBRShader>(device.Get());
+
+	// シャドウマップ生成
+	shadowMap = std::make_unique<ShadowMap>(device.Get());
 
 	// レンダラ生成
 	primitiveRenderer = std::make_unique<PrimitiveRenderer>(device.Get());

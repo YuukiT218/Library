@@ -22,6 +22,7 @@ public:
 	virtual bool RayCast(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, HitResult& hit) = 0;
 	//空間分割レイキャスト
 	virtual bool SpaceDivisionRaycast(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, HitResult& hit) { return false; }
+	virtual bool SpaceDivisionSphereCast(const DirectX::XMFLOAT3& origin, const DirectX::XMFLOAT3& direction, float radius, float& distance, DirectX::XMFLOAT3& hitPosition, DirectX::XMFLOAT3& hitNormal) { return false; }
 
 	//デバッグ用分割された空間の表示
 	virtual void Debug(const RenderContext& rc) = 0;

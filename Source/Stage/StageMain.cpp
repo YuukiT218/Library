@@ -197,6 +197,11 @@ bool StageMain::SpaceDivisionRaycast(const DirectX::XMFLOAT3& start, const Direc
 	return false;
 }
 
+bool StageMain::SpaceDivisionSphereCast(const DirectX::XMFLOAT3& origin, const DirectX::XMFLOAT3& direction, float radius, float& distance, DirectX::XMFLOAT3& hitPosition, DirectX::XMFLOAT3& hitNormal)
+{
+	return false;
+}
+
 void StageMain::Debug(const RenderContext& rc)
 {
 	ShapeRenderer* shapeRenderer = Graphics::Instance().GetShapeRenderer();

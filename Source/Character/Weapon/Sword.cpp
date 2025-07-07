@@ -87,7 +87,7 @@ Sword::Sword(ID3D11Device* device, const char* filename)
 	position = { -0.05f, 0.0f, 0.0f };
 	angle = { 1.0f, 0.0f, 0.0f };
 	scale = { 1.0f, 1.0f, -1.0f };
-	model = std::make_unique<Model>(device, filename);
+	model = std::make_unique<Model>(device, filename, 1.0f);
 	/*model->SetAdMetalness(1.0f);
 	model->SetAdRoughness(0.0f);
 	colors.emissiveFactor = 4.0f;*/

@@ -4,6 +4,7 @@
 #include "ModelRenderer.h"
 #include "Graphics/BasicShader.h"
 #include "Graphics/LambertShader.h"
+#include "Graphics/PBRShader.h"
 
 // コンストラクタ
 ModelRenderer::ModelRenderer(ID3D11Device* device)
@@ -23,6 +24,7 @@ ModelRenderer::ModelRenderer(ID3D11Device* device)
 	// シェーダー生成
 	shaders[static_cast<int>(ShaderId::Basic)] = std::make_unique<BasicShader>(device);
 	shaders[static_cast<int>(ShaderId::Lambert)] = std::make_unique<LambertShader>(device);
+	shaders[static_cast<int>(ShaderId::PBR)] = std::make_unique<PBRShader>(device);
 }
 
 // 箱描画
@@ -86,7 +88,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
 	// メッシュ描画関数
-	auto drawMesh = [&](std::vector<Model::Node> nodes, const ModelResource::Mesh& mesh, Shader* shader)
+	auto drawMesh = [&](std::vector<Model::Node> nodes, const ModelResource::Mesh& mesh, Shader* shader, DrawInfo drawInfo)
 	{
 		// 頂点バッファ設定
 		UINT stride = sizeof(ModelResource::Vertex);
@@ -115,7 +117,10 @@ void ModelRenderer::Render(const RenderContext& rc)
 		dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
 
 		// 更新
-		shader->Update(rc, mesh);
+		if (drawInfo.shaderId == ShaderId::PBR)
+			shader->Update(rc, drawInfo.model);
+		else
+			shader->Update(rc, mesh);
 
 		// 描画
 		dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
@@ -156,7 +161,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 			}
 
 			// 描画
-			drawMesh(nodes, mesh, shader);
+			drawMesh(nodes, mesh, shader,drawInfo);
 		}
 
 		shader->End(rc);
@@ -166,25 +171,25 @@ void ModelRenderer::Render(const RenderContext& rc)
 	// ブレンドステート設定
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
 
-	// カメラから遠い順にソート
-	std::sort(transparencyDrawInfos.begin(), transparencyDrawInfos.end(),
-		[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
-		{
-			return lhs.distance > rhs.distance;
-		});
+	//// カメラから遠い順にソート
+	//std::sort(transparencyDrawInfos.begin(), transparencyDrawInfos.end(),
+	//	[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
+	//	{
+	//		return lhs.distance > rhs.distance;
+	//	});
 
-	// 半透明描画処理
-	for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
-	{
-		Shader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
+	//// 半透明描画処理
+	//for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
+	//{
+	//	Shader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
 
-		shader->Begin(rc);
+	//	shader->Begin(rc);
 
-		drawMesh(transparencyDrawInfo.nodes, *transparencyDrawInfo.mesh, shader);
+	//	drawMesh(transparencyDrawInfo.nodes, *transparencyDrawInfo.mesh, shader);
 
-		shader->End(rc);
-	}
-	transparencyDrawInfos.clear();
+	//	shader->End(rc);
+	//}
+	//transparencyDrawInfos.clear();
 
 	// 定数バッファ設定解除
 	for (ID3D11Buffer*& vsConstantBuffer : vsConstantBuffers) { vsConstantBuffer = nullptr; }

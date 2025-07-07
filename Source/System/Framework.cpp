@@ -213,12 +213,12 @@ void Framework::SceneSelectGUI()
 		//ChangeSceneButtonGUI<ModelViewerScene>(u8"00.モデルビューア");
 		//ChangeSceneButtonGUI<WeightedCollisionScene>(u8"01.重みのある衝突処理");
 		//ChangeSceneButtonGUI<RaceRankingScene>(u8"02.レース順位判定処理");
-		ChangeSceneButtonGUI<SphereCastMoveScene>(u8"03.スフィアキャスト移動処理");
+		//ChangeSceneButtonGUI<SphereCastMoveScene>(u8"03.スフィアキャスト移動処理");
 		//ChangeSceneButtonGUI<SwordTrailScene>(u8"04.剣の軌跡処理");
 		//ChangeSceneButtonGUI<RootMotionScene>(u8"05.ルートモーション処理");
 		//ChangeSceneButtonGUI<RootMotionExScene>(u8"05.ルートモーションEX処理");
-		ChangeSceneButtonGUI<ConfirmCommandScene>(u8"06.コマンド判定処理");
-		ChangeSceneButtonGUI<SpaceDivisionRaycastScene>(u8"07.空間分割レイキャスト");
+		//ChangeSceneButtonGUI<ConfirmCommandScene>(u8"06.コマンド判定処理");
+		//ChangeSceneButtonGUI<SpaceDivisionRaycastScene>(u8"07.空間分割レイキャスト");
 		//ChangeSceneButtonGUI<SortingAndFilteringScene>(u8"08.ソート＆フィルタリング処理");
 		//ChangeSceneButtonGUI<LookAtScene>(u8"09.ルックアット処理");
 		//ChangeSceneButtonGUI<TwoBoneIKScene>(u8"10.2本のボーンIK制御");

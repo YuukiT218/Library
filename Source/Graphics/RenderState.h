@@ -10,7 +10,10 @@ enum class SamplerState
 	PointClamp,
 	LinearWrap,
 	LinearClamp,
+	LinearBorder,
+	Anisotropic,
 
+	SHADOW,
 	EnumCount
 };
 
@@ -33,6 +36,7 @@ enum class BlendState
 	Additive,
 	Subtraction,
 	Multiply,
+	LinearAlpha,
 
 	EnumCount
 };
@@ -40,6 +44,7 @@ enum class BlendState
 // ラスタライザステート
 enum class RasterizerState
 {
+	Solid,
 	SolidCullNone,
 	SolidCullBack,
 	WireCullNone,

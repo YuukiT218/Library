@@ -12,6 +12,7 @@ enum class ShaderId
 {
 	Basic,
 	Lambert,
+	PBR,
 
 	EnumCount
 };

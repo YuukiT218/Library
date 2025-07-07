@@ -174,11 +174,7 @@
     <ClInclude Include="Source\Model\ResourceManager.h" />
     <ClInclude Include="Source\Model\ModelResource.h" />
     <ClInclude Include="Source\Scene\SceneTitle.h" />
-    <ClInclude Include="Source\Scene\ConfirmCommandScene.h" />
-    <ClInclude Include="Source\Scene\SwordTrailScene.h" />
     <ClInclude Include="Source\Graphics\FrameBuffer.h" />
-    <ClInclude Include="Source\Scene\SphereCastMoveScene.h" />
-    <ClInclude Include="Source\Scene\SpaceDivisionRaycastScene.h" />
     <ClInclude Include="Source\Scene\SceneGame.h" />
     <ClInclude Include="Source\Scene\SceneLoading.h" />
     <ClInclude Include="Source\Scene\SceneManager.h" />
@@ -198,6 +194,23 @@
     <ClInclude Include="Source\Camera\CameraController.h" />
     <ClInclude Include="Source\Character\Weapon\Weapon.h" />
     <ClInclude Include="Source\Character\Weapon\Sword.h" />
+    <ClInclude Include="Source\Graphics\SkyBox.h" />
+    <ClInclude Include="Source\Character\PlayerState.h" />
+    <ClInclude Include="Source\Graphics\PBRShader.h" />
+    <ClInclude Include="Source\Graphics\ShadowMap.h" />
+    <ClInclude Include="Source\Character\Enemy\Enemy.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\ActionBase.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\ActionDerived.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorData.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\JudgementBase.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\JudgementDerived.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\NodeBase.h" />
+    <ClInclude Include="Source\Character\Enemy\SilverDragonkin.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\StateBase.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\StateDerived.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\RandomState.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\SequenceState.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Framework.cpp">
@@ -296,19 +309,7 @@
     <ClCompile Include="Source\Scene\SceneTitle.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene\ConfirmCommandScene.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Scene\SwordTrailScene.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Graphics\FrameBuffer.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Scene\SphereCastMoveScene.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Scene\SpaceDivisionRaycastScene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Scene\SceneGame.cpp">
@@ -359,6 +360,24 @@
     <ClCompile Include="Source\Character\Weapon\Sword.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Graphics\SkyBox.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\PlayerState.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\PBRShader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\ShadowMap.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\Enemy\Enemy.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\Enemy\SilverDragonkin.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Sprite.hlsli">
@@ -380,6 +399,18 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Shader\Scene.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\SkyBox.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\PBR.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\ShadingFunctions.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\ShadowMap.hlsli">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
@@ -412,6 +443,21 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\LambertVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PBRPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PBRVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowMapVS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

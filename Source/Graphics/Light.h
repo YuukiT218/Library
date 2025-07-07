@@ -5,7 +5,15 @@
 struct DirectionalLight
 {
 	DirectX::XMFLOAT3	direction = { 0, -1, 0 };
-	DirectX::XMFLOAT3	color = { 1, 1, 1 };
+	DirectX::XMFLOAT4	color = { 1, 1, 1, 1 };
+};
+
+#define POINT_MAX (64)
+struct PointLight
+{
+	int               index;
+	DirectX::XMFLOAT4 position;
+	DirectX::XMFLOAT4 color;
 };
 
 class LightManager
@@ -23,6 +31,15 @@ public:
 	// ディレクショナルライト取得
 	const DirectionalLight& GetDirectionalLight() const { return directionalLight; }
 
+	// ポイントライト設定
+	void SetPointLight(PointLight& light, int index) { pointLight[index] = light; }
+
+	// ポイントライト取得
+	const PointLight& GetPointLight(int index) const { return pointLight[index]; }
+
+	int AllocatePointLight();             // 空きを探して使えるインデックスを返す
+
 private:
 	DirectionalLight	directionalLight;
+	PointLight pointLight[POINT_MAX];
 };

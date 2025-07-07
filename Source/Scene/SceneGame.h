@@ -4,9 +4,10 @@
 #include "Camera/CameraController.h"
 #include "Camera/FreeCameraController.h"
 #include "Character/player.h"
+#include "Character/Enemy/SilverDragonkin.h"
 //#include "Character/Enemy/EnemyManager.h"
 #include "Scene.h"
-//#include "Graphics/SkyBox.h"
+#include "Graphics/SkyBox.h"
 //#include "Graphics/PostEffect.h"
 //#include "BattleUI/CombatUIManager.h"
 
@@ -45,10 +46,11 @@ private:
 
 private:
 	std::unique_ptr<Player> player;
+	std::unique_ptr<SilverDragonkin> dragonkin;
 
 	std::unique_ptr<CameraController> cameraController;
-	/*std::unique_ptr<DeathCameraController> deathCameraController;
-	std::unique_ptr<SkyBox> skyBox;*/
+	//std::unique_ptr<DeathCameraController> deathCameraController;
+	std::unique_ptr<SkyBox> skyBox;
 	FreeCameraController freeCameraController;
 
 	//std::unique_ptr<PostEffect> posteffect;
@@ -61,7 +63,7 @@ private:
 	DirectX::XMFLOAT3 offsetPosition{ 0.0f, 3.0f, 0.0f };
 	float attenuation = 4.5f;
 	//ディレクショナルライト
-	DirectX::XMFLOAT4 direction = { 1.0f, -1.0f, -1.0f, 1.0f };
+	DirectX::XMFLOAT3 direction = { 1.0f, -1.0f, -1.0f };
 	DirectX::XMFLOAT4 Directioncolor = { 1.0f, 1.0f, 1.0f, 6.0f };
 
 	//タイマー

@@ -13,6 +13,7 @@ public:
 
 	// XVˆ—
 	void Update(const RenderContext& rc, const ModelResource::Mesh& mesh) override;
+	void Update(const RenderContext& rc, const std::shared_ptr<Model> model) override {};
 
 	// I—¹ˆ—
 	void End(const RenderContext& rc) override;

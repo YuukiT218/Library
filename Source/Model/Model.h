@@ -9,11 +9,12 @@
 #include <unordered_map>
 #include <imgui.h>
 
+class Character;
 
 class Model
 {
 public:
-	Model(ID3D11Device* device, const char* filename, float sampleRate = 60);
+	Model(ID3D11Device* device, const char* filename, float scale);
 
 	static const std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDescs;
 
@@ -73,11 +74,21 @@ public:
 	// トランスフォーム更新処理
 	void UpdateTransform(const DirectX::XMFLOAT4X4& worldTransform);
 
+	// 移動値取得
+	const DirectX::XMFLOAT3& GetMove() const { return move; }
+	void ClearMove() { move = { 0, 0, 0 }; }
+
 	// アニメーション再生
 	void PlayAnimation(int index, bool loop, float blendSeconds = 0);
 
+	// ルートモーション再生
+	void PlayRootMotion(int index, bool loop, bool bakeY, float blendSeconds = 0, const char* rootName = nullptr);
+
 	// アニメーション再生中か
 	bool IsPlayAnimation() const;
+
+	// ルートモーション再生中か
+	bool IsPlayRootMotion() const { return isRootMotion; }
 
 	// 現在のアニメーション再生時間取得
 	float GetCurrentAnimationSeconds() const { return currentAnimationSeconds; }
@@ -97,8 +108,9 @@ public:
 
 	// アニメーション更新処理
 	void UpdateAnimation(float elapsedTime);
+	void UpdateRootAnimation(float elapsedTime, Character* character);
 
-	//// アニメーション計算処理
+	// アニメーション計算処理
 	void ComputeAnimation(float elapsedTime);
 
 	// ブレンディング計算処理
@@ -116,6 +128,27 @@ public:
 
 	// ノードポーズ取得
 	void GetNodePoses(std::vector<NodePose>& nodePoses) const;
+
+	//金属質感補正値取得
+	void SetAdMetalness(const float metalness) { adjustMetalness = metalness; }
+	//質感粗さ補正値取得
+	void SetAdRoughness(const float roughness) { adjustRoughness = roughness; }
+
+	//金属質感補正値取得
+	float GetAdMetalness() const { return adjustMetalness; }
+	//質感粗さ補正値取得
+	float GetAdRoughness() const { return adjustRoughness;; }
+
+	//ディゾルブ
+	void SetEmissiveDissolve(const float emidissolve) { this->dissolveConstants.emissivedissolve = emidissolve; }
+	void SetEmissiveConstants(const DissolveConstants dissolveConstants) { this->dissolveConstants = dissolveConstants; }
+	DissolveConstants GetEmissiveConstants() const { return dissolveConstants; }
+
+	//エミッシブ色設定
+	void SetEmissiveColors(const EmissiveColors colors) { emissive = colors; }
+
+	//エミッシブ色取得
+	EmissiveColors GetEmissiveColors() const { return emissive; }
 
 	//質感調整用ImGui
 	void DebugGui(const char* name);
@@ -137,16 +170,23 @@ private:
 
 	bool animationPlaying = false;
 	bool animationLoop = false;
+	bool isRootMotion = false;
+	bool bakeMoveY = false;
 
 	float currentAnimationBlendSeconds = 0.0f;
 	float animationBlendSecondsLength = -1.0f;
 	bool animationBlending = false;
 
 	const char* filename = nullptr;
+	const char* rootNodeName = nullptr;
 
 private:
 	std::shared_ptr<ModelResource> resource;
 	std::vector<Node>		nodes;
+	std::vector<NodePose> nodePoses;
 	std::vector<std::string>	nodeNames; // ノード名キャッシュ
-
+	NodePose beginPose, oldPose, newPose;
+	NodePose endPose;
+protected:
+	DirectX::XMFLOAT3 move = { 0,0,0 };
 };

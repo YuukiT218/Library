@@ -42,6 +42,9 @@ void SceneGame::Initialize()
 
 	// プレイヤー初期化
 	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.glb", 0.015f);
+	dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/silver-dragonkin/source/SilverDragonkin.gltf", 0.005f);
+	dragonkin->SetPosition({0, 1.0f, -10.0f});
+	dragonkin->SetScale({ 0.005f, 0.005f, 0.005f });
 
 	Camera& camera = Camera::Instance();
 
@@ -82,13 +85,13 @@ void SceneGame::Initialize()
 
 	LightManager& lightManager = LightManager::Instance();
 
-	//// ライト設定
-	//DirectionalLight directionalLight;
-	//directionalLight.direction = { direction };
-	//directionalLight.color = { Directioncolor };
-	//lightManager.SetDirectionalLight(directionalLight);
+	// ライト設定
+	DirectionalLight directionalLight;
+	directionalLight.direction = { direction };
+	directionalLight.color = { Directioncolor };
+	lightManager.SetDirectionalLight(directionalLight);
 
-	//skyBox = std::make_unique<SkyBox>(device);
+	skyBox = std::make_unique<SkyBox>(device);
 
 	//posteffect = std::make_unique<PostEffect>(device);
 
@@ -184,6 +187,7 @@ void SceneGame::Update(float elapsedTime)
 
 	////エネミーマネージャー更新
 	//EnemyManager::Instance().Update(elapsedTime);
+	dragonkin->Update(elapsedTime);
 
 	//// エフェクト更新処理
 	//EffectManager::Instance().Update(elapsedTime * HitStop::Instance().GetEnemyTimeScale());
@@ -244,7 +248,7 @@ void SceneGame::Render(float elapsedTime)
 
 	buffers[FrameBufferId::Scene]->SetRenderTargets(dc);*/
 
-	//ShadowMap* shadowMap = Graphics::Instance().GetShadowMap();
+	ShadowMap* shadowMap = Graphics::Instance().GetShadowMap();
 
 	Camera& camera = Camera::Instance();
 
@@ -267,35 +271,36 @@ void SceneGame::Render(float elapsedTime)
 	rc.deviceContext = graphics.GetDeviceContext();
 	rc.renderState = graphics.GetRenderState();
 	rc.lightManager = &lightManager;
-	//rc.shadowMap = shadowMap;
+	rc.shadowMap = shadowMap;
 	//rc.timer = timer;
 
 	// シャドウマップ描画
-	/*{
-		shadowMap->Begin(rc, camera.GetFocus());
-		if (shadowMap->GetCascade())
-		{
-			StageManager::Instance().SetShadowModel(shadowMap);
-			player->SetShadowMap(shadowMap);
-			EnemyManager::Instance().SetShadowMap(shadowMap);
+	//{
+	//	shadowMap->Begin(rc, camera.GetFocus());
+	//	if (shadowMap->GetCascade())
+	//	{
+	//		StageManager::Instance().SetShadowModel(shadowMap);
+	//		player->SetShadowMap(shadowMap);
+	//		//EnemyManager::Instance().SetShadowMap(shadowMap);
 
-			shadowMap->CascadeDraw(rc);
-		}
-		else
-		{
-			StageManager::Instance().ShadowRender(rc, shadowMap);
-			player->ShadowRender(rc, shadowMap);
-			EnemyManager::Instance().ShadowRender(rc, shadowMap);
-		}
-		shadowMap->End(rc);
-	}*/
+	//		shadowMap->CascadeDraw(rc);
+	//	}
+	//	else
+	//	{
+	//		StageManager::Instance().ShadowRender(rc, shadowMap);
+	//		player->ShadowRender(rc, shadowMap);
+	//		//EnemyManager::Instance().ShadowRender(rc, shadowMap);
+	//	}
+	//	shadowMap->End(rc);
+	//}
 
 	StageManager::Instance().Debug(rc);
 	// 3D描画
 	{
 		//shader->Draw(rc, stage.get());
 		StageManager::Instance().Render(rc, ShaderId::Lambert);
-		player->Render(rc, ShaderId::Basic);
+		player->Render(rc, ShaderId::Lambert);
+		dragonkin->Render(rc, ShaderId::Lambert);
 		//shader->Draw(rc, character.get());
 		//EnemyManager::Instance().Render(rc, shader);
 	}
@@ -320,9 +325,9 @@ void SceneGame::Render(float elapsedTime)
 	rc.OverriteColor = enemysupport.OverwriteColor;*/
 
 	// スカイボックス描画
-	/*skyBox->Begin(rc);
+	skyBox->Begin(rc);
 	skyBox->Render(rc);
-	skyBox->End(rc);*/
+	skyBox->End(rc);
 
 	//// 3Dエフェクト描画
 	//EffectManager::Instance().Render(camera.GetView(), camera.GetProjection());
@@ -396,6 +401,7 @@ void SceneGame::DrawDebugGUI()
 
 	// プレイヤーデバッグ描画
 	player->DrawDebugGUI();
+	dragonkin->DrawDebugGUI();
 
 	/*EnemyManager::Instance().DrawDebugGUI();
 

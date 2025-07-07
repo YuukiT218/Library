@@ -31,11 +31,11 @@ public:
 	//ステージ内定数のデバッグ
 	void DebugImGui();
 
-	////影描画
-	//void ShadowRender(const RenderContext& rc, ShadowMap* shadowMap);
+	//影描画
+	void ShadowRender(const RenderContext& rc, ShadowMap* shadowMap);
 
-	////カスケードシャドウマップ用モデル設定
-	//void SetShadowModel(ShadowMap* shadowMap);
+	//カスケードシャドウマップ用モデル設定
+	void SetShadowModel(ShadowMap* shadowMap);
 
 	// ステージ登録
 	void Register(Stage* stage);
