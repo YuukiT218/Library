@@ -49,17 +49,23 @@ void ModelRenderer::Render(const RenderContext& rc)
 		DirectX::XMMATRIX V = DirectX::XMLoadFloat4x4(&rc.camera->GetView());
 		DirectX::XMMATRIX P = DirectX::XMLoadFloat4x4(&rc.camera->GetProjection());
 		DirectX::XMStoreFloat4x4(&cbScene.viewProjection, V * P);
-		const DirectionalLight& directionalLight = lightManager->GetDirectionalLight();
+		const DirectionalLight& directionalLight = rc.lightManager->GetDirectionalLight();
 		cbScene.lightDirection.x = directionalLight.direction.x;
 		cbScene.lightDirection.y = directionalLight.direction.y;
 		cbScene.lightDirection.z = directionalLight.direction.z;
-		cbScene.lightColor.x = directionalLight.color.x;
-		cbScene.lightColor.y = directionalLight.color.y;
-		cbScene.lightColor.z = directionalLight.color.z;
+		cbScene.lightColor = directionalLight.color;
 		const DirectX::XMFLOAT3& eye = rc.camera->GetEye();
 		cbScene.cameraPosition.x = eye.x;
 		cbScene.cameraPosition.y = eye.y;
 		cbScene.cameraPosition.z = eye.z;
+		const ShadowMap* shadowMap = rc.shadowMap;
+		cbScene.lightViewProjection = shadowMap->GetLightViewProjection();
+		for (int i = 0; i < POINT_MAX; i++)
+		{
+			cbScene.pointLight[i] = rc.lightManager->GetPointLight(i).position;
+			cbScene.pointColor[i] = rc.lightManager->GetPointLight(i).color;
+		}
+
 		dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, 0, &cbScene, 0, 0);
 	}
 
@@ -79,7 +85,9 @@ void ModelRenderer::Render(const RenderContext& rc)
 	// サンプラステート設定
 	ID3D11SamplerState* samplerStates[] =
 	{
-		rc.renderState->GetSamplerState(SamplerState::LinearWrap)
+		rc.renderState->GetSamplerState(SamplerState::LinearWrap),
+		rc.renderState->GetSamplerState(SamplerState::Anisotropic),
+		rc.renderState->GetSamplerState(SamplerState::SHADOW),
 	};
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
 
@@ -88,7 +96,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
 	// メッシュ描画関数
-	auto drawMesh = [&](std::vector<Model::Node> nodes, const ModelResource::Mesh& mesh, Shader* shader, DrawInfo drawInfo)
+	auto drawMesh = [&](std::vector<Model::Node> nodes, const ModelResource::Mesh& mesh, Shader* shader, const std::shared_ptr<Model> model)
 	{
 		// 頂点バッファ設定
 		UINT stride = sizeof(ModelResource::Vertex);
@@ -117,10 +125,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 		dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
 
 		// 更新
-		if (drawInfo.shaderId == ShaderId::PBR)
-			shader->Update(rc, drawInfo.model);
-		else
-			shader->Update(rc, mesh);
+		shader->Update(rc, mesh, model);
 
 		// 描画
 		dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
@@ -161,7 +166,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 			}
 
 			// 描画
-			drawMesh(nodes, mesh, shader,drawInfo);
+			drawMesh(nodes, mesh, shader, drawInfo.model);
 		}
 
 		shader->End(rc);
@@ -171,25 +176,25 @@ void ModelRenderer::Render(const RenderContext& rc)
 	// ブレンドステート設定
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
 
-	//// カメラから遠い順にソート
-	//std::sort(transparencyDrawInfos.begin(), transparencyDrawInfos.end(),
-	//	[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
-	//	{
-	//		return lhs.distance > rhs.distance;
-	//	});
+	// カメラから遠い順にソート
+	std::sort(transparencyDrawInfos.begin(), transparencyDrawInfos.end(),
+		[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
+		{
+			return lhs.distance > rhs.distance;
+		});
 
-	//// 半透明描画処理
-	//for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
-	//{
-	//	Shader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
+	// 半透明描画処理
+	for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
+	{
+		Shader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
 
-	//	shader->Begin(rc);
+		shader->Begin(rc);
 
-	//	drawMesh(transparencyDrawInfo.nodes, *transparencyDrawInfo.mesh, shader);
+		drawMesh(transparencyDrawInfo.nodes, *transparencyDrawInfo.mesh, shader, nullptr);
 
-	//	shader->End(rc);
-	//}
-	//transparencyDrawInfos.clear();
+		shader->End(rc);
+	}
+	transparencyDrawInfos.clear();
 
 	// 定数バッファ設定解除
 	for (ID3D11Buffer*& vsConstantBuffer : vsConstantBuffers) { vsConstantBuffer = nullptr; }

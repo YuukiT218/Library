@@ -25,8 +25,8 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     instance = this;
 
     model = std::make_shared<Model>(device, filename, scale);
-    /*model->SetAdMetalness(1.0f);
-    model->SetAdRoughness(0.0f);*/
+    model->SetAdMetalness(1.0f);
+    model->SetAdRoughness(0.0f);
 
     // ステージの高さに合わせる
     /*position.y = -2.7f;
@@ -35,7 +35,7 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     // アニメーションスピード設定
     initAnimSpeed();
 
-    sword = std::make_unique<Sword>(device, "Data/Model/Weapon/Staff.glb");
+    sword = std::make_unique<Sword>(device, "Data/Model/Weapon/Staff.gltf");
 
     // プレイヤーの最大体力と体力設定
     maxHealth = 70;
@@ -47,6 +47,8 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     states[static_cast<int>(PlayerStateId::Idle)] = std::make_unique<PlayerIdleState>(this);
     states[static_cast<int>(PlayerStateId::Walk)] = std::make_unique<PlayerWalkState>(this);
     states[static_cast<int>(PlayerStateId::Run)] = std::make_unique<PlayerRunState>(this);
+    states[static_cast<int>(PlayerStateId::Jump)] = std::make_unique<PlayerJumpState>(this);
+    states[static_cast<int>(PlayerStateId::Fall)] = std::make_unique<PlayerFallState>(this);
     states[static_cast<int>(PlayerStateId::Dodge)] = std::make_unique<PlayerDodgeState>(this);
     states[static_cast<int>(PlayerStateId::DodgeAttack)] = std::make_unique<PlayerDodgeAttackState>(this);
     states[static_cast<int>(PlayerStateId::Combo1)] = std::make_unique<PlayerCombo1State>(this);
@@ -384,6 +386,14 @@ void Player::PlayerMove(float elapsedTime, float moveRate, float turnRate)
     }
 }
 
+void Player::PlayerJump(float speed)
+{
+    if (IsGround())
+    {
+        Jump(speed);
+    }
+}
+
 // ロックオン時敵の方を向く処理
 void Player::LockOnTurnToEnemy(float elapsedTime)
 {
@@ -575,7 +585,7 @@ void Player::Render(const RenderContext& rc, ShaderId shaderId)
 {
     ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
     modelRenderer->Draw(shaderId, model);
-    modelRenderer->Draw(shaderId, std::shared_ptr<Model>(sword->GetModel(), [](Model*) {}));
+    modelRenderer->Draw(shaderId, sword->GetModel());
     modelRenderer->Render(rc);
 
     // 体力ゲージ表示
@@ -585,13 +595,7 @@ void Player::Render(const RenderContext& rc, ShaderId shaderId)
 void Player::ShadowRender(const RenderContext& rc, ShadowMap* shadowMap)
 {
     shadowMap->Draw(rc, model.get());
-    shadowMap->Draw(rc, sword->GetModel());
-}
-
-void Player::SetShadowMap(ShadowMap* shadowMap)
-{
-    shadowMap->SetShadowModel(model.get());
-    shadowMap->SetShadowModel(sword->GetModel());
+    shadowMap->Draw(rc, sword->GetModel().get());
 }
 
 // デバッグプリミティブ描画

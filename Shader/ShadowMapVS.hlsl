@@ -1,6 +1,6 @@
 #include "Skinning.hlsli"
 
-cbuffer CbScene : register(b0)
+cbuffer CbScene : register(b7)
 {
     row_major float4x4 lightViewProjection;
 };

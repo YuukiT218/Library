@@ -13,12 +13,13 @@ public:
 	virtual void Begin(const RenderContext& rc) = 0;
 
 	// 更新処理
-	virtual void Update(const RenderContext& rc, const ModelResource::Mesh& mesh) = 0;
-	virtual void Update(const RenderContext& rc, const std::shared_ptr<Model> model) = 0;
+	virtual void Update(const RenderContext& rc, const ModelResource::Mesh& mesh, const std::shared_ptr<Model> model) = 0;
 
 	// 終了処理
 	virtual void End(const RenderContext& rc) = 0;
 
+	// デバッグ用GUI
+	virtual void ImGui() = 0;
 protected:
 	void ClearShaderResourceViews(int startSlot, ID3D11DeviceContext* dc)
 	{

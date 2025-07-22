@@ -19,12 +19,6 @@ public:
 	// 描画実行
 	void Draw(const RenderContext& rc, const Model* model);
 
-	//カスケードシャドウモデル設定
-	void SetShadowModel(const Model* model);
-
-	//カスケードシャドウ用描画コマンド
-	void CascadeDraw(const RenderContext& rc);
-
 	// 終了処理
 	void End(const RenderContext& rc);
 
@@ -89,7 +83,7 @@ private:
 		//視錘台を何分割するか
 	static constexpr int ShadowBuffer = 4;
 
-	bool cascade = true;
+	bool cascade = false;
 
 	bool cascadeArea = false;
 

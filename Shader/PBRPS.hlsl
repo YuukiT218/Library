@@ -15,10 +15,6 @@ Texture2D occlusionMap : register(t5);
 //カスケードシャドウマップ用テクスチャ
 Texture2DArray cascadeShadowMap[4] : register(t6);
 
-//ディゾルブ用テクスチャ
-Texture2D emissivedissolveMap : register(t11);
-Texture2D dissolveMap : register(t12);
-
 //ActorPBRで(t15)を使用
 
 //IBL用テクスチャ
@@ -34,7 +30,7 @@ SamplerState shadowSampler : register(s2);
 
 float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
 {
-  
+
     //	ガンマ係数
     static const float GammaFactor = 2.2f;
     
@@ -54,19 +50,19 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
         float Factor = emissiveFactor * isEmissive;
         emissive_color.rgb *= emissive.rgb * adjustColor.rgb * Factor;
         //emissive_color.rgb *= emissive.rgb * Factor;
-        float maskValue = emissivedissolveMap.Sample(linearSampler, pin.texcoord).r;
+        //float maskValue = emissivedissolveMap.Sample(linearSampler, pin.texcoord).r;
 
-        maskValue = smoothstep(emissivedissolve, emissivedissolve + 0.1, maskValue);
-         // ディゾルブ効果で透明になる部分を青色に光らせる
-        float edgeGlow = smoothstep(maskValue - 0.5, maskValue + 0.5, maskValue + 30); // エッジ部分の強調
+        //maskValue = smoothstep(emissivedissolve, emissivedissolve + 0.1, maskValue);
+        // // ディゾルブ効果で透明になる部分を青色に光らせる
+        //float edgeGlow = smoothstep(maskValue - 0.5, maskValue + 0.5, maskValue + 30); // エッジ部分の強調
 
-        // エミッシブカラーを追加（青色の光）
-        //float3 emissiveColor = float3(0.0f, 0.5f, 1.0f) * edgeGlow * 20.0f; // 青色の強度を設定
-        //オブジェクトと同じ色
-        float3 edgeColor = base_color * edgeGlow * 20.0f; // 青色の強度を設定
-        emissive_color.rgb += edgeColor * (1.0f - maskValue); // 透明になっていく部分だけに適用
+        //// エミッシブカラーを追加（青色の光）
+        ////float3 emissiveColor = float3(0.0f, 0.5f, 1.0f) * edgeGlow * 20.0f; // 青色の強度を設定
+        ////オブジェクトと同じ色
+        //float3 edgeColor = base_color * edgeGlow * 20.0f; // 青色の強度を設定
+        //emissive_color.rgb += edgeColor * (1.0f - maskValue); // 透明になっていく部分だけに適用
 
-        emissive_color.rgb *= maskValue;
+        //emissive_color.rgb *= maskValue;
     }
 
 	//	法線/従法線/接線

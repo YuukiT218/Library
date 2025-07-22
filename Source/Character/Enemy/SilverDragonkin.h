@@ -34,6 +34,9 @@ public:
 	// 描画処理
 	void Render(const RenderContext& rc, ShaderId shaderId)override;
 
+	//影描画処理
+	void ShadowRender(const RenderContext& rc, ShadowMap* shadowMap);
+
 	// デバッグプリミティブ描画
 	void DrawDebugPrimitive() override;
 

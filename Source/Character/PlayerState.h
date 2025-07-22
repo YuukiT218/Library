@@ -42,6 +42,9 @@ protected:
 	// 走り移動入力
 	bool InputRunMove() const;
 
+	// ジャンプ入力
+	bool InputJump() const;
+
 	// ガード入力
 	bool InputGuard() const;
 
@@ -135,6 +138,51 @@ private:
 	int runLeftAnimationIndex = -1;
 	float runAnimationSpeed = 1.0f;
 	float runAnimationMoveRate = 0.9f;
+};
+
+// ジャンプステート
+class PlayerJumpState : public PlayerState
+{
+public:
+	PlayerJumpState(Player* player);
+
+protected:
+	// 開始処理
+	void Enter() override;
+
+	// 更新処理
+	void Update(float elapsedTime) override;
+
+	// デバッグ用GUI描画
+	void DrawDebugGUI() override;
+
+private:
+	int jumpAnimationIndex = -1;
+	float jumpAnimationSpeed = 1.0f;
+	float jumpAnimationMoveRate = 0.7f;
+	float jumpPower = 10.0f;
+};
+
+// 落下ステート
+class PlayerFallState : public PlayerState
+{
+public:
+	PlayerFallState(Player* player);
+
+protected:
+	// 開始処理
+	void Enter() override;
+
+	// 更新処理
+	void Update(float elapsedTime) override;
+
+	// デバッグ用GUI描画
+	void DrawDebugGUI() override;
+
+private:
+	int fallAnimationIndex = -1;
+	float fallAnimationSpeed = 1.0f;
+	float fallAnimationMoveRate = 0.7f;
 };
 
 // 回避ステート

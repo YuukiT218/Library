@@ -64,14 +64,6 @@ void StageManager::ShadowRender(const RenderContext& rc, ShadowMap* shadowMap)
     }
 }
 
-void StageManager::SetShadowModel(ShadowMap* shadowMap)
-{
-    for (Stage* stage : stages)
-    {
-        shadowMap->SetShadowModel(stage->GetModel());
-    }
-}
-
 // ステージ登録
 void StageManager::Register(Stage* stage)
 {

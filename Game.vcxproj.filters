@@ -211,6 +211,8 @@
     <ClInclude Include="Source\Character\Enemy\StateMachine\StateDerived.h" />
     <ClInclude Include="Source\Character\Enemy\StateMachine\RandomState.h" />
     <ClInclude Include="Source\Character\Enemy\StateMachine\SequenceState.h" />
+    <ClInclude Include="Source\System\AnimationConfigLoader.h" />
+    <ClInclude Include="Source\Scene\SceneEdit.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Framework.cpp">
@@ -244,9 +246,6 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Sprite\Sprite.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Scene\Scene.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\GpuResourceUtils.cpp">
@@ -376,6 +375,12 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Character\Enemy\SilverDragonkin.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\AnimationConfigLoader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Scene\SceneEdit.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

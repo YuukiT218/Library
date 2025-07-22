@@ -25,7 +25,7 @@ PlayerState::InputComboType PlayerState::InputCombo()
     const Mouse& mouse = Input::Instance().GetMouse();
 
     if (gamepad.GetButtonDown() & GamePad::BTN_Y || (gamepad.GetButton() & GamePad::BTN_LEFT_THUMB && mouse.GetButtonDown() & Mouse::BTN_LEFT)) return InputComboType::Heavy;
-    if (gamepad.GetButtonDown() & GamePad::BTN_X || mouse.GetButtonDown() & Mouse::BTN_LEFT) return InputComboType::Light;
+    if (gamepad.GetButtonDown() & GamePad::BTN_B || mouse.GetButtonDown() & Mouse::BTN_LEFT) return InputComboType::Light;
     return InputComboType::None;
 }
 
@@ -34,7 +34,7 @@ bool PlayerState::InputDodge() const
 {
     const GamePad& gamepad = Input::Instance().GetGamePad();
 
-    if (gamepad.GetButtonDown() & GamePad::BTN_A)
+    if (gamepad.GetButtonDown() & GamePad::BTN_X)
     {
         return true;
     }
@@ -56,6 +56,19 @@ bool PlayerState::InputRunMove() const
     const GamePad& gamepad = Input::Instance().GetGamePad();
 
     return gamepad.GetLAxisPower() > 0.5f;
+}
+
+// ジャンプ入力
+bool PlayerState::InputJump() const
+{
+    const GamePad& gamepad = Input::Instance().GetGamePad();
+
+    if (gamepad.GetButtonDown() & GamePad::BTN_A)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 // ガード入力
@@ -196,6 +209,10 @@ void PlayerIdleState::Update(float elapsedTime)
     {
         ChangeState(PlayerStateId::GuardIdle);
     }
+    else if (InputJump())
+    {
+        ChangeState(PlayerStateId::Jump);
+    }
 
     //player->GetPlayerModel()->SetBaseAnimationSpeed(idleAnimationSpeed);
 }
@@ -238,7 +255,7 @@ void PlayerWalkState::Update(float elapsedTime)
 {
     LockOnStrafe(walkRightAnimationIndex, walkLeftAnimationIndex, walkFrontAnimationIndex, walkBackAnimationIndex);
 
-    player->PlayerMove(elapsedTime, walkAnimationMoveRate);
+    //player->PlayerMove(elapsedTime, walkAnimationMoveRate);
 
     float speed = DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(DirectX::XMLoadFloat3(&player->GetMoveVec())));
 
@@ -275,6 +292,10 @@ void PlayerWalkState::Update(float elapsedTime)
     else if (!InputWalkMove() && !InputRunMove())
     {
         ChangeState(PlayerStateId::Idle);
+    }
+    else if (InputJump())
+    {
+        ChangeState(PlayerStateId::Jump);
     }
 
     //player->GetPlayerModel()->SetBaseAnimationSpeed(walkAnimationSpeed);
@@ -359,6 +380,10 @@ void PlayerRunState::Update(float elapsedTime)
     {
         ChangeState(PlayerStateId::Idle);
     }
+	else if (InputJump())
+	{
+		ChangeState(PlayerStateId::Jump);
+	}
 
     //player->GetPlayerModel()->SetBaseAnimationSpeed(runAnimationSpeed);
 }
@@ -375,6 +400,134 @@ void PlayerRunState::DrawDebugGUI()
         //ImGui::Text(u8"終了フレーム:%.3f", player->GetPlayerModel()->GetAnimationLength(runFrontAnimationIndex));
         ImGui::DragFloat(u8"アニメーションスピード", &runAnimationSpeed, 0.01f, 0.0f, 5.0f);
         ImGui::DragFloat(u8"移動率", &runAnimationMoveRate, 0.01f, 0.0f, 5.0f);
+        ImGui::TreePop();
+    }
+}
+
+//-------------------------------------------------------------
+// ジャンプステート
+//-------------------------------------------------------------
+// コンストラクタ
+PlayerJumpState::PlayerJumpState(Player* player)
+    : PlayerState(player)
+{
+    jumpAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("JumpTakeOff");
+}
+
+// 開始処理
+void PlayerJumpState::Enter()
+{
+    if (player->IsGround())
+    {
+        player->GetPlayerModel()->PlayAnimation(jumpAnimationIndex, true, 0.1f);
+        player->PlayerJump(jumpPower);
+    }
+}
+
+// 更新処理
+void PlayerJumpState::Update(float elapsedTime)
+{
+    player->PlayerMove(elapsedTime, jumpAnimationMoveRate);
+
+    // コンボ1ステートに遷移
+    if (InputCombo() == InputComboType::Light)
+    {
+        ChangeState(PlayerStateId::Combo1);
+    }
+    // 強攻撃1ステートに遷移
+    else if (InputCombo() == InputComboType::Heavy)
+    {
+        ChangeState(PlayerStateId::Heavy1);
+    }
+    // 回避ステートに遷移
+    else if (InputDodge())
+    {
+        ChangeState(PlayerStateId::Dodge);
+    }
+	else if (player->IsGround())
+	{
+		ChangeState(PlayerStateId::Idle);
+	}
+
+    //player->GetPlayerModel()->SetBaseAnimationSpeed(runAnimationSpeed);
+}
+
+// デバッグ用GUI描画
+void PlayerJumpState::DrawDebugGUI()
+{
+    ImGui::Separator();
+
+    if (ImGui::TreeNode(u8"ジャンプ"))
+    {
+        //ImGui::Text(player->GetPlayerModel()->GetAnimationName(runFrontAnimationIndex));
+        //ImGui::SameLine();
+        //ImGui::Text(u8"終了フレーム:%.3f", player->GetPlayerModel()->GetAnimationLength(runFrontAnimationIndex));
+        ImGui::DragFloat(u8"アニメーションスピード", &jumpAnimationSpeed, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat(u8"移動率", &jumpAnimationMoveRate, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat(u8"ジャンプ力", &jumpPower, 0.01f, 0.0f, 20.0f);
+        ImGui::TreePop();
+    }
+}
+
+//-------------------------------------------------------------
+// 落下ステート
+//-------------------------------------------------------------
+// コンストラクタ
+PlayerFallState::PlayerFallState(Player* player)
+    : PlayerState(player)
+{
+    fallAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("JumpGoesDown2");
+}
+
+// 開始処理
+void PlayerFallState::Enter()
+{
+    if (!player->IsGround())
+    {
+        player->GetPlayerModel()->PlayAnimation(fallAnimationIndex, true, 0.1f);
+    }
+}
+
+// 更新処理
+void PlayerFallState::Update(float elapsedTime)
+{
+    player->PlayerMove(elapsedTime, fallAnimationMoveRate);
+
+    // コンボ1ステートに遷移
+    if (InputCombo() == InputComboType::Light)
+    {
+        ChangeState(PlayerStateId::Combo1);
+    }
+    // 強攻撃1ステートに遷移
+    else if (InputCombo() == InputComboType::Heavy)
+    {
+        ChangeState(PlayerStateId::Heavy1);
+    }
+    // 回避ステートに遷移
+    else if (InputDodge())
+    {
+        ChangeState(PlayerStateId::Dodge);
+    }
+    else if (player->IsGround())
+    {
+        ChangeState(PlayerStateId::Idle);
+    }
+
+    //player->GetPlayerModel()->SetBaseAnimationSpeed(runAnimationSpeed);
+}
+
+// デバッグ用GUI描画
+void PlayerFallState::DrawDebugGUI()
+{
+    ImGui::Separator();
+
+    if (ImGui::TreeNode(u8"落下"))
+    {
+        //ImGui::Text(player->GetPlayerModel()->GetAnimationName(runFrontAnimationIndex));
+        //ImGui::SameLine();
+        //ImGui::Text(u8"終了フレーム:%.3f", player->GetPlayerModel()->GetAnimationLength(runFrontAnimationIndex));
+        ImGui::DragFloat(u8"アニメーションスピード", &fallAnimationSpeed, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat(u8"移動率", &fallAnimationMoveRate, 0.01f, 0.0f, 5.0f);
         ImGui::TreePop();
     }
 }
@@ -629,12 +782,15 @@ void PlayerComboState::Enter()
 {
     forwarded = false;
     nextShiftReady = false;
+    player->SetGravity(-0.0001f);
+    player->SetVerticalVelocity(0);
     player->GetPlayerModel()->PlayRootMotion(comboAnimationIndex, false, true, 0.1f, "Character1_Hips");
 }
 
 // 終了処理
 void PlayerComboState::Exit()
 {
+    player->SetGravity(-0.3f);
     nextShiftReady = false;
 }
 
@@ -706,7 +862,7 @@ void PlayerComboState::Update(float elapsedTime)
         if (frame >= poseFrame)
         {
             // 走りステート遷移
-            if (InputRunMove())
+            if (InputRunMove() && player->IsGround())
             {
                 ChangeState(PlayerStateId::Run);
             }
@@ -745,7 +901,11 @@ void PlayerComboState::Update(float elapsedTime)
     // 終了後のステート遷移
     if (!player->GetPlayerModel()->IsPlayAnimation())
     {
-        ChangeState(PlayerStateId::Idle);
+        player->SetGravity(-0.3f);
+        if (player->IsGround())
+            ChangeState(PlayerStateId::Idle);
+        else
+			ChangeState(PlayerStateId::Fall);
     }
 }
 

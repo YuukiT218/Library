@@ -12,7 +12,6 @@ VS_OUT main(
     VS_OUT vout = (VS_OUT) 0;
     
     position = SkinningPosition(position, boneWeight, boneIndices);
-    //vout.vertex = mul(position, viewProjection);
     // 指定の位置に配置できるようにワールド行列を計算に含める
     //vout.vertex = mul(position, mul(worldTransform, viewProjection));
     vout.vertex = mul(position, viewProjection);

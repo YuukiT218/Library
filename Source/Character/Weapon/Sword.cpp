@@ -143,7 +143,7 @@ void Sword::Render(const RenderContext& rc, Shader* shader)
 
 void Sword::DrawDebugImGUi()
 {
-	if (ImGui::CollapsingHeader("Wepon", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("Weapon", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		model->DebugGui(u8"武器");
 

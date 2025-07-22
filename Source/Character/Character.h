@@ -173,7 +173,7 @@ protected:
 	};
 
 	float radius = 0.5f;
-	float gravity = -1.0f;
+	float gravity = -0.3f;
 	DirectX::XMFLOAT3 velocity = { 0, 0, 0 };
 	bool isGround = true;
 	float height = 2.0f;

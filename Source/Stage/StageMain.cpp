@@ -7,7 +7,7 @@ StageMain::StageMain()
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
-	model = std::make_unique<Model>(device, "Data/Model/Stage/ExampleStage.glb", 0.02f);
+	model = std::make_unique<Model>(device, "Data/Model/Stage/ExampleStage.gltf", 0.02f);
 	//model->SetAdRoughness(1.0f);
 
 	DirectX::XMVECTOR VolumeMin = DirectX::XMVectorReplicate(FLT_MAX);

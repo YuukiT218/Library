@@ -71,11 +71,11 @@ public:
 	struct Vertex
 	{
 		DirectX::XMFLOAT3		position = { 0, 0, 0 };
+		DirectX::XMFLOAT4		boneWeight = { 1, 0, 0, 0 };
+		DirectX::XMUINT4		boneIndex = { 0, 0, 0, 0 };
 		DirectX::XMFLOAT3		normal = { 0, 0, 0 };
 		DirectX::XMFLOAT4		tangent = { 0, 0, 0, 1 };
 		DirectX::XMFLOAT2		texcoord = { 0, 0 };
-		DirectX::XMFLOAT4		boneWeight = { 1, 0, 0, 0 };
-		DirectX::XMUINT4		boneIndex = { 0, 0, 0, 0 };
 
 		template<class Archive>
 		void serialize(Archive& archive);

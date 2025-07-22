@@ -34,9 +34,6 @@ public:
 	//影描画
 	void ShadowRender(const RenderContext& rc, ShadowMap* shadowMap);
 
-	//カスケードシャドウマップ用モデル設定
-	void SetShadowModel(ShadowMap* shadowMap);
-
 	// ステージ登録
 	void Register(Stage* stage);
 

@@ -12,11 +12,13 @@ public:
 	void Begin(const RenderContext& rc) override;
 
 	// 更新処理
-	void Update(const RenderContext& rc, const ModelResource::Mesh& mesh) override;
-	void Update(const RenderContext& rc, const std::shared_ptr<Model> model) override {};
-
+	void Update(const RenderContext& rc, const ModelResource::Mesh& mesh, const std::shared_ptr<Model> model) override;
+	
 	// 終了処理
 	void End(const RenderContext& rc) override;
+
+	//デバッグ用GUI
+	void ImGui() override {};
 
 private:
 	struct CbMesh

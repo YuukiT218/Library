@@ -9,7 +9,7 @@ struct VS_OUT
 };
 
 #define POINT_MAX (64)
-cbuffer CbScene : register(b0)
+cbuffer CbScene : register(b7)
 {
     row_major float4x4 viewProjection;
     float4 lightDirection;
@@ -20,7 +20,7 @@ cbuffer CbScene : register(b0)
     float4 pointColor[POINT_MAX];
 };
 
-cbuffer CbMesh : register(b1)
+cbuffer CbMesh : register(b0)
 {
     float4 materialColor;
     // ボーン行列にワールド行列の計算が加味されているので必要なくなった
@@ -28,7 +28,7 @@ cbuffer CbMesh : register(b1)
 };
 // register b2 ワールド変換用にskeltonで使用
 
-cbuffer CbMaterial : register(b3)
+cbuffer CbMaterial : register(b1)
 {
     float adjustMetalness; //  金属質調整
     float adjustRoughness; //  粗さ調整
@@ -41,7 +41,7 @@ cbuffer CbMaterial : register(b3)
     float4 emissiveColor; //エミッシブ色
 };
 
-cbuffer CbColor : register(b4)
+cbuffer CbColor : register(b2)
 {
     float isEmissive; //強調発光するかどうか
     float emissiveFactor; //発光度
@@ -58,7 +58,7 @@ cbuffer CbConstants : register(b5)
     float4 OverwriteColor;
 }
 
-cbuffer CbSetUp : register(b6)
+cbuffer CbSetUp : register(b3)
 {
     float IBLDiffuseScale; //ディフューズ調整用
     float IBLSpecularScale; //スペキュラー調整用
@@ -70,7 +70,7 @@ cbuffer CbSetUp : register(b6)
 //シャドウマップ用の定数
 //	カスケードシャドウマップ
 static const int ShadowBufferSize = 4;
-cbuffer CbShadow : register(b7)
+cbuffer CbShadow : register(b8)
 {
     row_major float4x4 CascadeLightViewProjection[ShadowBufferSize];
     float4 CascadeShadowBias;

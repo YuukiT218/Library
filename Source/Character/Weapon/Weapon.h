@@ -16,7 +16,7 @@ public:
 	virtual void Render(const RenderContext& rc, Shader* shader) {}
 
 	//モデル用ゲッター
-	Model* GetModel() const { return model.get(); }
+	std::shared_ptr<Model> GetModel() const { return model; }
 
 	//アタッチ
 	void Attach(std::string nodeName, Model* character);

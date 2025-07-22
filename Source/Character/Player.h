@@ -18,6 +18,8 @@ enum class PlayerStateId
 	Idle,
 	Walk,
 	Run,
+	Jump,
+	Fall,
 	Dodge,
 	DodgeAttack,
 	Combo1,
@@ -54,9 +56,6 @@ public:
 
 	//影描画処理
 	void ShadowRender(const RenderContext& rc, ShadowMap* shadowMap);
-
-	//影用モデル設定
-	void SetShadowMap(ShadowMap* shadowMap);
 
 	// デバッグプリミティブ描画
 	void DrawDebugPrimitive();
@@ -109,11 +108,20 @@ public:
 	// 移動処理
 	void PlayerMove(float elapsedTime, float moveRate = 1.0f, float turnRate = 1.0f);
 
+	// ジャンプ処理
+	void PlayerJump(float speed);
+
 	// ロックオン時敵の方を向く処理
 	void LockOnTurnToEnemy(float elapsedTime);
 
 	// 移動設定
 	void SetMovement(DirectX::XMFLOAT3& Vec, float moveRate);
+
+	// 重力設定
+	void SetGravity(float gravity) { this->gravity = gravity; }
+
+	// 垂直移動力設定
+	void SetVerticalVelocity(float velocity) { this->velocity.y = velocity; }
 
 	Model* GetModel() { return model.get(); }
 	Sword* GetSword() { return sword.get(); }

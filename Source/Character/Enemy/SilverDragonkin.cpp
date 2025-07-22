@@ -426,6 +426,11 @@ void SilverDragonkin::Render(const RenderContext& rc, ShaderId shaderId)
 	modelRenderer->Render(rc);
 }
 
+void SilverDragonkin::ShadowRender(const RenderContext& rc, ShadowMap* shadowMap)
+{
+	shadowMap->Draw(rc, model.get());
+}
+
 // 死亡した時に呼ばれる
 void SilverDragonkin::OnDead()
 {
@@ -655,6 +660,9 @@ void SilverDragonkin::DrawDebugGUI()
 		ShowDragonLightEditor();
 
 	}
+
+	// プレイヤーモデルのパラメータ調整
+	model->DebugGui(u8"Enemy");
 }
 
 void SilverDragonkin::ShowDragonLightEditor()

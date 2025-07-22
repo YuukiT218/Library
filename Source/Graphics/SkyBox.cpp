@@ -86,6 +86,15 @@ void SkyBox::Render(const RenderContext& rc)
 	// ラスタライザステート設定
 	rc.deviceContext->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
+	// サンプラステート設定
+	ID3D11SamplerState* samplerStates[] =
+	{
+		rc.renderState->GetSamplerState(SamplerState::LinearWrap),
+		rc.renderState->GetSamplerState(SamplerState::Anisotropic),
+		rc.renderState->GetSamplerState(SamplerState::SHADOW),
+	};
+	rc.deviceContext->PSSetSamplers(0, _countof(samplerStates), samplerStates);
+
 	// シェーダー設定
 	rc.deviceContext->IASetInputLayout(skyBoxInputLayout.Get());
 	rc.deviceContext->VSSetShader(skyBoxVertexShader.Get(), nullptr, 0);

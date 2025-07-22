@@ -9,19 +9,6 @@
 #include "Scene/SceneTitle.h"
 #include "Scene/SceneGame.h"
 #include "Scene/SceneLoading.h"
-#include "Scene/ModelViewerScene.h"
-#include "Scene/WeightedCollisionScene.h"
-#include "Scene/RaceRankingScene.h"
-#include "Scene/SphereCastMoveScene.h"
-#include "Scene/SwordTrailScene.h"
-#include "Scene/RootMotionScene.h"
-#include "Scene/RootMotionExScene.h"
-#include "Scene/ConfirmCommandScene.h"
-#include "Scene/SpaceDivisionRaycastScene.h"
-#include "Scene/SortingAndFilteringScene.h"
-#include "Scene/LookAtScene.h"
-#include "Scene/TwoBoneIKScene.h"
-#include "Scene/SphereVsTriangleCollisionScene.h"
 
 // 垂直同期間隔設定
 static const int syncInterval = 1;
@@ -38,21 +25,6 @@ Framework::Framework(HWND hWnd)
 	ImGuiRenderer::Initialize(hWnd, Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
 
 	// シーン初期化
-	//scene = std::make_unique<SceneTitle>();
-	//scene = std::make_unique<ModelViewerScene>();
-	//scene = std::make_unique<WeightedCollisionScene>();
-	//scene = std::make_unique<RaceRankingScene>();
-	//scene = std::make_unique<ConfirmCommandScene>();
-	//scene = std::make_unique<SortingAndFilteringScene>();
-	//scene = std::make_unique<RootMotionScene>();
-	//scene = std::make_unique<RootMotionExScene>();
-	//scene = std::make_unique<SwordTrailScene>();
-	//scene = std::make_unique<SphereVsTriangleCollisionScene>();
-	//scene = std::make_unique<TwoBoneIKScene>();
-	//scene = std::make_unique<LookAtScene>();
-	//scene = std::make_unique<SpaceDivisionRaycastScene>();
-	//scene = std::make_unique<SphereCastMoveScene>();
-
 	SceneManager::Instance().ChangeScene(new SceneGame);
 }
 
@@ -207,24 +179,6 @@ void Framework::SceneSelectGUI()
 	float height = 490;
 	ImGui::SetNextWindowPos(ImVec2(pos.x + displaySize.x - width - 10, pos.y + 10), ImGuiCond_Once);
 	ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Once);
-
-	if (ImGui::Begin("Scene"))
-	{
-		//ChangeSceneButtonGUI<ModelViewerScene>(u8"00.モデルビューア");
-		//ChangeSceneButtonGUI<WeightedCollisionScene>(u8"01.重みのある衝突処理");
-		//ChangeSceneButtonGUI<RaceRankingScene>(u8"02.レース順位判定処理");
-		//ChangeSceneButtonGUI<SphereCastMoveScene>(u8"03.スフィアキャスト移動処理");
-		//ChangeSceneButtonGUI<SwordTrailScene>(u8"04.剣の軌跡処理");
-		//ChangeSceneButtonGUI<RootMotionScene>(u8"05.ルートモーション処理");
-		//ChangeSceneButtonGUI<RootMotionExScene>(u8"05.ルートモーションEX処理");
-		//ChangeSceneButtonGUI<ConfirmCommandScene>(u8"06.コマンド判定処理");
-		//ChangeSceneButtonGUI<SpaceDivisionRaycastScene>(u8"07.空間分割レイキャスト");
-		//ChangeSceneButtonGUI<SortingAndFilteringScene>(u8"08.ソート＆フィルタリング処理");
-		//ChangeSceneButtonGUI<LookAtScene>(u8"09.ルックアット処理");
-		//ChangeSceneButtonGUI<TwoBoneIKScene>(u8"10.2本のボーンIK制御");
-		//ChangeSceneButtonGUI<SphereVsTriangleCollisionScene>(u8"11.球と三角形の衝突処理");
-	}
-	ImGui::End();
 }
 
 // フレームレート計算

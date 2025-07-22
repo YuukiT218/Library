@@ -118,9 +118,9 @@ void ModelResource::Vertex::serialize(Archive& archive)
 		CEREAL_NVP(position),
 		CEREAL_NVP(boneWeight),
 		CEREAL_NVP(boneIndex),
-		CEREAL_NVP(texcoord),
 		CEREAL_NVP(normal),
-		CEREAL_NVP(tangent)
+		CEREAL_NVP(tangent),
+		CEREAL_NVP(texcoord)
 	);
 }
 
@@ -195,7 +195,7 @@ void ModelResource::Load(ID3D11Device* device, const char* filename, float sampl
 	if (std::filesystem::exists(filepath))
 	{
 		// 独自形式のモデルファイルの読み込み
-		//Deserialize(filepath.string().c_str());
+		Deserialize(filepath.string().c_str());
 
 	}
 	else if (extension == ".gltf" || extension == ".glb")
@@ -216,7 +216,7 @@ void ModelResource::Load(ID3D11Device* device, const char* filename, float sampl
 		importer.LoadAnimations(animations, nodes, sampleRate);
 
 		// 独自形式のモデルファイルを保存
-		//Serialize(filepath.string().c_str());
+		Serialize(filepath.string().c_str());
 	}
 
 	BuildModel(device, filename, dirpath);
@@ -323,6 +323,63 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 				std::filesystem::path texturePath(dirpath / material.normalTextureFileName);
 				HRESULT hr = GpuResourceUtils::LoadTexture(device, texturePath.string().c_str(),
 					material.normalMap.GetAddressOf());
+				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			}
+		}
+
+		if (material.emissiveMap == nullptr)
+		{
+			if (material.emissiveTextureFileName.empty())
+			{
+				// 法線ダミーテクスチャ作成
+				HRESULT hr = GpuResourceUtils::CreateDummyTexture(device, 0xFFFF7F7F,
+					material.emissiveMap.GetAddressOf());
+				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			}
+			else
+			{
+				// 法線テクスチャ読み込み
+				std::filesystem::path texturePath(dirpath / material.emissiveTextureFileName);
+				HRESULT hr = GpuResourceUtils::LoadTexture(device, texturePath.string().c_str(),
+					material.emissiveMap.GetAddressOf());
+				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			}
+		}
+
+		if (material.metalnessRoughnessMap == nullptr)
+		{
+			if (material.metalnessRoughnessTextureFileName.empty())
+			{
+				// 法線ダミーテクスチャ作成
+				HRESULT hr = GpuResourceUtils::CreateDummyTexture(device, 0xFFFF7F7F,
+					material.metalnessRoughnessMap.GetAddressOf());
+				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			}
+			else
+			{
+				// 法線テクスチャ読み込み
+				std::filesystem::path texturePath(dirpath / material.metalnessRoughnessTextureFileName);
+				HRESULT hr = GpuResourceUtils::LoadTexture(device, texturePath.string().c_str(),
+					material.metalnessRoughnessMap.GetAddressOf());
+				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			}
+		}
+
+		if (material.occlusionMap == nullptr)
+		{
+			if (material.occlusionTextureFileName.empty())
+			{
+				// 法線ダミーテクスチャ作成
+				HRESULT hr = GpuResourceUtils::CreateDummyTexture(device, 0xFFFF7F7F,
+					material.occlusionMap.GetAddressOf());
+				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+			}
+			else
+			{
+				// 法線テクスチャ読み込み
+				std::filesystem::path texturePath(dirpath / material.occlusionTextureFileName);
+				HRESULT hr = GpuResourceUtils::LoadTexture(device, texturePath.string().c_str(),
+					material.occlusionMap.GetAddressOf());
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 			}
 		}

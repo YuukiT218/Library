@@ -36,11 +36,29 @@ private:
 		DirectX::XMFLOAT4		lightDirection;
 		DirectX::XMFLOAT4		lightColor;
 		DirectX::XMFLOAT4		cameraPosition;
+		DirectX::XMFLOAT4X4 lightViewProjection;
+		DirectX::XMFLOAT4 pointLight[POINT_MAX];
+		DirectX::XMFLOAT4 pointColor[POINT_MAX];
 	};
 
 	struct CbSkeleton
 	{
 		DirectX::XMFLOAT4X4		boneTransforms[256];
+	};
+
+	static const int ShadowBufferSize = 4;
+	struct CbShadow
+	{
+		DirectX::XMFLOAT4X4 CascadeLightViewProjection[ShadowBufferSize];
+		DirectX::XMFLOAT4 CascadeShadowBias;
+
+		DirectX::XMFLOAT4 cascadeFlags; // DisplayCascadeArea, IsCascade Ç float Ç…ÇµÅAó]ÇËÇégÇ§
+
+		DirectX::XMFLOAT4 shadowColor;
+		float shadowTexelSize;
+		float shadowAttenuation;
+		float shadowBias;
+		float dummy;
 	};
 
 	struct DrawInfo

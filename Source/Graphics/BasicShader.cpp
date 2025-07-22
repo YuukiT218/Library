@@ -67,7 +67,7 @@ void BasicShader::Begin(const RenderContext& rc)
 }
 
 // XVˆ—
-void BasicShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh)
+void BasicShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh, const std::shared_ptr<Model> model)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 

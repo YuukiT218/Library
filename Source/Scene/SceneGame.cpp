@@ -41,7 +41,7 @@ void SceneGame::Initialize()
 	float screenHeight = Graphics::Instance().GetScreenHeight();
 
 	// プレイヤー初期化
-	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.glb", 0.015f);
+	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf", 0.015f);
 	dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/silver-dragonkin/source/SilverDragonkin.gltf", 0.005f);
 	dragonkin->SetPosition({0, 1.0f, -10.0f});
 	dragonkin->SetScale({ 0.005f, 0.005f, 0.005f });
@@ -63,18 +63,6 @@ void SceneGame::Initialize()
 		{ 0.f, 0.0f, 0.f },	// 注視点
 		{ 0.f, 1.f, 0.f }		// 上ベクトル
 	);
-	//// カメラ設定
-	//camera.SetPerspectiveFov(
-	//	DirectX::XMConvertToRadians(45),	// 画角
-	//	screenWidth / screenHeight,			// 画面アスペクト比
-	//	0.1f,								// ニアクリップ
-	//	1000.0f								// ファークリップ
-	//);
-	//camera.SetLookAt(
-	//	{ 0, 10, 10 },		// 視点
-	//	{ 0, 0, 0 },		// 注視点
-	//	{ 0, 1, 0 }			// 上ベクトル
-	//);
 
 	cameraController = std::make_unique<CameraController>();
 	//movieCameraController = std::make_unique<MovieCameraController>();
@@ -108,10 +96,6 @@ void SceneGame::Initialize()
 	//DieUI::Instance().Initialize();
 
 	lagTimer = 0.0f;
-
-	////BGMの初期化
-	//AngryBGM = Audio::Instance().LoadAudioSource("Data/Sound/BGM/AngryBGM.wav");
-	//ClearBGM = Audio::Instance().LoadAudioSource("Data/Sound/BGM/ClearBGM.wav");
 }
 
 void SceneGame::Finalize()
@@ -212,14 +196,17 @@ void SceneGame::Update(float elapsedTime)
 
 	LightManager& lightManager = LightManager::Instance();
 
-	//// ポイントライト設定
-	//PointLight pointLight;
-	//pointLight.position.x = supportEnemy->GetPosition().x + offsetPosition.x;
-	//pointLight.position.y = supportEnemy->GetPosition().y + offsetPosition.y;
-	//pointLight.position.z = supportEnemy->GetPosition().z + offsetPosition.z;
-	//pointLight.position.w = attenuation;
-	//pointLight.color = pointColor;
-	//lightManager.SetPointLight(pointLight, 1);
+	// ポイントライト設定
+	PointLight pointLight;
+	for (int i = 0; i < POINT_MAX; i++)
+	{
+		pointLight.position.x = lightManager.GetPointLight(i).position.x + offsetPosition.x;
+		pointLight.position.y = lightManager.GetPointLight(i).position.y + offsetPosition.y;
+		pointLight.position.z = lightManager.GetPointLight(i).position.z + offsetPosition.z;
+	}
+	pointLight.position.w = attenuation;
+	pointLight.color = pointColor;
+	lightManager.SetPointLight(pointLight, 1);
 
 	timer += elapsedTime;
 
@@ -256,13 +243,6 @@ void SceneGame::Render(float elapsedTime)
 	DirectX::XMFLOAT4X4 worldTransform;
 	DirectX::XMStoreFloat4x4(&worldTransform, DirectX::XMMatrixIdentity());
 
-	// アニメーション更新
-	//character->UpdateAnimation(elapsedTime);
-
-	// トランスフォーム更新
-	//stage->UpdateTransform(worldTransform);
-	//character->UpdateTransform(worldTransform);
-
 	LightManager& lightManager = LightManager::Instance();
 
 	// 描画コンテキスト設定
@@ -274,35 +254,23 @@ void SceneGame::Render(float elapsedTime)
 	rc.shadowMap = shadowMap;
 	//rc.timer = timer;
 
-	// シャドウマップ描画
-	//{
-	//	shadowMap->Begin(rc, camera.GetFocus());
-	//	if (shadowMap->GetCascade())
-	//	{
-	//		StageManager::Instance().SetShadowModel(shadowMap);
-	//		player->SetShadowMap(shadowMap);
-	//		//EnemyManager::Instance().SetShadowMap(shadowMap);
-
-	//		shadowMap->CascadeDraw(rc);
-	//	}
-	//	else
-	//	{
-	//		StageManager::Instance().ShadowRender(rc, shadowMap);
-	//		player->ShadowRender(rc, shadowMap);
-	//		//EnemyManager::Instance().ShadowRender(rc, shadowMap);
-	//	}
-	//	shadowMap->End(rc);
-	//}
+	//シャドウマップ描画
+	{
+		shadowMap->Begin(rc, camera.GetFocus());
+		{
+			/*StageManager::Instance().ShadowRender(rc, shadowMap);
+			player->ShadowRender(rc, shadowMap);
+			dragonkin->ShadowRender(rc, shadowMap);*/
+		}
+		shadowMap->End(rc);
+	}
 
 	StageManager::Instance().Debug(rc);
 	// 3D描画
 	{
-		//shader->Draw(rc, stage.get());
-		StageManager::Instance().Render(rc, ShaderId::Lambert);
-		player->Render(rc, ShaderId::Lambert);
-		dragonkin->Render(rc, ShaderId::Lambert);
-		//shader->Draw(rc, character.get());
-		//EnemyManager::Instance().Render(rc, shader);
+		StageManager::Instance().Render(rc, ShaderId::PBR);
+		player->Render(rc, ShaderId::PBR);
+		dragonkin->Render(rc, ShaderId::PBR);
 	}
 
 	//{//トレイル描画
@@ -310,14 +278,6 @@ void SceneGame::Render(float elapsedTime)
 	//	TrailRenderer* trailRenderer = graphics.GetTrailRenderer();
 	//	trailRenderer->Render(dc, rc, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-	//}
-
-	////プレイヤー描画
-	//shader = Graphics::Instance().GetShader(ShaderId::ActorPBR);
-	//{
-	//	shader->Begin(rc);
-	//	player->Render(rc, shader);
-	//	shader->End(rc);
 	//}
 
 	/*rc.dissove = enemysupport.dissolve;
@@ -353,7 +313,7 @@ void SceneGame::Render(float elapsedTime)
 	//}
 
 	//// プレイヤーデバッグプリミティブ描画
-	//player->DrawDebugPrimitive();
+	player->DrawDebugPrimitive();
 
 	//エネミーデバッグプリミティブ描画
 	//EnemyManager::Instance().DrawDebugPrimitive();
@@ -415,10 +375,10 @@ void SceneGame::DrawDebugGUI()
 		/*posteffect->DrawDebugGUI();
 
 		Shader* ActorPBR = Graphics::Instance().GetShader(ShaderId::ActorPBR);
-		ActorPBR->DebugImGui();
+		ActorPBR->DebugImGui();*/
 
 		Shader* PBR = Graphics::Instance().GetShader(ShaderId::PBR);
-		PBR->DebugImGui();*/
+		PBR->ImGui();
 
 		if (ImGui::CollapsingHeader("DirectionalLight", ImGuiTreeNodeFlags_DefaultOpen))
 		{
@@ -436,7 +396,7 @@ void SceneGame::DrawDebugGUI()
 			ImGui::ColorEdit3("Directioncolor", &Directioncolor.x);
 			ImGui::SliderFloat("intensity", &Directioncolor.w, 0.0f, +100.0f);
 
-			//directionalLight = { direction,Directioncolor };
+			directionalLight = { direction,Directioncolor };
 
 			LightManager& lightManager = LightManager::Instance();
 			lightManager.SetDirectionalLight(directionalLight);
@@ -457,23 +417,23 @@ void SceneGame::DrawDebugGUI()
 		//TrailRenderer* trailRenderer = Graphics::Instance().GetTrailRenderer();
 		//trailRenderer->ImGui();
 
-		//{//シャドウマップ用ImGUI
-		//	ShadowMap* shadowMap = Graphics::Instance().GetShadowMap();
+		{//シャドウマップ用ImGUI
+			ShadowMap* shadowMap = Graphics::Instance().GetShadowMap();
 
-		//	shadowMap->DrawDebugGUI();
-		//}
+			shadowMap->DrawDebugGUI();
+		}
 
 	}
 
 	ImGui::End();
 
-	/*if (ImGui::Begin("Camera Menu", nullptr, ImGuiWindowFlags_None))
+	if (ImGui::Begin("Camera Menu", nullptr, ImGuiWindowFlags_None))
 	{
 		cameraController->DrawDebugGUI();
-		deathCameraController->DrawDebugGUI();
+		//deathCameraController->DrawDebugGUI();
 	}
 
-	ImGui::End();*/
+	ImGui::End();
 }
 
 void SceneGame::SelectedCamera(float elapsedTime)
