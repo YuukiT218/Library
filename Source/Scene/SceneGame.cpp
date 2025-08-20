@@ -32,7 +32,6 @@ void SceneGame::Initialize()
 {
 	// ステージ初期化
 	StageManager& stageManager = StageManager::Instance();
-	//std::shared_ptr<StageMain> stageMain = std::make_shared<StageMain>();
 	StageMain* stageMain = new StageMain();
 	stageManager.Register(stageMain);
 
@@ -41,10 +40,8 @@ void SceneGame::Initialize()
 	float screenHeight = Graphics::Instance().GetScreenHeight();
 
 	// プレイヤー初期化
-	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf", 0.015f);
+	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
 	dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/silver-dragonkin/source/SilverDragonkin.gltf", 0.005f);
-	dragonkin->SetPosition({0, 1.0f, -10.0f});
-	dragonkin->SetScale({ 0.005f, 0.005f, 0.005f });
 
 	Camera& camera = Camera::Instance();
 
@@ -80,8 +77,7 @@ void SceneGame::Initialize()
 	lightManager.SetDirectionalLight(directionalLight);
 
 	skyBox = std::make_unique<SkyBox>(device);
-
-	//posteffect = std::make_unique<PostEffect>(device);
+	posteffect = std::make_unique<PostEffect>(device);
 
 	//gauge = std::make_unique<Sprite>(device);
 
@@ -110,12 +106,12 @@ void SceneGame::Finalize()
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 	// 画面クリア＆レンダーターゲット設定
 	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };	// RGBA(0.0～1.0);
-	/*std::map<FrameBufferId, FrameBuffer*> buffers;
+	std::map<FrameBufferId, FrameBuffer*> buffers;
 	for (int i = 0; i < static_cast<int>(FrameBufferId::EnumCount); i++)
 	{
 		buffers[static_cast<FrameBufferId>(i)] = Graphics::Instance().GetFrameBuffer(static_cast<FrameBufferId>(i));
 		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, color);
-	}*/
+	}
 }
 
 void SceneGame::Update(float elapsedTime)
@@ -165,7 +161,7 @@ void SceneGame::Update(float elapsedTime)
 
 
 	//// プレイヤー更新処理
-	//player->SetLockOnCamera(CameraParam::Instance().GetRockOnEnemy());
+	//player->SetLockOnCamera(CameraParam::Instance().GetLockOnEnemy());
 	//player->Update(elapsedTime * HitStop::Instance().GetPlayerTimeScale());
 	player->Update(elapsedTime);
 
@@ -177,7 +173,7 @@ void SceneGame::Update(float elapsedTime)
 	//EffectManager::Instance().Update(elapsedTime * HitStop::Instance().GetEnemyTimeScale());
 
 	////HPUI更新
-	////HitPointUI::Instance().SetRockOnEnemy(cameraController->GetRockOnEnemy());
+	////HitPointUI::Instance().SetLockOnEnemy(cameraController->GetLockOnEnemy());
 	//HitPointUI::Instance().Update(elapsedTime, player->GetHealth(), 3);
 	//DieUI::Instance().Update(elapsedTime);
 
@@ -186,18 +182,18 @@ void SceneGame::Update(float elapsedTime)
 	GamePad& gamePad = Input::Instance().GetGamePad();
 	Mouse& mouse = Input::Instance().GetMouse();
 	// ロックオン
-	/*if (ImGui::IsAnyItemHovered() == false && ImGui::GetIO().WantCaptureMouse == false)
+	if (ImGui::IsAnyItemHovered() == false && ImGui::GetIO().WantCaptureMouse == false)
 	{
 		if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_SHOULDER || mouse.GetButtonDown() & Mouse::BTN_MIDDLE)
 		{
 			CameraParam::Instance().ReversLockOnSwitch();
 		}
-	}*/
+	}
 
 	LightManager& lightManager = LightManager::Instance();
 
 	// ポイントライト設定
-	PointLight pointLight;
+	/*PointLight pointLight;
 	for (int i = 0; i < POINT_MAX; i++)
 	{
 		pointLight.position.x = lightManager.GetPointLight(i).position.x + offsetPosition.x;
@@ -206,7 +202,7 @@ void SceneGame::Update(float elapsedTime)
 	}
 	pointLight.position.w = attenuation;
 	pointLight.color = pointColor;
-	lightManager.SetPointLight(pointLight, 1);
+	lightManager.SetPointLight(pointLight, 1);*/
 
 	timer += elapsedTime;
 
@@ -226,14 +222,14 @@ void SceneGame::Render(float elapsedTime)
 
 	// 画面クリア＆レンダーターゲット設定
 	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };	// RGBA(0.0～1.0);
-	/*std::map<FrameBufferId, FrameBuffer*> buffers;
+	std::map<FrameBufferId, FrameBuffer*> buffers;
 	for (int i = 0; i < static_cast<int>(FrameBufferId::EnumCount); i++)
 	{
 		buffers[static_cast<FrameBufferId>(i)] = Graphics::Instance().GetFrameBuffer(static_cast<FrameBufferId>(i));
 		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, color);
 	}
 
-	buffers[FrameBufferId::Scene]->SetRenderTargets(dc);*/
+	buffers[FrameBufferId::Scene]->SetRenderTargets(dc);
 
 	ShadowMap* shadowMap = Graphics::Instance().GetShadowMap();
 
@@ -252,18 +248,16 @@ void SceneGame::Render(float elapsedTime)
 	rc.renderState = graphics.GetRenderState();
 	rc.lightManager = &lightManager;
 	rc.shadowMap = shadowMap;
-	//rc.timer = timer;
+	rc.timer = timer;
 
 	//シャドウマップ描画
+	shadowMap->Begin(rc, camera.GetFocus());
 	{
-		shadowMap->Begin(rc, camera.GetFocus());
-		{
-			/*StageManager::Instance().ShadowRender(rc, shadowMap);
-			player->ShadowRender(rc, shadowMap);
-			dragonkin->ShadowRender(rc, shadowMap);*/
-		}
-		shadowMap->End(rc);
+		StageManager::Instance().ShadowRender(rc, shadowMap);
+		player->ShadowRender(rc, shadowMap);
+		dragonkin->ShadowRender(rc, shadowMap);
 	}
+	shadowMap->End(rc);
 
 	StageManager::Instance().Debug(rc);
 	// 3D描画
@@ -292,31 +286,31 @@ void SceneGame::Render(float elapsedTime)
 	//// 3Dエフェクト描画
 	//EffectManager::Instance().Render(camera.GetView(), camera.GetProjection());
 
-	////ポストプロセス
-	//{
-	//	posteffect->Begin(rc);
+	//ポストプロセス
+	{
+		posteffect->Begin(rc);
 
-	//	buffers[FrameBufferId::Luminance]->SetRenderTargets(dc);
-	//	posteffect->LuminanceExtraction(rc, buffers[FrameBufferId::Scene]->GetColorMap());
+		buffers[FrameBufferId::Luminance]->SetRenderTargets(dc);
+		posteffect->LuminanceExtraction(rc, buffers[FrameBufferId::Scene]->GetColorMap());
 
-	//	//川瀬の場合下記をコメントアウト
-	//	//buffers[FrameBufferId::Display]->SetRenderTargets(dc);
-	//	posteffect->KawaseBloom(rc, buffers[FrameBufferId::Scene]->GetColorMap(), buffers[FrameBufferId::Luminance]->GetColorMap(), buffers[FrameBufferId::RadialBlur]);
+		//川瀬の場合下記をコメントアウト
+		posteffect->KawaseBloom(rc, buffers[FrameBufferId::Scene]->GetColorMap(), buffers[FrameBufferId::Luminance]->GetColorMap(), buffers[FrameBufferId::RadialBlur]);
 
-	//	buffers[FrameBufferId::Chromatic]->SetRenderTargets(dc);
-	//	posteffect->RadialBlur(rc, buffers[FrameBufferId::RadialBlur]->GetColorMap());
+		buffers[FrameBufferId::Chromatic]->SetRenderTargets(dc);
+		posteffect->RadialBlur(rc, buffers[FrameBufferId::RadialBlur]->GetColorMap());
 
-	//	buffers[FrameBufferId::Display]->SetRenderTargets(dc);
-	//	posteffect->ChromaticAberration(rc, buffers[FrameBufferId::Chromatic]->GetColorMap());
+		buffers[FrameBufferId::Display]->SetRenderTargets(dc);
+		posteffect->ChromaticAberration(rc, buffers[FrameBufferId::Chromatic]->GetColorMap());
 
-	//	posteffect->End(rc);
-	//}
+		posteffect->End(rc);
+	}
 
 	//// プレイヤーデバッグプリミティブ描画
 	player->DrawDebugPrimitive();
 
 	//エネミーデバッグプリミティブ描画
 	//EnemyManager::Instance().DrawDebugPrimitive();
+	dragonkin->DrawDebugPrimitive();
 
 	//エネミー体力ゲージ描画
 	//RenderEnemyGauge(dc, camera.GetView(), camera.GetProjection());
@@ -372,9 +366,9 @@ void SceneGame::DrawDebugGUI()
 
 	if (ImGui::Begin("Graphics Menu", nullptr, ImGuiWindowFlags_None))
 	{
-		/*posteffect->DrawDebugGUI();
+		posteffect->DrawDebugGUI();
 
-		Shader* ActorPBR = Graphics::Instance().GetShader(ShaderId::ActorPBR);
+		/*Shader* ActorPBR = Graphics::Instance().GetShader(ShaderId::ActorPBR);
 		ActorPBR->DebugImGui();*/
 
 		Shader* PBR = Graphics::Instance().GetShader(ShaderId::PBR);

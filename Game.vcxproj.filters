@@ -213,6 +213,8 @@
     <ClInclude Include="Source\Character\Enemy\StateMachine\SequenceState.h" />
     <ClInclude Include="Source\System\AnimationConfigLoader.h" />
     <ClInclude Include="Source\Scene\SceneEdit.h" />
+    <ClInclude Include="Source\System\HitStop.h" />
+    <ClInclude Include="Source\Graphics\PostEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Framework.cpp">
@@ -383,6 +385,12 @@
     <ClCompile Include="Source\Scene\SceneEdit.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\System\HitStop.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\PostEffect.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Sprite.hlsli">
@@ -416,6 +424,15 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Shader\ShadowMap.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\FullScreenQuad\FullScreenQuad.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\PostEffect\PostEffect.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\PostEffect\PostShadingFunction.hlsli">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
@@ -463,6 +480,45 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\ShadowMapVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\FullScreenQuad\FullScreenQuadVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\BloomPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\FinalPostPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurDownSamplingPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurHorizontalPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurUpSamplingPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurVerticalPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GlowExtractionPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\LuminanceExtractionPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\RadialBlurPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\ChromaticAberrationPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\ToneMappingPS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

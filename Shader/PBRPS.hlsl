@@ -49,20 +49,6 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
         emissive.rgb = pow(emissive.rgb, GammaFactor);
         float Factor = emissiveFactor * isEmissive;
         emissive_color.rgb *= emissive.rgb * adjustColor.rgb * Factor;
-        //emissive_color.rgb *= emissive.rgb * Factor;
-        //float maskValue = emissivedissolveMap.Sample(linearSampler, pin.texcoord).r;
-
-        //maskValue = smoothstep(emissivedissolve, emissivedissolve + 0.1, maskValue);
-        // // ディゾルブ効果で透明になる部分を青色に光らせる
-        //float edgeGlow = smoothstep(maskValue - 0.5, maskValue + 0.5, maskValue + 30); // エッジ部分の強調
-
-        //// エミッシブカラーを追加（青色の光）
-        ////float3 emissiveColor = float3(0.0f, 0.5f, 1.0f) * edgeGlow * 20.0f; // 青色の強度を設定
-        ////オブジェクトと同じ色
-        //float3 edgeColor = base_color * edgeGlow * 20.0f; // 青色の強度を設定
-        //emissive_color.rgb += edgeColor * (1.0f - maskValue); // 透明になっていく部分だけに適用
-
-        //emissive_color.rgb *= maskValue;
     }
 
 	//	法線/従法線/接線
@@ -118,163 +104,30 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
 	//	視線ベクトル
     float3 V = normalize(pin.position.xyz - cameraPosition.xyz);
 
-#if 01  //  本来はデバッグ用の機能なのでいらない
-    int DebugShadowMapIndex = -1;
-#endif  //  defined(_DEBUG)
-    
-	//	直接光のシェーディング
+   //	直接光のシェーディング
     float3 total_diffuse = 0, total_specular = 0;
 	{
-		// 平行光源の処理
-		{
-        //    float3 diffuse = (float3) 0, specular = (float3) 0;
-        //    float3 L = normalize(lightDirection.xyz);
-        //    DirectBDRF(diffuse_reflectance, F0, N, V, L,
-					   //lightColor.rgb, roughness,
-					   //diffuse, specular);
-        //    total_diffuse += diffuse;
-        //    total_specular += specular;
+	    // 平行光源の処理
+	    {
             float3 diffuse = (float3) 0, specular = (float3) 0;
             float3 LightColor = lightColor.rgb * lightColor.a;
             float3 L = normalize(lightDirection.xyz);
             DirectBDRF(diffuse_reflectance, F0, N, V, L,
-					   LightColor, roughness,
-					   diffuse, specular);
-            
-            if (cascadeFlags.y > 0)
-            {
-            
-                //	平行光源用カスケードシャドウマップ
-                for (int index = 0; index < ShadowBufferSize; ++index)
-                {
-		        // ライトから見たNDC座標を算出
-                    float4 wvpPos = mul(float4(pin.position.xyz, 1.0f), CascadeLightViewProjection[index]);
-
-                // NDC座標からUV座標を算出する
-                    wvpPos /= wvpPos.w;
-                    wvpPos.y = -wvpPos.y;
-                    wvpPos.xy = 0.5f * wvpPos.xy + 0.5f;
-
-		        // シャドウマップのUV範囲内か、深度値が範囲内か判定する
-                    if (wvpPos.z >= 0 && wvpPos.z <= 1 && wvpPos.x >= 0 && wvpPos.x <= 1 && wvpPos.y >= 0 && wvpPos.y <= 1)
-                    {
-			        //// シャドウマップから深度値取得
-           //             float depth = cascadeShadowMap[index].Sample(shadowSampler, wvpPos.xy).r;
-
-			        //// 深度値を比較して影かどうかを判定する
-           //             if (wvpPos.z - depth > CascadeShadowBias[index])
-           //             {
-           //                 diffuse *= shadowColor * shadowAttenuation;
-           //                 specular *= shadowColor * shadowAttenuation;
-           //             }
-                        //作ったけど使ったらバグる
-                        //float3 texcoord = float3(wvpPos.xy * float2(0.5f, -0.5f) + (float2) 0.5f, wvpPos.z);
-                        float3 shadowAtten = ShadowMapFetchPCF(cascadeShadowMap[index], shadowSampler, index, wvpPos.xyz,
-                                       shadowColor, shadowAttenuation, CascadeShadowBias[index], 3.0f);
-                        
-                        diffuse *= shadowAtten;
-                        specular *= shadowAtten;
-                        
-#if 01  //  本来はデバッグ用の機能なのでいらない
-                        DebugShadowMapIndex = index;
-#endif  //  defined(_DEBUG)
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                //	平行光源用シャドウマップ
-                //float depth = shadowMap.Sample(shadowSampler, pin.shadow.xy).r;
-                
-                // // PCFで影の減衰値を取得（radius は調整可能）
-                //作ったけど使ったらバグる
-                //float3 texcoord = float3(pin.shadow.xy * float2(0.5f, -0.5f) + (float2) 0.5f, pin.shadow.z);
-                float3 shadowAtten = ShadowMapFetchPCF(shadowMap, shadowSampler, 1, pin.shadow,
+					   LightColor, roughness,diffuse, specular);
+		// 平行光源用シャドウマップ
+            //float depth = shadowMap.Sample(shadowSampler, pin.texcoord.xyz).r;
+		// 深度値を比較して影かどうかを判定する
+            float3 shadowAtten = ShadowMapFetchPCF(shadowMap, shadowSampler, 1, pin.shadow,
                                        shadowColor, shadowAttenuation, shadowBias, 3.0f);
                 
-                diffuse *= shadowAtten;
-                specular *= shadowAtten;
-                
-		        ////	深度値を比較して影かどうかを判定する
-          //      if (pin.shadow.z - depth > shadowBias)
-          //      {
-          //          diffuse *= shadowColor * shadowAttenuation;
-          //          specular *= shadowColor * shadowAttenuation;
-          //      }
-            }
+            diffuse *= shadowAtten;
+            specular *= shadowAtten;
+
             total_diffuse += diffuse;
             total_specular += specular;
-
-            
         }
-        
-        //	点光源
-        //for (int i = 0; i < 8; ++i)
-        //{
-        //    float3 L = pin.w_position.xyz - point_light[i].position.xyz;
-        //    float len = length(L);
-        //    if (len >= point_light[i].range)
-        //        continue;
-        //    float attenuateLength = saturate(1.0f - len / point_light[i].range);
-        //    float attenuation = attenuateLength * attenuateLength;
-        //    L /= len;
-        //    float3 diffuse = (float3) 0, specular = (float3) 0;
-        //    DirectBDRF(diffuse_reflectance, F0, N, V, L,
-					   //point_light[i].color.rgb, roughness,
-					   //diffuse, specular);
-        //    total_diffuse += diffuse * attenuation;
-        //    total_specular += specular * attenuation;
-        //}
-        // 点光源
-        for (int i = 0; i < POINT_MAX; ++i)
-        {
-            float4 point_light = pointLight[i];
-            float4 point_color = pointColor[i];
-
-            float3 L = pin.position.xyz - point_light.xyz;
-            float len = length(L);
-            if (len >= point_light.w)
-                continue;
-            float attenuateLength = saturate(1.0f - len / point_light.w);
-            float attenuation = attenuateLength * attenuateLength;
-            L /= len;
-            float3 diffuse = (float3) 0, specular = (float3) 0;
-            DirectBDRF(diffuse_reflectance, F0, N, V, L,
-                       point_color.rgb * 100, roughness,
-                       diffuse, specular);
-            total_diffuse += diffuse * attenuation;
-            total_specular += specular * attenuation;
-        }
-
-		////	スポットライト
-  //      for (int j = 0; j < 8; ++j)
-  //      {
-  //          float4 spot_light = spotLight[i];
-  //          float4 spot_color = spotColor[i];
-            
-  //          float3 L = pin.position.xyz - spot_light.xyz;
-  //          float len = length(L);
-  //          if (len >= point_light.w)
-  //              continue;
-  //          float attenuateLength = saturate(1.0f - len / spot_light.w);
-  //          float attenuation = attenuateLength * attenuateLength;
-  //          L /= len;
-  //          float3 spotDirection = normalize(spotlightDirection.xyz);
-  //          float angle = dot(spotDirection, L);
-  //          float area = spot_light[j].innerCorn - spot_light[j].outerCorn;
-  //          attenuation *= saturate(1.0f - (spot_light[j].innerCorn - angle) / area);
-
-  //          float3 diffuse = (float3) 0, specular = (float3) 0;
-  //          DirectBDRF(diffuse_reflectance, F0, N, V, L,
-		//			   spot_light[j].color.rgb, roughness,
-		//			   diffuse, specular);
-  //          total_diffuse += diffuse * attenuation;
-  //          total_specular += specular * attenuation;
-  //      }
-
     }
-    
+
     //IBL処理
     total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0,
               diffuseiem, linearSampler) * IBLDiffuseScale;
@@ -289,36 +142,6 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     float3 color = total_diffuse + total_specular + emissive_color;
     //return float4(color, base_color.a);
     color = pow(color, 1.0f / GammaFactor);
-    
-    //float maskValue = dissolveMap.Sample(linearSampler, pin.texcoord).r;
-
-    //maskValue = smoothstep(dissolve, dissolve + 0.1, maskValue);
-    //     // ディゾルブ効果で透明になる部分を青色に光らせる
-    //float edgeGlow = smoothstep(maskValue - 0.5, maskValue + 0.5, maskValue + 30); // エッジ部分の強調
-
-    //    // エミッシブカラーを追加（青色の光）
-    //    //float3 emissiveColor = float3(0.0f, 0.5f, 1.0f) * edgeGlow * 20.0f; // 青色の強度を設定
-    //    //オブジェクトと同じ色
-    //float3 edgeColor = base_color * edgeGlow * 20.0f; // 青色の強度を設定
-    //color.rgb += edgeColor * (1.0f - maskValue); // 透明になっていく部分だけに適用
-    
-    //  カスケード表示
-    if (cascadeFlags.x > 0)
-    {
-        if (DebugShadowMapIndex >= 0)
-        {
-            float col = rcp((float) (DebugShadowMapIndex / 3 + 1));
-            float r = DebugShadowMapIndex % 3 == 0;
-            float g = DebugShadowMapIndex % 3 == 1;
-            float b = DebugShadowMapIndex % 3 == 2;
-            color.rgb = float3(r, g, b) * col;
-        }
-        else
-        {
-            color.rgb = 0;
-        }
-    }
-
     
     return float4(color, base_color.a);
 

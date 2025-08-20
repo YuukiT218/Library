@@ -61,16 +61,18 @@ PBRShader::PBRShader(ID3D11Device* device)
 	{
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/Sky/diffuse_iem.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/sunset_sky/sunsetSkyDiffuseHDR.dds",
 			diffuseIemShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/Sky/specular_pmrem.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/sunset_sky/sunsetSkySpecularHDR.dds",
 			specularPmremShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/Sky/lut_ggx.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/sunset_sky/sunsetSkyBrdf.dds",
 			lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
 	}
 	SetUpConstant = std::make_unique<CbSetUp>();
+	cbSetUp.IBLDiffuseScale = 1.0f;
+	cbSetUp.IBLSpecularScale = 1.0f;
 }
 
 // 描画開始
@@ -125,7 +127,7 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh,
 
 	//セットアップ用定数バッファ更新
 	{
-		rc.deviceContext->UpdateSubresource(setUpConstantBuffer.Get(), 0, 0, SetUpConstant.get(), 0, 0);
+		rc.deviceContext->UpdateSubresource(setUpConstantBuffer.Get(), 0, 0, &cbSetUp, 0, 0);
 	}
 
 	{
@@ -149,7 +151,7 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh,
 
 		//マテリアル用定数バッファ更新
 		CbMaterial cbMaterial{};
-		//cbMaterial.normalScale = 1.0f;
+		cbMaterial.normalScale = 1.0f;
 		cbMaterial.adjustMetalness = model->GetAdMetalness(); // 金属質調整
 		cbMaterial.adjustRoughness = model->GetAdRoughness(); // 粗さ調整
 		cbMaterial.metalicFactor = mesh.material->metalness;
@@ -171,7 +173,6 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh,
 		};
 		//dc->PSSetShaderResources(0, 1, mesh.material->diffuseMap.GetAddressOf());
 		dc->PSSetShaderResources(0, _countof(srvs), srvs);
-
 	}
 }
 
@@ -193,7 +194,7 @@ void PBRShader::ImGui()
 {
 	if (ImGui::CollapsingHeader("PBRSetUp", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::DragFloat("IBLDiffuse", &SetUpConstant->IBLDiffuseScale, 0.1f);
-		ImGui::DragFloat("IBLSpecular", &SetUpConstant->IBLSpecularScale, 0.1f);
+		ImGui::DragFloat("IBLDiffuse", &cbSetUp.IBLDiffuseScale, 0.1f);
+		ImGui::DragFloat("IBLSpecular", &cbSetUp.IBLSpecularScale, 0.1f);
 	}
 }

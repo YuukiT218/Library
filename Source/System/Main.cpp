@@ -5,6 +5,9 @@
 
 #include "Framework.h"
 
+# define SYS_NEW new(TGL::Memory::AREA_TYPE_SYS,__FILE__, __LINE__)
+# define APP_NEW new(TGL::Memory::AREA_TYPE_APP,__FILE__, __LINE__)
+
 const LONG SCREEN_WIDTH = 1280;
 const LONG SCREEN_HEIGHT = 720;
 

@@ -84,9 +84,9 @@ Sword::Sword(ID3D11Device* device, const char* filename)
 	hitSphereRadius = 0.1f;
 #else	// 騎士キャラクター右手剣
 	//初期設定
-	position = { -0.05f, 0.0f, 0.0f };
-	angle = { 1.0f, 0.0f, 0.0f };
-	scale = { 1.0f, 1.0f, -1.0f };
+	position = { -0.075f, 0.0f, 0.025f };
+	angle = { -3.0f, -0.2f, 0.0f };
+	scale = { 1.0f, 1.0f, 1.0f };
 	model = std::make_unique<Model>(device, filename, 1.0f);
 	/*model->SetAdMetalness(1.0f);
 	model->SetAdRoughness(0.0f);
@@ -94,11 +94,11 @@ Sword::Sword(ID3D11Device* device, const char* filename)
 
 	//当たり判定用初期設定
 	hitSphereIndex = 5;
-	weaponHitOffset[0] = { 0.0f, 31.7f, 0.0f };
-	weaponHitOffset[1] = { 0.0f, 51.8f, 0.0f };
-	weaponHitOffset[2] = { 0.0f, 72.3f, 0.0f };
-	weaponHitOffset[3] = { 0.0f, 92.2f, 0.0f };
-	weaponHitOffset[4] = { 0.0f, 111.2f, 0.0f };
+	weaponHitOffset[0] = { 0.0f, 0.0f, 0.0f };
+	weaponHitOffset[1] = { 0.0f, 0.0f, 0.2f };
+	weaponHitOffset[2] = { 0.0f, 0.0f, 0.4f };
+	weaponHitOffset[3] = { 0.0f, 0.0f, 0.6f };
+	weaponHitOffset[4] = { 0.0f, 0.0f, 1.0f };
 	hitSphereRadius = 0.15f;
 #endif
 

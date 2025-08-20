@@ -12,4 +12,6 @@ struct RenderContext
 	const Camera*			camera;
 	const LightManager*		lightManager = nullptr;
 	const ShadowMap*		shadowMap;
+
+	float timer;
 };

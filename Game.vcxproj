@@ -152,6 +152,7 @@
     <ClInclude Include="Source\Camera\Camera.h" />
     <ClInclude Include="Source\Graphics\FrameBuffer.h" />
     <ClInclude Include="Source\Graphics\PBRShader.h" />
+    <ClInclude Include="Source\Graphics\PostEffect.h" />
     <ClInclude Include="Source\Graphics\ShadowMap.h" />
     <ClInclude Include="Source\Graphics\SkyBox.h" />
     <ClInclude Include="Source\Input\GamePad.h" />
@@ -184,6 +185,7 @@
     <ClInclude Include="Source\Graphics\Graphics.h" />
     <ClInclude Include="Source\System\HighResolutionTimer.h" />
     <ClInclude Include="Source\Debug\ImGuiRenderer.h" />
+    <ClInclude Include="Source\System\HitStop.h" />
     <ClInclude Include="Source\System\Misc.h" />
     <ClInclude Include="Source\Model\Model.h" />
     <ClInclude Include="Source\Debug\PrimitiveRenderer.h" />
@@ -217,6 +219,7 @@
     <ClCompile Include="Source\Camera\Camera.cpp" />
     <ClCompile Include="Source\Graphics\FrameBuffer.cpp" />
     <ClCompile Include="Source\Graphics\PBRShader.cpp" />
+    <ClCompile Include="Source\Graphics\PostEffect.cpp" />
     <ClCompile Include="Source\Graphics\ShadowMap.cpp" />
     <ClCompile Include="Source\Graphics\SkyBox.cpp" />
     <ClCompile Include="Source\Input\GamePad.cpp" />
@@ -245,6 +248,7 @@
     <ClCompile Include="Source\Graphics\GpuResourceUtils.cpp" />
     <ClCompile Include="Source\Graphics\Graphics.cpp" />
     <ClCompile Include="Source\Debug\ImGuiRenderer.cpp" />
+    <ClCompile Include="Source\System\HitStop.cpp" />
     <ClCompile Include="Source\System\Main.cpp" />
     <ClCompile Include="Source\Model\Model.cpp" />
     <ClCompile Include="Source\Debug\PrimitiveRenderer.cpp" />
@@ -254,8 +258,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Basic.hlsli" />
+    <None Include="Shader\FullScreenQuad\FullScreenQuad.hlsli" />
     <None Include="Shader\Lambert.hlsli" />
     <None Include="Shader\PBR.hlsli" />
+    <None Include="Shader\PostEffect\PostEffect.hlsli" />
+    <None Include="Shader\PostEffect\PostShadingFunction.hlsli" />
     <None Include="Shader\Scene.hlsli" />
     <None Include="Shader\ShadingFunctions.hlsli" />
     <None Include="Shader\ShadowMap.hlsli" />
@@ -274,6 +281,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\FullScreenQuad\FullScreenQuadVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\LambertPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -289,6 +300,54 @@
     <FxCompile Include="Shader\PBRVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\BloomPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\ChromaticAberrationPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\FinalPostPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurDownSamplingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurHorizontalPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurUpSamplingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurVerticalPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GlowExtractionPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\LuminanceExtractionPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\RadialBlurPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\ToneMappingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\ShadowMapVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>

@@ -15,9 +15,19 @@
 #include "Character/Enemy/StateMachine/RandomState.h"
 #include "StateMachine/StateDerived.h"
 
+static SilverDragonkin* instance = nullptr;
+
+// インスタンス取得
+SilverDragonkin& SilverDragonkin::Instance()
+{
+	return *instance;
+}
+
 // コンストラクタ
 SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, float scale)
 {
+	instance = this;
+
 	model = std::make_shared<Model>(device, filename, scale);
 
 	radius = 0.5f;
@@ -25,18 +35,6 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 	IsGameClear = false;
 
 	initAnimSpeed();
-
-	sequenceState = new SequenceState(this);
-	sequenceState->AddChild(new SkillState(this));
-	sequenceState->AddChild(new AttackState(this));
-
-	randomState = new RandomState(this);
-	randomState->AddChild(new AttackState(this));
-	randomState->AddChild(new SkillState(this));
-	randomState->AddChild(sequenceState);
-
-	rootState = std::make_unique<RootState<SilverDragonkin>>(this);
-	rootState->RegisterState(randomState);
 
 	// ビヘイビアツリー設定
 	behaviorData = std::make_unique<BehaviorData<SilverDragonkin>>();
@@ -49,10 +47,11 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 
 	//aiTree->AddNode("Battle", "Roar", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new RoarJudgment(this), new RoarAction(this));
 	aiTree->AddNode("Battle", "Dead", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DeadJudgment(this), new DeadAction(this));
-	aiTree->AddNode("Battle", "Attack", 2, BehaviorTree<SilverDragonkin>::SelectRule::Priority, new AttackJudgment(this), nullptr);
-	aiTree->AddNode("Attack", "AttackState", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new StateMachineAction(this, rootState.get()), rootState.get());
-	//aiTree->AddNode("Attack", "Scratch", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new ScratchAction(this));
-	//aiTree->AddNode("Attack", "Slap", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlapAction(this));
+	aiTree->AddNode("Battle", "Damage", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DamageJudgment(this), new DamageAction(this));
+	aiTree->AddNode("Battle", "Attack", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new AttackJudgment(this), nullptr);
+	//aiTree->AddNode("Attack", "AttackState", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new StateMachineAction(this, rootState.get()), rootState.get());
+	aiTree->AddNode("Attack", "Scratch", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new ScratchAction(this));
+	aiTree->AddNode("Attack", "Slap", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlapAction(this));
 	//aiTree->AddNode("Attack", "Spin", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SpinAction(this));
 	//aiTree->AddNode("Attack", "Tackle", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new TackleAction(this));
 	//aiTree->AddNode("Attack", "Sidestep", 5, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new SidestepAction(this));
@@ -60,11 +59,12 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 	//aiTree->AddNode("Attack", "SlapSpin", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DyingJudgment(this), new SlapSpinAction(this));
 	//aiTree->AddNode("Attack", "SpinSpin", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DyingJudgment(this), new SpinSpinAction(this));
 	//aiTree->AddNode("Attack", "SpinTackle", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DyingJudgment(this), new SpinTackleAction(this));
-	//aiTree->AddNode("Battle", "LongRange", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new LongRangeJudgment(this), nullptr);
+	aiTree->AddNode("Battle", "LongRange", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new LongRangeJudgment(this), nullptr);
+	aiTree->AddNode("LongRange", "TripleTeleport", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new TripleTeleportAction(this));
 	//aiTree->AddNode("LongRange", "BreathAttack", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new BreathAction(this));
 	//aiTree->AddNode("LongRange", "BreathAttackSweeping", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new BreathSweepingAction(this));
 	//aiTree->AddNode("LongRange", "Tackle", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, new TackleJudgment(this), new TackleAction(this));
-	//aiTree->AddNode("LongRange", "Pursuit", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
+	aiTree->AddNode("LongRange", "Pursuit", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
 	aiTree->AddNode("Battle", "Pursuit", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
 
 
@@ -74,84 +74,15 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 	// 衝突判定用のノードを設定
 	nodeHitSpheres =
 	{
-		//// 前脚
-		//{"Bip001_R_Hand", nodeRadius[0]},
-		//{"Bip001_R_Forearm", nodeRadius[1]},
-		//{"Bip001_R_UpperArm", nodeRadius[2]},
-		//{"Bip001_R_Finger2", nodeRadius[3]},
-		//{"Bip001_L_Hand", nodeRadius[4]},
-		//{"Bip001_L_Forearm", nodeRadius[5]},
-		//{"Bip001_L_UpperArm", nodeRadius[6]},
-		//{"Bip001_L_Finger2", nodeRadius[7]},
-		//// 胴体
-		//{"Bip001_Pelvis", nodeRadius[8]},
-		//{"Bip001_Spine", nodeRadius[9]},
-		//{"Bip001_Spine1", nodeRadius[10]},
-		//{"Bip001_Spine2", nodeRadius[11]},
-		//{"Point013", nodeRadius[12]},
-		//{"Point002", nodeRadius[13]},
-		//{"Point007", nodeRadius[14]},
-		//// 頭部
-		//{"Bip001_Neck", nodeRadius[15]},
-		//{"Bip001_Neck1", nodeRadius[16]},
-		//{"Bip001_Neck2", nodeRadius[17]},
-		//{"Bip001_Head", nodeRadius[18]},
-		//// 尻尾
-		//{"Bone001", nodeRadius[19]},
-		//{"Bone002", nodeRadius[20]},
-		//{"Bone003", nodeRadius[21]},
-		//{"Bone004", nodeRadius[22]},
-		//{"Bone005", nodeRadius[23]},
-		//{"Bone006", nodeRadius[24]},
-		//{"Bone007", nodeRadius[25]},
-		//{"Bone008", nodeRadius[26]},
-		//// 後脚
-		//{"Bip001_L_Thigh", nodeRadius[27]},
-		//{"Bip001_L_Calf", nodeRadius[28]},
-		//{"Bip001_L_HorseLink", nodeRadius[29]},
-		//{"Bip001_L_Foot", nodeRadius[30]},
-		//{"Bip001_R_Thigh", nodeRadius[31]},
-		//{"Bip001_R_Calf", nodeRadius[32]},
-		//{"Bip001_R_HorseLink", nodeRadius[33]},
-		//{"Bip001_R_Foot", nodeRadius[34]},
-		//// 右翼
-		//{"Bone020", nodeRadius[35]},
-		//{"Bone021", nodeRadius[36]},
-		//{"Bone022", nodeRadius[37]},
-		//{"Bone023", nodeRadius[38]},
-		//{"Bone024", nodeRadius[39]},
-
-		//{"Bone036", nodeRadius[40]},
-		//{"Bone037", nodeRadius[41]},
-		//{"Bone038", nodeRadius[42]},
-
-		//{"Bone027", nodeRadius[43]},
-		//{"Bone028", nodeRadius[44]},
-		//{"Bone029", nodeRadius[45]},
-		//{"Bone030", nodeRadius[46]},
-
-		//{"Bone040", nodeRadius[47]},
-		//{"Bone041", nodeRadius[48]},
-		//{"Bone042", nodeRadius[49]},
-		//// 左翼
-		//{"Bone020_mirrored_", nodeRadius[50]},
-		//{"Bone021_mirrored_", nodeRadius[51]},
-		//{"Bone022_mirrored_", nodeRadius[52]},
-		//{"Bone023_mirrored_", nodeRadius[53]},
-		//{"Bone024_mirrored_", nodeRadius[54]},
-
-		//{"Bone036_mirrored_", nodeRadius[55]},
-		//{"Bone037_mirrored_", nodeRadius[56]},
-		//{"Bone038_mirrored_", nodeRadius[57]},
-
-		//{"Bone027_mirrored_", nodeRadius[58]},
-		//{"Bone028_mirrored_", nodeRadius[59]},
-		//{"Bone029_mirrored_", nodeRadius[60]},
-		//{"Bone030_mirrored_", nodeRadius[61]},
-
-		//{"Bone040_mirrored_", nodeRadius[62]},
-		//{"Bone041_mirrored_", nodeRadius[63]},
-		//{"Bone042_mirrored_", nodeRadius[64]},
+		{"Pelvis", nodeRadius[0]},
+		{"spine_01", nodeRadius[1]},
+		{"spine_02", nodeRadius[2]},
+		{"neck_01", nodeRadius[3]},
+		{"head", nodeRadius[4]},
+		{"calf_l", nodeRadius[5]},
+		{"Foot_L", nodeRadius[6]},
+		{"calf_r", nodeRadius[7]},
+		{"Foot_R", nodeRadius[8]},
 	};
 
 	// 攻撃判定用のノードを設定
@@ -209,7 +140,7 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 	};
 
 	
-	SetPosition(DirectX::XMFLOAT3(0.0f, -2.7f, 25.0f));
+	SetPosition(DirectX::XMFLOAT3(-1.0f, -3.8f, 40.0f));
 	SetAngle(DirectX::XMFLOAT3(0.0f, DirectX::XMConvertToRadians(180.0f), 0.0f));
 	SetTerritory(GetPosition(), 10.0f);
 
@@ -228,7 +159,7 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 		}
 	}*/
 
-	areaSize = 50.0f;
+	areaSize = 44.2f;
 }
 
 // デストラクタ
@@ -476,7 +407,7 @@ void SilverDragonkin::SetRandomTargetPosition()
 // 移動設定
 void SilverDragonkin::SetMovement(DirectX::XMFLOAT3& Vec, float speedRate)
 {
-	Move(Vec.x * speedRate, Vec.z * speedRate, moveSpeed * speedRate);
+	Move(Vec.x, Vec.z, moveSpeed * speedRate);
 }
 
 // 目的地点へ移動
@@ -528,20 +459,20 @@ void SilverDragonkin::TurnToTarget(float elapsedTime, float vx, float vz, float 
 	{
 		if (cross < 0.0f)
 		{
-			if (!isTurnAnimation)
+			/*if (!isTurnAnimation)
 			{
 				model->PlayAnimation(static_cast<int>(EnemyAnimation::TurnLeft), false, blendSeconds);
 				isTurnAnimation = true;
-			}
+			}*/
 			angle.y -= rot;
 		}
 		else
 		{
-			if (!isTurnAnimation)
+			/*if (!isTurnAnimation)
 			{
 				model->PlayAnimation(static_cast<int>(EnemyAnimation::TurnRight), false, blendSeconds);
 				isTurnAnimation = true;
-			}
+			}*/
 			angle.y += rot;
 		}
 	}
@@ -622,7 +553,7 @@ void SilverDragonkin::DrawDebugGUI()
 		str = activeNode->GetName();
 	}
 	//トランスフォーム
-	if (ImGui::CollapsingHeader("SilverDragonkin", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::Begin("Enemy", nullptr, ImGuiWindowFlags_None))
 	{
 		// 位置
 		ImGui::InputFloat3("Position", &position.x);
@@ -637,6 +568,12 @@ void SilverDragonkin::DrawDebugGUI()
 		angle.z = DirectX::XMConvertToRadians(a.z);
 		// スケール
 		ImGui::InputFloat3("Scale", &scale.x);
+
+		ImGui::DragFloat("AttackRange", &attackRange, 0.1f);
+
+		ImGui::InputInt("Health", &health);
+
+		ImGui::Checkbox("DamageReaction", &isDamage);
 
 		ImGui::Text(u8"Behavior　%s", str.c_str());
 
@@ -658,11 +595,10 @@ void SilverDragonkin::DrawDebugGUI()
 		ImGui::Separator();
 
 		ShowDragonLightEditor();
-
+		model->DebugGui(u8"Enemy");
 	}
-
-	// プレイヤーモデルのパラメータ調整
-	model->DebugGui(u8"Enemy");
+	ImGui::End();
+	
 }
 
 void SilverDragonkin::ShowDragonLightEditor()

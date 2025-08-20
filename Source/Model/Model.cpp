@@ -23,7 +23,7 @@ const std::vector<D3D11_INPUT_ELEMENT_DESC> Model::InputElementDescs =
 };
 
 // コンストラクタ
-Model::Model(ID3D11Device* device, const char* filename, float scale)
+Model::Model(ID3D11Device* device, const char* filename, float scale) : scaling(scale)
 {
 	resource = ResourceManager::Instance().LoadModelResource(filename);
 
@@ -119,6 +119,7 @@ float Model::GetAnimationLength(int animationIndex) const
 void Model::UpdateTransform(const DirectX::XMFLOAT4X4& worldTransform)
 {
 	DirectX::XMMATRIX ParentWorldTransform = DirectX::XMLoadFloat4x4(&worldTransform);
+	DirectX::XMMATRIX CoordinateSystemTransform = DirectX::XMMatrixScaling(scaling, scaling, scaling);
 
 	for (Node& node : nodes)
 	{
@@ -141,7 +142,8 @@ void Model::UpdateTransform(const DirectX::XMFLOAT4X4& worldTransform)
 		DirectX::XMMATRIX GlobalTransform = LocalTransform * ParentGlobalTransform;
 
 		// ワールド行列算出
-		DirectX::XMMATRIX WorldTransform = GlobalTransform * ParentWorldTransform;
+		//DirectX::XMMATRIX WorldTransform = GlobalTransform * ParentWorldTransform;
+		DirectX::XMMATRIX WorldTransform = GlobalTransform * CoordinateSystemTransform * ParentWorldTransform;
 
 		// 計算結果を格納
 		DirectX::XMStoreFloat4x4(&node.localTransform, LocalTransform);
@@ -180,6 +182,7 @@ void Model::PlayRootMotion(int index, bool loop, bool bakeY, float blendSeconds,
 {
 	currentAnimationIndex = index;
 	currentAnimationSeconds = 0;
+	oldAnimationSeconds = 0;
 	animationLoop = loop;
 	bakeMoveY = bakeY;
 	rootNodeName = rootName;
@@ -212,9 +215,16 @@ bool Model::IsPlayAnimation() const
 }
 
 // アニメーション更新処理
-void Model::UpdateAnimation(float elapsedTime)
+void Model::UpdateAnimation(float elapsedTime, Character* character)
 {
-	ComputeAnimation(elapsedTime * animationSpeed * baseAnimationSpeed);
+	if (!IsPlayRootMotion())
+	{
+		ComputeAnimation(elapsedTime * animationSpeed * baseAnimationSpeed);
+	}
+	else
+	{
+		ComputeRootAnimation(elapsedTime, character);
+	}
 
 	ComputeBlending(elapsedTime * animationSpeed * baseAnimationSpeed);
 }
@@ -291,83 +301,6 @@ void Model::ComputeAnimation(float elapsedTime)
 			}
 		}
 	}
-	
-
-	//else
-	//{
-	//	// 指定時間のアニメーションの姿勢を取得
-	//	ComputeAnimation(currentAnimationIndex, currentAnimationSeconds, nodePoses);
-
-	//	// ルートモーションノード番号取得
-	//	const int rootMotionNodeIndex = resource->GetNodeIndex(rootNodeName);
-
-	//	// 初回、前回、今回のルートモーションノードの姿勢取得
-	//	//NodePose beginPose, oldPose, newPose;
- //		ComputeAnimation(currentAnimationIndex, rootMotionNodeIndex, 0.0f, beginPose);
-	//	ComputeAnimation(currentAnimationIndex, rootMotionNodeIndex, oldAnimationSeconds, oldPose);
-	//	ComputeAnimation(currentAnimationIndex, rootMotionNodeIndex, currentAnimationSeconds, newPose);
-
-	//	// ローカル移動値を算出
-	//	DirectX::XMFLOAT3 localTranslation;
-	//	if (oldAnimationSeconds > currentAnimationSeconds)
-	//	{
-	//		//NodePose endPose;
-	//		ComputeAnimation(currentAnimationIndex, rootMotionNodeIndex, animation.secondsLength, endPose);
-	//		localTranslation.x = (endPose.position.x - oldPose.position.x) - (newPose.position.x - beginPose.position.x);
-	//		localTranslation.y = (endPose.position.y - oldPose.position.y) - (newPose.position.y - beginPose.position.y);
-	//		localTranslation.z = (endPose.position.z - oldPose.position.z) - (newPose.position.z - beginPose.position.z);
-	//	}
-	//	else
-	//	{
-	//		localTranslation.x = newPose.position.x - oldPose.position.x;
-	//		localTranslation.y = newPose.position.y - oldPose.position.y;
-	//		localTranslation.z = newPose.position.z - oldPose.position.z;
-	//	}
-	//	DirectX::XMVECTOR LocalTranslation = DirectX::XMLoadFloat3(&localTranslation);
-
-	//	// グローバル移動値を算出
-	//	Node& rootMotionNode = GetNodes().at(rootMotionNodeIndex);
-	//	DirectX::XMMATRIX ParentGlobalTransform;
-	//	DirectX::XMVECTOR GlobalTranslation;
-	//	ParentGlobalTransform = DirectX::XMLoadFloat4x4(&rootMotionNode.parent->globalTransform);
-	//	GlobalTranslation = DirectX::XMVector3TransformNormal(LocalTranslation, ParentGlobalTransform);
-
-	//	if (bakeMoveY)
-	//	{
-	//		// Y成分の移動値を抜く
-	//		GlobalTranslation = DirectX::XMVectorSetY(GlobalTranslation, 0.0f);
-	//		// 今回の姿勢のグローバル位置を算出
-	//		DirectX::XMVECTOR LocalPosition, GlobalPosition;
-	//		LocalPosition = DirectX::XMLoadFloat3(&newPose.position);
-	//		GlobalPosition = DirectX::XMVector3Transform(LocalPosition, ParentGlobalTransform);
-	//		// XZ成分を削除
-	//		GlobalPosition = DirectX::XMVectorSetX(GlobalPosition, 0.0f);
-	//		GlobalPosition = DirectX::XMVectorSetZ(GlobalPosition, 0.0f);
-	//		// グローバル空間からローカル空間に変換する
-	//		DirectX::XMMATRIX InverseParentGlobalTransform;
-	//		InverseParentGlobalTransform = DirectX::XMMatrixInverse(nullptr, ParentGlobalTransform);
-	//		LocalPosition = DirectX::XMVector3Transform(GlobalPosition, InverseParentGlobalTransform);
-	//		DirectX::XMStoreFloat3(&nodePoses[rootMotionNodeIndex].position, LocalPosition);
-	//	}
-	//	else
-	//	{
-	//		// ルートモーションノードを初回の姿勢にする
-	//		nodePoses[rootMotionNodeIndex].position = beginPose.position;
-	//	}
-
-	//	// ワールド移動値を算出
-	//	DirectX::XMMATRIX WorldTransform;
-	//	DirectX::XMVECTOR WorldTranslation;
-	//	WorldTransform = DirectX::XMLoadFloat4x4();
-	//	WorldTranslation = DirectX::XMVector3TransformNormal(GlobalTranslation, WorldTransform);
-
-	//	// 位置を更新
-	//	move.x = DirectX::XMVectorGetX(WorldTranslation);
-	//	move.y = DirectX::XMVectorGetY(WorldTranslation);
-	//	move.z = DirectX::XMVectorGetZ(WorldTranslation);
-
-	//	SetNodePoses(nodePoses);
-	//}
 
 	// 経過時間
 	oldAnimationSeconds = currentAnimationSeconds;
@@ -392,7 +325,7 @@ void Model::ComputeAnimation(float elapsedTime)
 	}
 }
 
-void Model::UpdateRootAnimation(float elapsedTime, Character* character)
+void Model::ComputeRootAnimation(float elapsedTime, Character* character)
 {
 	if (!IsPlayAnimation())
 	{
@@ -730,7 +663,6 @@ void Model::DebugGui(const char* name)
 		ImGui::PopID();
 	}
 
-
 	// ラベル文字列のバッファを用意
 	char labelMetalness[128];
 	char labelRoughness[128];
@@ -748,6 +680,7 @@ void Model::DebugGui(const char* name)
 	snprintf(labelOverColor, sizeof(labelOverColor), u8"%s オーバーカラー", name);
 
 	// ImGui に渡す
+	ImGui::DragFloat("Scale", &scaling, 0.01f, 0, 5.0f);
 	ImGui::DragFloat(labelMetalness, &adjustMetalness, 0.01f, 0, 1.0f);
 	ImGui::DragFloat(labelRoughness, &adjustRoughness, 0.01f, 0, 1.0f);
 	ImGui::DragFloat(labelDissolve, &dissolveConstants.dissolve, 0.01f, -0.1f, 1.0f);

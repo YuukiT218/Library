@@ -8,7 +8,7 @@
 //#include "Character/Enemy/EnemyManager.h"
 #include "Scene.h"
 #include "Graphics/SkyBox.h"
-//#include "Graphics/PostEffect.h"
+#include "Graphics/PostEffect.h"
 //#include "BattleUI/CombatUIManager.h"
 
 // ゲームシーン
@@ -53,7 +53,7 @@ private:
 	std::unique_ptr<SkyBox> skyBox;
 	FreeCameraController freeCameraController;
 
-	//std::unique_ptr<PostEffect> posteffect;
+	std::unique_ptr<PostEffect> posteffect;
 	//std::unique_ptr<Sprite> gauge;
 
 	//std::unique_ptr<CombatUIManager> combatUI;

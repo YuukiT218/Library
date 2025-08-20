@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include <DirectXMath.h>
-//#include "Character/Enemy/EnemyManager.h"
+#include "Character/Enemy/SilverDragonkin.h"
 
 #define CameraLerp (1)
 
@@ -19,7 +19,7 @@ public:
 	void SetTarget(const DirectX::XMFLOAT3& target) { this->target = { target.x + offsetTarget.x,target.y + offsetTarget.y,target.z + offsetTarget.z }; }
 
 	// ロックオン位置設定
-	void SetRockonPoint();
+	void SetLockonPoint();
 
 	// エネミーの生死判定
 	void EnemyAlived();
@@ -48,9 +48,9 @@ private:
 private:
 	DirectX::XMFLOAT3 target = { 0, 0, 0 };//最終的な注視点
 	DirectX::XMFLOAT3 eye = { 0,0,0 };//カメラ位置
-	DirectX::XMFLOAT3 rockonpoint = { 0, 0, 0 };
+	DirectX::XMFLOAT3 lockonpoint = { 0, 0, 0 };
 
-	//Enemy* closestEnemy = nullptr;
+	Enemy* closestEnemy = nullptr;
 
 	DirectX::XMFLOAT3 angle = { 0, 0, 0 };
 	DirectX::XMFLOAT3 desiredAngle = { 0, 0, 0 };
@@ -78,8 +78,8 @@ private:
 	float disAngleY;
 
 	bool freeCameraFlag = false;
-	bool isrockon = false;
-	bool oldRockFlag = false;
+	bool islockon = false;
+	bool oldLockFlag = false;
 
 	// ずらし具合を調整するための角度オフセット
 	float angleOffset = DirectX::XMConvertToRadians(20);

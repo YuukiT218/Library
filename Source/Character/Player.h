@@ -7,7 +7,7 @@
 #include <functional>
 #include "Sprite/Sprite.h"
 #include "Character/Weapon/Sword.h"
-//#include "Character/Enemy/Enemy.h"
+#include "Character/Enemy/Enemy.h"
 
 // 前方宣言
 class PlayerState;
@@ -75,11 +75,11 @@ public:
 	//体力取得
 	float GetHealth() const { return health; }
 
-	//// ロックオンしている敵を取得
-	//Enemy* GetLockOnEnemy() { return LockOnEnemy; }
+	// ロックオンしている敵を取得
+	Enemy* GetLockOnEnemy() { return LockOnEnemy; }
 
-	//// ロックオン
-	//void SetLockOnCamera(Enemy* enemy) { LockOnEnemy = enemy; }
+	// ロックオン
+	void SetLockOnCamera(Enemy* enemy) { LockOnEnemy = enemy; }
 
 	// プレイヤーの回避状態取得
 	bool GetPlayerIsRolling() { return isRolling; }
@@ -120,6 +120,12 @@ public:
 	// 重力設定
 	void SetGravity(float gravity) { this->gravity = gravity; }
 
+	// 摩擦力設定
+	void SetFriction(float friction) { this->friction = friction; }
+
+	// 水平移動力設定
+	void SetHorizonVelocity(float velocity) { this->velocity.x = this->velocity.z = velocity; }
+
 	// 垂直移動力設定
 	void SetVerticalVelocity(float velocity) { this->velocity.y = velocity; }
 
@@ -155,12 +161,12 @@ private:
 
 	float nodeRadius[6] =
 	{
-		0.23f,
-		0.23f,
-		0.43f,
-		0.34f,
-		0.31f,
-		0.31f,
+		0.15f,
+		0.15f,
+		0.2f,
+		0.15f,
+		0.1f,
+		0.1f,
 	};
 
 	// ダークナイト
@@ -242,7 +248,7 @@ private:
 	//デバッグ用
 	bool isCollisionRender = false;//当たり判定描画フラグ
 
-	//Enemy* LockOnEnemy = nullptr;
+	Enemy* LockOnEnemy = nullptr;
 
 	// アニメーション変数
 	PlayerStateId currentStateID = PlayerStateId::EnumCount;

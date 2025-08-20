@@ -1,5 +1,6 @@
 ﻿#include "PlayerState.h"
 #include "Camera/CameraParam.h"
+#include "Enemy/SilverDragonkin.h"
 #include "Math/Collision.h"
 #include "Math/Mathf.h"
 
@@ -34,7 +35,7 @@ bool PlayerState::InputDodge() const
 {
     const GamePad& gamepad = Input::Instance().GetGamePad();
 
-    if (gamepad.GetButtonDown() & GamePad::BTN_X)
+    if (gamepad.GetLAxisPower() != 0 && gamepad.GetButtonDown() & GamePad::BTN_X)
     {
         return true;
     }
@@ -75,10 +76,9 @@ bool PlayerState::InputJump() const
 bool PlayerState::InputGuard() const
 {
     const GamePad& gamepad = Input::Instance().GetGamePad();
-    const Mouse& mouse = Input::Instance().GetMouse();
 
     // LBが押されている間
-    if (gamepad.GetButton() & GamePad::BTN_LEFT_SHOULDER || mouse.GetButton() & Mouse::BTN_RIGHT)
+    if (gamepad.GetLAxisPower() == 0 && gamepad.GetButton() & GamePad::BTN_X)
     {
         return true;
     }
@@ -93,10 +93,10 @@ bool PlayerState::InputGuardParry() const
     const Mouse& mouse = Input::Instance().GetMouse();
 
     // Bボタンが押された瞬間
-    if (gamepad.GetButtonDown() & GamePad::BTN_B || mouse.GetButtonDown() & Mouse::BTN_LEFT)
+   /* if (gamepad.GetButtonDown() & GamePad::BTN_B || mouse.GetButtonDown() & Mouse::BTN_LEFT)
     {
         return true;
-    }
+    }*/
 
     return false;
 }
@@ -162,7 +162,7 @@ void PlayerState::LockOnStrafe(int rightIndex, int leftIndex, int frontIndex, in
 PlayerIdleState::PlayerIdleState(Player* player)
     : PlayerState(player)
 {
-    idleAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Idle");
+    idleAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Idle_Combat_Seq_0");
 }
 
 // 開始処理
@@ -174,20 +174,10 @@ void PlayerIdleState::Enter()
 // 更新処理
 void PlayerIdleState::Update(float elapsedTime)
 {
-    if (CameraParam::Instance().GetIsLockOn())
-    {
-        player->LockOnTurnToEnemy(elapsedTime);
-    }
-
     // コンボ1ステートに遷移
     if (InputCombo() == InputComboType::Light)
     {
         ChangeState(PlayerStateId::Combo1);
-    }
-    // 強攻撃1ステートに遷移
-    else if (InputCombo() == InputComboType::Heavy)
-    {
-        ChangeState(PlayerStateId::Heavy1);
     }
     // 回避ステートに遷移
     else if (InputDodge())
@@ -239,23 +229,22 @@ void PlayerIdleState::DrawDebugGUI()
 PlayerWalkState::PlayerWalkState(Player* player)
     : PlayerState(player)
 {
-    walkFrontAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WalkForwardInPlace");
-    walkBackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WalkForwardInPlace");
-    walkRightAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WalkForwardInPlace");
-    walkLeftAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WalkForwardInPlace");
+    walkFrontAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Walk_Combat_Loop_F_0_RM_Seq_0");
+    walkBackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Walk_Combat_Loop_F_0_Seq_0");
+    walkRightAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Walk_Combat_Loop_F_0_Seq_0");
+    walkLeftAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Walk_Combat_Loop_F_0_Seq_0");
 }
 
 // 開始処理
 void PlayerWalkState::Enter()
 {
+    player->GetPlayerModel()->PlayRootMotion(walkFrontAnimationIndex, true, true, 0.1f, "Character1_Hips");
 }
 
 // 更新処理
 void PlayerWalkState::Update(float elapsedTime)
 {
-    LockOnStrafe(walkRightAnimationIndex, walkLeftAnimationIndex, walkFrontAnimationIndex, walkBackAnimationIndex);
-
-    //player->PlayerMove(elapsedTime, walkAnimationMoveRate);
+    player->PlayerMove(elapsedTime, 0);
 
     float speed = DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(DirectX::XMLoadFloat3(&player->GetMoveVec())));
 
@@ -267,11 +256,6 @@ void PlayerWalkState::Update(float elapsedTime)
     if (InputCombo() == InputComboType::Light)
     {
         ChangeState(PlayerStateId::Combo1);
-    }
-    // 強攻撃1ステートに遷移
-    else if (InputCombo() == InputComboType::Heavy)
-    {
-        ChangeState(PlayerStateId::Heavy1);
     }
     // 回避ステートに遷移
     else if (InputDodge())
@@ -324,9 +308,9 @@ void PlayerWalkState::DrawDebugGUI()
 PlayerRunState::PlayerRunState(Player* player)
     : PlayerState(player)
 {
-    runAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("RunForwardInPlace");
-    runFrontAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorRunForward");
-    runBackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorRunBackward");
+    runStartAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Run_Fast_Combat_Start_RM_Seq_0");
+    runLoopAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Run_Fast_Combat_Loop_RM_Seq_0");
+    runEndAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Run_Fast_Combat_End_RM_Seq_0");
     runRightAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorRunRightward");
     runLeftAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorRunLeftward");
 }
@@ -334,31 +318,22 @@ PlayerRunState::PlayerRunState(Player* player)
 // 開始処理
 void PlayerRunState::Enter()
 {
-    if (!CameraParam::Instance().GetIsLockOn())
-    {
-        player->GetPlayerModel()->PlayAnimation(runAnimationIndex, true, 0.1f);
-    }
+    player->GetPlayerModel()->PlayRootMotion(runStartAnimationIndex, false, true, 0.1f, "Character1_Hips");
 }
 
 // 更新処理
 void PlayerRunState::Update(float elapsedTime)
 {
-    if (CameraParam::Instance().GetIsLockOn())
+	player->PlayerMove(elapsedTime, 0);
+    if (!player->GetPlayerModel()->IsPlayAnimation())
     {
-        LockOnStrafe(runRightAnimationIndex, runLeftAnimationIndex, runFrontAnimationIndex, runBackAnimationIndex);
+        player->GetPlayerModel()->PlayRootMotion(runLoopAnimationIndex, true, true, 0.1f, "Character1_Hips");
     }
-
-    player->PlayerMove(elapsedTime, runAnimationMoveRate);
 
     // コンボ1ステートに遷移
     if (InputCombo() == InputComboType::Light)
     {
         ChangeState(PlayerStateId::Combo1);
-    }
-    // 強攻撃1ステートに遷移
-    else if (InputCombo() == InputComboType::Heavy)
-    {
-        ChangeState(PlayerStateId::Heavy1);
     }
     // 回避ステートに遷移
     else if (InputDodge())
@@ -411,7 +386,8 @@ void PlayerRunState::DrawDebugGUI()
 PlayerJumpState::PlayerJumpState(Player* player)
     : PlayerState(player)
 {
-    jumpAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("JumpTakeOff");
+    jumpAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Jump_Combat_Start_0_Seq_0");
+    fallAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Jump_Combat_Loop_0_Seq_0");
 }
 
 // 開始処理
@@ -419,7 +395,7 @@ void PlayerJumpState::Enter()
 {
     if (player->IsGround())
     {
-        player->GetPlayerModel()->PlayAnimation(jumpAnimationIndex, true, 0.1f);
+        player->GetPlayerModel()->PlayRootMotion(jumpAnimationIndex, false, true, 0.1f, "Character1_Reference");
         player->PlayerJump(jumpPower);
     }
 }
@@ -428,21 +404,24 @@ void PlayerJumpState::Enter()
 void PlayerJumpState::Update(float elapsedTime)
 {
     player->PlayerMove(elapsedTime, jumpAnimationMoveRate);
+    if (!player->GetPlayerModel()->IsPlayAnimation())
+    {
+        player->GetPlayerModel()->PlayRootMotion(fallAnimationIndex, true, true, 0.1f, "Character1_Reference");
+    }
 
     // コンボ1ステートに遷移
     if (InputCombo() == InputComboType::Light)
     {
         ChangeState(PlayerStateId::Combo1);
     }
-    // 強攻撃1ステートに遷移
-    else if (InputCombo() == InputComboType::Heavy)
-    {
-        ChangeState(PlayerStateId::Heavy1);
-    }
     // 回避ステートに遷移
     else if (InputDodge())
     {
         ChangeState(PlayerStateId::Dodge);
+    }
+    else if (InputGuard())
+    {
+        ChangeState(PlayerStateId::GuardIdle);
     }
 	else if (player->IsGround())
 	{
@@ -476,7 +455,7 @@ void PlayerJumpState::DrawDebugGUI()
 PlayerFallState::PlayerFallState(Player* player)
     : PlayerState(player)
 {
-    fallAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("JumpGoesDown2");
+    fallAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Jump_Combat_Loop_0_Seq_0");
 }
 
 // 開始処理
@@ -484,7 +463,7 @@ void PlayerFallState::Enter()
 {
     if (!player->IsGround())
     {
-        player->GetPlayerModel()->PlayAnimation(fallAnimationIndex, true, 0.1f);
+        player->GetPlayerModel()->PlayRootMotion(fallAnimationIndex, true, true, 0.1f, "Character1_Reference");
     }
 }
 
@@ -507,6 +486,10 @@ void PlayerFallState::Update(float elapsedTime)
     else if (InputDodge())
     {
         ChangeState(PlayerStateId::Dodge);
+    }
+    else if (InputGuard())
+    {
+        ChangeState(PlayerStateId::GuardIdle);
     }
     else if (player->IsGround())
     {
@@ -539,15 +522,8 @@ void PlayerFallState::DrawDebugGUI()
 PlayerDodgeState::PlayerDodgeState(Player* player)
     : PlayerState(player)
 {
-    dodgeBackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorDodge");
-    rollingFrontAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorEvadeForward");
-    rollingBackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorEvadeBackward");
-    rollingRightAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorEvadeRight");
-    rollingLeftAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorEvadeLeft");
-    rollingFrontRightAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorEvadeForwardRight");
-    rollingFrontLeftAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorEvadeForwardLeft");
-    rollingBackRightAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorEvadeBackwardRight");
-    rollingBackLeftAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorEvadeBackwardLeft");
+    dodgeAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Dodge_Combat_F_Seq_0");
+    airDodgeAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Dodge_Air_Combat_F_Seq_0");
 }
 
 // 開始処理
@@ -555,106 +531,51 @@ void PlayerDodgeState::Enter()
 {
     const Camera& camera = Camera::Instance();
     const GamePad& gamepad = Input::Instance().GetGamePad();
-
     DirectX::XMVECTOR Vec;
-    float moveRate;
-    if (gamepad.GetLAxisPower() > 0.1f)
+    DirectX::XMFLOAT3 vec;
+
+    // ワールド進行方向を取得
+    Vec = DirectX::XMLoadFloat3(&player->CharacterForward(player->GetAngle()));
+    Vec = DirectX::XMVector3Normalize(Vec);
+    DirectX::XMStoreFloat3(&vec, Vec);
+
+    if (player->IsGround())
     {
-        // 入力方向へ回避
-        float axisX = gamepad.GetAxisLX();
-        float axisY = gamepad.GetAxisLY();
-
-        // ワールド進行方向を取得
-        Vec = DirectX::XMLoadFloat3(&player->ComputeWorldVec(camera, axisX, axisY));
-        Vec = DirectX::XMVector3Normalize(Vec);
-
-        if (CameraParam::Instance().GetIsLockOn())
-        {
-            // 右前
-            if (axisY > 0.1f && axisX > 0.1f)
-                player->GetPlayerModel()->PlayAnimation(rollingFrontRightAnimationIndex, false, 0.1f);
-            // 左前
-            else if (axisY > 0.1f && axisX < -0.1f)
-                player->GetPlayerModel()->PlayAnimation(rollingFrontLeftAnimationIndex, false, 0.1f);
-            // 右後ろ
-            else if (axisY < -0.1f && axisX > 0.1f)
-                player->GetPlayerModel()->PlayAnimation(rollingBackRightAnimationIndex, false, 0.1f);
-            // 左後ろ
-            else if (axisY < -0.1f && axisX < -0.1f)
-                player->GetPlayerModel()->PlayAnimation(rollingBackLeftAnimationIndex, false, 0.1f);
-            // 前
-            else if (axisY > 0.1f)
-                player->GetPlayerModel()->PlayAnimation(rollingFrontAnimationIndex, false, 0.1f);
-            // 後ろ
-            else if (axisY < -0.1f)
-                player->GetPlayerModel()->PlayAnimation(rollingBackAnimationIndex, false, 0.1f);
-            // 右
-            else if (axisX > 0.1f)
-                player->GetPlayerModel()->PlayAnimation(rollingRightAnimationIndex, false, 0.1f);
-            // 左
-            else if (axisX < -0.1f)
-                player->GetPlayerModel()->PlayAnimation(rollingLeftAnimationIndex, false, 0.1f);
-        }
-        else
-        {
-            player->GetPlayerModel()->PlayAnimation(rollingFrontAnimationIndex, false, 0.1f);
-        }
-
-        timer = rollingFrontAnimationTime;
-
-        // 回避
-        moveRate = rollingFrontMovePow;
+        player->GetPlayerModel()->PlayRootMotion(dodgeAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        timer = dodgeAnimationTime;
     }
     else
     {
-        Vec = DirectX::XMLoadFloat3(&player->CharacterBack(player->GetAngle()));
-        Vec = DirectX::XMVector3Normalize(Vec);
-
-        player->GetPlayerModel()->PlayAnimation(dodgeBackAnimationIndex, false, 0.1f);
-
-        timer = dodgeBackAnimationTime;
-
-        isDodgeBack = true;
-
-        // 回避
-        moveRate = dodgeBackMovePow;
+        player->SetGravity(-0.0001f);
+        player->SetVerticalVelocity(0);
+        player->GetPlayerModel()->PlayRootMotion(airDodgeAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        timer = airDodgeAnimationTime;
     }
 
-    player->SetPlayerRolling(true);
-
+	player->SetPlayerRolling(true);
     nextShiftReady = false;
 
-    DirectX::XMFLOAT3 vec;
-    DirectX::XMStoreFloat3(&vec, Vec);
-
-    player->SetMovement(vec, moveRate);
+    player->SetMovement(vec, 4.0f);
 }
 
+    
 // 更新処理
 void PlayerDodgeState::Update(float elapsedTime)
 {
     timer -= elapsedTime;
-    if (timer <= 0.3f)
+    if (player->IsGround() && timer < 0.633f || !player->IsGround() && timer <= 0.083f)
     {
         // 走りステート遷移
-        if (InputRunMove())
+        if (player->IsGround() && InputRunMove())
         {
             ChangeState(PlayerStateId::Run);
         }
         // 歩きステート遷移
-        else if (InputWalkMove())
+        else if (player->IsGround() && InputWalkMove())
         {
             ChangeState(PlayerStateId::Walk);
         }
-        // 待機ステート遷移
-        else
-        {
-            ChangeState(PlayerStateId::Idle);
-        }
-    }
 
-    if (isDodgeBack)
-    {
         if (InputCombo() != InputComboType::None)
         {
             nextShiftReady = true;
@@ -662,21 +583,34 @@ void PlayerDodgeState::Update(float elapsedTime)
 
         if (nextShiftReady)
         {
-            if (timer <= 0.4f)
+            if (player->IsGround() && timer < 0.8f || !player->IsGround() && timer <= 0.083f)
             {
-                isDodgeBack = false;
-
-                ChangeState(PlayerStateId::DodgeAttack);
+                if (InputDodge())
+                {
+                    ChangeState(PlayerStateId::Dodge);
+                }
+                if (InputCombo() == InputComboType::Light)
+                {
+                    ChangeState(PlayerStateId::Combo1);
+                }
             }
         }
     }
-
-    //player->GetPlayerModel()->SetBaseAnimationSpeed(dodgeBackAnimationSpeed);
+    if (!player->IsGround() && !player->GetPlayerModel()->IsPlayAnimation())
+    {
+        ChangeState(PlayerStateId::Fall);
+    }
+    // 待機ステート遷移
+    else if (!player->GetPlayerModel()->IsPlayAnimation())
+    {
+        ChangeState(PlayerStateId::Idle);
+    }
 }
 
 // 終了処理
 void PlayerDodgeState::Exit()
 {
+    player->SetGravity(-0.3f);
     player->SetPlayerRolling(false);
 }
 
@@ -704,7 +638,7 @@ void PlayerDodgeState::DrawDebugGUI()
         //ImGui::SameLine();
         //ImGui::Text(u8"終了フレーム:%.3f", player->GetPlayerModel()->GetAnimationLength(rollingFrontAnimationIndex));
         //ImGui::DragFloat(u8"アニメーションスピード", &dodgeBackAnimationSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"アニメーション遷移時間", &rollingFrontAnimationTime, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat(u8"アニメーション遷移時間", &dodgeAnimationTime, 0.01f, 0.0f, 5.0f);
         ImGui::DragInt(u8"移動距離", &rollingFrontMovePow);
         ImGui::TreePop();
     }
@@ -782,9 +716,33 @@ void PlayerComboState::Enter()
 {
     forwarded = false;
     nextShiftReady = false;
-    player->SetGravity(-0.0001f);
-    player->SetVerticalVelocity(0);
-    player->GetPlayerModel()->PlayRootMotion(comboAnimationIndex, false, true, 0.1f, "Character1_Hips");
+    if (player->IsGround())
+    {
+        if (player->calcTargetDist(player->GetPosition(), SilverDragonkin::Instance().GetPosition()) > 5.0f
+            && comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
+        {
+            player->GetPlayerModel()->PlayRootMotion(dashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        }
+        else
+        {
+            player->GetPlayerModel()->PlayRootMotion(comboAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        }
+    }
+    else
+    {
+        player->SetGravity(-0.0001f);
+        player->SetHorizonVelocity(0);
+        player->SetVerticalVelocity(0);
+        if (player->calcTargetDist(player->GetPosition(), SilverDragonkin::Instance().GetPosition()) > 5.0f
+            && airComboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
+        {
+            player->GetPlayerModel()->PlayRootMotion(airDashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        }
+        else
+        {
+            player->GetPlayerModel()->PlayRootMotion(airComboAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        }
+    }
 }
 
 // 終了処理
@@ -807,77 +765,14 @@ void PlayerComboState::Update(float elapsedTime)
         player->LockOnTurnToEnemy(elapsedTime);
     }
 
-    // 指定フレームを超えたら前進処理
-    //if (!forwarded)
-    //{
-    //    if (frame >= config->attackParam.forwardFrame)
-    //    {
-    //        const float aimRange = 7.0f;
-    //        float rate = 1.0f; // デフォルトの移動倍率
-
-    //        DirectX::XMVECTOR playerPos = DirectX::XMLoadFloat3(&player->GetPosition());
-    //        Enemy* enemy = player->GetLockOnEnemy();
-
-    //        if (enemy)
-    //        {
-    //            DirectX::XMVECTOR enemyPos = DirectX::XMLoadFloat3(&enemy->GetPosition());
-    //            DirectX::XMVECTOR diffVec = DirectX::XMVectorSubtract(enemyPos, playerPos);
-
-    //            float distSq;
-    //            DirectX::XMStoreFloat(&distSq, DirectX::XMVector3LengthSq(diffVec));
-
-    //            // 敵との距離が範囲内なら距離に応じて前進力を調整
-    //            if (distSq < aimRange * aimRange)
-    //            {
-    //                float dist = sqrtf(distSq);
-    //                rate = dist / aimRange;  // 0～1の範囲でスケール
-    //            }
-    //        }
-
-    //        DirectX::XMFLOAT3 front = player->CharacterForward(player->GetAngle());
-    //        DirectX::XMFLOAT3 velocity = {
-    //            front.x * config->attackParam.forwardPower * rate,
-    //            front.y * config->attackParam.forwardPower * rate,
-    //            front.z * config->attackParam.forwardPower * rate
-    //        };
-    //        player->SetVelocity(velocity);
-
-    //        forwarded = true;
-    //    }
-    //}
-
-    //if (comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("WarriorAttackCombo3"))
-    //{
-    //    player->GetLeftShield()->AttackAnimationCollision(player->GetModel(), config);
-    //}
-    //else
-    //{
-    //    player->GetWeaponRight()->AttackAnimationCollision(player->GetModel(), config);
-    //}
-
+    //player->GetSword()->AttackAnimationCollision(player->GetModel(), config);
+    player->GetSword()->AttackAnimationCollision(player->GetModel(), attackCollisionStartFrame, attackCollisionEndFrame, attackDamage, invisibleTime, attackLeftVibrate, attackRightVibrate, attackHitStopTime, attackHitStopSpeed);
+    
     InputComboType input = InputCombo();
-
-    if (!nextShiftReady)
-    {
-        if (frame >= poseFrame)
-        {
-            // 走りステート遷移
-            if (InputRunMove() && player->IsGround())
-            {
-                ChangeState(PlayerStateId::Run);
-            }
-            //player->GetPlayerModel()->SetBaseAnimationSpeed(comboPoseSpeed);
-        }
-        else
-        {
-            //player->GetPlayerModel()->SetBaseAnimationSpeed(comboAttackSpeed);
-        }
-    }
 
     // 次のコンボステート処理
     if (inputToNextState.count(input))
     {
-
         // 先行入力処理
         if (input != InputComboType::None)
         {
@@ -916,7 +811,10 @@ void PlayerComboState::Update(float elapsedTime)
 PlayerCombo1State::PlayerCombo1State(Player* player)
     : PlayerComboState(player)
 {
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo1");
+	comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_01_Seq_0");
+    airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_01_Seq_0");
+    dashAttackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Run_Attack_01_Seq_0");
+    airDashAttackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Dash_Air_Attack_Seq_0");
 
     nextShiftFrame = 0.53f;
     poseFrame = 0.53f;
@@ -985,7 +883,8 @@ PlayerCombo2State::PlayerCombo2State(Player* player)
     endFrame = 0.816f;
     comboAttackSpeed = 1.5f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo2");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_02_Seq_0");
+    airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_02_Seq_0");
 
     forwardFrame = 0.0f;
     forwardPower = 15.0f;
@@ -1046,7 +945,8 @@ PlayerCombo3State::PlayerCombo3State(Player* player)
     endFrame = 0.9f;
     comboAttackSpeed = 1.0f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo3");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_03_Seq_0");
+    airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_03_Seq_0");
 
     forwardFrame = 0.46f;
     forwardPower = 13.0f;
@@ -1107,7 +1007,8 @@ PlayerCombo4State::PlayerCombo4State(Player* player)
     endFrame = 1.016f;
     comboAttackSpeed = 1.0f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo4");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_04_Seq_0");
+    airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_01_04_Seq_0");
 
     forwardFrame = 0.23f;
     forwardPower = 20.0f;
@@ -1277,53 +1178,57 @@ void PlayerHeavyAttack2State::DrawDebugGUI()
 PlayerGuardIdle::PlayerGuardIdle(Player* player)
     : PlayerState(player)
 {
-    guardIdleAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorGuard");
+    guardStartAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Block_Start_Seq_0");
+    guardLoopAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Block_Loop_Seq_0");
+    guardEndAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Block_End_Seq_0");
 }
 
 // 開始処理
 void PlayerGuardIdle::Enter()
 {
-    player->GetPlayerModel()->PlayAnimation(guardIdleAnimationIndex, true, 0.1f);
+    player->SetGravity(-0.0001f);
+    player->SetVerticalVelocity(0);
+    player->SetHorizonVelocity(0);
+
+    //player->GetPlayerModel()->PlayRootMotion(guardStartAnimationIndex, false, true, 0.1f, "Character1_Reference");
+    player->GetPlayerModel()->PlayRootMotion(guardLoopAnimationIndex, false, true, 0.2f, "Character1_Reference");
 
     player->SetPlayerGuard(true);
+    timer = 1.7f;
 }
 
 // 更新処理
 void PlayerGuardIdle::Update(float elapsedTime)
 {
+    timer -= elapsedTime;
+
     if (CameraParam::Instance().GetIsLockOn())
     {
         player->LockOnTurnToEnemy(elapsedTime);
     }
 
-    // 待機ステート遷移
-    if (!InputGuard())
+    if (timer <= 0.0f)
     {
-        ChangeState(PlayerStateId::Idle);
+        if (player->IsGround())
+        {
+            ChangeState(PlayerStateId::Idle);
+        }
+        else
+        {
+            ChangeState(PlayerStateId::Fall);
+        }
     }
-    // ガードパリィステート遷移
-    else if (InputGuard() && InputGuardParry())
+    else if (timer >= 0.8f)
     {
-        ChangeState(PlayerStateId::GuardParry);
+	    player->GetPlayerModel()->PlayRootMotion(guardEndAnimationIndex, false, true, 0.1f, "Character1_Reference");
+    	player->SetPlayerGuard(false);
     }
-    // ガード歩きステート遷移
-    else if (InputGuard() && (InputWalkMove() || InputRunMove()))
-    {
-        ChangeState(PlayerStateId::GuardWalk);
-    }
-    // 回避ステート遷移
-    else if (InputDodge())
-    {
-        ChangeState(PlayerStateId::Dodge);
-    }
-
-    //player->GetPlayerModel()->SetBaseAnimationSpeed(guardIdleAnimationSpeed);
 }
 
 // 終了処理
 void PlayerGuardIdle::Exit()
 {
-    player->SetPlayerGuard(false);
+    player->SetGravity(-0.3f);
 }
 
 // デバッグ用GUI描画

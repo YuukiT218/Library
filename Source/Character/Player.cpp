@@ -5,6 +5,7 @@
 #include "Model/ResourceManager.h"
 #include "Scene/SceneManager.h"
 //#include "Enemy/EnemyManager.h"
+#include "Character/Enemy/SilverDragonkin.h"
 #include "Math/Collision.h"
 #include "Math/Mathf.h"
 //#include "System/AnimationConfigLoader.h"
@@ -26,11 +27,12 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
 
     model = std::make_shared<Model>(device, filename, scale);
     model->SetAdMetalness(1.0f);
-    model->SetAdRoughness(0.0f);
+    model->SetAdRoughness(1.0f);
 
     // ステージの高さに合わせる
-    /*position.y = -2.7f;
-    position.z = -10.0f;*/
+    position.x = -1.0f;
+    position.y = -3.8f;
+    position.z = -10.0f;
 
     // アニメーションスピード設定
     initAnimSpeed();
@@ -77,7 +79,7 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     }*/
 
     // プレイヤーの範囲制限
-    areaSize = 54.64f;
+    areaSize = 44.2f;
 }
 
 Player::~Player()
@@ -192,16 +194,13 @@ void Player::Update(float elapsedTime)
     CollisionPlayerVsEnemies();
 
     // アタッチメント
-    sword->Attach("Character1_LeftHand", model.get());
+    sword->Attach("Character1_RightHand", model.get());
 
     // オブジェクト行列を更新
     UpdateTransform();
 
     // アニメーション更新
-    if (!model->IsPlayRootMotion())
-        model->UpdateAnimation(elapsedTime);
-    else
-        model->UpdateRootAnimation(elapsedTime, this);
+	model->UpdateAnimation(elapsedTime, this);
 
     // モデル行列更新
     model->UpdateTransform(transform);
@@ -303,6 +302,7 @@ void Player::CollisionPlayerVsEnemies()
 
         //// 指定のノードと全ての敵を総当たりで衝突処理
         //EnemyManager& enemyManager = EnemyManager::Instance();
+		SilverDragonkin& dragonkin = SilverDragonkin::Instance();
 
         //// 全てのプレイヤー攻撃判定と全ての敵の総当たりで衝突処理
         //int enemyCount = enemyManager.GetEnemyCount();
@@ -310,42 +310,42 @@ void Player::CollisionPlayerVsEnemies()
         //{
         //    Enemy* enemy = enemyManager.GetEnemy(i);
 
-        //    std::vector<NodeHitSphere> enemyNode = enemy->GetNodeHitSpheres();
-        //    for (auto& enemyHitSphere : enemyNode)
-        //    {
-        //        Model* enemyModel = enemy->GetModel();
-        //        Model::Node* enemyNode = enemyModel->FindNode(enemyHitSphere.nodeName);
+        std::vector<NodeHitSphere> enemyNode = dragonkin.GetNodeHitSpheres();
+        for (auto& enemyHitSphere : enemyNode)
+        {
+            Model* enemyModel = dragonkin.GetModel();
+            Model::Node* enemyNode = enemyModel->FindNode(enemyHitSphere.nodeName);
 
-        //        // ノード位置取得
-        //        DirectX::XMFLOAT3 enemyNodePosition;
-        //        enemyNodePosition = { enemyNode->worldTransform._41, enemyNode->worldTransform._42, enemyNode->worldTransform._43 };
+            // ノード位置取得
+            DirectX::XMFLOAT3 enemyNodePosition;
+            enemyNodePosition = { enemyNode->worldTransform._41, enemyNode->worldTransform._42, enemyNode->worldTransform._43 };
 
-        //        DirectX::XMFLOAT3 outPosition, hitPosition;
-        //        if (Collision::IntersectSphereVsSphere(
-        //            enemyNodePosition,
-        //            enemyHitSphere.radius,
-        //            playerNodePosition,
-        //            playerHitSphere.radius,
-        //            outPosition,
-        //            hitPosition))
-        //        {
-        //            DirectX::XMVECTOR Move;
-        //            DirectX::XMVECTOR PlayerNodePosition = DirectX::XMLoadFloat3(&playerNodePosition);
-        //            DirectX::XMVECTOR OutPosition = DirectX::XMLoadFloat3(&outPosition);
+            DirectX::XMFLOAT3 outPosition, hitPosition;
+            if (Collision::IntersectSphereVsSphere(
+                enemyNodePosition,
+                enemyHitSphere.radius,
+                playerNodePosition,
+                playerHitSphere.radius,
+                outPosition,
+                hitPosition))
+            {
+                DirectX::XMVECTOR Move;
+                DirectX::XMVECTOR PlayerNodePosition = DirectX::XMLoadFloat3(&playerNodePosition);
+                DirectX::XMVECTOR OutPosition = DirectX::XMLoadFloat3(&outPosition);
 
-        //            Move = DirectX::XMVectorSubtract(OutPosition, PlayerNodePosition);
-        //            Move = DirectX::XMVectorSetY(Move, 0.0f);
-        //            DirectX::XMVECTOR PlayerPosition = DirectX::XMLoadFloat3(&this->position);
-        //            PlayerPosition = DirectX::XMVectorAdd(PlayerPosition, Move);
+                Move = DirectX::XMVectorSubtract(OutPosition, PlayerNodePosition);
+                Move = DirectX::XMVectorSetY(Move, 0.0f);
+                DirectX::XMVECTOR PlayerPosition = DirectX::XMLoadFloat3(&this->position);
+                PlayerPosition = DirectX::XMVectorAdd(PlayerPosition, Move);
 
-        //            DirectX::XMStoreFloat3(&this->position, PlayerPosition);
+                DirectX::XMStoreFloat3(&this->position, PlayerPosition);
 
-        //            //複数の判定と押し出ししてしまうと、何重にも位置が加算されて吹っ飛ぶので
-        //            //最初にあたった判定のみ動作させる　
-        //            // （ここは移動幅が大きいところで処理するように改良した方がいいかも）
-        //            break;
-        //        }
-        //    }
+                //複数の判定と押し出ししてしまうと、何重にも位置が加算されて吹っ飛ぶので
+                //最初にあたった判定のみ動作させる　
+                // （ここは移動幅が大きいところで処理するように改良した方がいいかも）
+                break;
+            }
+        }
         //}
     }
 }
@@ -375,15 +375,8 @@ void Player::PlayerMove(float elapsedTime, float moveRate, float turnRate)
     // 移動処理
     Move(moveVec.x * moveRate, moveVec.z * moveRate, moveSpeed * moveRate);
 
-    /*if (CameraParam::Instance().GetIsLockOn())
-    {
-        LockOnTurnToEnemy(elapsedTime);
-    }*/
-    //else
-    {
-        // 旋回処理
-        Turn(elapsedTime, moveVec.x * turnRate, moveVec.z * turnRate, turnSpeed * turnRate);
-    }
+    // 旋回処理
+    Turn(elapsedTime, moveVec.x * turnRate, moveVec.z * turnRate, turnSpeed * turnRate);
 }
 
 void Player::PlayerJump(float speed)
@@ -397,69 +390,69 @@ void Player::PlayerJump(float speed)
 // ロックオン時敵の方を向く処理
 void Player::LockOnTurnToEnemy(float elapsedTime)
 {
-    //float turn = turnSpeed * elapsedTime;
-    ////ElderDragon* dragon = EnemyManager::Instance().FindElderDragon();
+    float turn = turnSpeed * elapsedTime;
+    SilverDragonkin& dragon = SilverDragonkin::Instance();
 
     //if (dragon == nullptr) return;
 
-    //// ターゲットに向く処理
-    //DirectX::XMVECTOR Position = DirectX::XMLoadFloat3(&position);
-    //DirectX::XMVECTOR Target = DirectX::XMLoadFloat3(&dragon->GetPosition());
-    //DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Target, Position);
+    // ターゲットに向く処理
+    DirectX::XMVECTOR Position = DirectX::XMLoadFloat3(&position);
+    DirectX::XMVECTOR Target = DirectX::XMLoadFloat3(&dragon.GetPosition());
+    DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Target, Position);
 
-    //// ゼロベクトルでないなら回転処理
-    //DirectX::XMVECTOR LengthSq = DirectX::XMVector3LengthSq(Vec);
-    //float lengthSq;
-    //DirectX::XMStoreFloat(&lengthSq, LengthSq);
-    //if (lengthSq > 0.00001f)
-    //{
-    //    // ターゲットまでのベクトルを単位ベクトル化
-    //    Vec = DirectX::XMVector3Normalize(Vec);
+    // ゼロベクトルでないなら回転処理
+    DirectX::XMVECTOR LengthSq = DirectX::XMVector3LengthSq(Vec);
+    float lengthSq;
+    DirectX::XMStoreFloat(&lengthSq, LengthSq);
+    if (lengthSq > 0.00001f)
+    {
+        // ターゲットまでのベクトルを単位ベクトル化
+        Vec = DirectX::XMVector3Normalize(Vec);
 
-    //    DirectX::XMFLOAT3 direction;
-    //    direction.x = sinf(angle.y);
-    //    direction.y = 0.0f;
-    //    direction.z = cosf(angle.y);
+        DirectX::XMFLOAT3 direction;
+        direction.x = sinf(angle.y);
+        direction.y = 0.0f;
+        direction.z = cosf(angle.y);
 
-    //    // 向いている方向ベクトルを算出
-    //    DirectX::XMVECTOR Direction = DirectX::XMLoadFloat3(&direction);
+        // 向いている方向ベクトルを算出
+        DirectX::XMVECTOR Direction = DirectX::XMLoadFloat3(&direction);
 
-    //    // 向いている方向とターゲットまでのベクトル内積(角度)を算出
-    //    DirectX::XMVECTOR Dot = DirectX::XMVector3Dot(Direction, Vec);
+        // 向いている方向とターゲットまでのベクトル内積(角度)を算出
+        DirectX::XMVECTOR Dot = DirectX::XMVector3Dot(Direction, Vec);
 
-    //    float dot;
-    //    DirectX::XMStoreFloat(&dot, Dot);
+        float dot;
+        DirectX::XMStoreFloat(&dot, Dot);
 
-    //    // 2つの単位ベクトルの角度が小さいほど1.0に近づくという性質を利用して回転速度を調整する
-    //    float rot = 1.0f - dot;
-    //    if (rot > turnSpeed)
-    //    {
-    //        rot = turnSpeed;
-    //    }
+        // 2つの単位ベクトルの角度が小さいほど1.0に近づくという性質を利用して回転速度を調整する
+        float rot = 1.0f - dot;
+        if (rot > turnSpeed)
+        {
+            rot = turnSpeed;
+        }
 
-    //    // 回転処理があるなら回転処理をする
-    //    if (fabsf(rot) > 0.0001f)
-    //    {
-    //        // 回転軸を算出
-    //        DirectX::XMVECTOR Axis = DirectX::XMVector3Cross(Direction, Vec);
+        // 回転処理があるなら回転処理をする
+        if (fabsf(rot) > 0.0001f)
+        {
+            // 回転軸を算出
+            DirectX::XMVECTOR Axis = DirectX::XMVector3Cross(Direction, Vec);
 
-    //        // 回転軸と回転量から回転行列を算出
-    //        DirectX::XMMATRIX Rotation = DirectX::XMMatrixRotationAxis(Axis, rot);
+            // 回転軸と回転量から回転行列を算出
+            DirectX::XMMATRIX Rotation = DirectX::XMMatrixRotationAxis(Axis, rot);
 
-    //        // 現在の行列回転させる
-    //        DirectX::XMMATRIX Transform = DirectX::XMLoadFloat4x4(&transform);
-    //        Transform = DirectX::XMMatrixMultiply(Transform, Rotation);
+            // 現在の行列回転させる
+            DirectX::XMMATRIX Transform = DirectX::XMLoadFloat4x4(&transform);
+            Transform = DirectX::XMMatrixMultiply(Transform, Rotation);
 
-    //        // Transformから前方ベクトルを取得（Z軸方向）
-    //        DirectX::XMVECTOR forward = DirectX::XMVector3Normalize(Transform.r[2]);
+            // Transformから前方ベクトルを取得（Z軸方向）
+            DirectX::XMVECTOR forward = DirectX::XMVector3Normalize(Transform.r[2]);
 
-    //        // Y軸角度（Yaw）を算出（XとZを使う）
-    //        float angleY = atan2f(DirectX::XMVectorGetX(forward), DirectX::XMVectorGetZ(forward));
+            // Y軸角度（Yaw）を算出（XとZを使う）
+            float angleY = atan2f(DirectX::XMVectorGetX(forward), DirectX::XMVectorGetZ(forward));
 
-    //        // 現在の角度を取得し、Yを更新して設定
-    //        angle.y = angleY;
-    //    }
-    //}
+            // 現在の角度を取得し、Yを更新して設定
+            angle.y = angleY;
+        }
+    }
 }
 
 // 移動設定
@@ -606,7 +599,7 @@ void Player::DrawDebugPrimitive()
     if (isCollisionRender)
     {
         // 衝突判定用のデバック球を描画
-        //debugRenderer->DrawSphere(position, radius, DirectX::XMFLOAT4(0, 0, 0, 1));
+        shapeRenderer->DrawSphere(position, radius, DirectX::XMFLOAT4(0, 0, 0, 1));
 
         // 衝突判定用のデバック円柱を描画
         shapeRenderer->DrawCylinder(position, radius, height, DirectX::XMFLOAT4(0, 0, 0, 1));
@@ -624,7 +617,7 @@ void Player::DrawDebugGUI()
     if (ImGui::Begin("Player", nullptr, ImGuiWindowFlags_None))
     {
         // 位置
-        ImGui::DragFloat3("Position", &position.x, 0.10f, -10, 10);
+        ImGui::DragFloat3("Position", &position.x, 0.10f, -1000, 1000);
 
         // 回転
         DirectX::XMFLOAT3 a;

@@ -107,11 +107,11 @@ public:
 	int GetCurrentAnimationIndex() { return currentAnimationIndex; }
 
 	// アニメーション更新処理
-	void UpdateAnimation(float elapsedTime);
-	void UpdateRootAnimation(float elapsedTime, Character* character);
+	void UpdateAnimation(float elapsedTime, Character* character);
 
 	// アニメーション計算処理
 	void ComputeAnimation(float elapsedTime);
+	void ComputeRootAnimation(float elapsedTime, Character* character);
 
 	// ブレンディング計算処理
 	void ComputeBlending(float elapsedTime);
@@ -167,6 +167,7 @@ private:
 	float oldAnimationSeconds = 0;
 	float animationSpeed = 1.0f;
 	float baseAnimationSpeed = 1.0f;
+	float scaling = 1.0f;
 
 	bool animationPlaying = false;
 	bool animationLoop = false;

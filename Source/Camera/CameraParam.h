@@ -20,10 +20,10 @@ public:
 	void SetIsLockOn(bool islockon) { isLockOn = islockon; }
 	bool GetIsLockOn() { return isLockOn; }
 
-	/*void SetRockOnEnemy(Enemy* enemy) { closestEnemy = enemy; }
-	Enemy* GetRockOnEnemy() { return closestEnemy; }*/
+	void SetLockOnEnemy(Enemy* enemy) { closestEnemy = enemy; }
+	Enemy* GetLockOnEnemy() { return closestEnemy; }
 
 private:
 	bool isLockOn = false;
-	//Enemy* closestEnemy = nullptr;
+	Enemy* closestEnemy = nullptr;
 };

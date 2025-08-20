@@ -20,10 +20,9 @@ void CameraController::Update(float elapsedTime)
             : fmodf((angle)-DirectX::XM_PI, DirectX::XM_2PI) + DirectX::XM_PI;
         };
 
-    oldRockFlag = isrockon;
-    isrockon = CameraParam::Instance().GetIsLockOn();
+    oldLockFlag = islockon;
+    islockon = CameraParam::Instance().GetIsLockOn();
 
-    if (!isrockon)
     {
         GamePad& gamePad = Input::Instance().GetGamePad();
         float ax = gamePad.GetAxisRX();
@@ -44,101 +43,28 @@ void CameraController::Update(float elapsedTime)
 #endif
     }
 
-#if _DEBUG
-    if (GetAsyncKeyState(VK_F1) & 0x01)
-    {
-        isMouseLock = !isMouseLock;
-    }
-    if (isMouseLock)
-    {
-        //// マウスを画面中央に固定
-        //Mouse& mouse = Input::Instance().GetMouse();
-        //float bx = mouse.GetPositionX();
-        //float by = mouse.GetPositionY();
-        //POINT P = { width / 2, height / 2 };
-        //if (fabsf(bx - P.x) > 50 || fabsf(by - P.y) > 50)
-        //{
-        //    mouse.SetMouseCursorPos(P.x, P.y);
-        //}
-
-        Mouse& mouse = Input::Instance().GetMouse();
-        HWND hwnd = Input::Instance().GetMouse().GetHwnd();
-        // CameraController::Update などの中で使用
-        static POINT lastMousePos = { 0 };
-        POINT currentPos;
-        GetCursorPos(&currentPos);
-
-        // マウスの差分を計算（中心からの移動量）
-        RECT rect;
-        GetClientRect(hwnd, &rect);
-        POINT center = {
-            (rect.right - rect.left) / 2,
-            (rect.bottom - rect.top) / 2
-        };
-        ClientToScreen(hwnd, &center); // クライアント座標→スクリーン座標
-
-        int deltaX = currentPos.x - center.x;
-        int deltaY = currentPos.y - center.y;
-
-        // カメラ角度に反映（スケーリング係数は適宜調整）
-        angle.y += deltaX * 0.01f;
-        angle.x += deltaY * 0.01f;
-
-        // 中心にマウスを戻す（次フレームで差分がゼロになる）
-        SetCursorPos(center.x, center.y);
-    }
-#else
-
-    Mouse& mouse = Input::Instance().GetMouse();
-    HWND hwnd = Input::Instance().GetMouse().GetHwnd();
-    static POINT lastMousePos = { 0 };
-    POINT currentPos;
-    GetCursorPos(&currentPos);
-
-    // マウスの差分を計算（中心からの移動量）
-    RECT rect;
-    GetClientRect(hwnd, &rect);
-    POINT center = {
-        (rect.right - rect.left) / 2,
-        (rect.bottom - rect.top) / 2
-    };
-    ClientToScreen(hwnd, &center); // クライアント座標→スクリーン座標
-
-    int deltaX = currentPos.x - center.x;
-    int deltaY = currentPos.y - center.y;
-
-    // カメラ角度に反映（スケーリング係数は適宜調整）
-    angle.y += deltaX * 0.001f;
-    angle.x += deltaY * 0.001f;
-
-    // 中心にマウスを戻す（次フレームで差分がゼロになる）
-    SetCursorPos(center.x, center.y);
-
-    ShowCursor(false);
-#endif
-
     angle.x = std::clamp(angle.x, minAngleX, maxAngleX);
 
     DirectX::XMMATRIX Transform = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
     DirectX::XMVECTOR Front = Transform.r[2];
     DirectX::XMFLOAT3 front;
     DirectX::XMStoreFloat3(&front, Front);
-    if (isrockon)
+    if (islockon)
     {
         EnemyAlived();
-        /*if (closestEnemy)
+        if (closestEnemy)
         {
-            rockonpoint = closestEnemy->GetPosition();
+            lockonpoint = closestEnemy->GetPosition();
         }
-        else SetRockonPoint();*/
+        else SetLockonPoint();
 
-        if (oldRockFlag != isrockon)
+        if (oldLockFlag != islockon)
         {
-            sideValue = CalcSide(target, rockonpoint);
+            sideValue = CalcSide(target, lockonpoint);
         }
 
         targetWork[0] = target;
-        targetWork[1] = rockonpoint;
+        targetWork[1] = lockonpoint;
         targetWork[0].y += 0.01f;
         targetWork[1].y += 0.01f;
 
@@ -171,7 +97,7 @@ void CameraController::Update(float elapsedTime)
         // 新しい注視点（中間点）
         t0 = DirectX::XMLoadFloat3(&targetWork[0]);
         t1 = DirectX::XMLoadFloat3(&targetWork[1]);
-        DirectX::XMStoreFloat3(&rockonpoint, DirectX::XMVectorMultiplyAdd(v, DirectX::XMVectorReplicate(0.5f), t0));
+        DirectX::XMStoreFloat3(&lockonpoint, DirectX::XMVectorMultiplyAdd(v, DirectX::XMVectorReplicate(0.5f), t0));
 
         // カメラ位置を算出
         t0 = DirectX::XMVectorMultiplyAdd(l, DirectX::XMVectorNegate(vNorm), t0);
@@ -189,11 +115,11 @@ void CameraController::Update(float elapsedTime)
     }
     else
     {
-        SetRockonPoint();
+        SetLockonPoint();
         angle.y = normalizeAngle(angle.y);
 
         // ロックオンを解除した直後であれば、eyeの更新をスキップ
-        if (!(oldRockFlag && !isrockon)) {
+        if (!(oldLockFlag && !islockon)) {
             eye = {
                 target.x - front.x * range,
                 target.y - front.y * range,
@@ -222,14 +148,14 @@ void CameraController::Update(float elapsedTime)
     newEye.y = Mathf::Lerp(newEye.y, eye.y, lerpSpeed * elapsedTime);
     newEye.z = Mathf::Lerp(newEye.z, eye.z, lerpSpeed * elapsedTime);
 
-    /*if (isrockon)
+    if (islockon)
     {
         if (closestEnemy)
         {
             newTarget = {
-                Mathf::Lerp(newTarget.x, rockonpoint.x, lerpSpeed * elapsedTime),
-                Mathf::Lerp(newTarget.y, rockonpoint.y + 0.9f, lerpSpeed * elapsedTime),
-                Mathf::Lerp(newTarget.z, rockonpoint.z, lerpSpeed * elapsedTime)
+                Mathf::Lerp(newTarget.x, lockonpoint.x, lerpSpeed * elapsedTime),
+                Mathf::Lerp(newTarget.y, lockonpoint.y + 0.9f, lerpSpeed * elapsedTime),
+                Mathf::Lerp(newTarget.z, lockonpoint.z, lerpSpeed * elapsedTime)
             };
         }
     }
@@ -240,7 +166,7 @@ void CameraController::Update(float elapsedTime)
             Mathf::Lerp(newTarget.y, target.y + 0.9f, lerpSpeed * elapsedTime),
             Mathf::Lerp(newTarget.z, target.z, lerpSpeed * elapsedTime)
         };
-    }*/
+    }
 
     newTarget = {
             Mathf::Lerp(newTarget.x, target.x, lerpSpeed * elapsedTime),
@@ -288,87 +214,24 @@ void CameraController::Update(float elapsedTime)
     CameraShake(elapsedTime);
 }
 
-void CameraController::SetRockonPoint()
+void CameraController::SetLockonPoint()
 {
-    //EnemyManager& enemyManager = EnemyManager::Instance();
-    //int enemyCount = enemyManager.GetEnemyCount();
+    SilverDragonkin& dragonkin = SilverDragonkin::Instance();
 
-    //if (enemyCount == 0)
-    //{
-    //    CameraParam::Instance().SetIsLockOn(false);
-    //    return;
-    //}
+    closestEnemy = nullptr;
 
-    //float bestScore = -FLT_MAX; // 最良スコア
-    //closestEnemy = nullptr;
+    closestEnemy = dynamic_cast<Enemy*>(&dragonkin); // Use dynamic_cast to convert SilverDragonkin to Enemy  
 
-    //// スコアの重み
-    //const float weightDistance = 0.98f; // 距離重視
-    //const float weightCenter = 0.02f;   // 中心重視
-
-    //for (int i = 0; i < enemyCount; ++i)
-    //{
-    //    Enemy* enemy = enemyManager.GetEnemy(i);
-    //    DirectX::XMFLOAT3 enemyPosition = enemy->GetPosition();
-
-    //    //// 距離を計算する
-    //    //DirectX::XMVECTOR currentTargetVec = DirectX::XMLoadFloat3(&newTarget);
-    //    //DirectX::XMVECTOR enemyPositionVec = DirectX::XMLoadFloat3(&enemyPosition);
-
-    //    //DirectX::XMVECTOR distanceVec = DirectX::XMVectorSubtract(currentTargetVec, enemyPositionVec);
-    //    //float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distanceVec));
-
-    //    //// 距離が30より大きい場合はスキップ
-    //    ////if (distance > 30.0f) continue;
-
-    //    //// ビューとプロジェクション行列を取得
-    //    //const DirectX::XMFLOAT4X4& viewMatrix = Camera::Instance().GetView();
-    //    //const DirectX::XMFLOAT4X4& projectionMatrix = Camera::Instance().GetProjection();
-
-    //    //DirectX::XMMATRIX view = DirectX::XMLoadFloat4x4(&viewMatrix);
-    //    //DirectX::XMMATRIX projection = DirectX::XMLoadFloat4x4(&projectionMatrix);
-    //    //DirectX::XMMATRIX viewProjection = DirectX::XMMatrixMultiply(view, projection);
-
-    //    //// NDC座標に変換
-    //    //DirectX::XMVECTOR targetNDCPositionVec = DirectX::XMVector3TransformCoord(enemyPositionVec, viewProjection);
-    //    //DirectX::XMFLOAT3 targetNdcPosition;
-    //    //DirectX::XMStoreFloat3(&targetNdcPosition, targetNDCPositionVec);
-
-    //    //// カメラの方向ベクトル
-    //    //DirectX::XMFLOAT3 cameraForward = Camera::Instance().GetFront();
-    //    //DirectX::XMVECTOR cameraPositionVec = DirectX::XMLoadFloat3(&Camera::Instance().GetEye());
-    //    //DirectX::XMVECTOR cameraForwardVec = DirectX::XMLoadFloat3(&cameraForward);
-
-    //    //DirectX::XMVECTOR directionToEnemyVec = DirectX::XMVectorSubtract(enemyPositionVec, cameraPositionVec);
-    //    //DirectX::XMVECTOR directionToEnemyNorm = DirectX::XMVector3Normalize(directionToEnemyVec);
-    //    //float dot = DirectX::XMVectorGetX(DirectX::XMVector3Dot(cameraForwardVec, directionToEnemyNorm));
-
-    //    //// 視野角内にあるか確認
-    //    //float fieldOfViewCos = cosf(DirectX::XMConvertToRadians(60 / 2.0f));
-    //    //if (dot < fieldOfViewCos) continue;
-
-    //    //// 距離スコアを計算
-    //    //float distanceScore = 1.0f / (distance + 1.0f);
-
-    //    //// 中心スコアを計算
-    //    //float centerScore = 1.0f / (fabs(targetNdcPosition.x) + 0.1f); // 0.1を加えてゼロ除算回避
-
-    //    //// 合成スコアを計算
-    //    //float score = weightDistance * distanceScore + weightCenter * centerScore;
-
-    //    //// 最良スコアを更新
-    //    //if (score > bestScore)
-    //    //{
-    //    //    bestScore = score;
-    //    closestEnemy = enemy;
-    //    CameraParam::Instance().SetRockOnEnemy(closestEnemy);
-    //    //}
-    //}
-
-    //if (!closestEnemy)
-    //{
-    //    CameraParam::Instance().SetIsLockOn(false);
-    //}
+    if (closestEnemy)  
+    {  
+        DirectX::XMFLOAT3 enemyPosition = closestEnemy->GetPosition();  
+        lockonpoint = enemyPosition;  
+        CameraParam::Instance().SetLockOnEnemy(closestEnemy);  
+    }  
+    else  
+    {  
+        CameraParam::Instance().SetIsLockOn(false);  
+    }  
 }
 
 
@@ -557,8 +420,8 @@ float CameraController::CalcSide(DirectX::XMFLOAT3 p1, DirectX::XMFLOAT3 p2)
 {
     // 外積を用いて横軸のズレ方向算出
     DirectX::XMFLOAT2	v{};
-    v.x = target.x - rockonpoint.x;
-    v.y = target.z - rockonpoint.z;
+    v.x = target.x - lockonpoint.x;
+    v.y = target.z - lockonpoint.z;
     float	l = sqrtf(v.x * v.x + v.y * v.y);
     v.y /= l;
     v.y /= l;

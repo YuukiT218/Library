@@ -22,6 +22,8 @@ class SequenceState;
 class SilverDragonkin : public Enemy
 {
 public:
+	static SilverDragonkin& Instance();
+
 	SilverDragonkin(ID3D11Device* device, const char* filename, float scale);
 	~SilverDragonkin()override;
 
@@ -102,6 +104,8 @@ public:
 
 	float GetBlendSeconds() { return blendSeconds; }
 
+	float GetMoveSpeed() { return moveSpeed; }
+
 	bool GetIsRoarUsing() const { return IsRoarUsing; }
 	bool GetRoarUsed() const { return RoarUsedFlag; }
 
@@ -112,26 +116,9 @@ public:
 	/*std::unique_ptr<Effect> breathEffect = nullptr;
 	std::unique_ptr<Effect> attackTelegraphEffect = nullptr;*/
 
-	float nodeRadius[65] =
+	float nodeRadius[9] =
 	{
-		// 前脚
-		0.8f, 0.95f, 0.9f, 0.6f, 0.8f, 0.95f, 0.9f, 0.6f,
-		// 胴体
-		1.5f, 1.45f, 1.35f, 1.85f, 1.3f, 1.6f, 1.6f,
-		// 頭部
-		0.85f, 0.85f, 0.8f, 1.25f,
-		// 尻尾
-		1.45f, 1.2f, 1.05f, 1.0f, 0.95f, 0.85f, 0.85f, 0.65f,
-		// 後脚
-		0.75f, 0.75f, 0.65f, 0.65f, 0.75f, 0.75f, 0.65f, 0.65f,
-		// 右翼
-		0.85f, 0.85f, 0.85f, 0.85f, 0.85f,
-		0.85f, 0.85f, 0.85f, 0.85f, 0.85f,
-		0.85f, 0.85f, 0.85f, 0.85f, 0.85f,
-		// 左翼
-		0.85f, 0.85f, 0.85f, 0.85f, 0.85f,
-		0.85f, 0.85f, 0.85f, 0.85f, 0.85f,
-		0.85f, 0.85f, 0.85f, 0.85f, 0.85f,
+		0.3f, 0.3f, 0.3f, 0.3f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f
 	};
 
 	float nodeRadiusAttack[29] =
@@ -219,6 +206,10 @@ public:
 		TurnRight,
 		Tackle,
 		Sidestep,
+		f,
+		g,
+		h,
+		GetHit
 	};
 
 
@@ -226,10 +217,10 @@ private:
 	DirectX::XMFLOAT3	targetPosition = { 0.0f,0.0f,0.0f };
 	DirectX::XMFLOAT3	territoryOrigin = { 0.0f,0.0f,0.0f };
 	float				territoryRange = 255.0f;
-	float				moveSpeed = 3.0f;
+	float				moveSpeed = 1.0f;
 	float				turnSpeed = DirectX::XMConvertToRadians(360);
 	float				searchRange = 20.0f;
-	float				attackRange = 7.5f;
+	float				attackRange = 1.5f;
 	float				runTimer = 0.0f;
 	float 			    blendSeconds = 0.5f;
 	bool 				isBattle = false;

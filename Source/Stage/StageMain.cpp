@@ -7,8 +7,9 @@ StageMain::StageMain()
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
-	model = std::make_unique<Model>(device, "Data/Model/Stage/ExampleStage.gltf", 0.02f);
-	//model->SetAdRoughness(1.0f);
+	model = std::make_unique<Model>(device, "Data/Model/boss_fight_arena/Arena.gltf", 0.3f);
+	model->SetAdMetalness(1.0f);
+	model->SetAdRoughness(0.1f);
 
 	DirectX::XMVECTOR VolumeMin = DirectX::XMVectorReplicate(FLT_MAX);
 	DirectX::XMVECTOR VolumeMax = DirectX::XMVectorReplicate(-FLT_MAX);
@@ -242,5 +243,5 @@ void StageMain::Debug(const RenderContext& rc)
 
 void StageMain::DebugImGui()
 {
-	//model->DebugGui(u8"メインステージ");
+	model->DebugGui(u8"メインステージ");
 }

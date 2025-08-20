@@ -64,6 +64,16 @@ public:
 	bool Judgment();
 };
 
+// DamageNodeに遷移できるか判定
+template <typename ActorType>
+class DamageJudgment : public JudgmentBase<ActorType>
+{
+public:
+	DamageJudgment(ActorType* actor) :JudgmentBase(actor) {};
+	// 判定
+	bool Judgment();
+};
+
 // DeadNodeに遷移できるか判定
 template <typename ActorType>
 class DeadJudgment : public JudgmentBase<ActorType>
@@ -202,6 +212,16 @@ bool WanderJudgment<ActorType>::Judgment()
 		return true;
 	}
 
+	return false;
+}
+
+template<typename ActorType>
+bool DamageJudgment<ActorType>::Judgment()
+{
+	if (owner->IsDamage())
+	{
+		return true;
+	}
 	return false;
 }
 

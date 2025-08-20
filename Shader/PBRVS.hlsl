@@ -20,17 +20,15 @@ VS_OUT main(
     vout.normal = SkinningVector(normal, boneWeight, boneIndices);
     
     // 視線ベクトルを求めるためにスキニング後のワールド座標をピクセルシェーダーに渡す
-    vout.position = position.xyz;
+    vout.position = position;
     
     vout.tangent = SkinningVector(tangent, boneWeight, boneIndices);
-    
-    // ライトから見たNDC座標を算出
+
     float4 shadow = mul(position, lightViewProjection);
     shadow.xyz /= shadow.w;
     shadow.y = -shadow.y;
-    // NDC座標をUV座標に変換
     shadow.xy = shadow.xy * 0.5f + 0.5f;
     vout.shadow = shadow.xyz;
-    
+
     return vout;
 }

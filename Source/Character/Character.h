@@ -103,6 +103,9 @@ public:
 	// 衝撃を与える
 	void AddImpulse(const DirectX::XMFLOAT3& impulse);
 
+	// ターゲットとの距離を計算
+	float calcTargetDist(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 targetPosition);
+
 	virtual Model* GetModel() { return model.get(); }
 
 	std::unordered_map<int, float> animSpeed;
@@ -181,7 +184,7 @@ protected:
 	int maxHealth = 1000000;
 	bool deathFlag = false;	// キャラクターが死亡したらtrueになる変数
 	float invincibleTimer = 1.0f;
-	float friction = 0.5f;
+	float friction = 1.5f;
 
 	// 慣性移動
 	float acceleration = 1.0f;

@@ -16,15 +16,6 @@ public:
 	ActionBase::State Run(float elapsedTime);
 };
 
-// 引っ掻き→叩きつけ攻撃派生行動
-template <typename ActorType>
-class ScratchSlapAction : public ActionBase<ActorType>
-{
-public:
-	ScratchSlapAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
-};
-
 // 叩きつけ攻撃行動
 template <typename ActorType>
 class SlapAction : public ActionBase<ActorType>
@@ -34,39 +25,12 @@ public:
 	ActionBase::State Run(float elapsedTime);
 };
 
-// 叩きつけ→回転攻撃派生行動
+// 三連テレポート
 template <typename ActorType>
-class SlapSpinAction : public ActionBase<ActorType>
+class TripleTeleportAction : public ActionBase<ActorType>
 {
 public:
-	SlapSpinAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
-};
-
-// 回転攻撃行動
-template <typename ActorType>
-class SpinAction : public ActionBase<ActorType>
-{
-public:
-	SpinAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
-};
-
-// 回転→回転攻撃派生行動
-template <typename ActorType>
-class SpinSpinAction : public ActionBase<ActorType>
-{
-public:
-	SpinSpinAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
-};
-
-// 回転→タックル攻撃派生行動
-template <typename ActorType>
-class SpinTackleAction : public ActionBase<ActorType>
-{
-public:
-	SpinTackleAction(ActorType* actor) :ActionBase(actor) {}
+	TripleTeleportAction(ActorType* actor) : ActionBase(actor) {}
 	ActionBase::State Run(float elapsedTime);
 };
 
@@ -160,6 +124,15 @@ public:
 	ActionBase::State Run(float elapsedTime);
 };
 
+// ダメージ
+template <typename ActorType>
+class DamageAction : public ActionBase<ActorType>
+{
+public:
+	DamageAction(ActorType* actor) :ActionBase(actor) {}
+	ActionBase::State Run(float elapsedTime);
+};
+
 // 死亡
 template <typename ActorType>
 class DeadAction : public ActionBase<ActorType>
@@ -227,16 +200,7 @@ typename ActionBase<ActorType>::State ScratchAction<ActorType>::Run(float elapse
 		}
 		break;
 	case 1:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			step++;
-		}
+		step++;
 		break;
 	case 2:
 		// アニメーション再生
@@ -245,12 +209,6 @@ typename ActionBase<ActorType>::State ScratchAction<ActorType>::Run(float elapse
 		step++;
 		break;
 	case 3:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
 		if (!owner->isPlayerInvincible)
 		{
 			owner->AttackAnimationCollision({ owner->rightArmNodeHitSpheres }, owner->attackFrameMin[0], owner->attackFrameMax[0], owner->attackDamage[0]);
@@ -267,92 +225,14 @@ typename ActionBase<ActorType>::State ScratchAction<ActorType>::Run(float elapse
 		}
 		break;
 	}
-	// 実行中を返す
-	return ActionBase<ActorType>::State::Run;
-}
-//-------------------------------------------------------------
-
-//-------------------------------------------------------------
-// 引っ掻き→叩きつけ攻撃派生行動
-template <typename ActorType>
-typename ActionBase<ActorType>::State ScratchSlapAction<ActorType>::Run(float elapsedTime)
-{
-	switch (step)
+	if (owner->IsDamage())
 	{
-	case 0:
-		// 攻撃対象設定
-		owner->SetTargetPosition(Player::Instance().GetPosition());
-		// 目的地点へ移動
-		{
-			float vx = owner->GetTargetPosition().x - owner->GetPosition().x;
-			float vz = owner->GetTargetPosition().z - owner->GetPosition().z;
-			owner->TurnToTarget(elapsedTime, vx, vz, DirectX::XMConvertToRadians(360) * 3.0f);
-			if (owner->IsTurnToTarget(vx, vz))
-			{
-				owner->isTurnAnimation = false;
-				step++;
-			}
-		}
-		break;
-	case 1:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			step++;
-		}
-		break;
-	case 2:
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::Attack02), false, owner->GetBlendSeconds());
-		step++;
-		break;
-	case 3:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->rightArmNodeHitSpheres }, owner->attackFrameMin[0], owner->attackFrameMax[0], owner->attackDamage[0]);
-		}
-		if (owner->GetModel()->GetCurrentAnimationSeconds() > owner->attackFrameMax[0] + 1.8f)
-		{
-			owner->isPlayerInvincible = false;
-			step++;
-		}
-		break;
-	case 4:
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::Attack01), false, owner->GetBlendSeconds());
-		step++;
-		break;
-	case 5:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->rightArmNodeHitSpheres }, owner->attackFrameMin[0], owner->attackFrameMax[0], owner->attackDamage[0]);
-		}
-		// アニメーションが終了しているとき
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			owner->isPlayerInvincible = false;
-			step = 0;
-			// 攻撃成功を返す
-			return ActionBase<ActorType>::State::Complete;
-		}
-		break;
+		step = 0;
+		return ActionBase<ActorType>::State::Failed;
+	}
+	if (owner->GetHealth() <= 0)
+	{
+		return ActionBase<ActorType>::State::Failed;
 	}
 	// 実行中を返す
 	return ActionBase<ActorType>::State::Run;
@@ -382,16 +262,7 @@ typename ActionBase<ActorType>::State SlapAction<ActorType>::Run(float elapsedTi
 		}
 		break;
 	case 1:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			step++;
-		}
+		step++;
 		break;
 	case 2:
 		// アニメーション再生
@@ -400,12 +271,6 @@ typename ActionBase<ActorType>::State SlapAction<ActorType>::Run(float elapsedTi
 		step++;
 		break;
 	case 3:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
 		if (!owner->isPlayerInvincible)
 		{
 			owner->AttackAnimationCollision({ owner->rightArmNodeHitSpheres }, owner->attackFrameMin[0], owner->attackFrameMax[0], owner->attackDamage[0]);
@@ -420,94 +285,10 @@ typename ActionBase<ActorType>::State SlapAction<ActorType>::Run(float elapsedTi
 		}
 		break;
 	}
-	// 実行中を返す
-	return ActionBase<ActorType>::State::Run;
-}
-//-------------------------------------------------------------
-
-//-------------------------------------------------------------
-// 叩きつけ→回転攻撃派生行動
-template <typename ActorType>
-typename ActionBase<ActorType>::State SlapSpinAction<ActorType>::Run(float elapsedTime)
-{
-	switch (step)
+	if (owner->IsDamage())
 	{
-	case 0:
-		// 攻撃対象設定
-		owner->SetTargetPosition(Player::Instance().GetPosition());
-		// 目的地点へ移動
-		{
-			float vx = owner->GetTargetPosition().x - owner->GetPosition().x;
-			float vz = owner->GetTargetPosition().z - owner->GetPosition().z;
-			owner->TurnToTarget(elapsedTime, vx, vz, DirectX::XMConvertToRadians(360) * 3.0f);
-			if (owner->IsTurnToTarget(vx, vz))
-			{
-				owner->isTurnAnimation = false;
-				step++;
-			}
-		}
-		break;
-	case 1:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			step++;
-		}
-		break;
-	case 2:
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::Attack02), false, owner->GetBlendSeconds());
-		step++;
-		break;
-	case 3:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->rightArmNodeHitSpheres }, owner->attackFrameMin[0], owner->attackFrameMax[0], owner->attackDamage[0]);
-		}
-		// アニメーションが終了しているとき
-		if (owner->GetModel()->GetCurrentAnimationSeconds() > owner->attackFrameMax[1] + 0.3f)
-		{
-			owner->isPlayerInvincible = false;
-			step++;
-		}
-		break;
-	case 4:
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::SpinAttack), false, owner->GetBlendSeconds());
-		step++;
-		break;
-	case 5:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->tailNodeHitSpheres }, owner->attackFrameMin[2], owner->attackFrameMax[2], owner->attackDamage[1]);
-		}
-		// アニメーションが終了しているとき
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			owner->isPlayerInvincible = false;
-			owner->SetAttackFlg(false);
-			step = 0;
-			// 攻撃成功を返す
-			return ActionBase<ActorType>::State::Complete;
-		}
-		break;
+		step = 0;
+		return ActionBase<ActorType>::State::Failed;
 	}
 	// 実行中を返す
 	return ActionBase<ActorType>::State::Run;
@@ -515,203 +296,65 @@ typename ActionBase<ActorType>::State SlapSpinAction<ActorType>::Run(float elaps
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
-// 回転攻撃行動
+// 三連テレポート
 template <typename ActorType>
-typename ActionBase<ActorType>::State SpinAction<ActorType>::Run(float elapsedTime)
+typename ActionBase<ActorType>::State TripleTeleportAction<ActorType>::Run(float elapsedTime)
 {
-	switch (step)
-	{
-	case 0:
-		// 攻撃対象設定
-		owner->SetTargetPosition(Player::Instance().GetPosition());
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::SpinAttack), false, owner->GetBlendSeconds());
-		step++;
-		break;
-	case 1:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->tailNodeHitSpheres }, owner->attackFrameMin[2], owner->attackFrameMax[2], owner->attackDamage[1]);
-		}
-		// アニメーションが終了しているとき
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			owner->isPlayerInvincible = false;
-			step = 0;
-			// 攻撃成功を返す
-			return ActionBase<ActorType>::State::Complete;
-		}
-		break;
-	}
-	// 実行中を返す
-	return ActionBase<ActorType>::State::Run;
-}
-//-------------------------------------------------------------
-
-//-------------------------------------------------------------
-// 回転→回転攻撃派生行動
-template <typename ActorType>
-typename ActionBase<ActorType>::State SpinSpinAction<ActorType>::Run(float elapsedTime)
-{
-	switch (step)
-	{
-	case 0:
-		// 攻撃対象設定
-		owner->SetTargetPosition(Player::Instance().GetPosition());
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::SpinAttack), false, owner->GetBlendSeconds());
-		step++;
-		break;
-	case 1:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->tailNodeHitSpheres }, owner->attackFrameMin[2], owner->attackFrameMax[2], owner->attackDamage[1]);
-		}
-
-		if (owner->GetModel()->GetCurrentAnimationSeconds() > owner->attackFrameMax[2] + 0.1f)
-		{
-			owner->isPlayerInvincible = false;
-			owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::IdleNormal), false, owner->GetBlendSeconds());
-			step++;
-		}
-		break;
-	case 2:
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::SpinAttack), false, owner->GetBlendSeconds());
-		step++;
-		break;
-	case 3:
-		if (owner->GetHealth() <= 0)
-		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->tailNodeHitSpheres }, owner->attackFrameMin[2], owner->attackFrameMax[2], owner->attackDamage[1]);
-		}
-		// アニメーションが終了しているとき
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			owner->isPlayerInvincible = false;
-			step = 0;
-			// 攻撃成功を返す
-			return ActionBase<ActorType>::State::Complete;
-		}
-		break;
-	}
-	// 実行中を返す
-	return ActionBase<ActorType>::State::Run;
-}
-//-------------------------------------------------------------
-
-//-------------------------------------------------------------
-// 回転→タックル攻撃派生行動
-template <typename ActorType>
-typename ActionBase<ActorType>::State SpinTackleAction<ActorType>::Run(float elapsedTime)
-{
-	bool init = false;	// 初期化フラグ
+	float runTimer = owner->GetRunTimer();
 	DirectX::XMFLOAT3 vec;
+	DirectX::XMVECTOR toTargetVec = {};
+	DirectX::XMVECTOR sideVec = {};
+	Model::Node* Node;
 	switch (step)
 	{
 	case 0:
-		// 攻撃対象設定
-		owner->SetTargetPosition(Player::Instance().GetPosition());
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::SpinAttack), false, owner->GetBlendSeconds());
+		DirectX::XMFLOAT3 targetPosition = Player::Instance().GetPosition();
+		DirectX::XMFLOAT3 position = owner->GetPosition();
+		DirectX::XMVectorSetX(toTargetVec, (targetPosition.x - position.x) / 3);
+		DirectX::XMVectorSetY(toTargetVec, (targetPosition.y - position.y) / 3);
+		DirectX::XMVectorSetZ(toTargetVec, (targetPosition.z - position.z) / 3);
+		Node = owner->GetModel()->FindNode("Pelvis");
+		// Rootノードから左前方向のベクトルを取る
+		sideVec = { -Node->worldTransform._11, -Node->worldTransform._12, -Node->worldTransform._13 };
+		DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(DirectX::XMVectorAdd(toTargetVec, sideVec)));
+		owner->SetMovement(vec, 50.0f);
+		owner->SetRunTimer(1.0f);
 		step++;
 		break;
 	case 1:
-		if (owner->GetHealth() <= 0)
+		// タイマー更新
+		runTimer -= elapsedTime;
+		owner->SetRunTimer(runTimer);
+		if (runTimer <= 0.0f)
 		{
-			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->tailNodeHitSpheres }, owner->attackFrameMin[2], owner->attackFrameMax[2], owner->attackDamage[1]);
-		}
-
-		if (owner->GetModel()->GetCurrentAnimationSeconds() > owner->attackFrameMax[2] + 0.1f)
-		{
-			owner->isPlayerInvincible = false;
-			owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::IdleNormal), false, owner->GetBlendSeconds());
 			step++;
+			break;
 		}
 		break;
 	case 2:
-	{
-		float vx = owner->GetTargetPosition().x - owner->GetPosition().x;
-		float vz = owner->GetTargetPosition().z - owner->GetPosition().z;
-		owner->TurnToTarget(elapsedTime, vx, vz, DirectX::XMConvertToRadians(360) * 3.0f);
-		if (owner->IsTurnToTarget(vx, vz))
-		{
-			owner->isTurnAnimation = false;
-			step++;
-		}
-	}
-	break;
-	case 3:
-		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::Tackle), false, owner->GetBlendSeconds());
+		targetPosition = Player::Instance().GetPosition();
+		position = owner->GetPosition();
+		DirectX::XMVectorSetX(toTargetVec, (targetPosition.x - position.x) / 3);
+		DirectX::XMVectorSetY(toTargetVec, (targetPosition.y - position.y) / 3);
+		DirectX::XMVectorSetZ(toTargetVec, (targetPosition.z - position.z) / 3);
+		// Rootノードから左前方向のベクトルを取る
+		Node = owner->GetModel()->FindNode("Pelvis");
+		sideVec = { -Node->worldTransform._11 * 2, -Node->worldTransform._12, -Node->worldTransform._13 };
+		DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(DirectX::XMVectorAdd(toTargetVec, sideVec)));
+		owner->SetMovement(vec, 100.0f);
+		owner->SetRunTimer(1.0f);
 		step++;
-		break;
-	case 4:
-		if (owner->GetHealth() <= 0)
+	case 3:
+		// タイマー更新
+		runTimer -= elapsedTime;
+		owner->SetRunTimer(runTimer);
+		if (runTimer <= 0.0f)
 		{
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
-			break;
-		}
-		if (!owner->isPlayerInvincible)
-		{
-			owner->AttackAnimationCollision({ owner->tackleHitSpheres }, owner->attackFrameMin[5], owner->attackFrameMax[5], owner->attackDamage[1]);
-		}
-		{
-			Model::Node* Node = owner->GetModel()->FindNode("root");
-			// Rootノードから左前方向のベクトルを取る
-			if (!init)
-			{
-				DirectX::XMVECTOR forwardVec = { Node->worldTransform._31, Node->worldTransform._32, Node->worldTransform._33 };
-				//DirectX::XMVECTOR leftVec = { -Node->worldTransform._11, -Node->worldTransform._12, -Node->worldTransform._13 };
-				//DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(DirectX::XMVectorAdd(forwardVec, leftVec)));
-				DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(forwardVec));
-				init = true;
-			}
-
-			if (owner->GetModel()->GetCurrentAnimationSeconds() > owner->attackFrameMin[5] && owner->GetModel()->GetCurrentAnimationSeconds() < owner->attackFrameMax[5])
-			{
-				// ベクトルの方向に移動
-				owner->SetMovement(vec, 8.0f);
-			}
-		}
-		// アニメーションが終了しているとき
-		if (!owner->GetModel()->IsPlayAnimation())
-		{
-			owner->SetAttackFlg(false);
-			owner->isPlayerInvincible = false;
-			step = 0;
-			init = false;
-			// 攻撃成功を返す
 			return ActionBase<ActorType>::State::Complete;
 		}
 		break;
 	}
-	// 実行中を返す
 	return ActionBase<ActorType>::State::Run;
 }
 //-------------------------------------------------------------
@@ -746,7 +389,6 @@ typename ActionBase<ActorType>::State BreathAction<ActorType>::Run(float elapsed
 		{
 			step = 0;
 			return ActionBase<ActorType>::State::Complete;
-			break;
 		}
 		if (!owner->GetModel()->IsPlayAnimation())
 		{
@@ -1214,7 +856,6 @@ typename ActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapse
 		{
 			step = 0;
 			return ActionBase<ActorType>::State::Complete;
-			break;
 		}
 		runTimer -= elapsedTime;
 		// タイマー更新
@@ -1222,7 +863,7 @@ typename ActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapse
 		// 目標地点をプレイヤー位置に設定
 		owner->SetTargetPosition(Player::Instance().GetPosition());
 		// 目的地点へ移動
-		owner->MoveToTarget(elapsedTime, 1.5f);
+		owner->MoveToTarget(elapsedTime, owner->GetMoveSpeed());
 
 		// プレイヤーとの距離を計算
 		DirectX::XMFLOAT3 position = owner->GetPosition();
@@ -1293,6 +934,29 @@ typename ActionBase<ActorType>::State IdleAction<ActorType>::Run(float elapsedTi
 			return ActionBase<ActorType>::State::Complete;
 		}
 		break;
+	}
+	// 実行中を返す
+	return ActionBase<ActorType>::State::Run;
+}
+//-------------------------------------------------------------
+
+//-------------------------------------------------------------
+// ダメージ
+template <typename ActorType>
+typename ActionBase<ActorType>::State DamageAction<ActorType>::Run(float elapsedTime)
+{
+	switch (step)
+	{
+	case 0:
+		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::GetHit), false, owner->GetBlendSeconds());
+		step++;
+	case 1:
+		if (!owner->GetModel()->IsPlayAnimation())
+		{
+			step = 0;
+			owner->SetDamage(false);
+			return ActionBase<ActorType>::State::Complete;
+		}
 	}
 	// 実行中を返す
 	return ActionBase<ActorType>::State::Run;

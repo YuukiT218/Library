@@ -131,9 +131,9 @@ protected:
 	void DrawDebugGUI() override;
 
 private:
-	int runAnimationIndex = -1;
-	int runFrontAnimationIndex = -1;
-	int runBackAnimationIndex = -1;
+	int runStartAnimationIndex = -1;
+	int runLoopAnimationIndex = -1;
+	int runEndAnimationIndex = -1;
 	int runRightAnimationIndex = -1;
 	int runLeftAnimationIndex = -1;
 	float runAnimationSpeed = 1.0f;
@@ -158,6 +158,7 @@ protected:
 
 private:
 	int jumpAnimationIndex = -1;
+	int fallAnimationIndex = -1;
 	float jumpAnimationSpeed = 1.0f;
 	float jumpAnimationMoveRate = 0.7f;
 	float jumpPower = 10.0f;
@@ -205,20 +206,14 @@ protected:
 	void DrawDebugGUI() override;
 
 private:
-	int dodgeBackAnimationIndex = -1;
+	int dodgeAnimationIndex = -1;
 	float dodgeBackAnimationSpeed = 1.0f;
 	float dodgeBackAnimationTime = 0.7f;
 	int dodgeBackMovePow = 2;
-	int rollingFrontAnimationIndex = -1;
-	int rollingBackAnimationIndex = -1;
-	int rollingRightAnimationIndex = -1;
-	int rollingLeftAnimationIndex = -1;
-	int rollingFrontRightAnimationIndex = -1;
-	int rollingFrontLeftAnimationIndex = -1;
-	int rollingBackRightAnimationIndex = -1;
-	int rollingBackLeftAnimationIndex = -1;
+	int airDodgeAnimationIndex = -1;
 	float rollingFrontAnimationSpeed = 1.0f;
-	float rollingFrontAnimationTime = 0.9f;
+	float dodgeAnimationTime = 1.333f;
+	float airDodgeAnimationTime = 0.583f;
 	int rollingFrontMovePow = 3;
 	float timer = 0.0f;
 	bool isDodgeBack = false;
@@ -263,6 +258,9 @@ protected:
 	PlayerStateId nextStateId = PlayerStateId::EnumCount;
 	InputComboType nextInput;
 	int comboAnimationIndex = -1;
+	int airComboAnimationIndex = -1;
+	int dashAttackAnimationIndex = -1;
+	int airDashAttackAnimationIndex = -1;
 	float comboAttackSpeed = 1.0f;
 	float comboPoseSpeed = 1.0f;
 	float poseFrame = 0.0f;
@@ -373,8 +371,11 @@ protected:
 	void DrawDebugGUI() override;
 
 private:
-	int guardIdleAnimationIndex = -1;
+	int guardStartAnimationIndex = -1;
+	int guardLoopAnimationIndex = -1;
+	int guardEndAnimationIndex = -1;
 	float guardIdleAnimationSpeed = 1.0f;
+	float timer = 0;
 };
 
 // ガード歩きステート

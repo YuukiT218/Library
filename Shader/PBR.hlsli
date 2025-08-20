@@ -3,7 +3,7 @@ struct VS_OUT
     float4 vertex : SV_POSITION;
     float2 texcoord : TEXCOORD;
     float3 normal : NORMAL;
-    float3 position : POSITION;
+    float4 position : POSITION;
     float3 tangent : TANGENT;
     float3 shadow : SHADOW;
 };
@@ -32,12 +32,13 @@ cbuffer CbMaterial : register(b1)
 {
     float adjustMetalness; //  金属質調整
     float adjustRoughness; //  粗さ調整
-    //float normalScale;     //法線マップのスケール
+    float normalScale;     //法線マップのスケール
     float metalicFactor; //金属度
     float roughnessFactor; //粗さ
     float occlusionStrength; //強度
     float metalicindex;
-    float2 material_dummy; //16bite区切り用ダミー
+    float material_Dummy;
+    //float2 material_dummy; //16bite区切り用ダミー
     float4 emissiveColor; //エミッシブ色
 };
 
@@ -49,14 +50,6 @@ cbuffer CbColor : register(b2)
     float4 adjustColor; //色の調整
 }
 
-cbuffer CbConstants : register(b5)
-{
-    float emissivedissolve;
-    float dissolve;
-    float alphaFactor;
-    float dummyconstants;
-    float4 OverwriteColor;
-}
 
 cbuffer CbSetUp : register(b3)
 {
@@ -64,7 +57,16 @@ cbuffer CbSetUp : register(b3)
     float IBLSpecularScale; //スペキュラー調整用
     
     float2 SetUpDummy;
-    float4 setupdummy;
+    //float4 setupdummy;
+}
+
+cbuffer CbConstants : register(b5)
+{
+    float emissivedissolve;
+    float dissolve;
+    float alphaFactor;
+    float dummyconstants;
+    float4 OverwriteColor;
 }
 
 //シャドウマップ用の定数

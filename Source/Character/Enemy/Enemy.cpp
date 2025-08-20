@@ -222,7 +222,7 @@ void Enemy::EditUpdate(float elapsedTime)
 
 	if (model)
 	{
-		model->UpdateAnimation(elapsedTime);
+		model->UpdateAnimation(elapsedTime, this);
 		model->UpdateTransform(transform);
 		//model->UpdateShakeModel(transform, 0.25f);
 	}
@@ -241,7 +241,7 @@ void Enemy::Update(float elapsedTime)
 
 	if (model)
 	{
-		model->UpdateAnimation(elapsedTime/* * HitStop::Instance().GetEnemyTimeScale()*/);
+		model->UpdateAnimation(elapsedTime, this);
 		model->UpdateTransform(transform);
 		//model->UpdateShakeModel(transform, 0.25f);
 	}

@@ -1,8 +1,9 @@
 #include "Weapon.h"
 #include "Graphics/Graphics.h"
 //#include "Character/Enemy/EnemyManager.h"
+#include "Character/Enemy/SilverDragonkin.h"
 #include "Math/Collision.h"
-//#include "System/HitStop.h"
+#include "System/HitStop.h"
 #include <vector>
 #include "Graphics/Light.h"
 
@@ -127,6 +128,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
 
         // 指定のノードと全ての敵を総当たりで衝突処理
         //EnemyManager& enemyManager = EnemyManager::Instance();
+		SilverDragonkin& dragonkin = SilverDragonkin::Instance();
 
         // 全てのプレイヤー攻撃判定と全ての敵の総当たりで衝突処理
         //int enemyCount = enemyManager.GetEnemyCount();
@@ -134,58 +136,59 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
         //{
         //    Enemy* enemy = enemyManager.GetEnemy(j);
 
-        //    std::vector<NodeHitSphere> enemyNode = enemy->GetNodeHitSpheres();
-        //    for (auto& enemyHitSphere : enemyNode)
-        //    {
-        //        Model* enemyModel = enemy->GetModel();
-        //        Model::Node* enemyNode = enemyModel->FindNode(enemyHitSphere.nodeName);
+            std::vector<NodeHitSphere> enemyNode = dragonkin.GetNodeHitSpheres();
+            for (auto& enemyHitSphere : enemyNode)
+            {
+                Model* enemyModel = dragonkin.GetModel();
+                Model::Node* enemyNode = enemyModel->FindNode(enemyHitSphere.nodeName);
 
-        //        // ノード位置取得
-        //        DirectX::XMFLOAT3 enemyNodePosition;
-        //        enemyNodePosition = { enemyNode->worldTransform._41, enemyNode->worldTransform._42, enemyNode->worldTransform._43 };
+                // ノード位置取得
+                DirectX::XMFLOAT3 enemyNodePosition;
+                enemyNodePosition = { enemyNode->worldTransform._41, enemyNode->worldTransform._42, enemyNode->worldTransform._43 };
 
-        //        DirectX::XMFLOAT3 outPosition;
-        //        DirectX::XMFLOAT3 outHitPoint;
-        //        if (Collision::IntersectSphereVsSphere(
-        //            weaponHitPosition[i],
-        //            nodeRadius,
-        //            enemyNodePosition,
-        //            enemyHitSphere.radius,
-        //            outPosition,
-        //            outHitPoint))
-        //        {
-        //            // ダメージを与える
-        //            if (enemy->ApplyDamage(rand() % 200 + config->attackParam.attackDamage, config->attackParam.invisibleTime, true, outHitPoint))
-        //            {
-        //                HitStop::Instance().HitStopStart(config->attackParam.attackHitStopTime, config->attackParam.attackHitStopSpeed, config->attackParam.attackHitStopTime, config->attackParam.attackHitStopSpeed);
-        //                //HitStop::Instance().HitStopStart(3.0f, 0.1f, 3.0f, 0.1f);
+                DirectX::XMFLOAT3 outPosition;
+                DirectX::XMFLOAT3 outHitPoint;
+                if (Collision::IntersectSphereVsSphere(
+                    weaponHitPosition[i],
+                    nodeRadius,
+                    enemyNodePosition,
+                    enemyHitSphere.radius,
+                    outPosition,
+                    outHitPoint))
+                {
+                    // ダメージを与える
+                    //if (enemy->ApplyDamage(rand() % 200 + config->attackParam.attackDamage, config->attackParam.invisibleTime, true, outHitPoint))
+                    {
+                        dragonkin.SetDamage(true);
+                        //HitStop::Instance().HitStopStart(config->attackParam.attackHitStopTime, config->attackParam.attackHitStopSpeed, config->attackParam.attackHitStopTime, config->attackParam.attackHitStopSpeed);
+                        HitStop::Instance().HitStopStart(3.0f, 0.1f, 3.0f, 0.1f);
 
-        //                gamepad.Vibrate(config->attackParam.attackLeftVibrate, config->attackParam.attackRightVibrate);
+                        //gamepad.Vibrate(config->attackParam.attackLeftVibrate, config->attackParam.attackRightVibrate);
 
-        //                attackHitEffectHandle = attackHitEffect->Play(outHitPoint, 0.5f);
+                        //attackHitEffectHandle = attackHitEffect->Play(outHitPoint, 0.5f);
 
-        //                Camera::Instance().SetCameraShakeSwitch(true, 0.2f, 0.5f);
+                        //Camera::Instance().SetCameraShakeSwitch(true, 0.2f, 0.5f);
 
-        //                //// 敵を吹っ飛ばすベクトルを算出
-        //                //DirectX::XMFLOAT3 vec;
-        //                //vec.x = outPosition.x - object->weaponHitPosition[i].x;
-        //                //vec.z = outPosition.z - object->weaponHitPosition[i].z;
-        //                //float length = sqrtf(vec.x * vec.x + vec.z * vec.z);
-        //                //vec.x /= length;
-        //                //vec.z /= length;
+                        //// 敵を吹っ飛ばすベクトルを算出
+                        //DirectX::XMFLOAT3 vec;
+                        //vec.x = outPosition.x - object->weaponHitPosition[i].x;
+                        //vec.z = outPosition.z - object->weaponHitPosition[i].z;
+                        //float length = sqrtf(vec.x * vec.x + vec.z * vec.z);
+                        //vec.x /= length;
+                        //vec.z /= length;
 
-        //                //// XZ平面に吹っ飛ばす力をかける
-        //                //float power = 15.0f;
-        //                //vec.x *= power;
-        //                //vec.z *= power;
-        //                //// Y方向にも力をかける
-        //                //vec.y = 5.0f;
+                        //// XZ平面に吹っ飛ばす力をかける
+                        //float power = 15.0f;
+                        //vec.x *= power;
+                        //vec.z *= power;
+                        //// Y方向にも力をかける
+                        //vec.y = 5.0f;
 
-        //                //// 吹っ飛ばす
-        //                //enemy->AddImpulse(vec);
-        //            }
-        //        }
-        //    }
+                        //// 吹っ飛ばす
+                        //enemy->AddImpulse(vec);
+                    }
+                }
+            }
         //}
     }
 }

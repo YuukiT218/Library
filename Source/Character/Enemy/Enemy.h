@@ -93,12 +93,15 @@ protected:
 
 	std::vector<NodeHitSphere> attackHitSpheres;
 
-public:
+private:
 	bool isFocus = false;
 public:
 	void SetFocus(bool focus) { isFocus = focus; }
 	bool IsFocus() const { return isFocus; }
+	void SetDamage(bool damage) { isDamage = damage; }
+	bool IsDamage() const { return isDamage; }
 	bool actionFlag = true;
+	bool isDamage = false;
 	std::string name = " ";
 
 	virtual std::string GetName() = 0;

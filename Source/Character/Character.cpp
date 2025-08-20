@@ -210,6 +210,17 @@ void Character::AddImpulse(const DirectX::XMFLOAT3& impulse)
     velocity.z += impulse.z;
 }
 
+// ƒ^[ƒQƒbƒg‚Æ‚Ì‹——£‚ðŒvŽZ
+float Character::calcTargetDist(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 targetPosition)
+{
+    float vx = targetPosition.x - position.x;
+    float vy = targetPosition.y - position.y;
+    float vz = targetPosition.z - position.z;
+    float dist = sqrtf(vx * vx + vy * vy + vz * vz);
+
+    return dist;
+}
+
 void Character::initAnimSpeed()
 {
     if (model)
@@ -522,7 +533,7 @@ void Character::UpdateHorizontalVelocity(float elapsedTime)
         float friction = this->friction * elapsedTime;
 
         // ‹ó’†‚É‚¢‚éŽž‚Í–€ŽC—Í‚ðŒ¸‚ç‚·
-        if (isGround == false) friction *= airControl;
+        //if (isGround == false) friction *= airControl;
 
         // –€ŽC‚É‚æ‚é‰¡•ûŒü‚ÌŒ¸‘¬ˆ—
         if (length > friction)

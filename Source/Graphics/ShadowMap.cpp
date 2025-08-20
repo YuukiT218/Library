@@ -212,7 +212,7 @@ void ShadowMap::Draw(const RenderContext& rc, const Model* model)
 		rc.deviceContext->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
 
 		// 描画
-		dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+		//dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 	}
 }
 

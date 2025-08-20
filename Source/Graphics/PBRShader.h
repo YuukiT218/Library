@@ -47,12 +47,13 @@ private:
 	{
 		float adjustMetalness; //  金属質調整
 		float adjustRoughness; //  粗さ調整
-		//float normalScale;     //法線マップのスケール
+		float normalScale;     //法線マップのスケール
 		float metalicFactor;         //金属度
 		float roughnessFactor;       //粗さ
 		float occlusionStrength;//強度
 		float metalicindex;
-		DirectX::XMFLOAT2 material_dummy;//16bite区切り用ダミー
+		float material_Dummy;
+		//DirectX::XMFLOAT2 material_dummy;//16bite区切り用ダミー
 		DirectX::XMFLOAT4 emissiveColor;//エミッシブ色
 	};
 
@@ -79,8 +80,9 @@ private:
 		float IBLSpecularScale = 1.0f; //スペキュラー調整用
 
 		DirectX::XMFLOAT2 SetUpDummy;
-		DirectX::XMFLOAT4 Setupdummy;
+		//DirectX::XMFLOAT4 Setupdummy;
 	};
+	CbSetUp cbSetUp;
 	std::unique_ptr<CbSetUp>			SetUpConstant{};
 
 	static const int ShadowBufferSize = 4;

@@ -475,6 +475,11 @@ public:
 template <typename ActorType>
 void GetHitState<ActorType>::Enter()
 {
+	if (!owner->IsDamage())
+	{
+		isComplete = true;
+	}
+
 	owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::GetHit), false);
 }
 
@@ -485,7 +490,7 @@ void GetHitState<ActorType>::Execute(float elapsedTime)
 	if (!owner->GetModel()->IsPlayAnimation())
 	{
 		// Pursuitステートに遷移
-		parentState->ChangeState("Pursuit");
+		owner->SetDamage(false);
 		isComplete = true;
 	}
 }
