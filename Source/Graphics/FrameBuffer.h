@@ -27,4 +27,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>		depthStencilView;
 	D3D11_VIEWPORT										viewport;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	colorMap;
+	DXGI_FORMAT                                         format = DXGI_FORMAT_R8G8B8A8_UNORM;
 };

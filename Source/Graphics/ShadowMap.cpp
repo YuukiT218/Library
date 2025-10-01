@@ -9,10 +9,14 @@ ShadowMap::ShadowMap(ID3D11Device* device)
 	// 入力レイアウト
 	D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
 	{
-		// 頂点座標変換しかしないので必要な要素だけを記述。
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"BONE_WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"BONE_INDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		// ボーン影響データを追加
+		// ※並び順をVertex構造体の要素と同じにする
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BONE_WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{ "BONE_INDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		//{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		//{ "TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		//{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	};
 
 	// 頂点シェーダー
@@ -160,20 +164,22 @@ void ShadowMap::Begin(const RenderContext& rc, const DirectX::XMFLOAT3& position
 	// ライトビュープロジェクション行列を作成
 	// 光源から見たビュー行列を作成
 	const DirectionalLight& directionalLight = rc.lightManager->GetDirectionalLight();
-	DirectX::XMVECTOR LightDirection = DirectX::XMLoadFloat4(&directionalLight.direction);
+	DirectX::XMFLOAT3 dir = { directionalLight.direction.x, directionalLight.direction.y, directionalLight.direction.z };
+	DirectX::XMVECTOR LightDirection = DirectX::XMLoadFloat3(&dir);
 	LightDirection = DirectX::XMVector3Normalize(LightDirection);
 	DirectX::XMVECTOR Up = DirectX::XMVectorSet(0, 1, 0, 0);
 	DirectX::XMVECTOR Focus = DirectX::XMLoadFloat3(&position);
-	DirectX::XMVECTOR Eye = DirectX::XMVectorSubtract(Focus, DirectX::XMVectorScale(LightDirection, 50.0f));
+	DirectX::XMVECTOR Eye = DirectX::XMVectorAdd(Focus, DirectX::XMVectorScale(LightDirection, 100.0f));
 	DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(Eye, Focus, Up);
 	// プロジェクション行列は平行投影で作成
-	DirectX::XMMATRIX Projection = DirectX::XMMatrixOrthographicLH(drawRect, drawRect, 0.1f, 200.0f);
+	DirectX::XMMATRIX Projection = DirectX::XMMatrixOrthographicLH(drawRect, drawRect, 0.1f, 2000.0f);
 	DirectX::XMMATRIX ViewProjection = DirectX::XMMatrixMultiply(View, Projection);
 	DirectX::XMStoreFloat4x4(&lightViewProjection, ViewProjection);
 
+
 	// シーン用定数バッファ
 	CbScene cbScene;
-	DirectX::XMStoreFloat4x4(&cbScene.lightViewProjection, ViewProjection);
+	cbScene.lightViewProjection = lightViewProjection;
 	dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, 0, &cbScene, 0, 0);
 }
 
@@ -212,7 +218,7 @@ void ShadowMap::Draw(const RenderContext& rc, const Model* model)
 		rc.deviceContext->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
 
 		// 描画
-		//dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
+		dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 	}
 }
 

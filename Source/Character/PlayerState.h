@@ -267,6 +267,7 @@ protected:
 	float endFrame = 0.0f;
 	float nextShiftFrame = 0.0f;
 	bool nextShiftReady = false;
+	bool isBakeY = true;
 
 	// 敵との距離の移動値と回転値
 	float moveRate = 1.0f;

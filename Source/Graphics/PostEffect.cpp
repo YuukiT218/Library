@@ -12,14 +12,14 @@ PostEffect::PostEffect(ID3D11Device* device)
 		"Data/Shader/FullScreenQuadVS.cso",
 		nullptr, 0,
 		nullptr,
-		fullscreenQuadVS.GetAddressOf());
+		fullscreenQuadVS.ReleaseAndGetAddressOf());
 
 	// 輝度抽出ピクセルシェーダー読み込み
 	GpuResourceUtils::LoadPixelShader(
 		device,
 		//"Data/Shader/LuminanceExtractionPS.cso",
 		"Data/Shader/GlowExtractionPS.cso",
-		luminanceExtractionPS.GetAddressOf());
+		luminanceExtractionPS.ReleaseAndGetAddressOf());
 
 	// 定数バッファ作成
 	GpuResourceUtils::CreateConstantBuffer(
@@ -142,88 +142,87 @@ PostEffect::PostEffect(ID3D11Device* device)
 	cbFpost.GrayWeight = 0.0f;//グレースケール
 }
 
-//void PostEffect::SetUp(float elapsedTime)
-//{
-//
-//	if (isParryFlash)
-//	{
-//		flashTimer += elapsedTime;
-//
-//		// 0.0～1.0で減衰
-//		float duration = 0.2f; // 200ms
-//		// FlashParams に送る
-//		if (cbFpost.flashAmount < 1.0f)
-//		{
-//			cbFpost.flashAmount = flashTimer * 11;
-//			cbFpost.chromatic_aberration = 0.050;
-//			if (radialRadius < 100.0f)radialRadius = 100.0f;
-//			cbFpost.concentratedLineDatas.intensity = 1.4f;
-//			cbFpost.concentratedLineDatas.useAnimation = 1.0f;
-//		}
-//		else
-//		{
-//			cbFpost.flashAmount = 1.0f;
-//			cbFpost.flashMask = (flashTimer - cbFpost.flashAmount / 11) * 2500;
-//			cbFpost.radialBlurDatas.maskRadius = (flashTimer - cbFpost.flashAmount / 11) * 2500;
-//			cbFpost.chromaticMask = (flashTimer - cbFpost.flashAmount / 11) * 2500;
-//			if (cbFpost.flashMask >= 1000.0f)
-//			{
-//				cbFpost.flashAmount = 0.0f;
-//				flashTimer = 0.0f;
-//				cbFpost.flashMask = 0.0f;
-//				cbFpost.chromatic_aberration = 0.005;
-//				radialRadius = 0.0f;
-//				cbFpost.concentratedLineDatas.intensity = 0.0f;
-//				cbFpost.concentratedLineDatas.useAnimation = 0.0f;
-//				isParryFlash = false;
-//			}
-//		}
-//
-//	}
-//
-//	AccelTimer = Camera::Instance().GetAcceleration();
-//
-//	if (AccelTimer > 0.0f)
-//	{
-//		AccelTimer -= elapsedTime;
-//
-//		cbFpost.AccelWeight = 1.0f;
-//	}
-//	else
-//	{
-//		cbFpost.AccelWeight = 0.0f;
-//	}
-//	Camera::Instance().SetAcceleration(AccelTimer);
-//
-//	ElderDragon* dragon = EnemyManager::Instance().FindElderDragon();
-//	if (dragon->GetIsRoarUsing())
-//	{
-//		if (radialRadius < 200.0f)radialRadius = 200.0f;
-//	}
-//	static bool RoarUsed = false;
-//	if (dragon->GetRoarUsed())
-//	{
-//		RoarUsed = dragon->GetRoarUsed();
-//	}
-//	if (RoarUsed)
-//	{
-//		if (radialRadius >= 0.0f)
-//		{
-//			float Minus = 200.0f;
-//			radialRadius -= elapsedTime * Minus;
-//		}
-//		else { RoarUsed = false; }
-//	}
-//
-//	if (Camera::Instance().GetIsParry())
-//	{
-//		cbFpost.GrayWeight = 1.0f;
-//	}
-//	else
-//	{
-//		cbFpost.GrayWeight = 0.0f;
-//	}
-//}
+void PostEffect::SetUp(float elapsedTime)
+{
+	//if (isParryFlash)
+	//{
+	//	flashTimer += elapsedTime;
+
+	//	// 0.0～1.0で減衰
+	//	float duration = 0.2f; // 200ms
+	//	// FlashParams に送る
+	//	if (cbFpost.flashAmount < 1.0f)
+	//	{
+	//		cbFpost.flashAmount = flashTimer * 11;
+	//		cbFpost.chromatic_aberration = 0.050;
+	//		if (radialRadius < 100.0f)radialRadius = 100.0f;
+	//		cbFpost.concentratedLineDatas.intensity = 1.4f;
+	//		cbFpost.concentratedLineDatas.useAnimation = 1.0f;
+	//	}
+	//	else
+	//	{
+	//		cbFpost.flashAmount = 1.0f;
+	//		cbFpost.flashMask = (flashTimer - cbFpost.flashAmount / 11) * 2500;
+	//		cbFpost.radialBlurDatas.maskRadius = (flashTimer - cbFpost.flashAmount / 11) * 2500;
+	//		cbFpost.chromaticMask = (flashTimer - cbFpost.flashAmount / 11) * 2500;
+	//		if (cbFpost.flashMask >= 1000.0f)
+	//		{
+	//			cbFpost.flashAmount = 0.0f;
+	//			flashTimer = 0.0f;
+	//			cbFpost.flashMask = 0.0f;
+	//			cbFpost.chromatic_aberration = 0.005;
+	//			radialRadius = 0.0f;
+	//			cbFpost.concentratedLineDatas.intensity = 0.0f;
+	//			cbFpost.concentratedLineDatas.useAnimation = 0.0f;
+	//			isParryFlash = false;
+	//		}
+	//	}
+
+	//}
+
+	//AccelTimer = Camera::Instance().GetAcceleration();
+
+	//if (AccelTimer > 0.0f)
+	//{
+	//	AccelTimer -= elapsedTime;
+
+	//	cbFpost.AccelWeight = 1.0f;
+	//}
+	//else
+	//{
+	//	cbFpost.AccelWeight = 0.0f;
+	//}
+	//Camera::Instance().SetAcceleration(AccelTimer);
+
+	//ElderDragon* dragon = EnemyManager::Instance().FindElderDragon();
+	//if (dragon->GetIsRoarUsing())
+	//{
+	//	if (radialRadius < 200.0f)radialRadius = 200.0f;
+	//}
+	//static bool RoarUsed = false;
+	//if (dragon->GetRoarUsed())
+	//{
+	//	RoarUsed = dragon->GetRoarUsed();
+	//}
+	//if (RoarUsed)
+	//{
+	//	if (radialRadius >= 0.0f)
+	//	{
+	//		float Minus = 200.0f;
+	//		radialRadius -= elapsedTime * Minus;
+	//	}
+	//	else { RoarUsed = false; }
+	//}
+
+	//if (Camera::Instance().GetIsParry())
+	//{
+	//	cbFpost.GrayWeight = 1.0f;
+	//}
+	//else
+	//{
+	//	cbFpost.GrayWeight = 0.0f;
+	//}
+}
 
 // 開始処理
 void PostEffect::Begin(const RenderContext& rc)

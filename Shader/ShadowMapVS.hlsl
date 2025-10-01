@@ -7,13 +7,16 @@ cbuffer CbScene : register(b7)
 
 float4 main(
     float4 position : POSITION,
-    float4 boneWeights : BONE_WEIGHTS,
-    uint4 boneIndices : BONE_INDICES
+    float4 boneWeights  : BONE_WEIGHTS,
+    uint4  boneIndices  :BONE_INDICES
+	//float3 normal,
+	//float4 tangent,
+	//float2 texcoord
     // 今回はピクセルシェーダーを使用せず、頂点変換のみ行う
-    ) : SV_POSITION
+    ) : SV_POSITION 
 {
     // ここで計算されたZ値が深度テクスチャに保存される
     position = SkinningPosition(position, boneWeights, boneIndices);
      
-    return mul(position, lightViewProjection);
+    return mul(float4(position.xyz, 1.0), lightViewProjection);
 }

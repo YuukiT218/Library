@@ -72,7 +72,7 @@ cbuffer CbConstants : register(b5)
 //シャドウマップ用の定数
 //	カスケードシャドウマップ
 static const int ShadowBufferSize = 4;
-cbuffer CbShadow : register(b8)
+cbuffer CbShadow : register(b4)
 {
     row_major float4x4 CascadeLightViewProjection[ShadowBufferSize];
     float4 CascadeShadowBias;

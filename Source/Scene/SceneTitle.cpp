@@ -1,5 +1,10 @@
 #include "Graphics/Graphics.h"
 #include "SceneTitle.h"
+#include "Input/Input.h"
+#include "Scene/SceneManager.h"
+#include "Scene/SceneLoading.h"
+#include "Scene/SceneGame.h"
+#include <map>
 
 SceneTitle::SceneTitle()
 {
@@ -22,19 +27,19 @@ void SceneTitle::Finalize()
 //更新処理
 void SceneTitle::Update(float elapsedTime)
 {
-	//GamePad& gamePad = Input::Instance().GetGamePad();
-	////何かボタンを押したらゲームシーンへ切り替え
-	//const GamePadButton anyButton =
-	//	GamePad::BTN_A
-	//	| GamePad::BTN_B
-	//	| GamePad::BTN_X
-	//	| GamePad::BTN_Y;
+	GamePad& gamePad = Input::Instance().GetGamePad();
+	//何かボタンを押したらゲームシーンへ切り替え
+	const GamePadButton anyButton =
+		GamePad::BTN_A
+		| GamePad::BTN_B
+		| GamePad::BTN_X
+		| GamePad::BTN_Y;
 
-	//if (gamePad.GetButtonDown() & anyButton)
-	//{
-	//	//SceneManager::Instance().ChangeScene(new SceneLoading);
-	//	SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame));
-	//}
+	if (gamePad.GetButtonDown() & anyButton)
+	{
+		//SceneManager::Instance().ChangeScene(new SceneLoading);
+		SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame));
+	}
 }
 
 //描画処理
@@ -42,15 +47,27 @@ void SceneTitle::Render(float elapsedTime)
 {
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
-	ID3D11RenderTargetView* rtv = graphics.GetRenderTargetView();
-	ID3D11DepthStencilView* dsv = graphics.GetDepthStencilView();
-	ModelRenderer* modelRenderer = graphics.GetModelRenderer();
 
-	//画面クリア＆レンダーターゲット設定
-	FLOAT color[] = { 0.0f, 0.0f, 0.5f, 1.0f };
-	dc->ClearRenderTargetView(rtv, color);
-	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	dc->OMSetRenderTargets(1, &rtv, dsv);
+	// 画面クリア＆レンダーターゲット設定
+	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };	// RGBA(0.0～1.0);
+	std::map<FrameBufferId, FrameBuffer*> buffers;
+	for (int i = 0; i < static_cast<int>(FrameBufferId::EnumCount); i++)
+	{
+		buffers[static_cast<FrameBufferId>(i)] = Graphics::Instance().GetFrameBuffer(static_cast<FrameBufferId>(i));
+		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, color);
+	}
+	buffers[FrameBufferId::Display]->SetRenderTargets(dc);
+
+	RenderState* renderState = graphics.GetRenderState();
+
+	ID3D11SamplerState* samplers[] =
+	{
+		renderState->GetSamplerState(SamplerState::PointClamp)
+	};
+	dc->PSSetSamplers(0, _countof(samplers), samplers);
+
+	FLOAT blendFactor[4] = { 1.0f,1.0f,1.0f,1.0f };
+	UINT sampleMask = 0xFFFFFFFF;
 
 	//2Dスプライト描画
 	{

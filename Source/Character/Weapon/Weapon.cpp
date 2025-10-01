@@ -1,6 +1,5 @@
 #include "Weapon.h"
 #include "Graphics/Graphics.h"
-//#include "Character/Enemy/EnemyManager.h"
 #include "Character/Enemy/SilverDragonkin.h"
 #include "Math/Collision.h"
 #include "System/HitStop.h"

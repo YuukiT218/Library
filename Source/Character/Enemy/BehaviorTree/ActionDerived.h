@@ -7,22 +7,34 @@
 //-------------------------------------------------------------
 // 行動処理クラス宣言
 //-------------------------------------------------------------
-// 引っ掻き攻撃行動
+// 斬撃コンボ1
 template <typename ActorType>
-class ScratchAction : public ActionBase<ActorType>
+class SlashCombo1Action : public ActionBase<ActorType>
 {
 public:
-	ScratchAction(ActorType* actor) :ActionBase(actor) {}
+	SlashCombo1Action(ActorType* actor) :ActionBase(actor) {}
 	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Combo_Attack_03_All_Seq_0");
 };
 
-// 叩きつけ攻撃行動
+// 斬撃コンボ2
 template <typename ActorType>
-class SlapAction : public ActionBase<ActorType>
+class SlashCombo2Action : public ActionBase<ActorType>
 {
 public:
-	SlapAction(ActorType* actor) :ActionBase(actor) {}
+	SlashCombo2Action(ActorType* actor) :ActionBase(actor) {}
 	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Combo_Attack_01_All_Seq_0");
+};
+
+// 突進斬り
+template <typename ActorType>
+class DashSlashAction : public ActionBase<ActorType>
+{
+public:
+	DashSlashAction(ActorType* actor) : ActionBase(actor) {}
+	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Run_Attack_01_Seq_0");
 };
 
 // 三連テレポート
@@ -86,6 +98,7 @@ class PursuitAction : public ActionBase<ActorType>
 public:
 	PursuitAction(ActorType* actor) :ActionBase(actor) {}
 	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Run_Combat_Loop_F_0_Seq_0");
 };
 
 // 徘徊行動
@@ -95,6 +108,7 @@ class WanderAction : public ActionBase<ActorType>
 public:
 	WanderAction(ActorType* actor) :ActionBase(actor) {}
 	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Walk_Combat_Loop_F_0_RM_Seq_0");
 };
 
 // 待機行動
@@ -104,6 +118,7 @@ class IdleAction : public ActionBase<ActorType>
 public:
 	IdleAction(ActorType* actor) :ActionBase(actor) {}
 	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Idle_Combat_Seq_0");
 };
 
 // 逃走行動
@@ -131,6 +146,7 @@ class DamageAction : public ActionBase<ActorType>
 public:
 	DamageAction(ActorType* actor) :ActionBase(actor) {}
 	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Hit_Large_Combat_F_Seq_0");
 };
 
 // 死亡
@@ -178,15 +194,15 @@ private:
 //  行動処理クラス処理部分
 //-------------------------------------------------------------
 //-------------------------------------------------------------
-// 引っ掻き攻撃行動
+// 斬撃コンボ1
 template <typename ActorType>
-typename ActionBase<ActorType>::State ScratchAction<ActorType>::Run(float elapsedTime)
+typename ActionBase<ActorType>::State SlashCombo1Action<ActorType>::Run(float elapsedTime)
 {
+	// 攻撃対象設定
+	owner->SetTargetPosition(Player::Instance().GetPosition());
 	switch (step)
 	{
 	case 0:
-		// 攻撃対象設定
-		owner->SetTargetPosition(Player::Instance().GetPosition());
 		// 目的地点へ移動
 		{
 			float vx = owner->GetTargetPosition().x - owner->GetPosition().x;
@@ -200,15 +216,13 @@ typename ActionBase<ActorType>::State ScratchAction<ActorType>::Run(float elapse
 		}
 		break;
 	case 1:
-		step++;
-		break;
-	case 2:
 		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::Attack01), false, owner->GetBlendSeconds());
+		owner->GetModel()->PlayRootMotion(animationIndex, false, true, owner->GetBlendSeconds(), "root");
 		owner->SetAttackFlg(true);
 		step++;
 		break;
-	case 3:
+	case 2:
+		owner->MoveToTarget(elapsedTime, 0.1f);
 		if (!owner->isPlayerInvincible)
 		{
 			owner->AttackAnimationCollision({ owner->rightArmNodeHitSpheres }, owner->attackFrameMin[0], owner->attackFrameMax[0], owner->attackDamage[0]);
@@ -240,15 +254,15 @@ typename ActionBase<ActorType>::State ScratchAction<ActorType>::Run(float elapse
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
-// 叩きつけ攻撃行動
+// 斬撃コンボ2
 template <typename ActorType>
-typename ActionBase<ActorType>::State SlapAction<ActorType>::Run(float elapsedTime)
+typename ActionBase<ActorType>::State SlashCombo2Action<ActorType>::Run(float elapsedTime)
 {
+	// 攻撃対象設定
+	owner->SetTargetPosition(Player::Instance().GetPosition());
 	switch (step)
 	{
 	case 0:
-		// 攻撃対象設定
-		owner->SetTargetPosition(Player::Instance().GetPosition());
 		// 目的地点へ移動
 		{
 			float vx = owner->GetTargetPosition().x - owner->GetPosition().x;
@@ -262,15 +276,54 @@ typename ActionBase<ActorType>::State SlapAction<ActorType>::Run(float elapsedTi
 		}
 		break;
 	case 1:
-		step++;
-		break;
-	case 2:
 		// アニメーション再生
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::Attack02), false, owner->GetBlendSeconds());
+		owner->GetModel()->PlayRootMotion(animationIndex, false, true, owner->GetBlendSeconds(), "root");
 		owner->SetAttackFlg(true);
 		step++;
 		break;
-	case 3:
+	case 2:
+		owner->MoveToTarget(elapsedTime, 0.1f);
+		if (!owner->isPlayerInvincible)
+		{
+			owner->AttackAnimationCollision({ owner->rightArmNodeHitSpheres }, owner->attackFrameMin[0], owner->attackFrameMax[0], owner->attackDamage[0]);
+		}
+		// アニメーションが終了しているとき
+		if (!owner->GetModel()->IsPlayAnimation())
+		{
+			owner->isPlayerInvincible = false;
+			step = 0;
+			// 攻撃成功を返す
+			return ActionBase<ActorType>::State::Complete;
+		}
+		break;
+	}
+	if (owner->IsDamage())
+	{
+		step = 0;
+		return ActionBase<ActorType>::State::Failed;
+	}
+	// 実行中を返す
+	return ActionBase<ActorType>::State::Run;
+}
+//-------------------------------------------------------------
+
+//-------------------------------------------------------------
+// 突進斬り
+template<typename ActorType>
+typename ActionBase<ActorType>::State DashSlashAction<ActorType>::Run(float elapsedTime)
+{
+	switch (step)
+	{
+	case 0:
+		// 攻撃対象設定
+		owner->SetTargetPosition(Player::Instance().GetPosition());
+		// アニメーション再生
+		owner->GetModel()->PlayRootMotion(animationIndex, false, true, owner->GetBlendSeconds(), "root");
+		owner->SetAttackFlg(true);
+		step++;
+		break;
+	case 1:
+		owner->MoveToTarget(elapsedTime, 0.1f);
 		if (!owner->isPlayerInvincible)
 		{
 			owner->AttackAnimationCollision({ owner->rightArmNodeHitSpheres }, owner->attackFrameMin[0], owner->attackFrameMax[0], owner->attackDamage[0]);
@@ -304,52 +357,43 @@ typename ActionBase<ActorType>::State TripleTeleportAction<ActorType>::Run(float
 	DirectX::XMFLOAT3 vec;
 	DirectX::XMVECTOR toTargetVec = {};
 	DirectX::XMVECTOR sideVec = {};
-	Model::Node* Node;
+	Model::Node* Node = owner->GetModel()->FindNode("pelvis");
+	DirectX::XMFLOAT3 targetPosition = Player::Instance().GetPosition();
+	DirectX::XMFLOAT3 position = owner->GetPosition();
+
 	switch (step)
 	{
-	case 0:
-		DirectX::XMFLOAT3 targetPosition = Player::Instance().GetPosition();
-		DirectX::XMFLOAT3 position = owner->GetPosition();
-		DirectX::XMVectorSetX(toTargetVec, (targetPosition.x - position.x) / 3);
-		DirectX::XMVectorSetY(toTargetVec, (targetPosition.y - position.y) / 3);
-		DirectX::XMVectorSetZ(toTargetVec, (targetPosition.z - position.z) / 3);
-		Node = owner->GetModel()->FindNode("Pelvis");
-		// Rootノードから左前方向のベクトルを取る
+	case 0: // 左へ切り返し
+		// 左方向ベクトル
 		sideVec = { -Node->worldTransform._11, -Node->worldTransform._12, -Node->worldTransform._13 };
+		// プレイヤー方向ベクトル
+		toTargetVec = { (targetPosition.x - position.x) / 3, (targetPosition.y - position.y) / 3, (targetPosition.z - position.z) / 3 };
 		DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(DirectX::XMVectorAdd(toTargetVec, sideVec)));
-		owner->SetMovement(vec, 50.0f);
-		owner->SetRunTimer(1.0f);
+		owner->SetMovement(vec, 15.0f);
+		owner->SetRunTimer(0.7f); // 切り返し時間
 		step++;
 		break;
-	case 1:
-		// タイマー更新
-		runTimer -= elapsedTime;
+	case 1: // 右へ切り返し
+		runTimer = owner->GetRunTimer() - elapsedTime;
 		owner->SetRunTimer(runTimer);
 		if (runTimer <= 0.0f)
 		{
+			sideVec = { Node->worldTransform._11, Node->worldTransform._12, Node->worldTransform._13 };
+			toTargetVec = { (targetPosition.x - position.x) / 3, (targetPosition.y - position.y) / 3, (targetPosition.z - position.z) / 3 };
+			DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(DirectX::XMVectorAdd(toTargetVec, sideVec)));
+			owner->SetMovement(vec, 15.0f);
+			owner->SetRunTimer(0.7f);
 			step++;
-			break;
 		}
 		break;
-	case 2:
-		targetPosition = Player::Instance().GetPosition();
-		position = owner->GetPosition();
-		DirectX::XMVectorSetX(toTargetVec, (targetPosition.x - position.x) / 3);
-		DirectX::XMVectorSetY(toTargetVec, (targetPosition.y - position.y) / 3);
-		DirectX::XMVectorSetZ(toTargetVec, (targetPosition.z - position.z) / 3);
-		// Rootノードから左前方向のベクトルを取る
-		Node = owner->GetModel()->FindNode("Pelvis");
-		sideVec = { -Node->worldTransform._11 * 2, -Node->worldTransform._12, -Node->worldTransform._13 };
-		DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(DirectX::XMVectorAdd(toTargetVec, sideVec)));
-		owner->SetMovement(vec, 100.0f);
-		owner->SetRunTimer(1.0f);
-		step++;
-	case 3:
-		// タイマー更新
-		runTimer -= elapsedTime;
+	case 2: // 最後にプレイヤー方向へ
+		runTimer = owner->GetRunTimer() - elapsedTime;
 		owner->SetRunTimer(runTimer);
 		if (runTimer <= 0.0f)
 		{
+			toTargetVec = { (targetPosition.x - position.x), (targetPosition.y - position.y), (targetPosition.z - position.z) };
+			DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(toTargetVec));
+			owner->SetMovement(vec, 15.0f);
 			step = 0;
 			return ActionBase<ActorType>::State::Complete;
 		}
@@ -793,7 +837,7 @@ typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsed
 	{
 	case 0:
 		// 徘徊モーション設定
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::WalkFWD), true, owner->GetBlendSeconds());
+		owner->GetModel()->PlayRootMotion(animationIndex, true, true, owner->GetBlendSeconds(), "root");
 		step++;
 		break;
 	case 1:
@@ -801,7 +845,6 @@ typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsed
 		{
 			step = 0;
 			return ActionBase<ActorType>::State::Complete;
-			break;
 		}
 		// 目的地点までのXZ平面での距離判定
 		DirectX::XMFLOAT3 position = owner->GetPosition();
@@ -820,7 +863,7 @@ typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsed
 		}
 
 		// 目的地点へ移動
-		owner->MoveToTarget(elapsedTime, 0.5f);
+		owner->MoveToTarget(elapsedTime, 0.1f);
 
 		// プレイヤー索敵成功したら
 		if (owner->SearchPlayer())
@@ -830,6 +873,11 @@ typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsed
 			return ActionBase<ActorType>::State::Complete;
 		}
 		break;
+	}
+	if (owner->IsDamage())
+	{
+		step = 0;
+		return ActionBase<ActorType>::State::Failed;
 	}
 	// 実行中を返す
 	return ActionBase<ActorType>::State::Run;
@@ -848,7 +896,7 @@ typename ActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapse
 		// 目標地点をプレイヤー位置に設定
 		owner->SetTargetPosition(Player::Instance().GetPosition());
 		owner->SetRunTimer(Mathf::RandomRange(2.0f, 3.0f));
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::WalkFWD), true, owner->GetBlendSeconds());
+		owner->GetModel()->PlayAnimation(animationIndex, true, owner->GetBlendSeconds());
 		step++;
 		break;
 	case 1:
@@ -889,6 +937,11 @@ typename ActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapse
 		}
 		break;
 	}
+	if (owner->IsDamage())
+	{
+		step = 0;
+		return ActionBase<ActorType>::State::Failed;
+	}
 	// 実行中を返す
 	return ActionBase<ActorType>::State::Run;
 }
@@ -906,11 +959,11 @@ typename ActionBase<ActorType>::State IdleAction<ActorType>::Run(float elapsedTi
 		owner->SetRunTimer(Mathf::RandomRange(3.0f, 5.0f));
 		if (owner->GetHealth() < (owner->GetMaxHealth() * 0.3))
 		{
-			owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::IdleDying), true, owner->GetBlendSeconds());
+			owner->GetModel()->PlayAnimation(animationIndex, true, owner->GetBlendSeconds());
 		}
 		else
 		{
-			owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::IdleNormal), true, owner->GetBlendSeconds());
+			owner->GetModel()->PlayAnimation(animationIndex, true, owner->GetBlendSeconds());
 		}
 		step++;
 		break;
@@ -935,6 +988,11 @@ typename ActionBase<ActorType>::State IdleAction<ActorType>::Run(float elapsedTi
 		}
 		break;
 	}
+	if (owner->IsDamage())
+	{
+		step = 0;
+		return ActionBase<ActorType>::State::Failed;
+	}
 	// 実行中を返す
 	return ActionBase<ActorType>::State::Run;
 }
@@ -948,13 +1006,15 @@ typename ActionBase<ActorType>::State DamageAction<ActorType>::Run(float elapsed
 	switch (step)
 	{
 	case 0:
-		owner->GetModel()->PlayAnimation(static_cast<int>(ActorType::EnemyAnimation::GetHit), false, owner->GetBlendSeconds());
+		owner->SetTargetPosition(Player::Instance().GetPosition());
+		owner->MoveToTarget(elapsedTime, 0);
+		owner->SetDamage(false);
+		owner->GetModel()->PlayRootMotion(animationIndex, false, true, owner->GetBlendSeconds(), "root");
 		step++;
 	case 1:
-		if (!owner->GetModel()->IsPlayAnimation())
+		if (!owner->GetModel()->IsPlayAnimation() || owner->IsDamage())
 		{
 			step = 0;
-			owner->SetDamage(false);
 			return ActionBase<ActorType>::State::Complete;
 		}
 	}

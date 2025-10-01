@@ -9,6 +9,173 @@
 #include <unordered_map>
 #include <imgui.h>
 
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
+// ラッパー構造体
+struct Float3 {
+	DirectX::XMFLOAT3 value;
+
+	Float3() : value(0, 0, 0) {}
+	Float3(float x, float y, float z) : value(x, y, z) {}
+	Float3(const DirectX::XMFLOAT3& v) : value(v) {}
+	operator DirectX::XMFLOAT3() const { return value; }
+
+	float& x() { return value.x; }
+	float& y() { return value.y; }
+	float& z() { return value.z; }
+
+	const float& x() const { return value.x; }
+	const float& y() const { return value.y; }
+	const float& z() const { return value.z; }
+};
+
+// JSON変換
+inline void to_json(json& j, const Float3& v) {
+	j = json::array({ v.value.x, v.value.y, v.value.z });
+}
+
+inline void from_json(const json& j, Float3& v) {
+	float x = j.at(0).get<float>();
+	float y = j.at(1).get<float>();
+	float z = j.at(2).get<float>();
+	v.value = DirectX::XMFLOAT3(x, y, z);
+}
+
+struct CameraKeyframe {
+	float time;
+	float range;
+	Float3 eyeOffset;
+	Float3 targetOffset;
+	float savedYaw = 0.0f;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CameraKeyframe, time, range, eyeOffset, targetOffset, savedYaw)
+
+enum class EventType {
+	Camera,
+	Effect,
+	// 必要に応じて追加
+};
+// 変換用マップ
+NLOHMANN_JSON_SERIALIZE_ENUM(EventType, {
+	{EventType::Camera, "Camera"},
+	{EventType::Effect, "Effect"}
+	})
+
+	enum class AnimationFlag
+{
+	None,
+	Attack,
+	Invincible,
+	Parry
+};
+
+// enum <-> string 変換のための定義
+NLOHMANN_JSON_SERIALIZE_ENUM(AnimationFlag, {
+	{AnimationFlag::None, "None"},
+	{AnimationFlag::Attack, "Attack"},
+	{AnimationFlag::Invincible, "Invincible"},
+	{AnimationFlag::Parry, "Parry"},
+	})
+
+	struct Keyframe {
+	float time;       // 0.0～1.0
+	float value;      // 0.0～3.0
+	float handleOffsetX = 0.05f;  // ハンドルのオフセット（自動）
+	float handleOffsetY = 0.0f;
+	float inTangent;
+	float outTangent;
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Keyframe, time, value, handleOffsetX, handleOffsetY, inTangent, outTangent)
+
+struct AnimationAttribute
+{
+	AnimationFlag flag;  // 属性の種類（攻撃、無敵、パリィなど）
+	float startTime;     // 開始時間（秒）
+	float endTime;       // 終了時間（秒）
+
+	// 任意：指定時間にこの属性が有効かどうか
+	bool IsActive(float currentTime) const
+	{
+		return currentTime >= startTime && currentTime <= endTime;
+	}
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationAttribute, flag, startTime, endTime)
+
+struct AnimationEvent
+{
+	float timeInSeconds;
+	float timeOutSeconds;
+	EventType eventType; //カメラやエフェクトなど
+	std::string eventName; //EventCamera1などイベントタイプの中で何をするかを判別
+
+	bool IsActive(float currentTime) const
+	{
+		return currentTime >= timeInSeconds && currentTime <= timeOutSeconds;
+	}
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationEvent, timeInSeconds, timeOutSeconds, eventType, eventName)
+
+struct AttackAnimParam
+{
+	float startTime = 0.2f;//先行入力受付開始フレーム
+	float endTime = 0.3f;//先行終了受付開始フレーム
+
+	// 敵との距離の移動値と回転値
+	float moveRate = 1.0f;
+	float turnRate = 1.0f;
+
+	//敵との距離に応じて移動値を調整
+	float forwardPower = 0.0f;
+	float forwardFrame = 0.0f;
+	bool forwarded = false;
+
+	// 攻撃判定必要変数
+	int   attackDamage = 1.0f;
+	float invisibleTime = 0.5f;
+
+	// コントローラーの振動変数
+	float attackLeftVibrate = 1.0f;
+	float attackRightVibrate = 1.0f;
+
+	// 攻撃時ヒットストップ変数
+	float attackHitStopTime = 1.0f;
+	float attackHitStopSpeed = 0.1f;
+
+	bool IsActive(float currentTime) const
+	{
+		return currentTime >= startTime && currentTime <= endTime;
+	}
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
+	startTime, endTime,
+	moveRate, turnRate,
+	forwardPower, forwardFrame, forwarded,
+	attackDamage, invisibleTime,
+	attackLeftVibrate, attackRightVibrate,
+	attackHitStopTime, attackHitStopSpeed)
+
+
+	struct AnimationConfig
+{
+	std::string characterName;
+	int animationIndex;
+	std::vector<Keyframe> speedCurve;
+	std::vector<AnimationEvent> events;
+	AnimationAttribute attribute;
+	std::vector<CameraKeyframe> cameraKeyframes;
+	AttackAnimParam attackParam; // ← 追加
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationConfig,
+	characterName,
+	animationIndex,
+	speedCurve,
+	events,
+	attribute,
+	cameraKeyframes,
+	attackParam)
+
 class Character;
 
 class Model

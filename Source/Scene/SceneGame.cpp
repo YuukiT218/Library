@@ -41,7 +41,8 @@ void SceneGame::Initialize()
 
 	// プレイヤー初期化
 	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/silver-dragonkin/source/SilverDragonkin.gltf", 0.005f);
+	//dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/silver-dragonkin/source/SilverDragonkin.gltf", 0.005f);
+	dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/Mannequin/SK_Mannequin.gltf", 1.0f);
 
 	Camera& camera = Camera::Instance();
 
@@ -62,10 +63,7 @@ void SceneGame::Initialize()
 	);
 
 	cameraController = std::make_unique<CameraController>();
-	//movieCameraController = std::make_unique<MovieCameraController>();
-
-	//deathCameraController = std::make_unique<DeathCameraController>();
-
+	
 	freeCameraController.SyncCameraToController(camera);
 
 	LightManager& lightManager = LightManager::Instance();
@@ -97,9 +95,7 @@ void SceneGame::Initialize()
 void SceneGame::Finalize()
 {
 	StageManager::Instance().Clear();
-	//EnemyManager::Instance().Clear();
 	
-
 	ShowCursor(true);
 
 	Graphics& graphics = Graphics::Instance();
@@ -161,7 +157,7 @@ void SceneGame::Update(float elapsedTime)
 
 
 	//// プレイヤー更新処理
-	//player->SetLockOnCamera(CameraParam::Instance().GetLockOnEnemy());
+	player->SetLockOnCamera(CameraParam::Instance().GetLockOnEnemy());
 	//player->Update(elapsedTime * HitStop::Instance().GetPlayerTimeScale());
 	player->Update(elapsedTime);
 
@@ -211,7 +207,7 @@ void SceneGame::Update(float elapsedTime)
 	//	SceneManager::Instance().ChangeScene(new SceneTitle());
 	//	};
 
-	//posteffect->SetUp(elapsedTime);
+	posteffect->SetUp(elapsedTime);
 }
 
 // 描画処理
@@ -250,8 +246,11 @@ void SceneGame::Render(float elapsedTime)
 	rc.shadowMap = shadowMap;
 	rc.timer = timer;
 
+	// MEMO : VS変換にておかしな形に(LVP空間に変換する前は正しい形)
+	//        LVPの値は一見おかしな値に見えなかった
+
 	//シャドウマップ描画
-	shadowMap->Begin(rc, camera.GetFocus());
+	shadowMap->Begin(rc, DirectX::XMFLOAT3(0,0,0));
 	{
 		StageManager::Instance().ShadowRender(rc, shadowMap);
 		player->ShadowRender(rc, shadowMap);
@@ -293,7 +292,6 @@ void SceneGame::Render(float elapsedTime)
 		buffers[FrameBufferId::Luminance]->SetRenderTargets(dc);
 		posteffect->LuminanceExtraction(rc, buffers[FrameBufferId::Scene]->GetColorMap());
 
-		//川瀬の場合下記をコメントアウト
 		posteffect->KawaseBloom(rc, buffers[FrameBufferId::Scene]->GetColorMap(), buffers[FrameBufferId::Luminance]->GetColorMap(), buffers[FrameBufferId::RadialBlur]);
 
 		buffers[FrameBufferId::Chromatic]->SetRenderTargets(dc);
@@ -309,7 +307,6 @@ void SceneGame::Render(float elapsedTime)
 	player->DrawDebugPrimitive();
 
 	//エネミーデバッグプリミティブ描画
-	//EnemyManager::Instance().DrawDebugPrimitive();
 	dragonkin->DrawDebugPrimitive();
 
 	//エネミー体力ゲージ描画

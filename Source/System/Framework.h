@@ -39,7 +39,7 @@ private:
 		Result
 	};
 
-	SceneType currentSceneType = SceneType::Game;
-	SceneType selectedSceneType = SceneType::Game;
+	SceneType currentSceneType = SceneType::Title;
+	SceneType selectedSceneType = SceneType::Title;
 };
 

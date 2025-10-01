@@ -1,0 +1,16 @@
+﻿#pragma once
+
+#include "Weapon.h"
+
+class EnemySword : public Weapon
+{
+public:
+	EnemySword(ID3D11Device* device, const char* filename);
+	~EnemySword();
+
+	void Update(float elapsedTime) override;
+
+	void Render(const RenderContext& rc, Shader* shader) override;
+
+	void DrawDebugImGUi();
+};

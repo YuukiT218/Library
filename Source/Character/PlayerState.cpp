@@ -25,7 +25,7 @@ PlayerState::InputComboType PlayerState::InputCombo()
     GamePad& gamepad = Input::Instance().GetGamePad();
     const Mouse& mouse = Input::Instance().GetMouse();
 
-    if (gamepad.GetButtonDown() & GamePad::BTN_Y || (gamepad.GetButton() & GamePad::BTN_LEFT_THUMB && mouse.GetButtonDown() & Mouse::BTN_LEFT)) return InputComboType::Heavy;
+    if (gamepad.GetButtonDown() & GamePad::BTN_A) return InputComboType::Heavy;
     if (gamepad.GetButtonDown() & GamePad::BTN_B || mouse.GetButtonDown() & Mouse::BTN_LEFT) return InputComboType::Light;
     return InputComboType::None;
 }
@@ -477,11 +477,6 @@ void PlayerFallState::Update(float elapsedTime)
     {
         ChangeState(PlayerStateId::Combo1);
     }
-    // 強攻撃1ステートに遷移
-    else if (InputCombo() == InputComboType::Heavy)
-    {
-        ChangeState(PlayerStateId::Heavy1);
-    }
     // 回避ステートに遷移
     else if (InputDodge())
     {
@@ -719,13 +714,13 @@ void PlayerComboState::Enter()
     if (player->IsGround())
     {
         if (player->calcTargetDist(player->GetPosition(), SilverDragonkin::Instance().GetPosition()) > 5.0f
-            && comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
+            && comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
         {
             player->GetPlayerModel()->PlayRootMotion(dashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
         }
         else
         {
-            player->GetPlayerModel()->PlayRootMotion(comboAnimationIndex, false, true, 0.1f, "Character1_Hips");
+            player->GetPlayerModel()->PlayRootMotion(comboAnimationIndex, false, isBakeY, 0.1f, "Character1_Hips");
         }
     }
     else
@@ -740,7 +735,7 @@ void PlayerComboState::Enter()
         }
         else
         {
-            player->GetPlayerModel()->PlayRootMotion(airComboAnimationIndex, false, true, 0.1f, "Character1_Hips");
+            player->GetPlayerModel()->PlayRootMotion(airComboAnimationIndex, false, isBakeY, 0.1f, "Character1_Hips");
         }
     }
 }
@@ -776,6 +771,8 @@ void PlayerComboState::Update(float elapsedTime)
         // 先行入力処理
         if (input != InputComboType::None)
         {
+            if (input == InputComboType::Heavy && !player->IsGround())
+                return;
             if (frame <= nextShiftFrame)
             {
                 nextShiftReady = true;
@@ -794,13 +791,15 @@ void PlayerComboState::Update(float elapsedTime)
     }
 
     // 終了後のステート遷移
-    if (!player->GetPlayerModel()->IsPlayAnimation())
+    if (!player->GetPlayerModel()->IsPlayAnimation() && player->IsGround())
+    {
+    	ChangeState(PlayerStateId::Idle);
+    }
+
+    else if (!player->IsGround() && frame >= endFrame || !player->GetPlayerModel()->IsPlayAnimation())
     {
         player->SetGravity(-0.3f);
-        if (player->IsGround())
-            ChangeState(PlayerStateId::Idle);
-        else
-			ChangeState(PlayerStateId::Fall);
+        ChangeState(PlayerStateId::Fall);
     }
 }
 
@@ -811,10 +810,11 @@ void PlayerComboState::Update(float elapsedTime)
 PlayerCombo1State::PlayerCombo1State(Player* player)
     : PlayerComboState(player)
 {
-	comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_01_Seq_0");
+	comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_01_Seq_0");
     airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_01_Seq_0");
     dashAttackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Run_Attack_01_Seq_0");
     airDashAttackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Dash_Air_Attack_Seq_0");
+    isBakeY = true;
 
     nextShiftFrame = 0.53f;
     poseFrame = 0.53f;
@@ -842,6 +842,7 @@ PlayerCombo1State::PlayerCombo1State(Player* player)
     attackHitStopSpeed = 0.1f;
 
     inputToNextState[InputComboType::Light] = PlayerStateId::Combo2;
+    inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
 }
 
 // デバッグ用GUI描画
@@ -883,8 +884,9 @@ PlayerCombo2State::PlayerCombo2State(Player* player)
     endFrame = 0.816f;
     comboAttackSpeed = 1.5f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_02_Seq_0");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_02_Seq_0");
     airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_02_Seq_0");
+    isBakeY = true;
 
     forwardFrame = 0.0f;
     forwardPower = 15.0f;
@@ -939,14 +941,15 @@ PlayerCombo3State::PlayerCombo3State(Player* player)
     : PlayerComboState(player)
 {
     inputToNextState[InputComboType::Light] = PlayerStateId::Combo4;
-    //inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy2;
+    inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
     nextShiftFrame = 0.63f;
     poseFrame = 0.63f;
     endFrame = 0.9f;
     comboAttackSpeed = 1.0f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_03_Seq_0");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_03_Seq_0");
     airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_03_Seq_0");
+    isBakeY = true;
 
     forwardFrame = 0.46f;
     forwardPower = 13.0f;
@@ -1007,8 +1010,9 @@ PlayerCombo4State::PlayerCombo4State(Player* player)
     endFrame = 1.016f;
     comboAttackSpeed = 1.0f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_02_04_Seq_0");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_04_Seq_0");
     airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_01_04_Seq_0");
+    isBakeY = true;
 
     forwardFrame = 0.23f;
     forwardPower = 20.0f;
@@ -1062,13 +1066,14 @@ void PlayerCombo4State::DrawDebugGUI()
 PlayerHeavyAttack1State::PlayerHeavyAttack1State(Player* player)
     : PlayerComboState(player)
 {
-    inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy2;
-    nextShiftFrame = 0.4f;
+    inputToNextState[InputComboType::Light] = PlayerStateId::Combo1;
+    nextShiftFrame = 0.75f;
     poseFrame = 0.4f;
-    endFrame = 0.749f;
+    endFrame = 0.95f;
     comboAttackSpeed = 1.0f;
     comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorAttackHeavy1");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Attack_Up_Floor_To_Air_02_Seq_0");
+    isBakeY = false;
 
     forwardFrame = 0.0f;
     forwardPower = 17.0f;

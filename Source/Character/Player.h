@@ -169,7 +169,6 @@ private:
 		0.1f,
 	};
 
-	// ダークナイト
 	std::vector<NodeHitSphere> nodeHitSpheres =
 	{
 		{"Character1_LeftLeg", nodeRadius[0]},

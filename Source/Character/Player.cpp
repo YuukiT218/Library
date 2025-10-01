@@ -31,8 +31,8 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
 
     // ステージの高さに合わせる
     position.x = -1.0f;
-    position.y = -3.8f;
-    position.z = -10.0f;
+    position.y = -2.4f;
+    position.z = -25.0f;
 
     // アニメーションスピード設定
     initAnimSpeed();
@@ -79,7 +79,7 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     }*/
 
     // プレイヤーの範囲制限
-    areaSize = 44.2f;
+    areaSize = 37.0f;
 }
 
 Player::~Player()
@@ -174,17 +174,7 @@ void Player::Update(float elapsedTime)
 #endif
     }
 
-    //int currentIndex = this->model->GetCurrentAnimationIndex();
-    ////const AnimationConfig* config = model->GetAnimationConfig("Player", currentIndex);
-    //float animationSeconds = model->GetCurrentAnimationSeconds();
-    //float secondsLength = model->GetAnimationLength(currentIndex);
-    //float t = animationSeconds / secondsLength;
-    //t = std::clamp(t, 0.0f, 1.0f);  // 念のため 0.0～1.0 にクランプ
-    //float speed = model->EvaluateSpeed(config->speedCurve, t);
-
-    //model->SetAnimationSpeed(speed);
-
-    // 速力処理更新
+	// 速力処理更新
     UpdateVelocity(elapsedTime);
 
     // 無敵時間更新

@@ -14,7 +14,7 @@ SkyBox::SkyBox(ID3D11Device* device)
 	};
 
 	// 空用描画スプライト
-	skyBoxRenderSprite = std::make_unique<Sprite>(device, "Data/SkyBox/sunset_sky/sunsetSkyEnvHDR.dds");
+	skyBoxRenderSprite = std::make_unique<Sprite>(device, "Data/SkyBox/night_sky/nightSkyEnvHDR.dds");
 
 	// 空描画用シェーダー
 	GpuResourceUtils::LoadVertexShader(

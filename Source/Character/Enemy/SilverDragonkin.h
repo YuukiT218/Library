@@ -3,6 +3,7 @@
 #include "Model/Model.h"
 #include "Character/Enemy/Enemy.h"
 #include "Graphics/Light.h"
+#include "Character/Weapon/EnemySword.h"
 
 template <typename ActorType>
 class BehaviorTree;
@@ -217,7 +218,7 @@ private:
 	DirectX::XMFLOAT3	targetPosition = { 0.0f,0.0f,0.0f };
 	DirectX::XMFLOAT3	territoryOrigin = { 0.0f,0.0f,0.0f };
 	float				territoryRange = 255.0f;
-	float				moveSpeed = 1.0f;
+	float				moveSpeed = 2.5f;
 	float				turnSpeed = DirectX::XMConvertToRadians(360);
 	float				searchRange = 20.0f;
 	float				attackRange = 1.5f;
@@ -232,6 +233,7 @@ private:
 	RandomState<SilverDragonkin>* randomState = nullptr;
 	SequenceState<SilverDragonkin>* sequenceState = nullptr;
 	std::unique_ptr<RootState<SilverDragonkin>> rootState = nullptr;
+	std::unique_ptr<EnemySword> sword;
 
 	//ポイントライト
 	//std::vector<AnimatedLight> AnimPointLights;

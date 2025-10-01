@@ -104,7 +104,11 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
 	//	視線ベクトル
     float3 V = normalize(pin.position.xyz - cameraPosition.xyz);
 
-   //	直接光のシェーディング
+#if 01  //  本来はデバッグ用の機能なのでいらない
+    int DebugShadowMapIndex = -1;
+#endif  //  defined(_DEBUG)
+
+    //	直接光のシェーディング
     float3 total_diffuse = 0, total_specular = 0;
 	{
 	    // 平行光源の処理
@@ -114,14 +118,44 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
             float3 L = normalize(lightDirection.xyz);
             DirectBDRF(diffuse_reflectance, F0, N, V, L,
 					   LightColor, roughness,diffuse, specular);
-		// 平行光源用シャドウマップ
-            //float depth = shadowMap.Sample(shadowSampler, pin.texcoord.xyz).r;
-		// 深度値を比較して影かどうかを判定する
-            float3 shadowAtten = ShadowMapFetchPCF(shadowMap, shadowSampler, 1, pin.shadow,
+            if (cascadeFlags.y > 0)
+            {
+            
+                //	平行光源用カスケードシャドウマップ
+                for (int index = 0; index < ShadowBufferSize; ++index)
+                {
+		        // ライトから見たNDC座標を算出
+                    float4 wvpPos = mul(float4(pin.position.xyz, 1.0f), CascadeLightViewProjection[index]);
+
+                // NDC座標からUV座標を算出する
+                    wvpPos /= wvpPos.w;
+                    wvpPos.y = -wvpPos.y;
+                    wvpPos.xy = 0.5f * wvpPos.xy + 0.5f;
+
+		        // シャドウマップのUV範囲内か、深度値が範囲内か判定する
+                    if (wvpPos.z >= 0 && wvpPos.z <= 1 && wvpPos.x >= 0 && wvpPos.x <= 1 && wvpPos.y >= 0 && wvpPos.y <= 1)
+                    {
+						float3 shadowAtten = ShadowMapFetchPCF(cascadeShadowMap[index], shadowSampler, index, wvpPos.xyz,
+                                       shadowColor, shadowAttenuation, CascadeShadowBias[index], 3.0f);
+                        
+                        diffuse *= shadowAtten;
+                        specular *= shadowAtten;
+                        
+#if 01  //  本来はデバッグ用の機能なのでいらない
+                        DebugShadowMapIndex = index;
+#endif  //  defined(_DEBUG)
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                float3 shadowAtten = ShadowMapFetchPCF(shadowMap, shadowSampler, 1, pin.shadow,
                                        shadowColor, shadowAttenuation, shadowBias, 3.0f);
                 
-            diffuse *= shadowAtten;
-            specular *= shadowAtten;
+                diffuse *= shadowAtten;
+                specular *= shadowAtten;
+            }
 
             total_diffuse += diffuse;
             total_specular += specular;
@@ -142,7 +176,23 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     float3 color = total_diffuse + total_specular + emissive_color;
     //return float4(color, base_color.a);
     color = pow(color, 1.0f / GammaFactor);
-    
-    return float4(color, base_color.a);
 
+    //  カスケード表示
+    if (cascadeFlags.x > 0)
+    {
+        if (DebugShadowMapIndex >= 0)
+        {
+            float col = rcp((float) (DebugShadowMapIndex / 3 + 1));
+            float r = DebugShadowMapIndex % 3 == 0;
+            float g = DebugShadowMapIndex % 3 == 1;
+            float b = DebugShadowMapIndex % 3 == 2;
+            color.rgb = float3(r, g, b) * col;
+        }
+        else
+        {
+            color.rgb = 0;
+        }
+    }
+
+    return float4(color, base_color.a);
 }

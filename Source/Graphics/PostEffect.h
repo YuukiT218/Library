@@ -10,8 +10,8 @@ class PostEffect
 public:
 	PostEffect(ID3D11Device* device);
 
-	//定数アップデート用
-	//void SetUp(float elapsedTime);
+	// 定数アップデート用
+	void SetUp(float elapsedTime);
 
 	// 開始処理
 	void Begin(const RenderContext& rc);

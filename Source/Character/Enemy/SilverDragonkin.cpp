@@ -29,6 +29,10 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 	instance = this;
 
 	model = std::make_shared<Model>(device, filename, scale);
+	model->SetAdMetalness(1.0f);
+	model->SetAdRoughness(0.0f);
+
+	sword = std::make_unique<EnemySword>(device, "Data/Model/Weapon/Staff.gltf");
 
 	radius = 0.5f;
 	height = 1.0f;
@@ -45,44 +49,34 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 	aiTree->AddNode("Root", "Battle", 1, BehaviorTree<SilverDragonkin>::SelectRule::Priority, new BattleJudgment(this), nullptr);
 	aiTree->AddNode("Root", "Scout", 2, BehaviorTree<SilverDragonkin>::SelectRule::Priority, nullptr, nullptr);
 
-	//aiTree->AddNode("Battle", "Roar", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new RoarJudgment(this), new RoarAction(this));
 	aiTree->AddNode("Battle", "Dead", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DeadJudgment(this), new DeadAction(this));
 	aiTree->AddNode("Battle", "Damage", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DamageJudgment(this), new DamageAction(this));
 	aiTree->AddNode("Battle", "Attack", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new AttackJudgment(this), nullptr);
 	//aiTree->AddNode("Attack", "AttackState", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new StateMachineAction(this, rootState.get()), rootState.get());
-	aiTree->AddNode("Attack", "Scratch", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new ScratchAction(this));
-	aiTree->AddNode("Attack", "Slap", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlapAction(this));
-	//aiTree->AddNode("Attack", "Spin", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SpinAction(this));
-	//aiTree->AddNode("Attack", "Tackle", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new TackleAction(this));
-	//aiTree->AddNode("Attack", "Sidestep", 5, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new SidestepAction(this));
-	//aiTree->AddNode("Attack", "SlapScratch", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DyingJudgment(this), new ScratchSlapAction(this));
-	//aiTree->AddNode("Attack", "SlapSpin", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DyingJudgment(this), new SlapSpinAction(this));
-	//aiTree->AddNode("Attack", "SpinSpin", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DyingJudgment(this), new SpinSpinAction(this));
-	//aiTree->AddNode("Attack", "SpinTackle", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DyingJudgment(this), new SpinTackleAction(this));
+	aiTree->AddNode("Attack", "SlashCombo1", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlashCombo1Action(this));
+	aiTree->AddNode("Attack", "SlashCombo2", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlashCombo2Action(this));
 	aiTree->AddNode("Battle", "LongRange", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new LongRangeJudgment(this), nullptr);
-	aiTree->AddNode("LongRange", "TripleTeleport", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new TripleTeleportAction(this));
-	//aiTree->AddNode("LongRange", "BreathAttack", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new BreathAction(this));
-	//aiTree->AddNode("LongRange", "BreathAttackSweeping", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new BreathSweepingAction(this));
-	//aiTree->AddNode("LongRange", "Tackle", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, new TackleJudgment(this), new TackleAction(this));
+	aiTree->AddNode("LongRange", "DashSlash", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new DashSlashAction(this));
+	aiTree->AddNode("LongRange", "TripleTeleport", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new TripleTeleportAction(this));
 	aiTree->AddNode("LongRange", "Pursuit", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
 	aiTree->AddNode("Battle", "Pursuit", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
 
 
-	aiTree->AddNode("Scout", "Wander", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new WanderJudgment(this), new WanderAction(this));
+	//aiTree->AddNode("Scout", "Wander", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new WanderJudgment(this), new WanderAction(this));
 	aiTree->AddNode("Scout", "Idle", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new IdleAction(this));
 
 	// 衝突判定用のノードを設定
 	nodeHitSpheres =
 	{
-		{"Pelvis", nodeRadius[0]},
+		{"pelvis", nodeRadius[0]},
 		{"spine_01", nodeRadius[1]},
 		{"spine_02", nodeRadius[2]},
 		{"neck_01", nodeRadius[3]},
 		{"head", nodeRadius[4]},
 		{"calf_l", nodeRadius[5]},
-		{"Foot_L", nodeRadius[6]},
+		{"foot_l", nodeRadius[6]},
 		{"calf_r", nodeRadius[7]},
-		{"Foot_R", nodeRadius[8]},
+		{"foot_r", nodeRadius[8]},
 	};
 
 	// 攻撃判定用のノードを設定
@@ -140,7 +134,7 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 	};
 
 	
-	SetPosition(DirectX::XMFLOAT3(-1.0f, -3.8f, 40.0f));
+	SetPosition(DirectX::XMFLOAT3(-1.0f, -2.4f, 6.5f));
 	SetAngle(DirectX::XMFLOAT3(0.0f, DirectX::XMConvertToRadians(180.0f), 0.0f));
 	SetTerritory(GetPosition(), 10.0f);
 
@@ -159,7 +153,7 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 		}
 	}*/
 
-	areaSize = 44.2f;
+	areaSize = 37.0f;
 }
 
 // デストラクタ
@@ -236,17 +230,16 @@ void SilverDragonkin::UpdateEnemySpecific(float elapsedTime)
 		activeNode = aiTree->Run(activeNode, behaviorData.get(), elapsedTime);
 	}
 
+	// アタッチメント
+	sword->Attach("weapon_r", model.get());
+
 	// オブジェクト行列更新
 	UpdateTransform();
 
 	// モデル行列更新
 	model->UpdateTransform(transform);
 
-	//ポイントライトの更新
-	/*for (int i = 0; i < AnimPointLights.size(); i++)
-	{
-		AnimPointLights.at(i).Update(elapsedTime);
-	}*/
+	sword->Update(elapsedTime);
 
 	KeepAreaLimit(position);
 }
@@ -354,6 +347,7 @@ void SilverDragonkin::Render(const RenderContext& rc, ShaderId shaderId)
 {
 	ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
 	modelRenderer->Draw(shaderId, model);
+	modelRenderer->Draw(shaderId, sword->GetModel());
 	modelRenderer->Render(rc);
 }
 
@@ -422,7 +416,7 @@ void SilverDragonkin::MoveToTarget(float elapsedTime, float speedRate)
 
 	// 移動処理
 	Move(vx, vz, moveSpeed * speedRate);
-	Turn(elapsedTime, vx, vz, turnSpeed * speedRate);
+	Turn(elapsedTime, vx, vz, turnSpeed);
 }
 
 // 旋回
@@ -573,6 +567,8 @@ void SilverDragonkin::DrawDebugGUI()
 
 		ImGui::InputInt("Health", &health);
 
+		ImGui::DragFloat("moveSpeed", &moveSpeed, 0.01f);
+
 		ImGui::Checkbox("DamageReaction", &isDamage);
 
 		ImGui::Text(u8"Behavior　%s", str.c_str());
@@ -596,6 +592,7 @@ void SilverDragonkin::DrawDebugGUI()
 
 		ShowDragonLightEditor();
 		model->DebugGui(u8"Enemy");
+		sword->DrawDebugImGUi();
 	}
 	ImGui::End();
 	

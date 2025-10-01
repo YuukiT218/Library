@@ -61,13 +61,13 @@ PBRShader::PBRShader(ID3D11Device* device)
 	{
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/sunset_sky/sunsetSkyDiffuseHDR.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/nightSkyDiffuseHDR.dds",
 			diffuseIemShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/sunset_sky/sunsetSkySpecularHDR.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/nightSkySpecularHDR.dds",
 			specularPmremShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/sunset_sky/sunsetSkyBrdf.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/nightSkyBrdf.dds",
 			lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
 	}
 	SetUpConstant = std::make_unique<CbSetUp>();

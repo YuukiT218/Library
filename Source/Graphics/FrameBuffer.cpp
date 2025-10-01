@@ -32,6 +32,7 @@ FrameBuffer::FrameBuffer(ID3D11Device* device, IDXGISwapChain* swapchain)
 
 		width = texture2dDesc.Width;
 		height = texture2dDesc.Height;
+		format = texture2dDesc.Format;
 	}
 
 	// ビューポート
@@ -93,6 +94,7 @@ FrameBuffer::FrameBuffer(ID3D11Device* device, UINT width, UINT height)
 		texture2dDesc.MiscFlags = 0;
 		hr = device->CreateTexture2D(&texture2dDesc, 0, renderTragetBuffer.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		format = texture2dDesc.Format;
 
 		// レンダーターゲットビュー作成
 		D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc{};
@@ -192,7 +194,7 @@ void FrameBuffer::Resize(int width, int height)
 	texDesc.Height = height;
 	texDesc.MipLevels = 1;
 	texDesc.ArraySize = 1;
-	texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	texDesc.Format = format;
 	texDesc.SampleDesc.Count = 1;
 	texDesc.Usage = D3D11_USAGE_DEFAULT;
 	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;

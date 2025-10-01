@@ -7,9 +7,9 @@ StageMain::StageMain()
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
-	model = std::make_unique<Model>(device, "Data/Model/boss_fight_arena/Arena.gltf", 0.3f);
+	model = std::make_unique<Model>(device, "Data/Model/boss_fight_arena/Arena.gltf", 0.25f);
 	model->SetAdMetalness(1.0f);
-	model->SetAdRoughness(0.1f);
+	model->SetAdRoughness(0.35f);
 
 	DirectX::XMVECTOR VolumeMin = DirectX::XMVectorReplicate(FLT_MAX);
 	DirectX::XMVECTOR VolumeMax = DirectX::XMVectorReplicate(-FLT_MAX);

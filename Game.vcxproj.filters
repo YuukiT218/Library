@@ -215,6 +215,99 @@
     <ClInclude Include="Source\Scene\SceneEdit.h" />
     <ClInclude Include="Source\System\HitStop.h" />
     <ClInclude Include="Source\Graphics\PostEffect.h" />
+    <ClInclude Include="Source\Character\Weapon\EnemySword.h" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\conversions\from_json.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\conversions\to_chars.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\conversions\to_json.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\binary_reader.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\input_adapters.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\json_sax.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\lexer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\parser.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\position_t.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\internal_iterator.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\iter_impl.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\iteration_proxy.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\iterator_traits.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\json_reverse_iterator.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\primitive_iterator.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\call_std\begin.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\call_std\end.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\cpp_future.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\detected.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\identity_tag.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\is_sax.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\std_fs.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\type_traits.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\void_t.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\output\binary_writer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\output\output_adapters.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\output\serializer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\abi_macros.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\exceptions.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\hash.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\json_custom_base_class.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\json_pointer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\json_ref.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\macro_scope.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\macro_unscope.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\string_concat.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\string_escape.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\string_utils.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\value_t.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\thirdparty\hedley\hedley.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\adl_serializer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\byte_container_with_subtype.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\json.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\json_fwd.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\ordered_map.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\conversions\from_json.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\conversions\to_chars.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\conversions\to_json.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\binary_reader.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\input_adapters.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\json_sax.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\lexer.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\parser.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\position_t.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\internal_iterator.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\iter_impl.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\iteration_proxy.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\iterator_traits.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\json_reverse_iterator.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\primitive_iterator.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\call_std\begin.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\call_std\end.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\cpp_future.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\detected.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\identity_tag.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\is_sax.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\std_fs.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\type_traits.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\void_t.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\output\binary_writer.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\output\output_adapters.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\output\serializer.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\abi_macros.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\exceptions.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\hash.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\json_custom_base_class.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\json_pointer.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\json_ref.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\macro_scope.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\macro_unscope.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\string_concat.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\string_escape.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\string_utils.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\value_t.hpp" />
+    <ClInclude Include="Source\nlohmann\thirdparty\hedley\hedley.hpp" />
+    <ClInclude Include="Source\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="Source\nlohmann\adl_serializer.hpp" />
+    <ClInclude Include="Source\nlohmann\byte_container_with_subtype.hpp" />
+    <ClInclude Include="Source\nlohmann\json.hpp" />
+    <ClInclude Include="Source\nlohmann\json_fwd.hpp" />
+    <ClInclude Include="Source\nlohmann\ordered_map.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Framework.cpp">
@@ -389,6 +482,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\PostEffect.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\Weapon\EnemySword.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
