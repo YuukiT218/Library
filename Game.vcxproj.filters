@@ -308,6 +308,8 @@
     <ClInclude Include="Source\nlohmann\json.hpp" />
     <ClInclude Include="Source\nlohmann\json_fwd.hpp" />
     <ClInclude Include="Source\nlohmann\ordered_map.hpp" />
+    <ClInclude Include="Source\Camera\EditCameraController.h" />
+    <ClInclude Include="External\DirectXTK-main\Inc\WICTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Framework.cpp">
@@ -485,6 +487,12 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Character\Weapon\EnemySword.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Camera\EditCameraController.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="External\DirectXTK-main\Src\WICTextureLoader.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

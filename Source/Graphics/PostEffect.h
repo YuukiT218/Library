@@ -122,7 +122,7 @@ private:
 	{
 		DirectX::XMFLOAT4 vignetteColor = { 0.2f, 0.2f, 0.2f, 1.0f };
 		DirectX::XMFLOAT2 vignetteCenter = { 0.5f, 0.5f };
-		float vignetteIntensity = 0.4f;
+		float vignetteIntensity = 0.0f;
 		float vignetteSmoothness = 0.2f;
 
 		bool vignetteRounded = false;

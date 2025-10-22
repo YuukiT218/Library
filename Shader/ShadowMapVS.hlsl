@@ -9,9 +9,6 @@ float4 main(
     float4 position : POSITION,
     float4 boneWeights  : BONE_WEIGHTS,
     uint4  boneIndices  :BONE_INDICES
-	//float3 normal,
-	//float4 tangent,
-	//float2 texcoord
     // 今回はピクセルシェーダーを使用せず、頂点変換のみ行う
     ) : SV_POSITION 
 {

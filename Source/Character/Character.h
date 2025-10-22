@@ -1,6 +1,8 @@
 #pragma once
 
 #include <DirectXMath.h>
+#include <SimpleMath.h>
+
 #include <memory>
 #include <vector>
 #include "Model/Model.h"
@@ -69,6 +71,8 @@ public:
 
 	// キャラクター右方向計算
 	DirectX::XMFLOAT3 CharacterRight(DirectX::XMFLOAT3 angle);
+
+	DirectX::XMFLOAT3 Arrive(const DirectX::XMFLOAT3& targetPos, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3 velocity);
 
 	// 地面に接しているか
 	bool IsGround() const { return isGround; }
@@ -188,7 +192,7 @@ protected:
 
 	// 慣性移動
 	float acceleration = 1.0f;
-	float maxMoveSpeed = 5.0f;
+	float maxSpeed = 5.0f;
 	float moveVecX = 0.0f;
 	float moveVecZ = 0.0f;
 

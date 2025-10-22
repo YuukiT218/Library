@@ -62,8 +62,7 @@ protected:
 template <typename ActorType>
 NodeBase<ActorType>::~NodeBase()
 {
-	delete judgment;
-	delete action;
+	
 }
 
 // ノード検索

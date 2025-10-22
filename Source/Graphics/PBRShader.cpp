@@ -71,8 +71,8 @@ PBRShader::PBRShader(ID3D11Device* device)
 			lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
 	}
 	SetUpConstant = std::make_unique<CbSetUp>();
-	cbSetUp.IBLDiffuseScale = 1.0f;
-	cbSetUp.IBLSpecularScale = 1.0f;
+	cbSetUp.IBLDiffuseScale = 0.7f;
+	cbSetUp.IBLSpecularScale = 0.7f;
 }
 
 // 描画開始

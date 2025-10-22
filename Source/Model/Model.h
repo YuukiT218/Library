@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <imgui.h>
 
-#include <nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
@@ -63,12 +63,13 @@ NLOHMANN_JSON_SERIALIZE_ENUM(EventType, {
 	{EventType::Effect, "Effect"}
 	})
 
-	enum class AnimationFlag
+enum class AnimationFlag
 {
 	None,
 	Attack,
 	Invincible,
-	Parry
+	Parry,
+	SuperArmor
 };
 
 // enum <-> string 変換のための定義
@@ -77,6 +78,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(AnimationFlag, {
 	{AnimationFlag::Attack, "Attack"},
 	{AnimationFlag::Invincible, "Invincible"},
 	{AnimationFlag::Parry, "Parry"},
+	{AnimationFlag::SuperArmor, "SuperArmor"}
 	})
 
 	struct Keyframe {
@@ -117,6 +119,13 @@ struct AnimationEvent
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationEvent, timeInSeconds, timeOutSeconds, eventType, eventName)
 
+enum class KnockbackType
+{
+	Light,
+	Heavy,
+	Launch
+};
+
 struct AttackAnimParam
 {
 	float startTime = 0.2f;//先行入力受付開始フレーム
@@ -143,6 +152,9 @@ struct AttackAnimParam
 	float attackHitStopTime = 1.0f;
 	float attackHitStopSpeed = 0.1f;
 
+	// ノックバックの種類
+	KnockbackType knockbackType;
+
 	bool IsActive(float currentTime) const
 	{
 		return currentTime >= startTime && currentTime <= endTime;
@@ -154,25 +166,26 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
 	forwardPower, forwardFrame, forwarded,
 	attackDamage, invisibleTime,
 	attackLeftVibrate, attackRightVibrate,
-	attackHitStopTime, attackHitStopSpeed)
+	attackHitStopTime, attackHitStopSpeed,
+	knockbackType)
 
 
-	struct AnimationConfig
+struct AnimationConfig
 {
 	std::string characterName;
 	int animationIndex;
 	std::vector<Keyframe> speedCurve;
 	std::vector<AnimationEvent> events;
-	AnimationAttribute attribute;
+	std::vector<AnimationAttribute> attributes;
 	std::vector<CameraKeyframe> cameraKeyframes;
-	AttackAnimParam attackParam; // ← 追加
+	AttackAnimParam attackParam;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationConfig,
 	characterName,
 	animationIndex,
 	speedCurve,
 	events,
-	attribute,
+	attributes,
 	cameraKeyframes,
 	attackParam)
 
@@ -263,6 +276,7 @@ public:
 
 	// アニメーションインデックス取得
 	int GetAnimationIndex(const char* name) const;
+	int GetCurrentAnimationIndex() { return currentAnimationIndex; }
 
 	// アニメーション名取得
 	const char* GetAnimationName(int animationIndex) const;
@@ -270,8 +284,8 @@ public:
 	// アニメーション再生時間取得
 	float GetAnimationLength(int animationIndex) const;
 
-	//
-	int GetCurrentAnimationIndex() { return currentAnimationIndex; }
+	// アニメーションスピード設定
+	void SetAnimationSpeed(float animationSpeed) { this->animationSpeed = animationSpeed; }
 
 	// アニメーション更新処理
 	void UpdateAnimation(float elapsedTime, Character* character);
@@ -320,6 +334,87 @@ public:
 	//質感調整用ImGui
 	void DebugGui(const char* name);
 
+	// アニメーション設定の保存
+	void SetAnimationConfig(const AnimationConfig& config)
+	{
+		// 一致するものがあれば上書き
+		for (auto& existing : animationConfigs) {
+			if (existing.characterName == config.characterName && existing.animationIndex == config.animationIndex) {
+				existing = config;
+				return;
+			}
+		}
+		// なければ追加
+		animationConfigs.push_back(config);
+	}
+
+	// アニメーション設定取得
+	AnimationConfig* GetAnimationConfig(const std::string& characterName, int animationIndex)
+	{
+		for (auto& config : animationConfigs)
+		{
+			if (config.characterName == characterName && config.animationIndex == animationIndex)
+			{
+				return &config;
+			}
+		}
+
+		// 見つからなかった場合、新しいAnimationConfigを追加して返す
+		AnimationConfig defaultConfig;
+		defaultConfig.characterName = characterName;
+		defaultConfig.animationIndex = animationIndex;
+		defaultConfig.speedCurve = { { 0.0f, 1.0f }, { 1.0f, 1.0f } };
+		defaultConfig.events = {};
+		defaultConfig.attributes = {};  // 空の配列
+		defaultConfig.cameraKeyframes = {};
+
+		animationConfigs.push_back(defaultConfig);
+		return &animationConfigs.back();
+	}
+
+	// 
+	float EvaluateSpeed(const std::vector<Keyframe>& curve, float t)
+	{
+		if (curve.empty())
+			return 1.0f;
+
+		// 端端は定値クロップ
+		if (t <= curve.front().time)  return curve.front().value;
+		if (t >= curve.back().time)   return curve.back().value;
+
+		// 該当区間を探す
+		for (size_t i = 0; i + 1 < curve.size(); ++i)
+		{
+			const auto& k0 = curve[i];
+			const auto& k1 = curve[i + 1];
+			if (t < k0.time || t > k1.time) continue;
+
+			// 正規化パラメータ
+			float dt = k1.time - k0.time;
+			float u = (t - k0.time) / dt;
+
+			// Hermite 基底
+			float u2 = u * u, u3 = u2 * u;
+			float h00 = 2 * u3 - 3 * u2 + 1;
+			float h10 = u3 - 2 * u2 + u;
+			float h01 = -2 * u3 + 3 * u2;
+			float h11 = u3 - u2;
+
+			// タンジェントをスケーリング（時間スケール分をかける）
+			float m0 = k0.outTangent * dt;
+			float m1 = k1.inTangent * dt;
+
+			// 補間値を返す
+			return h00 * k0.value
+				+ h10 * m0
+				+ h01 * k1.value
+				+ h11 * m1;
+		}
+
+		// 万一見つからなかったら
+		return 1.0f;
+	}
+
 private:
 	//model事の質感補正値
 	float adjustMetalness = 0; //  金属質調整
@@ -355,6 +450,7 @@ private:
 	std::vector<std::string>	nodeNames; // ノード名キャッシュ
 	NodePose beginPose, oldPose, newPose;
 	NodePose endPose;
+	std::vector<AnimationConfig> animationConfigs;
 protected:
 	DirectX::XMFLOAT3 move = { 0,0,0 };
 };

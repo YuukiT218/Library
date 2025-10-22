@@ -3,10 +3,12 @@
 #include <assert.h>
 #include <tchar.h>
 
-#include "Framework.h"
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
 
-# define SYS_NEW new(TGL::Memory::AREA_TYPE_SYS,__FILE__, __LINE__)
-# define APP_NEW new(TGL::Memory::AREA_TYPE_APP,__FILE__, __LINE__)
+#include "Framework.h"
 
 const LONG SCREEN_WIDTH = 1280;
 const LONG SCREEN_HEIGHT = 720;
@@ -21,8 +23,6 @@ INT WINAPI wWinMain(HINSTANCE instance, HINSTANCE prev_instance, LPWSTR cmd_line
 {
 #if defined(DEBUG) | defined(_DEBUG)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	//_CrtSetBreakAlloc(237);
 #endif
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);

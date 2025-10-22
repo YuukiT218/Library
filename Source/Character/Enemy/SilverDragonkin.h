@@ -111,6 +111,7 @@ public:
 	bool GetRoarUsed() const { return RoarUsedFlag; }
 
 	std::shared_ptr<Model> GetEnemyModel() { return model; }
+	EnemySword* GetSword() { return sword.get(); }
 
 	EnemyType GetEnemyType() const override { return EnemyType::SilverDragonkin; }
 	std::string GetName() { return "SilverDragonkin"; }
@@ -227,7 +228,7 @@ private:
 	bool 				isBattle = false;
 	int 				step = 0;
 
-	std::unique_ptr<BehaviorTree<SilverDragonkin>> aiTree = nullptr;
+	BehaviorTree<SilverDragonkin>* aiTree = nullptr;
 	std::unique_ptr<BehaviorData<SilverDragonkin>> behaviorData = nullptr;
 	NodeBase<SilverDragonkin>* activeNode = nullptr;
 	RandomState<SilverDragonkin>* randomState = nullptr;

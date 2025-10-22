@@ -15,7 +15,7 @@ public:
 	};
 
 	// Àsˆ—(ƒˆ‰¼‘zŠÖ”)
-	virtual ActionBase::State Run(float elapsedTime) = 0;
+	virtual State Run(float elapsedTime) = 0;
 protected:
 	std::shared_ptr<ActorType> owner;
 	int step = 0;

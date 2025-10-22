@@ -8,7 +8,9 @@
 #include "Scene/SceneManager.h"
 #include "Scene/SceneTitle.h"
 #include "Scene/SceneGame.h"
+#include "Scene/SceneEdit.h"
 #include "Scene/SceneLoading.h"
+#include "System/AnimationConfigLoader.h"
 
 // 垂直同期間隔設定
 static const int syncInterval = 1;
@@ -25,7 +27,9 @@ Framework::Framework(HWND hWnd)
 	ImGuiRenderer::Initialize(hWnd, Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
 
 	// シーン初期化
-	SceneManager::Instance().ChangeScene(new SceneTitle);
+	SceneManager::Instance().ChangeScene(new SceneGame);
+
+	AnimationConfigLoader::LoadAllConfigs();
 }
 
 // デストラクタ
@@ -92,10 +96,10 @@ void Framework::Render(float elapsedTime)
 
 		// シーン描画
 		SceneManager::Instance().Render(elapsedTime);
-		/*auto* editScene = dynamic_cast<SceneEdit*>(SceneManager::Instance().GetCurrentScene());
+		auto* editScene = dynamic_cast<SceneEdit*>(SceneManager::Instance().GetCurrentScene());
 		if (editScene) {
 			editScene->Render(elapsedTime, width, height);
-		}*/
+		}
 	}
 	else
 	{
@@ -109,47 +113,35 @@ void Framework::Render(float elapsedTime)
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f - 20, 0), ImGuiCond_Always);
 	ImGui::SetNextWindowBgAlpha(0.3f); // ちょっと透明にする
 
-	if (ImGui::Begin("Toggle", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
-		if (ImGui::Button(showSceneSelector ? "Close Selector" : "Open Selector")) {
-			showSceneSelector = !showSceneSelector;
-		}
-	}
-	ImGui::End();
-
 	// Scene Selector ウィンドウ（表示中のみ）
-	if (showSceneSelector) {
-		ImGui::Begin("Scene Selector");
+#if _DEBUG || DEBUG
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("Scene Selector"))
+		{
+			if (ImGui::MenuItem("Title Scene")) {
+				currentSceneType = SceneType::Title;
+				SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle()));
+				ResizeSceneFramebufferToWindow();
+			}
 
-		if (ImGui::Button("Title Scene") && currentSceneType != SceneType::Title) {
-			currentSceneType = SceneType::Title;
-			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneTitle()));
-			ResizeSceneFramebufferToWindow();
-			showSceneSelector = false;
+			if (ImGui::MenuItem("Game Scene")) {
+				currentSceneType = SceneType::Game;
+				SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame()));
+				ResizeSceneFramebufferToWindow();
+			}
+
+			if (ImGui::MenuItem("Edit Scene")) {
+				currentSceneType = SceneType::Edit;
+				SceneManager::Instance().ChangeScene(new SceneLoading(new SceneEdit()));
+				ResizeSceneFramebufferToWindow();
+			}
+			ImGui::EndMenu();
 		}
-
-		if (ImGui::Button("Game Scene") && currentSceneType != SceneType::Game) {
-			currentSceneType = SceneType::Game;
-			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame()));
-			ResizeSceneFramebufferToWindow();
-			showSceneSelector = false;
-		}
-
-		/*if (ImGui::Button("Edit Scene") && currentSceneType != SceneType::Edit) {
-			currentSceneType = SceneType::Edit;
-			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneEdit()));
-			ResizeSceneFramebufferToWindow();
-			showSceneSelector = false;
-		}*/
-
-		/*if (ImGui::Button("Result Scene") && currentSceneType != SceneType::Result) {
-			currentSceneType = SceneType::Result;
-			SceneManager::Instance().ChangeScene(new SceneLoading(new SceneResult()));
-			ResizeSceneFramebufferToWindow();
-			showSceneSelector = false;
-		}*/
-
-		ImGui::End();
+		ImGui::EndMainMenuBar();
 	}
+#endif
+	
 #if 0
 	// IMGUIデモウインドウ描画（IMGUI機能テスト用）
 	ImGui::ShowDemoWindow();

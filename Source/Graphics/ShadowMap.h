@@ -80,9 +80,9 @@ private:
 	const UINT textureSize = 4096;
 
 
-	float drawRect = 120.0f;//影保存用テクスチャサイズ
+	float drawRect = 70.0f;//影保存用テクスチャサイズ
 
-	float shadowAttenuation = 0.3f;//影の濃さ
+	float shadowAttenuation = 0.1f;//影の濃さ
 	float shadowBias = 0.001f;//深度値補正
 
 	//カスケードシャドウマップ用

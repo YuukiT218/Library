@@ -74,7 +74,7 @@ float4 hlsl_tone_map(float4 original, float4 blur, float2 tc)
     // Square of distance from origin (center of screen)
     float vignette = 1 - dot(tc, tc);
     // Multiply by vignette to the fourth
-    color = color * vignette * vignette * vignette * vignette;
+    color = color * vignette * vignette/* * vignette * vignette*/;
     color *= fExposureLevel; // Apply simple exposure level
     return pow(color, 0.55f); // Apply gamma and return
 }

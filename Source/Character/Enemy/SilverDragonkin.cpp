@@ -15,6 +15,11 @@
 #include "Character/Enemy/StateMachine/RandomState.h"
 #include "StateMachine/StateDerived.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 static SilverDragonkin* instance = nullptr;
 
 // インスタンス取得
@@ -42,28 +47,32 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 
 	// ビヘイビアツリー設定
 	behaviorData = std::make_unique<BehaviorData<SilverDragonkin>>();
-	aiTree = std::make_unique<BehaviorTree<SilverDragonkin>>();
+	aiTree = new BehaviorTree<SilverDragonkin>();
 
 	// BehaviorTreeのルートノードを追加
 	aiTree->AddNode("", "Root", 0, BehaviorTree<SilverDragonkin>::SelectRule::Priority, nullptr, nullptr);
-	aiTree->AddNode("Root", "Battle", 1, BehaviorTree<SilverDragonkin>::SelectRule::Priority, new BattleJudgment(this), nullptr);
-	aiTree->AddNode("Root", "Scout", 2, BehaviorTree<SilverDragonkin>::SelectRule::Priority, nullptr, nullptr);
-
-	aiTree->AddNode("Battle", "Dead", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DeadJudgment(this), new DeadAction(this));
-	aiTree->AddNode("Battle", "Damage", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DamageJudgment(this), new DamageAction(this));
-	aiTree->AddNode("Battle", "Attack", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new AttackJudgment(this), nullptr);
-	//aiTree->AddNode("Attack", "AttackState", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new StateMachineAction(this, rootState.get()), rootState.get());
-	aiTree->AddNode("Attack", "SlashCombo1", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlashCombo1Action(this));
-	aiTree->AddNode("Attack", "SlashCombo2", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlashCombo2Action(this));
-	aiTree->AddNode("Battle", "LongRange", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new LongRangeJudgment(this), nullptr);
-	aiTree->AddNode("LongRange", "DashSlash", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new DashSlashAction(this));
-	aiTree->AddNode("LongRange", "TripleTeleport", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new TripleTeleportAction(this));
-	aiTree->AddNode("LongRange", "Pursuit", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
-	aiTree->AddNode("Battle", "Pursuit", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
-
-
-	//aiTree->AddNode("Scout", "Wander", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new WanderJudgment(this), new WanderAction(this));
-	aiTree->AddNode("Scout", "Idle", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new IdleAction(this));
+	{
+		aiTree->AddNode("Root", "Battle", 1, BehaviorTree<SilverDragonkin>::SelectRule::Priority, new BattleJudgment(this), nullptr);
+		aiTree->AddNode("Battle", "Dead", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DeadJudgment(this), new DeadAction(this));
+		aiTree->AddNode("Battle", "Damage", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DamageJudgment(this), new DamageAction(this));
+		aiTree->AddNode("Battle", "Pursuit", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
+	}
+	{
+		aiTree->AddNode("Battle", "Attack", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new AttackJudgment(this), nullptr);
+		aiTree->AddNode("Attack", "SlashCombo1", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlashCombo1Action(this));
+		aiTree->AddNode("Attack", "SlashCombo2", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new FineJudgment(this), new SlashCombo2Action(this));
+	}
+	{
+		aiTree->AddNode("Battle", "LongRange", 2, BehaviorTree<SilverDragonkin>::SelectRule::Random, new LongRangeJudgment(this), nullptr);
+		aiTree->AddNode("LongRange", "DashSlash", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new DashSlashAction(this));
+		//aiTree->AddNode("LongRange", "TripleTeleport", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new TripleTeleportAction(this));
+		aiTree->AddNode("LongRange", "Pursuit", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
+		aiTree->AddNode("LongRange", "CautiousWalk", 4, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new CautiousWalkAction(this));
+	}
+	{
+		aiTree->AddNode("Root", "Scout", 2, BehaviorTree<SilverDragonkin>::SelectRule::Priority, nullptr, nullptr);
+		aiTree->AddNode("Scout", "Idle", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new IdleAction(this));
+	}
 
 	// 衝突判定用のノードを設定
 	nodeHitSpheres =
@@ -79,61 +88,6 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 		{"foot_r", nodeRadius[8]},
 	};
 
-	// 攻撃判定用のノードを設定
-	// 右前腕
-	rightArmNodeHitSpheres =
-	{
-		/*{"Bip001_R_Hand", nodeRadiusAttack[0]},
-		{"Bip001_R_Forearm", nodeRadiusAttack[1]},
-		{"Bip001_R_Finger2", nodeRadiusAttack[2]},*/
-	};
-	// 尻尾
-	tailNodeHitSpheres =
-	{
-		/*{"Bone001", nodeRadiusAttack[21]},
-		{"Bone002", nodeRadiusAttack[22]},
-		{"Bone003", nodeRadiusAttack[23]},
-		{"Bone004", nodeRadiusAttack[24]},
-		{"Bone005", nodeRadiusAttack[25]},
-		{"Bone006", nodeRadiusAttack[26]},
-		{"Bone007", nodeRadiusAttack[27]},
-		{"Bone008", nodeRadiusAttack[28]},*/
-	};
-	// タックル用
-	tackleHitSpheres =
-	{
-		/*{"Bip001_R_Hand", nodeRadiusAttack[0]},
-		{"Bip001_R_Forearm", nodeRadiusAttack[1]},
-		{"Bip001_R_Finger2", nodeRadiusAttack[2]},
-		{"Bip001_L_Hand", nodeRadiusAttack[3]},
-		{"Bip001_L_Forearm", nodeRadiusAttack[4]},
-		{"Bip001_L_Finger2", nodeRadiusAttack[5]},
-		{"Bip001_R_Thigh", nodeRadiusAttack[6]},
-		{"Bip001_R_Calf", nodeRadiusAttack[7]},
-		{"Bip001_R_HorseLink", nodeRadiusAttack[8]},
-		{"Bip001_R_Foot", nodeRadiusAttack[9]},
-		{"Bip001_L_Thigh", nodeRadiusAttack[10]},
-		{"Bip001_L_Calf", nodeRadiusAttack[11]},
-		{"Bip001_L_HorseLink", nodeRadiusAttack[12]},
-		{"Bip001_L_Foot", nodeRadiusAttack[13]},
-		{"Bip001_Pelvis", nodeRadiusAttack[14]},
-		{"Bip001_Spine", nodeRadiusAttack[15]},
-		{"Bip001_Spine1", nodeRadiusAttack[16]},
-		{"Bip001_Spine2", nodeRadiusAttack[17]},
-		{"Point013", nodeRadiusAttack[18]},
-		{"Point002", nodeRadiusAttack[19]},
-		{"Point007", nodeRadiusAttack[20]},
-		{"Bone001", nodeRadiusAttack[21]},
-		{"Bone002", nodeRadiusAttack[22]},
-		{"Bone003", nodeRadiusAttack[23]},
-		{"Bone004", nodeRadiusAttack[24]},
-		{"Bone005", nodeRadiusAttack[25]},
-		{"Bone006", nodeRadiusAttack[26]},
-		{"Bone007", nodeRadiusAttack[27]},
-		{"Bone008", nodeRadiusAttack[28]},*/
-	};
-
-	
 	SetPosition(DirectX::XMFLOAT3(-1.0f, -2.4f, 6.5f));
 	SetAngle(DirectX::XMFLOAT3(0.0f, DirectX::XMConvertToRadians(180.0f), 0.0f));
 	SetTerritory(GetPosition(), 10.0f);
@@ -153,13 +107,13 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 		}
 	}*/
 
-	areaSize = 37.0f;
+	areaSize = 29.0f;
 }
 
 // デストラクタ
 SilverDragonkin::~SilverDragonkin()
 {
-
+	delete aiTree;
 }
 
 void SilverDragonkin::UpdateEnemySpecific(float elapsedTime)
@@ -247,100 +201,91 @@ void SilverDragonkin::UpdateEnemySpecific(float elapsedTime)
 // エディター用更新処理
 void SilverDragonkin::EditUpdate(float elapsedTime)
 {
-	//int currentIndex = model->GetCurrentAnimationIndex();
-	//if (currentIndex >= 0) {
-	//	const AnimationConfig* config = model->GetAnimationConfig("SilverDragonkin", currentIndex);
-	//	float animationSeconds = model->GetCurrentAnimationSeconds();
-	//	float secondsLength = model->GetAnimationLength(currentIndex);
-	//	float t = animationSeconds / secondsLength;
-	//	t = std::clamp(t, 0.0f, 1.0f);  // 念のため 0.0～1.0 にクランプ
-	//	float speed = model->EvaluateSpeed(config->speedCurve, t);
+	int currentIndex = model->GetCurrentAnimationIndex();
+	if (currentIndex >= 0) {
+		const AnimationConfig* config = model->GetAnimationConfig("SilverDragonkin", currentIndex);
+		float animationSeconds = model->GetCurrentAnimationSeconds();
+		float secondsLength = model->GetAnimationLength(currentIndex);
+		float t = animationSeconds / secondsLength;
+		t = std::clamp(t, 0.0f, 1.0f);  // 念のため 0.0～1.0 にクランプ
+		float speed = model->EvaluateSpeed(config->speedCurve, t);
 
-	//	model->SetAnimationSpeed(speed);
+		model->SetAnimationSpeed(speed);
 
-	//	for (const auto& event : config->events)
-	//	{
-	//		if (animationSeconds >= event.timeInSeconds)
-	//		{
-	//			static Effekseer::Handle handle = -1; // エフェクトのハンドルを保持
-	//			static Effekseer::Handle handle1 = -1; // エフェクトのハンドルを保持
-	//			switch (event.eventType)
-	//			{
-	//			case EventType::Effect:
-	//				if (event.eventName == "Breath")
-	//				{
-	//					// ブレスエフェクト再生
-	//					{
-	//						Model::Node* modelNode = model->FindNode("Bone052");
-	//						DirectX::XMFLOAT3 pos = {
-	//							modelNode->worldTransform._41,
-	//							modelNode->worldTransform._42,
-	//							modelNode->worldTransform._43
-	//						};
-	//						DirectX::XMFLOAT3 Angle = {
-	//							angle.z,
-	//							angle.y + DirectX::XM_PI,
-	//							angle.x
-	//						};
+		for (const auto& event : config->events)
+		{
+			//if (animationSeconds >= event.timeInSeconds)
+			//{
+			//	static Effekseer::Handle handle = -1; // エフェクトのハンドルを保持
+			//	static Effekseer::Handle handle1 = -1; // エフェクトのハンドルを保持
+			//	switch (event.eventType)
+			//	{
+			//	case EventType::Effect:
+			//		if (event.eventName == "Breath")
+			//		{
+			//			// ブレスエフェクト再生
+			//			{
+			//				Model::Node* modelNode = model->FindNode("Bone052");
+			//				DirectX::XMFLOAT3 pos = {
+			//					modelNode->worldTransform._41,
+			//					modelNode->worldTransform._42,
+			//					modelNode->worldTransform._43
+			//				};
+			//				DirectX::XMFLOAT3 Angle = {
+			//					angle.z,
+			//					angle.y + DirectX::XM_PI,
+			//					angle.x
+			//				};
 
-	//						if (handle == -1)
-	//							handle = breathEffect->Play(pos);
+			//				if (handle == -1)
+			//					handle = breathEffect->Play(pos);
 
-	//						breathEffect->SetRotation(handle, Angle);
-	//						breathEffect->SetPosition(handle, pos);
-	//						breathEffect->SetTargetPosition(handle, Player::Instance().GetPosition());
-	//					}
-	//				}
-	//				if (event.eventName == "Attack")
-	//				{
-	//					{
-	//						if (handle1 == -1)
-	//						{
-	//							Model::Node* modelNode = model->FindNode("Bone048");
-	//							DirectX::XMFLOAT3 pos = {
-	//								modelNode->worldTransform._41,
-	//								modelNode->worldTransform._42,
-	//								modelNode->worldTransform._43
-	//							};
-	//							//attackTelegraphEffect->SetPosition(handle1, pos);
-	//							handle1 = attackTelegraphEffect->Play(pos);
-	//						}
-	//					}
-	//				}
-	//				break;
+			//				breathEffect->SetRotation(handle, Angle);
+			//				breathEffect->SetPosition(handle, pos);
+			//				breathEffect->SetTargetPosition(handle, Player::Instance().GetPosition());
+			//			}
+			//		}
+			//		if (event.eventName == "Attack")
+			//		{
+			//			{
+			//				if (handle1 == -1)
+			//				{
+			//					Model::Node* modelNode = model->FindNode("Bone048");
+			//					DirectX::XMFLOAT3 pos = {
+			//						modelNode->worldTransform._41,
+			//						modelNode->worldTransform._42,
+			//						modelNode->worldTransform._43
+			//					};
+			//					//attackTelegraphEffect->SetPosition(handle1, pos);
+			//					handle1 = attackTelegraphEffect->Play(pos);
+			//				}
+			//			}
+			//		}
+			//		break;
 
-	//			case EventType::Camera:
-	//				// カメラ制御などをここに追加
-	//				break;
-	//			}
+			//	case EventType::Camera:
+			//		// カメラ制御などをここに追加
+			//		break;
+			//	}
 
 
-	//			if (!event.IsActive(animationSeconds))
-	//			{
-	//				// エフェクト停止
-	//				if (handle != -1)
-	//				{
-	//					breathEffect->Stop(handle);
-	//					handle = -1;
-	//				}
-	//				if (handle1 != -1)
-	//				{
-	//					attackTelegraphEffect->Stop(handle1);
-	//					handle1 = -1;
-	//				}
-	//			}
-	//		}
-	//	}
+			//	
+			//}
+		}
 
-	//}
-	//// オブジェクト行列更新
-	//UpdateTransform();
+	}
+	sword->Attach("weapon_r", model.get());
 
-	//// モデルのアニメーション更新
-	//model->UpdateAnimation(elapsedTime);
+	sword->Update(elapsedTime);
 
-	//// モデル行列更新
-	//model->UpdateTransform(transform);
+	// オブジェクト行列更新
+	UpdateTransform();
+
+	// モデルのアニメーション更新
+	model->UpdateAnimation(elapsedTime, this);
+
+	// モデル行列更新
+	model->UpdateTransform(transform);
 }
 
 void SilverDragonkin::Render(const RenderContext& rc, ShaderId shaderId)

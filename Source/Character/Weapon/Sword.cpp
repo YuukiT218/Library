@@ -58,7 +58,7 @@ void Sword::Update(float elapsedTime)
 void Sword::Render(const RenderContext& rc, Shader* shader)
 {
 	ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
-	modelRenderer->Draw(ShaderId::Lambert, model);
+	modelRenderer->Draw(ShaderId::PBR, model);
 	modelRenderer->Render(rc);
 	//if (IsAttack)TrailRender(rc);
 }

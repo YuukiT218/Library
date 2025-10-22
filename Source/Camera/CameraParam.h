@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-//#include "Character/Enemy/Enemy.h"
+#include "Character/Enemy/Enemy.h"
 
 class CameraParam
 {

@@ -63,7 +63,7 @@ private:
 	DirectX::XMFLOAT3 offsetPosition{ 0.0f, 3.0f, 0.0f };
 	float attenuation = 4.5f;
 	//ディレクショナルライト
-	DirectX::XMFLOAT4 direction = { -0.775f, 0.125f, 0.625f, 1.0f };
+	DirectX::XMFLOAT4 direction = { -0.813f, 0.255f, 0.523f, 1.0f };
 	DirectX::XMFLOAT4 Directioncolor = { 1.0f, 1.0f, 1.0f, 100.0f };
 
 	//タイマー

@@ -62,7 +62,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -92,7 +92,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -115,6 +115,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="External\DirectXTK-main\Inc\WICTextureLoader.h" />
     <ClInclude Include="External\imgui-docking\imconfig.h" />
     <ClInclude Include="External\imgui-docking\imgui.h" />
     <ClInclude Include="External\imgui-docking\imgui_impl_dx11.h" />
@@ -176,6 +177,7 @@
     <ClInclude Include="External\SphereCast\Include\SphereCast.h" />
     <ClInclude Include="Source\Camera\CameraController.h" />
     <ClInclude Include="Source\Camera\CameraParam.h" />
+    <ClInclude Include="Source\Camera\EditCameraController.h" />
     <ClInclude Include="Source\Character\Character.h" />
     <ClInclude Include="Source\Character\Enemy\BehaviorTree\ActionBase.h" />
     <ClInclude Include="Source\Character\Enemy\BehaviorTree\ActionDerived.h" />
@@ -290,6 +292,7 @@
     <ClInclude Include="Source\Math\TransformUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="External\DirectXTK-main\Src\WICTextureLoader.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_demo.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_draw.cpp" />
@@ -301,6 +304,7 @@
     <ClCompile Include="External\ImGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="External\ImGuizmo\ImSequencer.cpp" />
     <ClCompile Include="Source\Camera\CameraController.cpp" />
+    <ClCompile Include="Source\Camera\EditCameraController.cpp" />
     <ClCompile Include="Source\Character\Character.cpp" />
     <ClCompile Include="Source\Character\Enemy\Enemy.cpp" />
     <ClCompile Include="Source\Character\Enemy\SilverDragonkin.cpp" />

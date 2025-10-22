@@ -41,7 +41,6 @@ void SceneGame::Initialize()
 
 	// プレイヤー初期化
 	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	//dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/silver-dragonkin/source/SilverDragonkin.gltf", 0.005f);
 	dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/Mannequin/SK_Mannequin.gltf", 1.0f);
 
 	Camera& camera = Camera::Instance();

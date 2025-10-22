@@ -517,7 +517,7 @@ void PlayerFallState::DrawDebugGUI()
 PlayerDodgeState::PlayerDodgeState(Player* player)
     : PlayerState(player)
 {
-    dodgeAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Dodge_Combat_F_Seq_0");
+    dodgeAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Roll_Combat_F_0_Seq_0");
     airDodgeAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Dodge_Air_Combat_F_Seq_0");
 }
 
@@ -536,6 +536,7 @@ void PlayerDodgeState::Enter()
 
     if (player->IsGround())
     {
+        player->GetPlayerModel()->SetAnimationSpeed(4.5f);
         player->GetPlayerModel()->PlayRootMotion(dodgeAnimationIndex, false, true, 0.1f, "Character1_Hips");
         timer = dodgeAnimationTime;
     }
@@ -550,7 +551,7 @@ void PlayerDodgeState::Enter()
 	player->SetPlayerRolling(true);
     nextShiftReady = false;
 
-    player->SetMovement(vec, 4.0f);
+    player->SetMovement(vec, 3.0f);
 }
 
     
@@ -605,6 +606,7 @@ void PlayerDodgeState::Update(float elapsedTime)
 // 終了処理
 void PlayerDodgeState::Exit()
 {
+    player->GetPlayerModel()->SetAnimationSpeed(1.0f);
     player->SetGravity(-0.3f);
     player->SetPlayerRolling(false);
 }
@@ -753,15 +755,15 @@ void PlayerComboState::Update(float elapsedTime)
     float frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
     int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
 
-    //AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
 
     if (CameraParam::Instance().GetIsLockOn())
     {
         player->LockOnTurnToEnemy(elapsedTime);
     }
 
-    //player->GetSword()->AttackAnimationCollision(player->GetModel(), config);
-    player->GetSword()->AttackAnimationCollision(player->GetModel(), attackCollisionStartFrame, attackCollisionEndFrame, attackDamage, invisibleTime, attackLeftVibrate, attackRightVibrate, attackHitStopTime, attackHitStopSpeed);
+    player->GetSword()->AttackAnimationCollision(player->GetModel(), config);
+    //player->GetSword()->AttackAnimationCollision(player->GetModel(), attackCollisionStartFrame, attackCollisionEndFrame, attackDamage, invisibleTime, attackLeftVibrate, attackRightVibrate, attackHitStopTime, attackHitStopSpeed);
     
     InputComboType input = InputCombo();
 
@@ -1003,8 +1005,8 @@ void PlayerCombo3State::DrawDebugGUI()
 PlayerCombo4State::PlayerCombo4State(Player* player)
     : PlayerComboState(player)
 {
-    inputToNextState[InputComboType::Light] = PlayerStateId::Combo1;
-    inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
+    inputToNextState[InputComboType::Light] = PlayerStateId::Heavy1;
+    //inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
     nextShiftFrame = 0.7f;
     poseFrame = 0.7f;
     endFrame = 1.016f;

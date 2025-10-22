@@ -7,7 +7,7 @@ StageMain::StageMain()
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
-	model = std::make_unique<Model>(device, "Data/Model/boss_fight_arena/Arena.gltf", 0.25f);
+	model = std::make_unique<Model>(device, "Data/Model/boss_fight_arena/Arena.gltf", 0.2f);
 	model->SetAdMetalness(1.0f);
 	model->SetAdRoughness(0.35f);
 

@@ -151,6 +151,29 @@ DirectX::XMFLOAT3 Character::CharacterRight(DirectX::XMFLOAT3 angle)
     return vec;
 }
 
+DirectX::XMFLOAT3 Character::Arrive(const DirectX::XMFLOAT3& targetPos, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3 velocity)
+{
+    DirectX::SimpleMath::Vector3 arrive(
+        targetPos.x - position.x,
+        targetPos.y - position.y,
+        targetPos.z - position.z);
+
+    // 2. 目的方向ベクトルの長さを20で割る
+    float length = arrive.Length() * 0.05f;
+
+    // 3. 目的方向ベクトルを正規化する。 
+    arrive.Normalize();
+
+    // 4. 2.で求めた値と最大速度を比較し、小さい値を3.で求めた正規化したベクトルにかける
+    // = std::min(length, maxSpeed);
+    arrive *= length;
+
+    //5. 4.で求めたベクトルから現在の速度を引く。
+    arrive -= DirectX::SimpleMath::Vector3(velocity.x, velocity.y, velocity.z);
+
+    return arrive;
+}
+
 // ダメージを与える
 bool Character::ApplyDamage(int damage, float invicibleTime, bool isState, DirectX::XMFLOAT3 HitPosition)
 {
@@ -172,15 +195,6 @@ bool Character::ApplyDamage(int damage, float invicibleTime, bool isState, Direc
 
     // 無敵時間設定
     invincibleTimer = invicibleTime;
-
-
-    // 通知
-    //{
-    //    MessageData::POPUPNUMBERDATA	p;
-    //    p.position = HitPosition;
-    //    p.value = -damage;	//	ダメージなのでマイナス反転しておく
-    //    Messenger::Instance().SendData(MessageData::POPUPNUMBEREVENT, &p);
-    //}
 
     if (!isState)
     {
@@ -241,7 +255,7 @@ void Character::Move(float vx, float vz, float speed)
     moveVecZ = vz;
 
     // 最大速度設定
-    maxMoveSpeed = speed;
+    maxSpeed = speed;
 }
 
 // 旋回処理
@@ -598,8 +612,8 @@ void Character::UpdateHorizontalVelocity(float elapsedTime)
         float vz = moveVecZ / moveVecLength;
 
         // 即時に最大速度で速度ベクトルを設定
-        velocity.x = vx * maxMoveSpeed;
-        velocity.z = vz * maxMoveSpeed;
+        velocity.x = vx * maxSpeed;
+        velocity.z = vz * maxSpeed;
     }
 
     // 移動ベクトルをリセット

@@ -8,7 +8,7 @@
 #include "Character/Enemy/SilverDragonkin.h"
 #include "Math/Collision.h"
 #include "Math/Mathf.h"
-//#include "System/AnimationConfigLoader.h"
+#include "System/AnimationConfigLoader.h"
 #include "Camera/CameraParam.h"
 
 static Player* instance = nullptr;
@@ -31,8 +31,8 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
 
     // ステージの高さに合わせる
     position.x = -1.0f;
-    position.y = -2.4f;
-    position.z = -25.0f;
+    //position.y = -2.4f;
+    position.z = -15.0f;
 
     // アニメーションスピード設定
     initAnimSpeed();
@@ -71,15 +71,15 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
 
     // アニメーションごとのパラメーター設定
     const std::vector<ModelResource::Animation>& animations = model->GetResource()->GetAnimations();
-    /*for (int i = 0; i < animations.size(); i++)
+    for (int i = 0; i < animations.size(); i++)
     {
         const AnimationConfig* config = AnimationConfigLoader::GetConfig("Player", i);
         if (config != nullptr)
             model->SetAnimationConfig(*config);
-    }*/
+    }
 
     // プレイヤーの範囲制限
-    areaSize = 37.0f;
+    areaSize = 29.5f;
 }
 
 Player::~Player()
@@ -649,7 +649,7 @@ void Player::DrawDebugGUI()
                 ImGui::DragFloat(u8"プレイヤー無敵時間", &invincibleTimer, 0.1f);
                 ImGui::DragFloat(u8"プレイヤー摩擦力", &friction, 0.01f);
                 ImGui::DragFloat(u8"プレイヤー加速度", &acceleration, 0.1f);
-                ImGui::DragFloat(u8"プレイヤー最大移動速度", &maxMoveSpeed, 0.1f);
+                ImGui::DragFloat(u8"プレイヤー最大移動速度", &maxSpeed, 0.1f);
                 ImGui::DragFloat(u8"プレイヤーX方向ベクトル", &moveVecX, 0.1f);
                 ImGui::DragFloat(u8"プレイヤーZ方向ベクトル", &moveVecZ, 0.1f);
                 ImGui::DragFloat(u8"プレイヤー空中摩擦力", &airControl, 0.1f);

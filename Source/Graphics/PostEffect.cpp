@@ -125,15 +125,15 @@ PostEffect::PostEffect(ID3D11Device* device)
 	gaussianFilterDatas.kernelSize = 1;
 	gaussianFilterDatas.sigma = 10.0f;
 	gaussianFilterDatas.textureSize = { 0,0 };
-	vignetteSetData.vignetteColor = { 0.2f, 0.2f, 0.2f, 1.0f };
+	vignetteSetData.vignetteColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 	vignetteSetData.vignetteCenter = { 0.5f, 0.5f };
-	vignetteSetData.vignetteIntensity = 0.4f;
+	vignetteSetData.vignetteIntensity = 0.0f;
 	vignetteSetData.vignetteSmoothness = 0.2f;
 	vignetteSetData.vignetteRounded = false;
 	vignetteSetData.vignetteRoundness = 1.0f;
 	cbFpost.contrast = 1.2f;
 	cbFpost.saturation = 1.4f;
-	cbFpost.chromatic_aberration = 0.006f;
+	cbFpost.chromatic_aberration = 0.000f;
 	cbFpost.flashAmount = 0.0f;//0.0 ~　1.0で白さを調整
 	cbFpost.colorFilter = { 1.05f, 0.9f, 0.9f };
 	cbFpost.chromaticMask = 0.0f;
@@ -317,20 +317,7 @@ void PostEffect::KawaseBloom(const RenderContext& rc, ID3D11ShaderResourceView* 
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 	ID3D11ShaderResourceView* null_shader_resource_view{};
-	//ColorFilter filter{};
-	//filter.hueShift = color_filter_parameter.x;
-	//filter.saturation = color_filter_parameter.y;
-	//filter.brightness = color_filter_parameter.z;
-	//dc->UpdateSubresource(color_filter_constant_buffer.Get(), 0, 0, &filter, 0, 0);
-	//dc->VSSetConstantBuffers(1, 1, color_filter_constant_buffer.GetAddressOf());
-	//dc->PSSetConstantBuffers(1, 1, color_filter_constant_buffer.GetAddressOf());
-	//// Extracting bright color
-	//glow_extraction->Clear(dc, 0, 0, 0, 1);
-	//glow_extraction->SetRenderTargets(dc);
-	//bit_block_transfer->blit(dc, &colorMap, 0, 1, luminanceExtractionPS.Get());
-	//End(rc);
-
-
+	
 	 // サンプラステート設定
 	ID3D11SamplerState* samplers[] =
 	{

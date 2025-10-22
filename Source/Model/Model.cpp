@@ -223,7 +223,7 @@ void Model::UpdateAnimation(float elapsedTime, Character* character)
 	}
 	else
 	{
-		ComputeRootAnimation(elapsedTime, character);
+		ComputeRootAnimation(elapsedTime * animationSpeed * baseAnimationSpeed, character);
 	}
 
 	ComputeBlending(elapsedTime * animationSpeed * baseAnimationSpeed);

@@ -30,7 +30,7 @@ void CameraController::Update(float elapsedTime)
         float speed = rollSpeed * elapsedTime;
 
         if (ax) angle.y += ax * speed;
-        if (ay) angle.x += (Input::Instance().GetIsLastGamePad() ? -ay : ay) * speed;
+        if (ay) angle.x -= (Input::Instance().GetIsLastGamePad() ? -ay : ay) * speed;
 
         // マウスでカメラを操作
 #if _DEBUG
@@ -39,7 +39,7 @@ void CameraController::Update(float elapsedTime)
             MouseCameraController(elapsedTime);
         }
 #else
-        MouseCameraController(elapsedTime);
+        //MouseCameraController(elapsedTime);
 #endif
     }
 

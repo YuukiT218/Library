@@ -36,7 +36,7 @@ public:
 	// シーケンスノードから推論開始
 	NodeBase<ActorType>* SequenceBack(NodeBase<ActorType>* sequenceNode, BehaviorData<ActorType>* data);
 
-	// ノード追加
+	// ノード追加:
 	void AddNode(std::string parentName, std::string entryName, int priority, SelectRule selectRule, JudgmentBase<ActorType>* judgment, ActionBase<ActorType>* action, StateBase<ActorType>* stateMachine = nullptr);
 
 	// 実行
@@ -46,7 +46,7 @@ private:
 	void NodeAllClear(NodeBase<ActorType>* delNode);
 private:
 	// ルートノード
-	std::unique_ptr<NodeBase<ActorType>> root;
+	NodeBase<ActorType>* root;
 	std::shared_ptr<ActorType> owner;
 };
 
@@ -54,7 +54,7 @@ private:
 template <typename ActorType>
 BehaviorTree<ActorType>::~BehaviorTree()
 {
-	//NodeAllClear(root);
+	NodeAllClear(root);
 }
 
 template <typename ActorType>
@@ -80,7 +80,7 @@ void BehaviorTree<ActorType>::AddNode(std::string parentName, std::string entryN
 		if (root == nullptr)
 		{
 			// ルートノードを追加
-			root = std::make_unique<NodeBase<ActorType>>(entryName, nullptr, priority, selectRule, judgment, action);
+			root = new NodeBase<ActorType>(entryName, nullptr, priority, selectRule, judgment, action);
 		}
 	}
 }
