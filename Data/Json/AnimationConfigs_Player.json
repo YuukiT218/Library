@@ -1,23 +1,9 @@
 {
     "Player": [
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 0,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -42,30 +28,10 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 1,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": 0,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [
-                {
-                    "endTime": 0.5,
-                    "flag": "Attack",
-                    "startTime": 0.0
-                }
-            ],
+            "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
             "events": [],
@@ -89,23 +55,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 2,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -130,23 +82,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 3,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -171,23 +109,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 4,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -212,23 +136,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 5,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -253,23 +163,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 6,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -294,23 +190,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 7,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -335,23 +217,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 8,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -376,23 +244,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 9,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -417,23 +271,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 10,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -458,928 +298,1036 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 11,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 12,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 13,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 14,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 15,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 16,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 17,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 18,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 19,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 20,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 21,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 22,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 23,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 24,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 25,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 26,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 27,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 28,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 29,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 30,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 31,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 32,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 33,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": 0,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [
                 {
-                    "endTime": 0.5,
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5801581740379333,
+                    "flag": "Attack",
+                    "startTime": 0.1183728352189064
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 12,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 13,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 14,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 15,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 16,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 17,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 18,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 19,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 20,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 21,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.23424962162971497,
+                    "flag": "Attack",
+                    "startTime": 0.1842496246099472
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.30484986305236816,
+                    "flag": "Attack",
+                    "startTime": 0.254849910736084
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.3737281858921051,
+                    "flag": "Attack",
+                    "startTime": 0.32372817397117615
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4426066279411316,
+                    "flag": "Attack",
+                    "startTime": 0.39260661602020264
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5114849209785461,
+                    "flag": "Attack",
+                    "startTime": 0.4614849090576172
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Heavy",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.6515318751335144,
+                    "flag": "Attack",
+                    "startTime": 0.5303632616996765
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 22,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 23,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 24,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 25,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 26,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 27,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 28,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 29,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 30,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 31,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 32,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 33,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4530807137489319,
+                    "flag": "Attack",
+                    "startTime": 0.10478673130273819
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 34,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.2287202775478363,
+                    "flag": "Attack",
+                    "startTime": 0.042654022574424744
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5170615911483765,
+                    "flag": "Attack",
+                    "startTime": 0.25933659076690674
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 35,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.6227487325668335,
+                    "flag": "Attack",
+                    "startTime": 0.07540283352136612
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 36,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Heavy",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.731785774230957,
+                    "flag": "Attack",
+                    "startTime": 0.3697947561740875
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 37,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 38,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.48088473081588745,
+                    "flag": "Attack",
+                    "startTime": 0.11990529298782349
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "Player",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 39,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.35592424869537354,
                     "flag": "Attack",
                     "startTime": 0.0
                 }
@@ -1407,33 +1355,28 @@
             ]
         },
         {
-            "animationIndex": 34,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 40,
             "attributes": [
                 {
-                    "endTime": 0.2764928340911865,
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4081515669822693,
                     "flag": "Attack",
-                    "startTime": 0.06824643164873123
-                },
-                {
-                    "endTime": 0.5682461857795715,
-                    "flag": "Attack",
-                    "startTime": 0.3463507890701294
+                    "startTime": 0.0
                 }
             ],
             "cameraKeyframes": [],
@@ -1446,47 +1389,6 @@
                     "inTangent": 0.0,
                     "outTangent": 0.0,
                     "time": 0.0,
-                    "value": 0.989999532699585
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.9986911416053772,
-                    "value": 1.007462501525879
-                }
-            ]
-        },
-        {
-            "animationIndex": 35,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
                     "value": 1.0
                 },
                 {
@@ -1500,228 +1402,9 @@
             ]
         },
         {
-            "animationIndex": 36,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 37,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 38,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 39,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
-            "animationIndex": 40,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
-            "attributes": [],
-            "cameraKeyframes": [],
-            "characterName": "Player",
-            "events": [],
-            "speedCurve": [
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 0.0,
-                    "value": 1.0
-                },
-                {
-                    "handleOffsetX": 0.05000000074505806,
-                    "handleOffsetY": 0.0,
-                    "inTangent": 0.0,
-                    "outTangent": 0.0,
-                    "time": 1.0,
-                    "value": 1.0
-                }
-            ]
-        },
-        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 41,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -1746,23 +1429,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 42,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -1787,23 +1456,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 43,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -1828,23 +1483,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 44,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -1869,23 +1510,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 45,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -1910,23 +1537,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 46,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -1951,23 +1564,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 47,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -1992,23 +1591,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 48,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2033,23 +1618,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 49,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2074,23 +1645,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 50,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2115,23 +1672,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 51,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2156,23 +1699,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 52,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2197,23 +1726,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 53,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2238,23 +1753,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 54,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2279,23 +1780,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 55,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2320,23 +1807,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 56,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2361,23 +1834,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 57,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2402,23 +1861,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 58,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2443,23 +1888,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 59,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2484,23 +1915,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 60,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2525,23 +1942,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 61,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2566,23 +1969,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 62,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2607,23 +1996,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 63,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2648,23 +2023,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 64,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2689,23 +2050,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 65,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2730,23 +2077,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 66,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2771,23 +2104,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 67,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2812,23 +2131,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 68,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2853,23 +2158,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 69,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2894,23 +2185,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 70,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2935,23 +2212,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 71,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -2976,23 +2239,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 72,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3017,23 +2266,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 73,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3058,23 +2293,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 74,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3099,23 +2320,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 75,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3140,23 +2347,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 76,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3181,23 +2374,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 77,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3222,23 +2401,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 78,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3263,23 +2428,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 79,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3304,23 +2455,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 80,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3345,23 +2482,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 81,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3386,23 +2509,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 82,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3427,23 +2536,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 83,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3468,23 +2563,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 84,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3509,23 +2590,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 85,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3550,23 +2617,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 86,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3591,23 +2644,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 87,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3632,23 +2671,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 88,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3673,23 +2698,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 89,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3714,23 +2725,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 90,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3755,23 +2752,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 91,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3796,23 +2779,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 92,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3837,23 +2806,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 93,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3878,23 +2833,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 94,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3919,23 +2860,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 95,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -3960,23 +2887,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 96,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4001,23 +2914,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 97,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4042,23 +2941,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 98,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4083,23 +2968,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 99,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4124,23 +2995,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 100,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4165,23 +3022,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 101,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4193,7 +3036,15 @@
                     "inTangent": 0.0,
                     "outTangent": 0.0,
                     "time": 0.0,
-                    "value": 1.0
+                    "value": 1.734999418258667
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.7637487649917603,
+                    "value": 1.5
                 },
                 {
                     "handleOffsetX": 0.05000000074505806,
@@ -4206,23 +3057,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 102,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4247,23 +3084,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 103,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4288,23 +3111,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 104,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4329,23 +3138,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 105,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4370,23 +3165,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 106,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4411,23 +3192,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 107,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4452,23 +3219,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 108,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4493,23 +3246,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 109,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4534,23 +3273,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 110,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4575,23 +3300,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 111,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4616,23 +3327,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 112,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4657,23 +3354,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 113,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4698,23 +3381,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 114,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4739,23 +3408,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 115,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4780,23 +3435,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 116,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4821,23 +3462,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 117,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4862,23 +3489,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 118,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4903,23 +3516,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 119,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4944,23 +3543,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 120,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -4985,23 +3570,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 121,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5026,23 +3597,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 122,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5067,23 +3624,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 123,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5108,23 +3651,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 124,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5149,23 +3678,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 125,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5190,23 +3705,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 126,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5231,23 +3732,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 127,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5272,23 +3759,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 128,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5313,23 +3786,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 129,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5354,23 +3813,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 130,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",
@@ -5395,23 +3840,9 @@
             ]
         },
         {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
             "animationIndex": 131,
-            "attackParam": {
-                "attackDamage": 1,
-                "attackHitStopSpeed": 0.10000000149011612,
-                "attackHitStopTime": 1.0,
-                "attackLeftVibrate": 1.0,
-                "attackRightVibrate": 1.0,
-                "endTime": 0.30000001192092896,
-                "forwardFrame": 0.0,
-                "forwardPower": 0.0,
-                "forwarded": false,
-                "invisibleTime": 0.5,
-                "knockbackType": -858993460,
-                "moveRate": 1.0,
-                "startTime": 0.20000000298023224,
-                "turnRate": 1.0
-            },
             "attributes": [],
             "cameraKeyframes": [],
             "characterName": "Player",

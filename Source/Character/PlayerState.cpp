@@ -524,6 +524,9 @@ PlayerDodgeState::PlayerDodgeState(Player* player)
 // 開始処理
 void PlayerDodgeState::Enter()
 {
+    int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+
     const Camera& camera = Camera::Instance();
     const GamePad& gamepad = Input::Instance().GetGamePad();
     DirectX::XMVECTOR Vec;
@@ -536,7 +539,6 @@ void PlayerDodgeState::Enter()
 
     if (player->IsGround())
     {
-        player->GetPlayerModel()->SetAnimationSpeed(4.5f);
         player->GetPlayerModel()->PlayRootMotion(dodgeAnimationIndex, false, true, 0.1f, "Character1_Hips");
         timer = dodgeAnimationTime;
     }

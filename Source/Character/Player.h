@@ -51,6 +51,9 @@ public:
 	// 更新処理
 	void Update(float elapsedTime);
 
+	// エディタ用更新処理
+	void EditUpdate(float elapsedTime);
+
 	// 描画処理
 	void Render(const RenderContext& rc, ShaderId shaderId);
 

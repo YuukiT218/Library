@@ -183,7 +183,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
     }
 }
 
-void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config)
+void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, AnimationAttribute* activeAttribute)
 {
     if (!IsAttack) IsAttack = !IsAttack;
 
@@ -197,10 +197,8 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config)
         DirectX::XMVECTOR P = DirectX::XMVector3Transform(weaponHitOffsetVec, weaponWorldMatrix);
         DirectX::XMStoreFloat3(&weaponHitPosition[i], P);
 
-        // 当たり判定用球描画
         Graphics::Instance().GetShapeRenderer()->DrawSphere(weaponHitPosition[i], hitSphereRadius, { 1.0f, 0.0f, 0.0f, 1.0f });
 
-        // 指定のノードと全ての敵を総当たりで衝突処理
         SilverDragonkin& dragonkin = SilverDragonkin::Instance();
         std::vector<NodeHitSphere> enemyNode = dragonkin.GetNodeHitSpheres();
         for (auto& enemyHitSphere : enemyNode)
@@ -208,7 +206,6 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config)
             Model* enemyModel = dragonkin.GetModel();
             Model::Node* enemyNode = enemyModel->FindNode(enemyHitSphere.nodeName);
 
-            // ノード位置取得
             DirectX::XMFLOAT3 enemyNodePosition;
             enemyNodePosition = { enemyNode->worldTransform._41, enemyNode->worldTransform._42, enemyNode->worldTransform._43 };
 
@@ -222,36 +219,23 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config)
                 outPosition,
                 outHitPoint))
             {
-                // ダメージを与える
-                //if (enemy->ApplyDamage(rand() % 200 + config->attackParam.attackDamage, config->attackParam.invisibleTime, true, outHitPoint))
+                // アクティブな攻撃属性のパラメータを使用
+                if (activeAttribute && activeAttribute->flag == AnimationFlag::Attack)
                 {
+                    auto& ap = activeAttribute->attackParam;
+
                     dragonkin.SetDamage(true);
-                    //HitStop::Instance().HitStopStart(config->attackParam.attackHitStopTime, config->attackParam.attackHitStopSpeed, config->attackParam.attackHitStopTime, config->attackParam.attackHitStopSpeed);
-                    HitStop::Instance().HitStopStart(3.0f, 0.1f, 3.0f, 0.1f);
+                    HitStop::Instance().HitStopStart(
+                        ap.attackHitStopTime,
+                        ap.attackHitStopSpeed,
+                        ap.attackHitStopTime,
+                        ap.attackHitStopSpeed
+                    );
 
-                    //gamepad.Vibrate(config->attackParam.attackLeftVibrate, config->attackParam.attackRightVibrate);
+                    gamepad.Vibrate(ap.attackLeftVibrate, ap.attackRightVibrate);
 
-                    //attackHitEffectHandle = attackHitEffect->Play(outHitPoint, 0.5f);
-
-                    //Camera::Instance().SetCameraShakeSwitch(true, 0.2f, 0.5f);
-
-                    //// 敵を吹っ飛ばすベクトルを算出
-                    //DirectX::XMFLOAT3 vec;
-                    //vec.x = outPosition.x - object->weaponHitPosition[i].x;
-                    //vec.z = outPosition.z - object->weaponHitPosition[i].z;
-                    //float length = sqrtf(vec.x * vec.x + vec.z * vec.z);
-                    //vec.x /= length;
-                    //vec.z /= length;
-
-                    //// XZ平面に吹っ飛ばす力をかける
-                    //float power = 15.0f;
-                    //vec.x *= power;
-                    //vec.z *= power;
-                    //// Y方向にも力をかける
-                    //vec.y = 5.0f;
-
-                    //// 吹っ飛ばす
-                    //enemy->AddImpulse(vec);
+                    // ダメージ適用（コメントアウト部分を有効化する場合）
+                    // enemy->ApplyDamage(ap.attackDamage, ap.invisibleTime, true, outHitPoint);
                 }
             }
         }
@@ -282,11 +266,10 @@ void Weapon::AttackAnimationCollision(Model* character, float animTimeMin, float
 void Weapon::AttackAnimationCollision(Model* character, AnimationConfig* config)
 {
     GamePad& gamepad = Input::Instance().GetGamePad();
-
-    // 任意のアニメーションの再生区間のみ衝突処理をする
     float animationTime = character->GetCurrentAnimationSeconds();
 
     bool anyAttackActive = false;
+    AnimationAttribute* activeAttackAttribute = nullptr;
 
     // 複数のAttributeをチェック
     for (auto& attribute : config->attributes)
@@ -294,16 +277,15 @@ void Weapon::AttackAnimationCollision(Model* character, AnimationConfig* config)
         if (attribute.flag == AnimationFlag::Attack && attribute.IsActive(animationTime))
         {
             anyAttackActive = true;
+            activeAttackAttribute = &attribute;
 
-            // 攻撃当たり判定球とエネミーの衝突判定
-            CollisionNodeVsEnemies(hitSphereRadius, config);
+            // 攻撃当たり判定球とエネミーの衝突判定（アクティブな属性を渡す）
+            CollisionNodeVsEnemies(hitSphereRadius, config, activeAttackAttribute);
 
-            // 最初に見つかったアクティブな攻撃属性のみを処理する場合
-            break; // この行をコメントアウトすれば、重複する攻撃属性すべてを処理
+            break; // 最初に見つかったアクティブな攻撃属性のみを処理
         }
     }
 
-    // どの攻撃属性もアクティブでない場合
     if (!anyAttackActive)
     {
         if (IsAttack) IsAttack = !IsAttack;

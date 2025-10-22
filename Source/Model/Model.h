@@ -91,34 +91,6 @@ NLOHMANN_JSON_SERIALIZE_ENUM(AnimationFlag, {
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Keyframe, time, value, handleOffsetX, handleOffsetY, inTangent, outTangent)
 
-struct AnimationAttribute
-{
-	AnimationFlag flag;  // 属性の種類（攻撃、無敵、パリィなど）
-	float startTime;     // 開始時間（秒）
-	float endTime;       // 終了時間（秒）
-
-	// 任意：指定時間にこの属性が有効かどうか
-	bool IsActive(float currentTime) const
-	{
-		return currentTime >= startTime && currentTime <= endTime;
-	}
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationAttribute, flag, startTime, endTime)
-
-struct AnimationEvent
-{
-	float timeInSeconds;
-	float timeOutSeconds;
-	EventType eventType; //カメラやエフェクトなど
-	std::string eventName; //EventCamera1などイベントタイプの中で何をするかを判別
-
-	bool IsActive(float currentTime) const
-	{
-		return currentTime >= timeInSeconds && currentTime <= timeOutSeconds;
-	}
-};
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationEvent, timeInSeconds, timeOutSeconds, eventType, eventName)
-
 enum class KnockbackType
 {
 	Light,
@@ -126,11 +98,15 @@ enum class KnockbackType
 	Launch
 };
 
+// enum <-> string 変換のための定義
+NLOHMANN_JSON_SERIALIZE_ENUM(KnockbackType, {
+	{KnockbackType::Light, "Light"},
+	{KnockbackType::Heavy, "Heavy"},
+	{KnockbackType::Launch, "Launch"}
+	})
+
 struct AttackAnimParam
 {
-	float startTime = 0.2f;//先行入力受付開始フレーム
-	float endTime = 0.3f;//先行終了受付開始フレーム
-
 	// 敵との距離の移動値と回転値
 	float moveRate = 1.0f;
 	float turnRate = 1.0f;
@@ -154,14 +130,8 @@ struct AttackAnimParam
 
 	// ノックバックの種類
 	KnockbackType knockbackType;
-
-	bool IsActive(float currentTime) const
-	{
-		return currentTime >= startTime && currentTime <= endTime;
-	}
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
-	startTime, endTime,
 	moveRate, turnRate,
 	forwardPower, forwardFrame, forwarded,
 	attackDamage, invisibleTime,
@@ -169,6 +139,35 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
 	attackHitStopTime, attackHitStopSpeed,
 	knockbackType)
 
+struct AnimationAttribute
+{
+	AnimationFlag flag;  // 属性の種類（攻撃、無敵、パリィなど）
+	float startTime;     // 開始時間（秒）
+	float endTime;       // 終了時間（秒）
+
+	AttackAnimParam attackParam;
+
+	// 任意：指定時間にこの属性が有効かどうか
+	bool IsActive(float currentTime) const
+	{
+		return currentTime >= startTime && currentTime <= endTime;
+	}
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationAttribute, flag, startTime, endTime, attackParam)
+
+struct AnimationEvent
+{
+	float timeInSeconds;
+	float timeOutSeconds;
+	EventType eventType; //カメラやエフェクトなど
+	std::string eventName; //EventCamera1などイベントタイプの中で何をするかを判別
+
+	bool IsActive(float currentTime) const
+	{
+		return currentTime >= timeInSeconds && currentTime <= timeOutSeconds;
+	}
+};
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationEvent, timeInSeconds, timeOutSeconds, eventType, eventName)
 
 struct AnimationConfig
 {
@@ -178,7 +177,9 @@ struct AnimationConfig
 	std::vector<AnimationEvent> events;
 	std::vector<AnimationAttribute> attributes;
 	std::vector<CameraKeyframe> cameraKeyframes;
-	AttackAnimParam attackParam;
+
+	float advanceInputStartFrame = 0.0f;	//先行入力受付開始フレーム
+	float advanceInputEndFrame = 0.0f;		//先行終了受付終了フレーム
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationConfig,
 	characterName,
@@ -187,7 +188,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationConfig,
 	events,
 	attributes,
 	cameraKeyframes,
-	attackParam)
+	advanceInputStartFrame,
+	advanceInputEndFrame)
 
 class Character;
 

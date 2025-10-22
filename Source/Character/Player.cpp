@@ -165,14 +165,29 @@ void Player::Update(float elapsedTime)
     if (currentStateID != PlayerStateId::EnumCount)
     {
 #if _DEBUG
-        /*ImGuiIO& io = ImGui::GetIO();
-        if (!io.WantCaptureMouse && !io.WantCaptureKeyboard) {*/
+        ImGuiIO& io = ImGui::GetIO();
+        if (!io.WantCaptureMouse && !io.WantCaptureKeyboard) {
             GetState(currentStateID).Update(elapsedTime);
-        //}
+        }
+        else
+        {
+            AnimationConfig* config = GetPlayerModel()->GetAnimationConfig("Player", GetPlayerModel()->GetCurrentAnimationIndex());
+            sword->AttackAnimationCollision(model.get(), config);
+        }
 #else
         GetState(currentStateID).Update(elapsedTime);
 #endif
     }
+
+    int currentIndex = this->model->GetCurrentAnimationIndex();
+    const AnimationConfig* config = model->GetAnimationConfig("Player", currentIndex);
+    float animationSeconds = model->GetCurrentAnimationSeconds();
+    float secondsLength = model->GetAnimationLength(currentIndex);
+    float t = animationSeconds / secondsLength;
+    t = std::clamp(t, 0.0f, 1.0f);  // 念のため 0.0～1.0 にクランプ
+    float speed = model->EvaluateSpeed(config->speedCurve, t);
+
+    model->SetAnimationSpeed(speed);
 
 	// 速力処理更新
     UpdateVelocity(elapsedTime);
@@ -191,6 +206,32 @@ void Player::Update(float elapsedTime)
 
     // アニメーション更新
 	model->UpdateAnimation(elapsedTime, this);
+
+    // モデル行列更新
+    model->UpdateTransform(transform);
+
+    sword->Update(elapsedTime);
+
+    // 範囲制限
+    KeepAreaLimit(position);
+}
+
+void Player::EditUpdate(float elapsedTime)
+{
+    // 速力処理更新
+    UpdateVelocity(elapsedTime);
+
+    // プレイヤーとエネミーの衝突処理
+    CollisionPlayerVsEnemies();
+
+    // アタッチメント
+    sword->Attach("Character1_RightHand", model.get());
+
+    // オブジェクト行列を更新
+    UpdateTransform();
+
+    // アニメーション更新
+    model->UpdateAnimation(elapsedTime, this);
 
     // モデル行列更新
     model->UpdateTransform(transform);

@@ -874,7 +874,6 @@ void SceneEdit::DrawCurrentSpeedIndicator(AnimationConfig* config, ImDrawList* d
 
 void SceneEdit::DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* config, int animIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength)
 {
-	// 複数のAttributeに対応
 	for (size_t attrIndex = 0; attrIndex < config->attributes.size(); ++attrIndex)
 	{
 		auto& attr = config->attributes[attrIndex];
@@ -944,18 +943,18 @@ void SceneEdit::DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* con
 			attr.endTime = std::clamp(attr.endTime, attr.startTime, secondsLength);
 		}
 
-		// 攻撃属性の場合、AttackParamのハンドルも表示
+		// 攻撃属性の場合、AttackParamのハンドルも表示（この属性自身のattackParamを使用）
 		if (attr.flag == AnimationFlag::Attack)
 		{
 			const float handleOffset = 12.0f;
-			AttackAnimParam& param = config->attackParam;
+			AttackAnimParam& param = attr.attackParam; // config->attackParam から attr.attackParam に変更
 
 			ImU32 attackFill = IM_COL32(180, 100, 255, 60);
 			ImU32 attackLine = IM_COL32(180, 100, 255, 200);
 			ImU32 attackCircle = IM_COL32(200, 150, 255, 255);
 
-			float atkStartX = graphStart.x + (param.startTime / secondsLength) * graphWidth;
-			float atkEndX = graphStart.x + (param.endTime / secondsLength) * graphWidth;
+			float atkStartX = graphStart.x + (config->advanceInputStartFrame / secondsLength) * graphWidth;
+			float atkEndX = graphStart.x + (config->advanceInputEndFrame / secondsLength) * graphWidth;
 
 			ImVec2 atkStartTop = ImVec2(atkStartX, graphStart.y - handleOffset);
 			ImVec2 atkStartBottom = ImVec2(atkStartX, graphEnd.y + handleOffset);
@@ -974,8 +973,8 @@ void SceneEdit::DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* con
 			ImGui::InvisibleButton(atkStartIdBtm.c_str(), ImVec2(12, 12));
 			if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
 				float delta = ImGui::GetIO().MouseDelta.x / graphWidth * secondsLength;
-				param.startTime += delta;
-				param.startTime = std::clamp(param.startTime, 0.0f, param.endTime);
+				config->advanceInputStartFrame += delta;
+				config->advanceInputStartFrame = std::clamp(config->advanceInputStartFrame, 0.0f, config->advanceInputEndFrame);
 			}
 
 			std::string atkEndIdBtm = "atkEndBtm##" + std::to_string(animIndex) + "_" + std::to_string(attrIndex);
@@ -983,8 +982,8 @@ void SceneEdit::DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* con
 			ImGui::InvisibleButton(atkEndIdBtm.c_str(), ImVec2(12, 12));
 			if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
 				float delta = ImGui::GetIO().MouseDelta.x / graphWidth * secondsLength;
-				param.endTime += delta;
-				param.endTime = std::clamp(param.endTime, param.startTime, secondsLength);
+				config->advanceInputEndFrame += delta;
+				config->advanceInputEndFrame = std::clamp(config->advanceInputEndFrame, config->advanceInputStartFrame, secondsLength);
 			}
 		}
 	}
@@ -1921,19 +1920,21 @@ void SceneEdit::DrawAttributeEditPanel(AnimationConfig* config, int selectedAttr
 	ImGui::Text(u8"時間設定");
 	ImGui::DragFloat(u8"開始時間(秒)", &attr.startTime, 0.01f, 0.0f, attr.endTime);
 	ImGui::DragFloat(u8"終了時間(秒)", &attr.endTime, 0.01f, attr.startTime, secondsLength);
+	ImGui::DragFloat(u8"先行入力受付開始", &config->advanceInputStartFrame, 0.01f, attr.startTime, secondsLength);
+	ImGui::DragFloat(u8"先行入力受付終了", &config->advanceInputEndFrame, 0.01f, attr.startTime, secondsLength);
 
 	int startFrame = static_cast<int>(attr.startTime * 60.0f);
 	int endFrame = static_cast<int>(attr.endTime * 60.0f);
 	ImGui::Text(u8"フレーム: %d - %d", startFrame, endFrame);
 
-	// 攻撃属性の場合、詳細パラメータ
+	// 攻撃属性の場合、詳細パラメータ（この属性自身のattackParamを使用）
 	if (attr.flag == AnimationFlag::Attack)
 	{
 		ImGui::Spacing();
 		ImGui::Separator();
 		ImGui::TextColored(ImVec4(1, 0.5f, 0.5f, 1), u8"攻撃パラメータ");
 
-		auto& ap = config->attackParam;
+		auto& ap = attr.attackParam; // config->attackParam から attr.attackParam に変更
 
 		const char* flagNames[] = {
 		u8"無し",
