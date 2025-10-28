@@ -74,6 +74,33 @@ public:
 	bool Judgment();
 };
 
+template <typename ActorType>
+class LightDamageJudgment : public JudgmentBase<ActorType>
+{
+public:
+	LightDamageJudgment(ActorType* actor) :JudgmentBase(actor) {};
+	// 判定
+	bool Judgment();
+};
+
+template <typename ActorType>
+class HeavyDamageJudgment : public JudgmentBase<ActorType>
+{
+public:
+	HeavyDamageJudgment(ActorType* actor) :JudgmentBase(actor) {};
+	// 判定
+	bool Judgment();
+};
+
+template <typename ActorType>
+class LaunchDamageJudgment : public JudgmentBase<ActorType>
+{
+public:
+	LaunchDamageJudgment(ActorType* actor) :JudgmentBase(actor) {};
+	// 判定
+	bool Judgment();
+};
+
 // DeadNodeに遷移できるか判定
 template <typename ActorType>
 class DeadJudgment : public JudgmentBase<ActorType>
@@ -219,6 +246,36 @@ template<typename ActorType>
 bool DamageJudgment<ActorType>::Judgment()
 {
 	if (owner->IsDamage())
+	{
+		return true;
+	}
+	return false;
+}
+
+template<typename ActorType>
+bool LightDamageJudgment<ActorType>::Judgment()
+{
+	if (owner->IsLightKbDamage())
+	{
+		return true;
+	}
+	return false;
+}
+
+template<typename ActorType>
+bool HeavyDamageJudgment<ActorType>::Judgment()
+{
+	if (owner->IsHeavyKbDamage())
+	{
+		return true;
+	}
+	return false;
+}
+
+template<typename ActorType>
+bool LaunchDamageJudgment<ActorType>::Judgment()
+{
+	if (owner->IsLaunchKbDamage())
 	{
 		return true;
 	}

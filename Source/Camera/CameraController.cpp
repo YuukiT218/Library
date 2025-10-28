@@ -30,7 +30,7 @@ void CameraController::Update(float elapsedTime)
         float speed = rollSpeed * elapsedTime;
 
         if (ax) angle.y += ax * speed;
-        if (ay) angle.x -= (Input::Instance().GetIsLastGamePad() ? -ay : ay) * speed;
+        if (ay) angle.x += (Input::Instance().GetIsLastGamePad() ? -ay : ay) * speed;
 
         // マウスでカメラを操作
 #if _DEBUG
@@ -52,66 +52,138 @@ void CameraController::Update(float elapsedTime)
     if (islockon)
     {
         EnemyAlived();
-        if (closestEnemy)
+    if (closestEnemy)
+    {
+        lockonpoint = closestEnemy->GetPosition();
+    }
+    else SetLockonPoint();
+
+    if (oldLockFlag != islockon)
+    {
+        sideValue = CalcSide(target, lockonpoint);
+    }
+
+    // プレイヤーとターゲットの位置
+    DirectX::XMFLOAT3 playerPos = target;
+    DirectX::XMFLOAT3 enemyPos = lockonpoint;
+
+    // 両者の中間点を注視点とする
+    DirectX::XMFLOAT3 midPoint;
+    midPoint.x = (playerPos.x + enemyPos.x) * 0.5f;
+    midPoint.y = (playerPos.y + enemyPos.y) * 0.5f + targetYoffset;
+    midPoint.z = (playerPos.z + enemyPos.z) * 0.5f;
+
+    // プレイヤーとターゲット間の距離を計算
+    DirectX::XMVECTOR vPlayer = DirectX::XMLoadFloat3(&playerPos);
+    DirectX::XMVECTOR vEnemy = DirectX::XMLoadFloat3(&enemyPos);
+    DirectX::XMVECTOR vDiff = DirectX::XMVectorSubtract(vEnemy, vPlayer);
+    
+    float distance = 0.0f;
+    DirectX::XMStoreFloat(&distance, DirectX::XMVector3Length(vDiff));
+
+    // 距離が極端に近い場合の処理
+    if (distance < 0.1f)
+    {
+        distance = 0.1f;
+        vDiff = DirectX::XMVectorSet(0, 0, 0.1f, 0); // デフォルト方向
+    }
+
+    // カメラ距離を対象間の距離から算出
+    float baseCameraDistance = distance * 0.8f;
+    
+    // 最小・最大距離でクランプ
+    float minCameraDist = lengthLimit[0];
+    float maxCameraDist = lengthLimit[1];
+    float cameraDistance = std::clamp(baseCameraDistance, minCameraDist, maxCameraDist);
+
+    // FOVを考慮した追加距離
+    cameraDistance *= lockOnFovCorrection;
+    cameraDistance = std::clamp(cameraDistance, minCameraDist, maxCameraDist);
+
+    // プレイヤーとターゲットを結ぶベクトル（水平面投影版を使用）
+    DirectX::XMFLOAT3 diffFloat;
+    DirectX::XMStoreFloat3(&diffFloat, vDiff);
+    
+    // 水平方向のベクトルを作成（Y成分を0にする）
+    DirectX::XMFLOAT3 horizontalDiff = diffFloat;
+    horizontalDiff.y = 0;
+    
+    DirectX::XMVECTOR forward = DirectX::XMLoadFloat3(&horizontalDiff);
+    float horizontalLength = 0.0f;
+    DirectX::XMStoreFloat(&horizontalLength, DirectX::XMVector3Length(forward));
+    
+    // 水平距離が極端に短い場合（ほぼ真上or真下）
+    // 前回の右ベクトルか、デフォルトの方向を使用
+    DirectX::XMVECTOR right;
+    if (horizontalLength < 0.1f)
+    {
+        // 前回の右ベクトルを使用（急激な変化を防ぐ）
+        right = DirectX::XMLoadFloat3(&lastCameraRight);
+        
+        // forwardベクトルをデフォルト方向に設定
+        if (horizontalLength < 0.01f)
         {
-            lockonpoint = closestEnemy->GetPosition();
+            forward = DirectX::XMVectorSet(0, 0, 1, 0); // Z軸正方向
         }
-        else SetLockonPoint();
-
-        if (oldLockFlag != islockon)
+        else
         {
-            sideValue = CalcSide(target, lockonpoint);
+            forward = DirectX::XMVector3Normalize(forward);
         }
+    }
+    else
+    {
+        // 通常時：水平方向ベクトルを正規化
+        forward = DirectX::XMVector3Normalize(forward);
+        
+        // 右方向ベクトルを計算
+        DirectX::XMVECTOR worldUp = DirectX::XMVectorSet(0, 1, 0, 0);
+        right = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(worldUp, forward));
+        
+        // 右ベクトルを保存（次回の参照用）
+        DirectX::XMStoreFloat3(&lastCameraRight, right);
+    }
 
-        targetWork[0] = target;
-        targetWork[1] = lockonpoint;
-        targetWork[0].y += 0.01f;
-        targetWork[1].y += 0.01f;
+    // 斜め上からの視点を作成
+    float heightAngle = DirectX::XMConvertToRadians(lockOnHeightAngle);
+    float sideAngle = DirectX::XMConvertToRadians(lockOnSideAngle);
 
-        // 後方斜に移動させる
-        DirectX::XMVECTOR t0 = DirectX::XMVectorSet(targetWork[0].x, 0.5f, targetWork[0].z, 0);
-        DirectX::XMVECTOR t1 = DirectX::XMVectorSet(targetWork[1].x, 0.5f + targetYoffset, targetWork[1].z, 0);
-        DirectX::XMVECTOR crv = DirectX::XMLoadFloat3(&Camera::Instance().GetRight());
-        DirectX::XMVECTOR cuv = DirectX::XMVectorSet(0, 1, 0, 0);
+    // カメラの基準位置（中間点の後方）
+    DirectX::XMVECTOR cameraOffset = DirectX::XMVectorNegate(forward);
+    
+    // 上方向の成分を追加
+    DirectX::XMVECTOR worldUp = DirectX::XMVectorSet(0, 1, 0, 0);
+    float heightRatio = tanf(heightAngle);
+    DirectX::XMVECTOR heightOffset = DirectX::XMVectorScale(worldUp, cameraDistance * heightRatio);
+    
+    // 横方向の成分を追加
+    DirectX::XMVECTOR sideOffset = DirectX::XMVectorScale(right, sideValue * cameraDistance * tanf(sideAngle));
 
-        // v: t1 - t0
-        DirectX::XMVECTOR v = DirectX::XMVectorSubtract(t1, t0);
-        DirectX::XMVECTOR vNorm = DirectX::XMVector3Normalize(v);
+    // 最終的なカメラ位置を計算
+    DirectX::XMVECTOR vMidPoint = DirectX::XMLoadFloat3(&midPoint);
+    DirectX::XMVECTOR eyePos = vMidPoint;
+    
+    // 後方への距離
+    float backwardDist = cameraDistance * cosf(heightAngle);
+    eyePos = DirectX::XMVectorMultiplyAdd(cameraOffset, 
+                                          DirectX::XMVectorReplicate(backwardDist), 
+                                          eyePos);
+    
+    // 上方向のオフセット
+    eyePos = DirectX::XMVectorAdd(eyePos, heightOffset);
+    
+    // 横方向のオフセット
+    eyePos = DirectX::XMVectorAdd(eyePos, sideOffset);
 
-        // 生の距離を取得
-        DirectX::XMVECTOR lRawVec = DirectX::XMVector3Length(v);
-        float rawDistance = 0.0f;
-        DirectX::XMStoreFloat(&rawDistance, lRawVec);
+    DirectX::XMStoreFloat3(&eye, eyePos);
+    
+    // 注視点を設定
+    lockonpoint = midPoint;
 
-        // 距離を反転
-        float minDist = lengthLimit[0];
-        float maxDist = lengthLimit[1];
-        float t = (rawDistance - minDist) / (maxDist - minDist);
-        t = std::clamp(t, 0.0f, 1.0f);
-        t = 1.0f - t;      // 反転
-        t = t * t;         // イージング（任意）
-
-        float reversedDistance = minDist + (maxDist - minDist) * t;
-        DirectX::XMVECTOR l = DirectX::XMVectorReplicate(reversedDistance);
-
-        // 新しい注視点（中間点）
-        t0 = DirectX::XMLoadFloat3(&targetWork[0]);
-        t1 = DirectX::XMLoadFloat3(&targetWork[1]);
-        DirectX::XMStoreFloat3(&lockonpoint, DirectX::XMVectorMultiplyAdd(v, DirectX::XMVectorReplicate(0.5f), t0));
-
-        // カメラ位置を算出
-        t0 = DirectX::XMVectorMultiplyAdd(l, DirectX::XMVectorNegate(vNorm), t0);
-        t0 = DirectX::XMVectorMultiplyAdd(crv, DirectX::XMVectorReplicate(sideValue * 3.0f), t0);
-        t0 = DirectX::XMVectorMultiplyAdd(cuv, DirectX::XMVectorReplicate(3.0f), t0);
-        DirectX::XMStoreFloat3(&eye, t0);
-
-        // eye.y を距離に応じて変化させる
-        float minY = targetLimit[0];
-        float maxY = targetLimit[1];
-        float yT = (reversedDistance - minDist) / (maxDist - minDist);
-        yT = std::clamp(yT, 0.0f, 1.0f);
-        yT = yT * yT;  // optional
-        eye.y = minY + (maxY - minY) * yT;
+    // デバッグ用：カメラ高さの微調整
+    float heightAdjust = targetLimit[0] + 
+                        (targetLimit[1] - targetLimit[0]) * 
+                        std::clamp((distance - 5.0f) / 15.0f, 0.0f, 1.0f);
+    eye.y += heightAdjust;
     }
     else
     {
@@ -359,6 +431,16 @@ void CameraController::DrawDebugGUI()
         ImGui::DragFloat("dotOffset", &dotOffset);
         ImGui::DragFloat("turnSpeed", &turnSpeed);
 
+        if (ImGui::TreeNode("Lock-On Camera Settings"))
+        {
+            ImGui::DragFloat("Height Angle", &lockOnHeightAngle, 1.0f, 10.0f, 80.0f);
+            ImGui::DragFloat("Side Angle", &lockOnSideAngle, 1.0f, 0.0f, 60.0f);
+            ImGui::DragFloat("FOV Correction", &lockOnFovCorrection, 0.1f, 1.0f, 3.0f);
+            ImGui::Text("Height Angle: カメラの見下ろし角度");
+            ImGui::Text("Side Angle: カメラの横ズレ角度");
+            ImGui::Text("FOV Correction: 画面収まり補正");
+            ImGui::TreePop();
+        }
         ImGui::DragFloat("TargetY Offset", &targetYoffset, 0.1f);
 
         ImGui::DragFloat("lengthLimit 1", &lengthLimit[0], 0.1f, -10.0f, lengthLimit[1]);
@@ -366,6 +448,10 @@ void CameraController::DrawDebugGUI()
 
         ImGui::DragFloat("TargetLimit 1", &targetLimit[0], 0.1f);
         ImGui::DragFloat("TargetLimit 2", &targetLimit[1], 0.1f);
+
+        ImGui::DragFloat("Min Target Distance", &minTargetDistance, 0.1f, 1.0f, maxTargetDistance);
+        ImGui::DragFloat("Max Target Distance", &maxTargetDistance, 0.1f, minTargetDistance, 50.0f);
+        ImGui::DragFloat("Distance Easing", &distanceEasingPower, 0.1f, 0.5f, 3.0f);
 
         // カメラを自由に動かせるかどうか
         ImGui::Checkbox("FreeCamera", &freeCameraFlag);

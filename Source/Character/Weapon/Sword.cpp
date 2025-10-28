@@ -18,11 +18,11 @@ Sword::Sword(ID3D11Device* device, const char* filename)
 	//当たり判定用初期設定
 	hitSphereIndex = 5;
 	weaponHitOffset[0] = { 0.0f, 0.0f, 0.0f };
-	weaponHitOffset[1] = { 0.0f, 0.0f, 0.2f };
-	weaponHitOffset[2] = { 0.0f, 0.0f, 0.4f };
-	weaponHitOffset[3] = { 0.0f, 0.0f, 0.6f };
-	weaponHitOffset[4] = { 0.0f, 0.0f, 1.0f };
-	hitSphereRadius = 0.15f;
+	weaponHitOffset[1] = { 0.0f, 0.0f, 0.4f };
+	weaponHitOffset[2] = { 0.0f, 0.0f, 0.65f };
+	weaponHitOffset[3] = { 0.0f, 0.0f, 0.9f };
+	weaponHitOffset[4] = { 0.0f, 0.0f, 1.15f };
+	hitSphereRadius = 0.25f;
 
 	//炎トレイル用ポイントライト
 	attenuation = 1.1f;

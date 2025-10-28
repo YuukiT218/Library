@@ -57,6 +57,7 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     states[static_cast<int>(PlayerStateId::Combo2)] = std::make_unique<PlayerCombo2State>(this);
     states[static_cast<int>(PlayerStateId::Combo3)] = std::make_unique<PlayerCombo3State>(this);
     states[static_cast<int>(PlayerStateId::Combo4)] = std::make_unique<PlayerCombo4State>(this);
+    states[static_cast<int>(PlayerStateId::Combo5)] = std::make_unique<PlayerCombo5State>(this);
     states[static_cast<int>(PlayerStateId::Heavy1)] = std::make_unique<PlayerHeavyAttack1State>(this);
     states[static_cast<int>(PlayerStateId::Heavy2)] = std::make_unique<PlayerHeavyAttack2State>(this);
     states[static_cast<int>(PlayerStateId::GuardIdle)] = std::make_unique<PlayerGuardIdle>(this);
@@ -169,11 +170,6 @@ void Player::Update(float elapsedTime)
         if (!io.WantCaptureMouse && !io.WantCaptureKeyboard) {
             GetState(currentStateID).Update(elapsedTime);
         }
-        else
-        {
-            AnimationConfig* config = GetPlayerModel()->GetAnimationConfig("Player", GetPlayerModel()->GetCurrentAnimationIndex());
-            sword->AttackAnimationCollision(model.get(), config);
-        }
 #else
         GetState(currentStateID).Update(elapsedTime);
 #endif
@@ -204,6 +200,8 @@ void Player::Update(float elapsedTime)
     // オブジェクト行列を更新
     UpdateTransform();
 
+    SetKnockbackPosition();
+
     // アニメーション更新
 	model->UpdateAnimation(elapsedTime, this);
 
@@ -218,6 +216,18 @@ void Player::Update(float elapsedTime)
 
 void Player::EditUpdate(float elapsedTime)
 {
+    int currentIndex = this->model->GetCurrentAnimationIndex();
+    AnimationConfig* config = model->GetAnimationConfig("Player", currentIndex);
+    float animationSeconds = model->GetCurrentAnimationSeconds();
+    float secondsLength = model->GetAnimationLength(currentIndex);
+    float t = animationSeconds / secondsLength;
+    t = std::clamp(t, 0.0f, 1.0f);  // 念のため 0.0～1.0 にクランプ
+    float speed = model->EvaluateSpeed(config->speedCurve, t);
+
+    model->SetAnimationSpeed(speed);
+
+    sword->AttackAnimationCollision(model.get(), config);
+
     // 速力処理更新
     UpdateVelocity(elapsedTime);
 
@@ -604,6 +614,33 @@ void Player::DisplayHealthBar()
     //);
 }
 
+// ノックバック位置設定
+void Player::SetKnockbackPosition()
+{
+    DirectX::SimpleMath::Vector3 vec;
+    vec = CharacterForward(angle);
+	knockbackPosition = DirectX::SimpleMath::Vector3{
+		position.x + vec.x * knockBackPower,
+		position.y,
+		position.z + vec.z * knockBackPower
+	};
+    lightKnockbackPosition = DirectX::SimpleMath::Vector3{
+        position.x + vec.x * lightKnockBackPower,
+        position.y,
+        position.z + vec.z * lightKnockBackPower
+    };
+    heavyKnockbackPosition = DirectX::SimpleMath::Vector3{
+        position.x + vec.x * heavyKnockBackPower,
+        position.y,
+        position.z + vec.z * heavyKnockBackPower
+    };
+    launchKnockbackPosition = DirectX::SimpleMath::Vector3{
+        position.x + vec.x * knockBackPower,
+        position.y + launchKnockBackPower,
+        position.z + vec.z * knockBackPower
+    };
+}
+
 // 描画処理
 void Player::Render(const RenderContext& rc, ShaderId shaderId)
 {
@@ -627,19 +664,24 @@ void Player::DrawDebugPrimitive()
 {
     ShapeRenderer* shapeRenderer = Graphics::Instance().GetShapeRenderer();
 
-    if (isCollisionRender)
-    {
-        // 衝突判定用のデバック球を描画
-        shapeRenderer->DrawSphere(position, radius, DirectX::XMFLOAT4(0, 0, 0, 1));
+    if (drawCollisionPrimitive)
+	{
+		// 衝突判定用のデバック球を描画
+    	shapeRenderer->DrawSphere(position, radius, DirectX::XMFLOAT4(0, 0, 0, 1));
 
-        // 衝突判定用のデバック円柱を描画
-        shapeRenderer->DrawCylinder(position, radius, height, DirectX::XMFLOAT4(0, 0, 0, 1));
+    	shapeRenderer->DrawSphere(knockbackPosition, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+    	shapeRenderer->DrawSphere(lightKnockbackPosition, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+    	shapeRenderer->DrawSphere(heavyKnockbackPosition, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+    	shapeRenderer->DrawSphere(launchKnockbackPosition, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
 
-        shapeRenderer->DrawCylinder(areaCenter, areaSize, 5.0f, { 0.0, 0.0f, 0.0f, 1.0f });
+    	// 衝突判定用のデバック円柱を描画
+    	shapeRenderer->DrawCylinder(position, radius, height, DirectX::XMFLOAT4(0, 0, 0, 1));
 
-        // 全身に当たり判定を付与する
-        AddCollisionSpheres(model, nodeHitSpheres);
-    }
+    	shapeRenderer->DrawCylinder(areaCenter, areaSize, 5.0f, { 0.0, 0.0f, 0.0f, 1.0f });
+	}
+
+    // 全身に当たり判定を付与する
+    AddCollisionSpheres(model, nodeHitSpheres);
 }
 
 // デバッグ用GUI描画
@@ -649,6 +691,11 @@ void Player::DrawDebugGUI()
     {
         // 位置
         ImGui::DragFloat3("Position", &position.x, 0.10f, -1000, 1000);
+
+        ImGui::DragFloat("KnockbackPosition", &knockBackPower, 0.01f, 0, 5.0f);
+        ImGui::DragFloat("LightKnockbackPosition", &lightKnockBackPower, 0.01f, 0, 5.0f);
+        ImGui::DragFloat("HeavyKnockbackPosition", &heavyKnockBackPower, 0.01f, 0, 10.0f);
+        ImGui::DragFloat("LaunchKnockbackPosition", &launchKnockBackPower, 0.01f, 0, 5.0f);
 
         // 回転
         DirectX::XMFLOAT3 a;
@@ -666,8 +713,6 @@ void Player::DrawDebugGUI()
         ImGui::Text(u8"体力 %zu", health);  // 体力
         ImGui::Text(u8"最大体力 %zu", maxHealth);  // 最大体力
 
-        //model->DrawGui();
-
         int state = static_cast<int>(currentStateID);
         ImGui::DragInt("State", &state);
 
@@ -676,8 +721,8 @@ void Player::DrawDebugGUI()
             // デバッグ用GUI描画
             states[i]->DrawDebugGUI();
         }
-        //model->DrawGui();
-        ImGui::Checkbox(u8"当たり判定描画フラグ", &isCollisionRender);
+        
+        ImGui::Checkbox(u8"当たり判定描画フラグ", &drawCollisionPrimitive);
 
         if (ImGui::CollapsingHeader("Parameter"))
         {

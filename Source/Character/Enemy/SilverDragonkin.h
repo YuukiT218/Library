@@ -107,6 +107,8 @@ public:
 
 	float GetMoveSpeed() { return moveSpeed; }
 
+	void SetVerticalVelocity(float velocity) { this->velocity.y = velocity; }
+
 	bool GetIsRoarUsing() const { return IsRoarUsing; }
 	bool GetRoarUsed() const { return RoarUsedFlag; }
 
@@ -120,7 +122,7 @@ public:
 
 	float nodeRadius[9] =
 	{
-		0.3f, 0.3f, 0.3f, 0.3f, 0.2f, 0.2f, 0.2f, 0.2f, 0.2f
+		0.4f, 0.3f, 0.3f, 0.3f, 0.25f, 0.25f, 0.25f, 0.25f, 0.25f
 	};
 
 	float nodeRadiusAttack[29] =
@@ -224,7 +226,7 @@ private:
 	float				searchRange = 20.0f;
 	float				attackRange = 1.5f;
 	float				runTimer = 0.0f;
-	float 			    blendSeconds = 0.5f;
+	float 			    blendSeconds = 0.1f;
 	bool 				isBattle = false;
 	int 				step = 0;
 

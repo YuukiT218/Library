@@ -26,6 +26,7 @@ enum class PlayerStateId
 	Combo2,
 	Combo3,
 	Combo4,
+	Combo5,
 	Heavy1,
 	Heavy2,
 	GuardIdle,
@@ -120,9 +121,6 @@ public:
 	// 移動設定
 	void SetMovement(DirectX::XMFLOAT3& Vec, float moveRate);
 
-	// 重力設定
-	void SetGravity(float gravity) { this->gravity = gravity; }
-
 	// 摩擦力設定
 	void SetFriction(float friction) { this->friction = friction; }
 
@@ -148,6 +146,15 @@ public:
 	};
 	DeathMenuOption currentSelection = DeathMenuOption::Continue;
 	int GetCurrentSelection() { return static_cast<int>(currentSelection); }
+
+	DirectX::SimpleMath::Vector3 knockbackPosition;
+	float knockBackPower = 2.0f;
+	DirectX::SimpleMath::Vector3 lightKnockbackPosition;
+	float lightKnockBackPower = 4.3f;
+	DirectX::SimpleMath::Vector3 heavyKnockbackPosition;
+	float heavyKnockBackPower = 7.0f;
+	DirectX::SimpleMath::Vector3 launchKnockbackPosition;
+	float launchKnockBackPower = 3.0f;
 
 protected:
 	// 着地した時に呼ばれる
@@ -187,18 +194,11 @@ private:
 	// 入力された時にtrueを返すようにする。
 	float InputMove(float elapsedTime);
 
-
 	// 前方向の移動値
 	void ForwardMove(float speed, float elapsedTime);
 
 	// 後ろ方向の移動値
 	void BackMove(float speed, float elapsedTime);
-
-	// 攻撃位置へ移動
-	//bool AttackMoveToTarget(float elapsedTime);
-
-	// 攻撃振り向き処理
-	//void AttackRotation(float elapsedTime);
 
 	// ジャンプ入力処理
 	bool InputJump();
@@ -224,6 +224,9 @@ private:
 	// ヒットストップ処理
 	void HitStop(float elapsedTime);
 
+	// ノックバック位置設定
+	void SetKnockbackPosition();
+
 	// ステート取得
 	PlayerState& GetState(PlayerStateId stateId)
 	{
@@ -246,9 +249,6 @@ private:
 	/*std::unique_ptr<Effect> effect = nullptr;
 	Effekseer::Handle effectHandle;
 	std::unique_ptr<Sprite> healthBar = nullptr;*/
-
-	//デバッグ用
-	bool isCollisionRender = false;//当たり判定描画フラグ
 
 	Enemy* LockOnEnemy = nullptr;
 

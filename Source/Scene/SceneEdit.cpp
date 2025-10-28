@@ -110,7 +110,7 @@ void SceneEdit::Update(float elapsedTime)
 
 	// プレイヤー更新処理
 	//player->SetLockOnCamera(cameraController->GetRockOnEnemy());
-	player->Update(elapsedTime);
+	player->EditUpdate(elapsedTime);
 
 	dragonkin->EditUpdate(elapsedTime);
 
@@ -1937,14 +1937,15 @@ void SceneEdit::DrawAttributeEditPanel(AnimationConfig* config, int selectedAttr
 		auto& ap = attr.attackParam; // config->attackParam から attr.attackParam に変更
 
 		const char* flagNames[] = {
-		u8"無し",
-		u8"ヘビー",
+		u8"なし",
+		u8"弱",
+		u8"強",
 		u8"打ち上げ",
 		};
 		int knockbackType = static_cast<int>(ap.knockbackType);
 		ImGui::Spacing();
 		ImGui::Separator();
-		if (ImGui::Combo(u8"ノックバックタイプ", &knockbackType, flagNames, 3))
+		if (ImGui::Combo(u8"ノックバックタイプ", &knockbackType, flagNames, 4))
 		{
 			ap.knockbackType = static_cast<KnockbackType>(knockbackType);
 		}

@@ -332,6 +332,16 @@ public:
 	void DrawDebugGUI() override;
 };
 
+// コンボ5ステート
+class PlayerCombo5State : public PlayerComboState
+{
+public:
+	PlayerCombo5State(Player* player);
+
+	// デバッグ用GUI描画
+	void DrawDebugGUI() override;
+};
+
 // 強攻撃1ステート
 class PlayerHeavyAttack1State : public PlayerComboState
 {

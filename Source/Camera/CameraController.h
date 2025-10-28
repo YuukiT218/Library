@@ -57,7 +57,7 @@ private:
 
 	float rollSpeed = DirectX::XMConvertToRadians(200);
 	float mouseRollSpeed = DirectX::XMConvertToRadians(10);
-	float range = 9.0f;
+	float range = 8.0f;
 	float maxAngleX = DirectX::XMConvertToRadians(80);
 	float minAngleX = DirectX::XMConvertToRadians(3);
 
@@ -69,8 +69,8 @@ private:
 
 	DirectX::XMFLOAT3	targetWork[2] = { { 0, 0, 0 }, { 0, 0, 0 } };	// 0 : 座標, 1 : 注視点
 	float				targetYoffset = 0;
-	float				lengthLimit[2] = { 7, 14 };
-	float				targetLimit[2] = { 0, 3 };
+	float				lengthLimit[2] = { 5.0, 22.5f };
+	float				targetLimit[2] = { 0, 3.0f };
 	float				sideValue = 1;
 
 	float lerpSpeed = 3.8f;
@@ -95,4 +95,13 @@ private:
 
 	// マウス画面に固定するか
 	bool isMouseLock = false;
+
+	// カメラ距離調整用パラメータ
+	float minTargetDistance = 7.0f;   // この距離以下でカメラ最接近
+	float maxTargetDistance = 22.5f;  // この距離以上でカメラ最遠
+	float distanceEasingPower = 1.0f; // イージングの強さ(1.0 = 線形, 2.0 = 二次曲線)
+	float lockOnHeightAngle = 10.0f;    // 上から見下ろす角度（度数法）
+	float lockOnSideAngle = 0.0f;      // 横からのオフセット角度（度数法）
+	float lockOnFovCorrection = 2.0f;   // FOV補正係数（両者をフレームに収める余裕）
+	DirectX::XMFLOAT3 lastCameraRight = { 1, 0, 0 };  // 前回の右ベクトル（旋回防止用）
 };

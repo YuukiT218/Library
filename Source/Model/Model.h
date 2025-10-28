@@ -93,6 +93,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Keyframe, time, value, handleOffsetX, handleO
 
 enum class KnockbackType
 {
+	None,
 	Light,
 	Heavy,
 	Launch
@@ -100,6 +101,7 @@ enum class KnockbackType
 
 // enum <-> string 変換のための定義
 NLOHMANN_JSON_SERIALIZE_ENUM(KnockbackType, {
+	{KnockbackType::None, "None"},
 	{KnockbackType::Light, "Light"},
 	{KnockbackType::Heavy, "Heavy"},
 	{KnockbackType::Launch, "Launch"}
@@ -129,7 +131,7 @@ struct AttackAnimParam
 	float attackHitStopSpeed = 0.1f;
 
 	// ノックバックの種類
-	KnockbackType knockbackType;
+	KnockbackType knockbackType = KnockbackType::None;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
 	moveRate, turnRate,

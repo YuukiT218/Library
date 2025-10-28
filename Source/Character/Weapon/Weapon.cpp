@@ -1,10 +1,12 @@
 #include "Weapon.h"
 #include "Graphics/Graphics.h"
+#include "Character/Player.h"
 #include "Character/Enemy/SilverDragonkin.h"
 #include "Math/Collision.h"
 #include "System/HitStop.h"
 #include <vector>
 #include "Graphics/Light.h"
+#include "Math/Mathf.h"
 
 void Weapon::Attach(std::string nodeName, Model* character)
 {
@@ -188,6 +190,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, A
     if (!IsAttack) IsAttack = !IsAttack;
 
     GamePad& gamepad = Input::Instance().GetGamePad();
+    float power;
 
     // 当たり判定用オフセットを使い、当たり判定位置を求める
     DirectX::XMMATRIX weaponWorldMatrix = DirectX::XMLoadFloat4x4(&transform);
@@ -199,6 +202,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, A
 
         Graphics::Instance().GetShapeRenderer()->DrawSphere(weaponHitPosition[i], hitSphereRadius, { 1.0f, 0.0f, 0.0f, 1.0f });
 
+        Player& player = Player::Instance();
         SilverDragonkin& dragonkin = SilverDragonkin::Instance();
         std::vector<NodeHitSphere> enemyNode = dragonkin.GetNodeHitSpheres();
         for (auto& enemyHitSphere : enemyNode)
@@ -223,8 +227,14 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, A
                 if (activeAttribute && activeAttribute->flag == AnimationFlag::Attack)
                 {
                     auto& ap = activeAttribute->attackParam;
-
-                    dragonkin.SetDamage(true);
+                    if (ap.knockbackType == KnockbackType::None)
+                        dragonkin.SetDamage(true);
+                    else if (ap.knockbackType == KnockbackType::Light)
+                        dragonkin.SetLightKbDamage(true);
+                    else if (ap.knockbackType == KnockbackType::Heavy)
+                        dragonkin.SetHeavyKbDamage(true);
+                    else if (ap.knockbackType == KnockbackType::Launch)
+	                    dragonkin.SetLaunchKbDamage(true);
                     HitStop::Instance().HitStopStart(
                         ap.attackHitStopTime,
                         ap.attackHitStopSpeed,
@@ -232,7 +242,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, A
                         ap.attackHitStopSpeed
                     );
 
-                    gamepad.Vibrate(ap.attackLeftVibrate, ap.attackRightVibrate);
+                    gamepad.Vibrate(ap.attackLeftVibrate, ap.attackRightVibrate);                    
 
                     // ダメージ適用（コメントアウト部分を有効化する場合）
                     // enemy->ApplyDamage(ap.attackDamage, ap.invisibleTime, true, outHitPoint);

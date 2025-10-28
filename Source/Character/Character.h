@@ -95,6 +95,10 @@ public:
 	// 最大健康状態を取得
 	int GetMaxHealth() const { return  maxHealth; }
 
+	void SetGravity(float gravity) { this->gravity = gravity; }
+
+	float GetGravity() const { return gravity; }
+
 	// 生存状態取得
 	bool IsDeathFlag() { return deathFlag; }
 
@@ -186,6 +190,7 @@ protected:
 	float height = 2.0f;
 	int health = 1000000;
 	int maxHealth = 1000000;
+	bool drawCollisionPrimitive = false;
 	bool deathFlag = false;	// キャラクターが死亡したらtrueになる変数
 	float invincibleTimer = 1.0f;
 	float friction = 1.5f;

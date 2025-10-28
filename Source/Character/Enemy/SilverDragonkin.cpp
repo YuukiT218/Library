@@ -55,6 +55,9 @@ SilverDragonkin::SilverDragonkin(ID3D11Device* device, const char* filename, flo
 		aiTree->AddNode("Root", "Battle", 1, BehaviorTree<SilverDragonkin>::SelectRule::Priority, new BattleJudgment(this), nullptr);
 		aiTree->AddNode("Battle", "Dead", 1, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DeadJudgment(this), new DeadAction(this));
 		aiTree->AddNode("Battle", "Damage", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new DamageJudgment(this), new DamageAction(this));
+		aiTree->AddNode("Battle", "LightDamage", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new LightDamageJudgment(this), new LightDamageAction(this));
+		aiTree->AddNode("Battle", "HeavyDamage", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new HeavyDamageJudgment(this), new HeavyDamageAction(this));
+		aiTree->AddNode("Battle", "LaunchDamage", 2, BehaviorTree<SilverDragonkin>::SelectRule::Non, new LaunchDamageJudgment(this), new LaunchDamageAction(this));
 		aiTree->AddNode("Battle", "Pursuit", 3, BehaviorTree<SilverDragonkin>::SelectRule::Non, nullptr, new PursuitAction(this));
 	}
 	{
@@ -310,19 +313,22 @@ void SilverDragonkin::OnDead()
 
 void SilverDragonkin::DrawDebugPrimitive()
 {
-	// 基底クラスのデバッグプリミティブ描画
-	Enemy::DrawDebugPrimitive();
+	if (drawCollisionPrimitive)
+	{
+		// 基底クラスのデバッグプリミティブ描画
+		Enemy::DrawDebugPrimitive();
 
-	ShapeRenderer* debugRenderer = Graphics::Instance().GetShapeRenderer();
+		ShapeRenderer* debugRenderer = Graphics::Instance().GetShapeRenderer();
 
-	// 縄張り範囲をデバッグ円柱描画
-	debugRenderer->DrawCylinder(territoryOrigin, territoryRange, 1.0f, DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+		// 縄張り範囲をデバッグ円柱描画
+		debugRenderer->DrawCylinder(territoryOrigin, territoryRange, 1.0f, DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
 
-	// ターゲット位置をデバッグ球描画
-	debugRenderer->DrawSphere(targetPosition, radius, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
+		// ターゲット位置をデバッグ球描画
+		debugRenderer->DrawSphere(targetPosition, radius, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
-	// 索敵範囲をデバッグ円柱描画
-	debugRenderer->DrawCylinder(position, searchRange, 1.0f, DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+		// 索敵範囲をデバッグ円柱描画
+		debugRenderer->DrawCylinder(position, searchRange, 1.0f, DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+	}
 
 	AddCollisionSpheres(model, nodeHitSpheres);
 }
@@ -514,9 +520,17 @@ void SilverDragonkin::DrawDebugGUI()
 
 		ImGui::DragFloat("moveSpeed", &moveSpeed, 0.01f);
 
-		ImGui::Checkbox("DamageReaction", &isDamage);
+		ImGui::DragFloat("Gravity", &gravity);
+
+		ImGui::Checkbox("IsGround", &isGround);
+		bool isAnyDamage = IsAnyDamage();
+		ImGui::Checkbox("DamageReaction", &isAnyDamage);
+
+		ImGui::Checkbox("ActionFlag", &actionFlag);
 
 		ImGui::Text(u8"Behavior　%s", str.c_str());
+
+		ImGui::Checkbox(u8"当たり判定描画フラグ", &drawCollisionPrimitive);
 
 		// 当たり判定調整
 		for (size_t i = 0; i < nodeHitSpheres.size(); ++i)

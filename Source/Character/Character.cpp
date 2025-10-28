@@ -733,13 +733,15 @@ void Character::AddCollisionSpheres(std::shared_ptr<Model> model, std::vector<No
         // ƒm[ƒh‚ÌˆÊ’u‚ðŽæ“¾‚µ‚Ä‹…‚ð•`‰æ
         ShapeRenderer* debugRenderer = Graphics::Instance().GetShapeRenderer();
 
-        debugRenderer->DrawSphere(
-            DirectX::XMFLOAT3(
-                modelNode->worldTransform._41,
-                modelNode->worldTransform._42,
-                modelNode->worldTransform._43),
-            node.radius,
-            DirectX::XMFLOAT4(0, 0, 0, 1)
-        );
+        if (drawCollisionPrimitive)
+        {
+	        debugRenderer->DrawSphere(
+			   DirectX::XMFLOAT3(
+				   modelNode->worldTransform._41,
+				   modelNode->worldTransform._42,
+				   modelNode->worldTransform._43),
+			   node.radius,
+			   DirectX::XMFLOAT4(0, 0, 0, 1));
+        }
     }
 }

@@ -95,13 +95,25 @@ protected:
 
 private:
 	bool isFocus = false;
+
+protected:
+	bool isDamage = false;
+	bool isLightKnockbackDamage = false;
+	bool isHeavyKnockbackDamage = false;
+	bool isLaunchKnockbackDamage = false;
 public:
 	void SetFocus(bool focus) { isFocus = focus; }
 	bool IsFocus() const { return isFocus; }
 	void SetDamage(bool damage) { isDamage = damage; }
 	bool IsDamage() const { return isDamage; }
+	void SetLightKbDamage(bool damage) { isLightKnockbackDamage = damage; }
+	bool IsLightKbDamage() const { return isLightKnockbackDamage; }
+	void SetHeavyKbDamage(bool damage) { isHeavyKnockbackDamage = damage; }
+	bool IsHeavyKbDamage() const { return isHeavyKnockbackDamage; }
+	void SetLaunchKbDamage(bool damage) { isLaunchKnockbackDamage = damage; }
+	bool IsLaunchKbDamage() const { return isLaunchKnockbackDamage; }
+	bool IsAnyDamage() const { return isDamage || isLightKnockbackDamage || isHeavyKnockbackDamage || isLaunchKnockbackDamage; }
 	bool actionFlag = true;
-	bool isDamage = false;
 	std::string name = " ";
 
 	virtual std::string GetName() = 0;

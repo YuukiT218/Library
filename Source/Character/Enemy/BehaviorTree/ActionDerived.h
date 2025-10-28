@@ -94,7 +94,40 @@ class DamageAction : public ActionBase<ActorType>
 public:
 	DamageAction(ActorType* actor) :ActionBase(actor) {}
 	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Hit_Combat_F_Seq_0");
+	int airAnimationIndex = owner->GetModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_Start_Seq_0");
+	int airLoopAnimationIndex = owner->GetModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_Loop_Seq_0");
+};
+
+template <typename ActorType>
+class LightDamageAction : public ActionBase<ActorType>
+{
+public:
+	LightDamageAction(ActorType* actor) :ActionBase(actor) {}
+	ActionBase::State Run(float elapsedTime);
 	int animationIndex = owner->GetModel()->GetAnimationIndex("Hit_Large_Combat_F_Seq_0");
+	int airAnimationIndex = owner->GetModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_Start_Seq_0");
+	int airLoopAnimationIndex = owner->GetModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_Loop_Seq_0");
+};
+
+template <typename ActorType>
+class HeavyDamageAction : public ActionBase<ActorType>
+{
+public:
+	HeavyDamageAction(ActorType* actor) :ActionBase(actor) {}
+	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Hit_Large_Combat_Death_Seq_0");
+	int getupAnimationIndex = owner->GetModel()->GetAnimationIndex("Get_Up_Combat_Seq_0");
+};
+
+template <typename ActorType>
+class LaunchDamageAction : public ActionBase<ActorType>
+{
+public:
+	LaunchDamageAction(ActorType* actor) :ActionBase(actor) {}
+	ActionBase::State Run(float elapsedTime);
+	int animationIndex = owner->GetModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_Start_Seq_0");
+	int fallAnimationIndex = owner->GetModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_Loop_Seq_0");
 };
 
 // 死亡
@@ -188,7 +221,7 @@ typename ActionBase<ActorType>::State SlashCombo1Action<ActorType>::Run(float el
 		}
 		break;
 	}
-	if (owner->IsDamage())
+	if (owner->IsAnyDamage())
 	{
 		step = 0;
 		return ActionBase<ActorType>::State::Failed;
@@ -246,7 +279,7 @@ typename ActionBase<ActorType>::State SlashCombo2Action<ActorType>::Run(float el
 		}
 		break;
 	}
-	if (owner->IsDamage())
+	if (owner->IsAnyDamage())
 	{
 		step = 0;
 		return ActionBase<ActorType>::State::Failed;
@@ -287,7 +320,7 @@ typename ActionBase<ActorType>::State DashSlashAction<ActorType>::Run(float elap
 		}
 		break;
 	}
-	if (owner->IsDamage())
+	if (owner->IsAnyDamage())
 	{
 		step = 0;
 		return ActionBase<ActorType>::State::Failed;
@@ -436,7 +469,7 @@ typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsed
 		}
 		break;
 	}
-	if (owner->IsDamage())
+	if (owner->IsAnyDamage())
 	{
 		step = 0;
 		return ActionBase<ActorType>::State::Failed;
@@ -499,7 +532,7 @@ typename ActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapse
 		}
 		break;
 	}
-	if (owner->IsDamage())
+	if (owner->IsAnyDamage())
 	{
 		step = 0;
 		return ActionBase<ActorType>::State::Failed;
@@ -571,14 +604,298 @@ typename ActionBase<ActorType>::State DamageAction<ActorType>::Run(float elapsed
 		owner->SetTargetPosition(Player::Instance().GetPosition());
 		owner->MoveToTarget(elapsedTime, 0);
 		owner->SetDamage(false);
+
+		// 空中で攻撃を受けた場合の処理
+		if (!owner->IsGround())
+		{
+			owner->SetGravity(-0.15f);
+
+			// 空中ヒット用の軽い吹き飛び
+			owner->SetPosition({
+				Mathf::Lerp(owner->GetPosition().x, Player::Instance().knockbackPosition.x, 0.15f),
+				owner->GetPosition().y,
+				Mathf::Lerp(owner->GetPosition().z, Player::Instance().knockbackPosition.z, 0.15f)
+				});
+
+			owner->SetVerticalVelocity(2.0f);
+
+			// 空中ダメージアニメーション（あれば）
+			owner->GetModel()->PlayRootMotion(airAnimationIndex, false, true, 0.2f, "root");
+		}
+		else
+		{
+			// 地上ヒット時の通常処理
+			owner->GetModel()->PlayRootMotion(animationIndex, false, true, owner->GetBlendSeconds(), "root");
+			owner->SetPosition({
+				Mathf::Lerp(owner->GetPosition().x, Player::Instance().knockbackPosition.x, 0.25f),
+				Mathf::Lerp(owner->GetPosition().y, Player::Instance().knockbackPosition.y, 0.25f),
+				Mathf::Lerp(owner->GetPosition().z, Player::Instance().knockbackPosition.z, 0.25f)
+				});
+		}
+		step++;
+		break;
+
+	case 1:
+		// 空中コンボ判定：より強力な攻撃を受けたら即座に遷移
+		if (owner->IsLightKbDamage() || owner->IsHeavyKbDamage() || owner->IsLaunchKbDamage())
+		{
+			owner->SetGravity(-0.3f);
+			owner->SetVerticalVelocity(0.0f);
+			step = 0;
+			return ActionBase<ActorType>::State::Complete;
+		}
+
+		// 通常ダメージを再度受けた場合
+		if (owner->IsDamage())
+		{
+			owner->SetGravity(-0.3f);
+			owner->SetVerticalVelocity(0.0f);
+			step = 0;
+			return ActionBase<ActorType>::State::Run;
+		}
+
+		// アニメーション終了で完了
+		if (owner->IsGround() && !owner->GetModel()->IsPlayAnimation())
+		{
+			owner->SetGravity(-0.3f);
+			step = 0;
+			return ActionBase<ActorType>::State::Complete;
+		}
+		break;
+	}
+	return ActionBase<ActorType>::State::Run;
+}
+
+template <typename ActorType>
+typename ActionBase<ActorType>::State LightDamageAction<ActorType>::Run(float elapsedTime)
+{
+	switch (step)
+	{
+	case 0:
+		owner->SetTargetPosition(Player::Instance().GetPosition());
+		owner->MoveToTarget(elapsedTime, 0);
+		owner->SetLightKbDamage(false);
+
+		// 空中で攻撃を受けた場合の処理
+		if (!owner->IsGround())
+		{
+			owner->SetGravity(-0.15f);
+
+			// 空中ヒット：横方向の吹き飛びを強化
+			owner->SetPosition({
+				Mathf::Lerp(owner->GetPosition().x, Player::Instance().lightKnockbackPosition.x, 0.4f),
+				owner->GetPosition().y,
+				Mathf::Lerp(owner->GetPosition().z, Player::Instance().lightKnockbackPosition.z, 0.4f)
+				});
+
+			owner->SetVerticalVelocity(2.0f);
+
+			owner->GetModel()->PlayRootMotion(airAnimationIndex, false, true, 0.2f, "root");
+		}
+		else
+		{
+			// 地上ヒット：通常の吹き飛び
+			owner->SetPosition({
+				Mathf::Lerp(owner->GetPosition().x, Player::Instance().lightKnockbackPosition.x, 0.25f),
+				Mathf::Lerp(owner->GetPosition().y, Player::Instance().lightKnockbackPosition.y, 0.25f),
+				Mathf::Lerp(owner->GetPosition().z, Player::Instance().lightKnockbackPosition.z, 0.25f)
+				});
+			owner->GetModel()->PlayRootMotion(animationIndex, false, true, owner->GetBlendSeconds(), "root");
+		}
+
+		step++;
+		break;
+	case 1:
+		// より強力な攻撃を受けたら即座に遷移
+		if (owner->IsDamage() || owner->IsHeavyKbDamage() || owner->IsLaunchKbDamage())
+		{
+			owner->SetGravity(-0.3f);
+			owner->SetVerticalVelocity(0.0f);
+			step = 0;
+			return ActionBase<ActorType>::State::Complete;
+		}
+
+		if (owner->IsLightKbDamage())
+		{
+			owner->SetGravity(-0.3f);
+			owner->SetVerticalVelocity(0.0f);
+			step = 0;
+			return ActionBase<ActorType>::State::Run;
+		}
+
+		// アニメーション終了 or 着地で完了
+		if (!owner->GetModel()->IsPlayAnimation() && owner->IsGround())
+		{
+			owner->SetGravity(-0.3f);
+			step = 0;
+			if (owner->IsGround())
+			{
+				owner->SetVerticalVelocity(0.0f);
+			}
+			return ActionBase<ActorType>::State::Complete;
+		}
+		break;
+	}
+	return ActionBase<ActorType>::State::Run;
+}
+
+template <typename ActorType>
+typename ActionBase<ActorType>::State HeavyDamageAction<ActorType>::Run(float elapsedTime)
+{
+	switch (step)
+	{
+	case 0:
+		owner->SetTargetPosition(Player::Instance().GetPosition());
+		owner->MoveToTarget(elapsedTime, 0);
+		owner->SetHeavyKbDamage(false);
+
+		// 空中で攻撃を受けた場合の処理
+		if (!owner->IsGround())
+		{
+			owner->SetGravity(-0.2f);
+
+			// 空中ヒット：大きく横方向に吹き飛ばす
+			owner->SetPosition({
+				Mathf::Lerp(owner->GetPosition().x, Player::Instance().heavyKnockbackPosition.x, 0.6f),
+				owner->GetPosition().y,
+				Mathf::Lerp(owner->GetPosition().z, Player::Instance().heavyKnockbackPosition.z, 0.6f)
+				});
+		}
+		else
+		{
+			// 地上ヒット：大きく吹き飛ばす
+			owner->SetPosition({
+				Mathf::Lerp(owner->GetPosition().x, Player::Instance().heavyKnockbackPosition.x, 0.4f),
+				Mathf::Lerp(owner->GetPosition().y, Player::Instance().heavyKnockbackPosition.y, 0.4f),
+				Mathf::Lerp(owner->GetPosition().z, Player::Instance().heavyKnockbackPosition.z, 0.4f)
+				});
+
+			// 地上から中程度に浮かせる
+			owner->SetVerticalVelocity(1.5f);
+		}
+
 		owner->GetModel()->PlayRootMotion(animationIndex, false, true, owner->GetBlendSeconds(), "root");
 		step++;
+		break;
+
 	case 1:
-		if (!owner->GetModel()->IsPlayAnimation() || owner->IsDamage())
+		// Launch攻撃を受けたら即座に遷移
+		if (owner->IsAnyDamage())
 		{
 			step = 0;
 			return ActionBase<ActorType>::State::Complete;
 		}
+
+		// アニメーション終了 or 着地で完了
+		if (!owner->GetModel()->IsPlayAnimation() && owner->IsGround())
+		{
+			owner->SetGravity(-0.3f);
+			step = 0;
+			if (owner->IsGround())
+			{
+				owner->SetVerticalVelocity(0.0f);
+			}
+			return ActionBase<ActorType>::State::Complete;
+		}
+		break;
+	}
+	return ActionBase<ActorType>::State::Run;
+}
+
+template <typename ActorType>
+typename ActionBase<ActorType>::State LaunchDamageAction<ActorType>::Run(float elapsedTime)
+{
+	float targetHeight;
+	float currentHeight;
+	float heightDiff;
+	float launchVelocity;
+	float pauseTimer = owner->GetRunTimer();
+
+	switch (step)
+	{
+	case 0: // 打ち上げ開始
+		owner->SetTargetPosition(Player::Instance().GetPosition());
+		owner->MoveToTarget(elapsedTime, 0);
+
+		// 打ち上げアニメーション再生
+		owner->GetModel()->PlayRootMotion(animationIndex, false, true, 0.1f, "root");
+
+		// 水平方向の位置を補間で移動
+		owner->SetPosition({
+			Mathf::Lerp(owner->GetPosition().x, Player::Instance().launchKnockbackPosition.x, 0.5f),
+			owner->GetPosition().y,
+			Mathf::Lerp(owner->GetPosition().z, Player::Instance().launchKnockbackPosition.z, 0.5f)
+			});
+
+		// 目標高度までの距離を計算
+		targetHeight = Player::Instance().launchKnockbackPosition.y;
+		currentHeight = owner->GetPosition().y;
+		heightDiff = targetHeight - currentHeight;
+
+		// 打ち上げに必要な初速度を計算（重力を考慮）
+		// v = sqrt(2 * g * h)の式を使用
+		launchVelocity = sqrtf(100.0f * fabsf(owner->GetGravity()) * heightDiff);
+		owner->SetVerticalVelocity(launchVelocity);
+
+		step++;
+		break;
+
+	case 1: // 上昇中
+		// 水平方向の位置を継続的に補間
+		owner->SetPosition({
+			Mathf::Lerp(owner->GetPosition().x, Player::Instance().launchKnockbackPosition.x, 0.3f),
+			owner->GetPosition().y,
+			Mathf::Lerp(owner->GetPosition().z, Player::Instance().launchKnockbackPosition.z, 0.3f)
+			});
+
+		// 最高高度に到達したか確認（速度が0以下になったとき）
+		if (owner->GetVelocity().y <= 0.0f)
+		{
+			// 最高高度で一瞬停止
+			owner->SetVerticalVelocity(0.0f);
+			owner->SetGravity(0.0f);  // 重力を一時的に無効化
+			owner->SetRunTimer(0.3f);  // 0.3秒間停止
+			step++;
+		}
+
+		// アニメーションが終わったらループアニメーションに切り替え
+		if (!owner->GetModel()->IsPlayAnimation())
+		{
+			owner->GetModel()->PlayRootMotion(fallAnimationIndex, true, true, 0.1f, "root");
+		}
+		break;
+
+	case 2: // 最高高度で一時停止
+		pauseTimer -= elapsedTime;
+		owner->SetRunTimer(pauseTimer);
+
+		if (pauseTimer <= 0.0f)
+		{
+			// 重力を再度有効化して落下開始
+			owner->SetGravity(-0.3f);  // 元の重力値に戻す
+			owner->GetModel()->PlayRootMotion(fallAnimationIndex, true, true, 0.1f, "root");
+			step++;
+		}
+		break;
+
+	case 3: // 落下中
+		// 地面に着地したか、他のダメージを受けたら終了
+		if (owner->IsGround() || owner->IsDamage() || owner->IsLightKbDamage() || owner->IsHeavyKbDamage())
+		{
+			step = 0;
+			owner->SetLaunchKbDamage(false);
+			owner->SetVerticalVelocity(0.0f);
+			owner->SetGravity(-0.3f);  // 重力を確実に元に戻す
+			return ActionBase<ActorType>::State::Complete;
+		}
+		break;
+	}
+	if (owner->IsDamage() || owner->IsLightKbDamage() || owner->IsHeavyKbDamage())
+	{
+		step = 0;
+		owner->SetLaunchKbDamage(false);
+		owner->SetVerticalVelocity(0.0f);
+		return ActionBase<ActorType>::State::Complete;
 	}
 	// 実行中を返す
 	return ActionBase<ActorType>::State::Run;
