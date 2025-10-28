@@ -190,8 +190,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, A
     if (!IsAttack) IsAttack = !IsAttack;
 
     GamePad& gamepad = Input::Instance().GetGamePad();
-    float power;
-
+    
     // 当たり判定用オフセットを使い、当たり判定位置を求める
     DirectX::XMMATRIX weaponWorldMatrix = DirectX::XMLoadFloat4x4(&transform);
     for (int i = 0; i < hitSphereIndex; i++)
