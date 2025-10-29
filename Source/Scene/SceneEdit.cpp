@@ -1161,52 +1161,6 @@ void SceneEdit::DrawSpeedCurveUI(AnimationConfig* config, float secondsLength, f
 	ImVec2 rightUIPos = ImVec2(graphEnd.x + spacing, graphStart.y);  // グラフと同じ高さから始める
 	ImGui::SetCursorScreenPos(rightUIPos);
 
-	// UI を一まとまりで表示
-	ImGui::BeginGroup();
-
-	ImGui::Text(u8"アニメーションの属性管理:");
-	ImGui::TextWrapped(u8"※属性の追加・編集は「イベントシーケンサー」ウィンドウで行ってください");
-
-	ImGui::Spacing();
-
-	if (ImGui::Button(u8"CarveKeyを削除")) {
-		if (selectedKeyIndex >= 0 && selectedKeyIndex < config->speedCurve.size()) {
-			config->speedCurve.erase(config->speedCurve.begin() + selectedKeyIndex);
-			selectedKeyIndex = static_cast<int>(config->speedCurve.size() - 1);
-		}
-	}
-
-	if (ImGui::Button(u8"CameraKeyを削除")) {
-		if (selectedCameraKeyIndex >= 0 && selectedCameraKeyIndex < config->cameraKeyframes.size()) {
-			config->cameraKeyframes.erase(config->cameraKeyframes.begin() + selectedCameraKeyIndex);
-			selectedCameraKeyIndex = static_cast<int>(config->cameraKeyframes.size() - 1);
-		}
-	}
-
-	if (ImGui::Button(u8"全削除")) {
-		config->speedCurve.clear();
-		config->cameraKeyframes.clear();
-	}
-
-	if (ImGui::Button(u8"イベント追加"))
-	{
-		config->events.push_back({ 0.0f, secondsLength, EventType::Camera, "EventName" });
-	}
-
-	ImGui::Separator();
-	ImGui::TextColored(ImVec4(0.9f, 0.3f, 0.3f, 1.0f), u8"操作ヒント");
-
-	ImGui::Bullet(); ImGui::TextWrapped(u8"右クリックでキーフレームを追加できます");
-	ImGui::Bullet(); ImGui::TextWrapped(u8"属性は「イベントシーケンサー」で複数追加・編集できます");
-	ImGui::Bullet(); ImGui::TextWrapped(u8"イベントには名前を付けて、動作を分岐させることができます");
-	ImGui::Bullet(); ImGui::TextWrapped(u8"「CarveKey」「CameraKey」は選択中のキーフレームを削除します");
-	ImGui::Bullet(); ImGui::TextWrapped(u8"「全削除」で全てのキーフレームを一括で消去します");
-
-	ImGui::Separator();
-
-	ImGui::EndGroup();
-
-
 	DrawSpeedCurveEditor(config, draw_list, graphStart, graphEnd, graphWidth, graphHeight, selectedKeyIndex, secondsLength, model);
 	DrawCameraKeyframePoints(config, draw_list, graphStart, graphEnd, graphWidth, graphHeight, selectedCameraKeyIndex);
 

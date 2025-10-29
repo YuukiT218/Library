@@ -26,11 +26,11 @@ public:
 
 	//ノードとエネミーの衝突処理
 	void CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
-	void CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, AnimationAttribute* activeAttribute);
+	void CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config, AnimationAttribute* activeAttribute, Character* character);
 
 	//アニメーションの攻撃当たり判定をつける
 	void AttackAnimationCollision(Model* character, float animTimeMin, float animTimeMax, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
-	void AttackAnimationCollision(Model* character, AnimationConfig* config);
+	void AttackAnimationCollision(Model* model, AnimationConfig* config, Character* character);
 
 	// パリィ判定と敵の攻撃の衝突処理
 	void CollisionParryVsAttack();

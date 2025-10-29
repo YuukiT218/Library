@@ -185,7 +185,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
     }
 }
 
-void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, AnimationAttribute* activeAttribute)
+void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config, AnimationAttribute* activeAttribute, Character* character)
 {
     if (!IsAttack) IsAttack = !IsAttack;
 
@@ -203,22 +203,33 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, AnimationConfig* config, A
 
         Player& player = Player::Instance();
         SilverDragonkin& dragonkin = SilverDragonkin::Instance();
-        std::vector<NodeHitSphere> enemyNode = dragonkin.GetNodeHitSpheres();
-        for (auto& enemyHitSphere : enemyNode)
+        std::vector<NodeHitSphere> targetHitSphere;
+        Model* targetModel;
+        if (character == static_cast<Character*>(&player))
         {
-            Model* enemyModel = dragonkin.GetModel();
-            Model::Node* enemyNode = enemyModel->FindNode(enemyHitSphere.nodeName);
+            targetHitSphere = dragonkin.GetNodeHitSpheres();
+            targetModel = dragonkin.GetModel();
+        }
+        else
+        {
+            targetHitSphere = player.GetNodeHitSpheres();
+            targetModel = player.GetModel();
+        }
+           
+        for (auto& hitSphere : targetHitSphere)
+        {
+            Model::Node* targetNode = targetModel->FindNode(hitSphere.nodeName);
 
-            DirectX::XMFLOAT3 enemyNodePosition;
-            enemyNodePosition = { enemyNode->worldTransform._41, enemyNode->worldTransform._42, enemyNode->worldTransform._43 };
+            DirectX::XMFLOAT3 targetNodePosition;
+            targetNodePosition = { targetNode->worldTransform._41, targetNode->worldTransform._42, targetNode->worldTransform._43 };
 
             DirectX::XMFLOAT3 outPosition;
             DirectX::XMFLOAT3 outHitPoint;
             if (Collision::IntersectSphereVsSphere(
                 weaponHitPosition[i],
                 nodeRadius,
-                enemyNodePosition,
-                enemyHitSphere.radius,
+                targetNodePosition,
+                hitSphere.radius,
                 outPosition,
                 outHitPoint))
             {
@@ -272,10 +283,10 @@ void Weapon::AttackAnimationCollision(Model* character, float animTimeMin, float
     }
 }
 
-void Weapon::AttackAnimationCollision(Model* character, AnimationConfig* config)
+void Weapon::AttackAnimationCollision(Model* model, AnimationConfig* config, Character* character)
 {
     GamePad& gamepad = Input::Instance().GetGamePad();
-    float animationTime = character->GetCurrentAnimationSeconds();
+    float animationTime = model->GetCurrentAnimationSeconds();
 
     bool anyAttackActive = false;
     AnimationAttribute* activeAttackAttribute = nullptr;
@@ -289,7 +300,7 @@ void Weapon::AttackAnimationCollision(Model* character, AnimationConfig* config)
             activeAttackAttribute = &attribute;
 
             // 攻撃当たり判定球とエネミーの衝突判定（アクティブな属性を渡す）
-            CollisionNodeVsEnemies(hitSphereRadius, config, activeAttackAttribute);
+            CollisionNodeVsCharacter(hitSphereRadius, config, activeAttackAttribute, character);
 
             break; // 最初に見つかったアクティブな攻撃属性のみを処理
         }

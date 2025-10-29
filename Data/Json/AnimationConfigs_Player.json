@@ -2019,8 +2019,8 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 0.5649999976158142,
+            "advanceInputStartFrame": 0.3848339021205902,
             "animationIndex": 53,
             "attributes": [
                 {
@@ -2066,10 +2066,30 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 0.5199999809265137,
+            "advanceInputStartFrame": 0.17714481055736542,
             "animationIndex": 54,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4965399503707886,
+                    "flag": "Invincible",
+                    "startTime": 0.17714481055736542
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "Player",
             "events": [],
@@ -3335,8 +3355,8 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.878000020980835,
-            "advanceInputStartFrame": 0.39800000190734863,
+            "advanceInputEndFrame": 0.800000011920929,
+            "advanceInputStartFrame": 0.16839498281478882,
             "animationIndex": 101,
             "attributes": [
                 {
@@ -3444,8 +3464,8 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 0.6000000238418579,
+            "advanceInputStartFrame": 0.27229058742523193,
             "animationIndex": 104,
             "attributes": [
                 {

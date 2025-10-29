@@ -226,7 +226,7 @@ void Player::EditUpdate(float elapsedTime)
 
     model->SetAnimationSpeed(speed);
 
-    sword->AttackAnimationCollision(model.get(), config);
+    sword->AttackAnimationCollision(model.get(), config, this);
 
     // 速力処理更新
     UpdateVelocity(elapsedTime);

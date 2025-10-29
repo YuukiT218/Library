@@ -566,8 +566,27 @@ void PlayerDodgeState::Update(float elapsedTime)
     AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
 
     timer -= elapsedTime;
-    if (player->IsGround() && timer < 0.633f || !player->IsGround() && timer <= 0.083f)
+    if (frame >= config->advanceInputStartFrame || frame <= config->advanceInputEndFrame)
     {
+        if (InputCombo() != InputComboType::None || InputDodge())
+        {
+            nextShiftReady = true;
+        }
+    }
+
+    if (frame >= config->advanceInputEndFrame)
+    {
+        if (nextShiftReady)
+        {
+            if (InputDodge())
+            {
+                ChangeState(PlayerStateId::Dodge);
+            }
+            if (InputCombo() == InputComboType::Light)
+            {
+                ChangeState(PlayerStateId::Combo1);
+            }
+        }
         // 走りステート遷移
         if (player->IsGround() && InputRunMove())
         {
@@ -578,27 +597,8 @@ void PlayerDodgeState::Update(float elapsedTime)
         {
             ChangeState(PlayerStateId::Walk);
         }
-
-        if (InputCombo() != InputComboType::None)
-        {
-            nextShiftReady = true;
-        }
-
-        if (nextShiftReady)
-        {
-            if (frame >= config->advanceInputEndFrame)
-            {
-                if (InputDodge())
-                {
-                    ChangeState(PlayerStateId::Dodge);
-                }
-                if (InputCombo() == InputComboType::Light)
-                {
-                    ChangeState(PlayerStateId::Combo1);
-                }
-            }
-        }
     }
+
     if (!player->IsGround() && !player->GetPlayerModel()->IsPlayAnimation())
     {
         ChangeState(PlayerStateId::Fall);
@@ -769,7 +769,7 @@ void PlayerComboState::Update(float elapsedTime)
         player->LockOnTurnToEnemy(elapsedTime);
     }
 
-    player->GetSword()->AttackAnimationCollision(player->GetModel(), config);
+    player->GetSword()->AttackAnimationCollision(player->GetModel(), config, player);
     //player->GetSword()->AttackAnimationCollision(player->GetModel(), attackCollisionStartFrame, attackCollisionEndFrame, attackDamage, invisibleTime, attackLeftVibrate, attackRightVibrate, attackHitStopTime, attackHitStopSpeed);
     
     InputComboType input = InputCombo();
@@ -782,7 +782,7 @@ void PlayerComboState::Update(float elapsedTime)
         {
             if (input == InputComboType::Heavy && !player->IsGround())
                 return;
-            if (frame <= nextShiftFrame)
+            if (frame >= config->advanceInputStartFrame && frame <= config->advanceInputEndFrame)
             {
                 nextShiftReady = true;
                 nextInput = input;
@@ -793,7 +793,7 @@ void PlayerComboState::Update(float elapsedTime)
     // 次のコンボステートへ遷移
     if (nextShiftReady)
     {
-        if (frame >= nextShiftFrame)
+        if (frame >= config->advanceInputEndFrame)
         {
             ChangeState(inputToNextState[nextInput]);
         }
