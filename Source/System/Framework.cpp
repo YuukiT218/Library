@@ -11,6 +11,7 @@
 #include "Scene/SceneEdit.h"
 #include "Scene/SceneLoading.h"
 #include "System/AnimationConfigLoader.h"
+#include "Effect/EffectManager.h"
 
 // 垂直同期間隔設定
 static const int syncInterval = 1;
@@ -26,6 +27,8 @@ Framework::Framework(HWND hWnd)
 	// IMGUI初期化
 	ImGuiRenderer::Initialize(hWnd, Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
 
+	EffectManager::Instance().Initialize();
+
 	// シーン初期化
 	SceneManager::Instance().ChangeScene(new SceneGame);
 
@@ -39,6 +42,8 @@ Framework::~Framework()
 
 	// IMGUI終了化
 	ImGuiRenderer::Finalize();
+
+	EffectManager::Instance().Finalize();
 }
 
 // 更新処理

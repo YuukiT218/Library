@@ -107,13 +107,13 @@ PostEffect::PostEffect(ID3D11Device* device)
 	}
 
 	//CbPostEffect
-	cbPostEffect.luminanceExtractionLowerEdge = 0.4f;
+	cbPostEffect.luminanceExtractionLowerEdge = 0.6f;
 	cbPostEffect.luminanceExtractionHigherEdge = 0.8f;
 	cbPostEffect.gaussianSigma = 1.0f;
-	cbPostEffect.bloomIntensity = 0.1f;
-	cbPostEffect.exposure = 1.0f;
+	cbPostEffect.bloomIntensity = 0.3f;
+	cbPostEffect.exposure = 10.0f;
 	cbPostEffect.fExposureLevel = 32.0f;
-	cbPostEffect.threshold = 1.5f;
+	cbPostEffect.threshold = 0.8f;
 	cbPostEffect.time = 0.0f;
 	cbPostEffect.oldTime = 0.0f;
 	//cbGaussianFilter

@@ -7,7 +7,7 @@
 #include "Stage/StageManager.h"
 #include "Graphics/Graphics.h"
 #include "Camera/CameraParam.h"
-//#include "Math/FastNoiseLite.h"
+#include "Math/FastNoiseLite.h"
 //
 //#include	"System/MessageData.h"
 //#include	"System/Messenger.h"
@@ -23,6 +23,7 @@ void CameraController::Update(float elapsedTime)
     oldLockFlag = islockon;
     islockon = CameraParam::Instance().GetIsLockOn();
 
+    // 通常カメラ操作（ロックオンしていない時）
     {
         GamePad& gamePad = Input::Instance().GetGamePad();
         float ax = gamePad.GetAxisRX();
@@ -32,14 +33,11 @@ void CameraController::Update(float elapsedTime)
         if (ax) angle.y += ax * speed;
         if (ay) angle.x += (Input::Instance().GetIsLastGamePad() ? -ay : ay) * speed;
 
-        // マウスでカメラを操作
 #if _DEBUG
         if (isMouseLock)
         {
             MouseCameraController(elapsedTime);
         }
-#else
-        //MouseCameraController(elapsedTime);
 #endif
     }
 
@@ -49,148 +47,339 @@ void CameraController::Update(float elapsedTime)
     DirectX::XMVECTOR Front = Transform.r[2];
     DirectX::XMFLOAT3 front;
     DirectX::XMStoreFloat3(&front, Front);
+
     if (islockon)
     {
-        EnemyAlived();
-    if (closestEnemy)
-    {
-        lockonpoint = closestEnemy->GetPosition();
-    }
-    else SetLockonPoint();
-
-    if (oldLockFlag != islockon)
-    {
-        sideValue = CalcSide(target, lockonpoint);
-    }
-
-    // プレイヤーとターゲットの位置
-    DirectX::XMFLOAT3 playerPos = target;
-    DirectX::XMFLOAT3 enemyPos = lockonpoint;
-
-    // 両者の中間点を注視点とする
-    DirectX::XMFLOAT3 midPoint;
-    midPoint.x = (playerPos.x + enemyPos.x) * 0.5f;
-    midPoint.y = (playerPos.y + enemyPos.y) * 0.5f + targetYoffset;
-    midPoint.z = (playerPos.z + enemyPos.z) * 0.5f;
-
-    // プレイヤーとターゲット間の距離を計算
-    DirectX::XMVECTOR vPlayer = DirectX::XMLoadFloat3(&playerPos);
-    DirectX::XMVECTOR vEnemy = DirectX::XMLoadFloat3(&enemyPos);
-    DirectX::XMVECTOR vDiff = DirectX::XMVectorSubtract(vEnemy, vPlayer);
-    
-    float distance = 0.0f;
-    DirectX::XMStoreFloat(&distance, DirectX::XMVector3Length(vDiff));
-
-    // 距離が極端に近い場合の処理
-    if (distance < 0.1f)
-    {
-        distance = 0.1f;
-        vDiff = DirectX::XMVectorSet(0, 0, 0.1f, 0); // デフォルト方向
-    }
-
-    // カメラ距離を対象間の距離から算出
-    float baseCameraDistance = distance * 0.8f;
-    
-    // 最小・最大距離でクランプ
-    float minCameraDist = lengthLimit[0];
-    float maxCameraDist = lengthLimit[1];
-    float cameraDistance = std::clamp(baseCameraDistance, minCameraDist, maxCameraDist);
-
-    // FOVを考慮した追加距離
-    cameraDistance *= lockOnFovCorrection;
-    cameraDistance = std::clamp(cameraDistance, minCameraDist, maxCameraDist);
-
-    // プレイヤーとターゲットを結ぶベクトル（水平面投影版を使用）
-    DirectX::XMFLOAT3 diffFloat;
-    DirectX::XMStoreFloat3(&diffFloat, vDiff);
-    
-    // 水平方向のベクトルを作成（Y成分を0にする）
-    DirectX::XMFLOAT3 horizontalDiff = diffFloat;
-    horizontalDiff.y = 0;
-    
-    DirectX::XMVECTOR forward = DirectX::XMLoadFloat3(&horizontalDiff);
-    float horizontalLength = 0.0f;
-    DirectX::XMStoreFloat(&horizontalLength, DirectX::XMVector3Length(forward));
-    
-    // 水平距離が極端に短い場合（ほぼ真上or真下）
-    // 前回の右ベクトルか、デフォルトの方向を使用
-    DirectX::XMVECTOR right;
-    if (horizontalLength < 0.1f)
-    {
-        // 前回の右ベクトルを使用（急激な変化を防ぐ）
-        right = DirectX::XMLoadFloat3(&lastCameraRight);
-        
-        // forwardベクトルをデフォルト方向に設定
-        if (horizontalLength < 0.01f)
+        if (closestEnemy->IsTeleporting())
         {
-            forward = DirectX::XMVectorSet(0, 0, 1, 0); // Z軸正方向
+            lockonpoint = closestEnemy->GetCameraTrackingPosition();
+        }
+        else
+        {
+            lockonpoint = closestEnemy->GetPosition();
+        }
+
+        // ===== テレポート検知処理 =====
+        bool isTeleported = false;
+
+        if (!isFirstLockOn)
+        {
+            // 前フレームとの距離を計算
+            DirectX::XMVECTOR vPrevPos = DirectX::XMLoadFloat3(&previousEnemyPosition);
+            DirectX::XMVECTOR vCurrentPos = DirectX::XMLoadFloat3(&lockonpoint);
+            DirectX::XMVECTOR vDiff = DirectX::XMVectorSubtract(vCurrentPos, vPrevPos);
+            float moveDistance = DirectX::XMVectorGetX(DirectX::XMVector3Length(vDiff));
+
+            // テレポート判定
+            if (moveDistance > teleportDetectionThreshold)
+            {
+                isTeleported = true;
+                teleportRecoveryTime = teleportRecoveryDuration;
+            }
+        }
+        else
+        {
+            // 初回ロックオン時は前の位置を初期化
+            isFirstLockOn = false;
+            smoothedLockonPoint = lockonpoint;
+        }
+
+        // 前フレームの位置を保存
+        previousEnemyPosition = lockonpoint;
+
+        // テレポート回復時間の更新
+        if (teleportRecoveryTime > 0.0f)
+        {
+            teleportRecoveryTime -= elapsedTime;
+            if (teleportRecoveryTime < 0.0f)
+            {
+                teleportRecoveryTime = 0.0f;
+            }
+        }
+
+        // スムーズなロックオン位置の補間
+        {
+            DirectX::XMVECTOR vSmoothed = DirectX::XMLoadFloat3(&smoothedLockonPoint);
+            DirectX::XMVECTOR vTarget = DirectX::XMLoadFloat3(&lockonpoint);
+
+            // テレポート中は補間を遅くする
+            float smoothFactor = lockonSmoothSpeed;
+            /*if (teleportRecoveryTime > 0.0f)
+            {
+                smoothFactor *= teleportSlowdownFactor;
+            }*/
+
+            float smoothT = (std::min)(smoothFactor * elapsedTime, 1.0f);
+            DirectX::XMVECTOR vResult = DirectX::XMVectorLerp(vSmoothed, vTarget, smoothT);
+            DirectX::XMStoreFloat3(&smoothedLockonPoint, vResult);
+        }
+
+        if (oldLockFlag != islockon)
+        {
+            sideValue = CalcSide(target, smoothedLockonPoint);
+
+            // ロックオン開始時に現在のカメラ状態を初期化
+            Camera& camera = Camera::Instance();
+            currentCameraPosition = camera.GetEye();
+            currentRotation = camera.GetRotation();
+            targetRotation = currentRotation;
+
+            // 初期化フラグをリセット
+            isFirstLockOn = true;
+        }
+
+        // プレイヤーとターゲットの位置（スムーズ化された位置を使用）
+        DirectX::XMFLOAT3 playerPos = target;
+        DirectX::XMFLOAT3 enemyPos = smoothedLockonPoint;
+
+        // 距離計算
+        DirectX::XMVECTOR vPlayer = DirectX::XMLoadFloat3(&playerPos);
+        DirectX::XMVECTOR vEnemy = DirectX::XMLoadFloat3(&enemyPos);
+        DirectX::XMVECTOR vDiff = DirectX::XMVectorSubtract(vEnemy, vPlayer);
+
+        float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(vDiff));
+
+        if (distance < 0.1f)
+        {
+            distance = 0.1f;
+            vDiff = DirectX::XMVectorSet(0, 0, 0.1f, 0);
+        }
+
+        if (std::isnan(distance) || std::isinf(distance))
+        {
+            distance = 5.0f;
+            vDiff = DirectX::XMVectorSet(0, 0, 5.0f, 0);
+        }
+
+        // =============================================
+        // 注視点の決定
+        // =============================================
+        DirectX::XMFLOAT3 focusTarget;
+
+        focusTarget = enemyPos;
+
+        // プレイヤーの位置をスムーズ化（攻撃モーション時の急激な動きを抑制）
+        {
+            DirectX::XMVECTOR vSmoothedPlayer = DirectX::XMLoadFloat3(&smoothedPlayerPosition);
+            DirectX::XMVECTOR vCurrentPlayer = DirectX::XMLoadFloat3(&playerPos);
+
+            // XZ平面のみをスムーズ化（Y軸は維持）
+            DirectX::XMVECTOR vPlayerXZ = DirectX::XMVectorSetY(vCurrentPlayer, 0.0f);
+            DirectX::XMVECTOR vSmoothedXZ = DirectX::XMVectorSetY(vSmoothedPlayer, 0.0f);
+
+            float playerSmoothT = (std::min)(playerPositionSmoothSpeed * elapsedTime, 1.0f);
+            DirectX::XMVECTOR vResultXZ = DirectX::XMVectorLerp(vSmoothedXZ, vPlayerXZ, playerSmoothT);
+
+            // Y座標は即座に反映
+            DirectX::XMVECTOR vResult = DirectX::XMVectorSetY(vResultXZ, DirectX::XMVectorGetY(vCurrentPlayer));
+            DirectX::XMStoreFloat3(&smoothedPlayerPosition, vResult);
+        }
+        // =============================================
+        // 画角内チェック（Cameraクラスの機能を使用）
+        // =============================================
+        Camera& camera = Camera::Instance();
+        bool playerInView = camera.IsInViewport(playerPos, viewportMargin);
+        bool enemyInView = camera.IsInViewport(enemyPos, viewportMargin);
+        bothInView = playerInView && enemyInView;
+
+        // =============================================
+        // カメラ位置の計算
+        // =============================================
+        float t = (distance - distanceParamMin) / (distanceParamMax - distanceParamMin);
+        t = std::clamp(t, 0.0f, 1.0f);
+
+        float dynamicOffsetY = minOffsetTargetY + (maxOffsetTargetY - minOffsetTargetY) * t;
+        float dynamicHeightAngle = minHeightAngle + (maxHeightAngle - minHeightAngle) * t;
+        float dynamicFovCorrection = maxFovCorrection - (maxFovCorrection - minFovCorrection) * t;
+
+        DirectX::XMFLOAT3 midPoint;
+        midPoint.x = (smoothedPlayerPosition.x + enemyPos.x) * 0.5f;
+        midPoint.y = (smoothedPlayerPosition.y + enemyPos.y) * 0.5f + dynamicOffsetY;
+        midPoint.z = (smoothedPlayerPosition.z + enemyPos.z) * 0.5f;
+
+        float baseCameraDistance = distance * 0.8f;
+        float minCameraDist = lengthLimit[0];
+        float maxCameraDist = lengthLimit[1];
+        float cameraDistance = std::clamp(baseCameraDistance, minCameraDist, maxCameraDist);
+        cameraDistance *= dynamicFovCorrection;
+        cameraDistance = std::clamp(cameraDistance, minCameraDist, maxCameraDist);
+
+        DirectX::XMFLOAT3 diffFloat;
+        DirectX::XMStoreFloat3(&diffFloat, vDiff);
+        DirectX::XMFLOAT3 horizontalDiff = diffFloat;
+        horizontalDiff.y = 0;
+
+        DirectX::XMVECTOR forward = DirectX::XMLoadFloat3(&horizontalDiff);
+        float horizontalLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(forward));
+
+        DirectX::XMVECTOR right;
+        if (horizontalLength < 0.1f)
+        {
+            right = DirectX::XMLoadFloat3(&lastCameraRight);
+            if (horizontalLength < 0.01f)
+            {
+                forward = DirectX::XMVectorSet(0, 0, 1, 0);
+            }
+            else
+            {
+                forward = DirectX::XMVector3Normalize(forward);
+            }
         }
         else
         {
             forward = DirectX::XMVector3Normalize(forward);
+            DirectX::XMVECTOR worldUp = DirectX::XMVectorSet(0, 1, 0, 0);
+            right = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(worldUp, forward));
+            DirectX::XMStoreFloat3(&lastCameraRight, right);
         }
-    }
-    else
-    {
-        // 通常時：水平方向ベクトルを正規化
-        forward = DirectX::XMVector3Normalize(forward);
-        
-        // 右方向ベクトルを計算
+
+        float heightAngle = DirectX::XMConvertToRadians(dynamicHeightAngle);
+        float sideAngle = DirectX::XMConvertToRadians(lockOnSideAngle);
+
+        if (std::isnan(heightAngle) || std::isinf(heightAngle))
+        {
+            heightAngle = DirectX::XMConvertToRadians(20.0f);
+        }
+        if (std::isnan(sideAngle) || std::isinf(sideAngle))
+        {
+            sideAngle = 0.0f;
+        }
+
+        DirectX::XMVECTOR cameraOffset = DirectX::XMVectorNegate(forward);
         DirectX::XMVECTOR worldUp = DirectX::XMVectorSet(0, 1, 0, 0);
-        right = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(worldUp, forward));
-        
-        // 右ベクトルを保存（次回の参照用）
-        DirectX::XMStoreFloat3(&lastCameraRight, right);
-    }
+        float heightRatio = tanf(heightAngle);
+        DirectX::XMVECTOR heightOffset = DirectX::XMVectorScale(worldUp, cameraDistance * heightRatio);
+        DirectX::XMVECTOR sideOffset = DirectX::XMVectorScale(right, sideValue * cameraDistance * tanf(sideAngle));
 
-    // 斜め上からの視点を作成
-    float heightAngle = DirectX::XMConvertToRadians(lockOnHeightAngle);
-    float sideAngle = DirectX::XMConvertToRadians(lockOnSideAngle);
+        DirectX::XMVECTOR vMidPoint = DirectX::XMLoadFloat3(&midPoint);
+        DirectX::XMVECTOR newTargetEyePos = vMidPoint;
+        float backwardDist = cameraDistance * cosf(heightAngle);
+        newTargetEyePos = DirectX::XMVectorMultiplyAdd(cameraOffset,
+            DirectX::XMVectorReplicate(backwardDist),
+            newTargetEyePos);
+        newTargetEyePos = DirectX::XMVectorAdd(newTargetEyePos, heightOffset);
+        newTargetEyePos = DirectX::XMVectorAdd(newTargetEyePos, sideOffset);
 
-    // カメラの基準位置（中間点の後方）
-    DirectX::XMVECTOR cameraOffset = DirectX::XMVectorNegate(forward);
-    
-    // 上方向の成分を追加
-    DirectX::XMVECTOR worldUp = DirectX::XMVectorSet(0, 1, 0, 0);
-    float heightRatio = tanf(heightAngle);
-    DirectX::XMVECTOR heightOffset = DirectX::XMVectorScale(worldUp, cameraDistance * heightRatio);
-    
-    // 横方向の成分を追加
-    DirectX::XMVECTOR sideOffset = DirectX::XMVectorScale(right, sideValue * cameraDistance * tanf(sideAngle));
+        float heightAdjust = targetLimit[0] +
+            (targetLimit[1] - targetLimit[0]) *
+            std::clamp((distance - 5.0f) / 15.0f, 0.0f, 1.0f);
+        newTargetEyePos = DirectX::XMVectorAdd(newTargetEyePos,
+            DirectX::XMVectorSet(0, heightAdjust, 0, 0));
 
-    // 最終的なカメラ位置を計算
-    DirectX::XMVECTOR vMidPoint = DirectX::XMLoadFloat3(&midPoint);
-    DirectX::XMVECTOR eyePos = vMidPoint;
-    
-    // 後方への距離
-    float backwardDist = cameraDistance * cosf(heightAngle);
-    eyePos = DirectX::XMVectorMultiplyAdd(cameraOffset, 
-                                          DirectX::XMVectorReplicate(backwardDist), 
-                                          eyePos);
-    
-    // 上方向のオフセット
-    eyePos = DirectX::XMVectorAdd(eyePos, heightOffset);
-    
-    // 横方向のオフセット
-    eyePos = DirectX::XMVectorAdd(eyePos, sideOffset);
+        DirectX::XMStoreFloat3(&targetCameraPosition, newTargetEyePos);
 
-    DirectX::XMStoreFloat3(&eye, eyePos);
-    
-    // 注視点を設定
-    lockonpoint = midPoint;
+        // =============================================
+        // 目標クォータニオンの計算
+        // =============================================
+        {
+            DirectX::XMVECTOR vEye = newTargetEyePos;
+            DirectX::XMVECTOR vFocus = DirectX::XMLoadFloat3(&focusTarget);
+            DirectX::XMVECTOR vUp = DirectX::XMVectorSet(0, 1, 0, 0);
 
-    // デバッグ用：カメラ高さの微調整
-    float heightAdjust = targetLimit[0] + 
-                        (targetLimit[1] - targetLimit[0]) * 
-                        std::clamp((distance - 5.0f) / 15.0f, 0.0f, 1.0f);
-    eye.y += heightAdjust;
+            // 注視点もスムーズ化（攻撃時の揺れを抑制）
+            DirectX::XMVECTOR vSmoothedFocus = DirectX::XMLoadFloat3(&smoothedFocusTarget);
+            float focusSmoothT = (std::min)(focusSmoothSpeed * elapsedTime, 1.0f);
+            vFocus = DirectX::XMVectorLerp(vSmoothedFocus, vFocus, focusSmoothT);
+            DirectX::XMStoreFloat3(&smoothedFocusTarget, vFocus);
+
+            DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookAtLH(
+                vEye,
+                vFocus,
+                vUp
+            );
+
+            DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixInverse(nullptr, viewMatrix);
+            DirectX::XMVECTOR newTargetQuat = DirectX::XMQuaternionRotationMatrix(worldMatrix);
+            DirectX::XMStoreFloat4(&targetRotation, newTargetQuat);
+        }
+
+        // =============================================
+        // クォータニオンと位置の補間（テレポート対策）
+        // =============================================
+        DirectX::XMVECTOR currentQuat = DirectX::XMLoadFloat4(&currentRotation);
+        DirectX::XMVECTOR targetQuat = DirectX::XMLoadFloat4(&targetRotation);
+
+        // テレポート中は回転速度を制限
+        float effectiveRotationSpeed = rotationLerpSpeed;
+        if (teleportRecoveryTime > 0.0f)
+        {
+            // 回復時間に応じて徐々に速度を戻す
+            float recoveryRatio = teleportRecoveryTime / teleportRecoveryDuration;
+            effectiveRotationSpeed *= (1.0f - recoveryRatio * (1.0f - teleportSlowdownFactor));
+        }
+
+        float rotationT = (std::min)(effectiveRotationSpeed * elapsedTime, 1.0f);
+
+        // 最大回転速度の制限
+        {
+            // 現在のクォータニオンと目標クォータニオンの角度差を計算
+            float dotProduct = DirectX::XMVectorGetX(DirectX::XMQuaternionDot(currentQuat, targetQuat));
+            dotProduct = std::clamp(dotProduct, -1.0f, 1.0f);
+            float angleDifference = 2.0f * acosf(fabsf(dotProduct));
+
+            // 最大回転速度に基づいて補間率を制限
+            float maxRotationThisFrame = maxRotationSpeedPerFrame * elapsedTime;
+            if (angleDifference > 0.001f)
+            {
+                float maxT = maxRotationThisFrame / angleDifference;
+                rotationT = (std::min)(rotationT, maxT);
+            }
+        }
+
+        DirectX::XMVECTOR newQuat = DirectX::XMQuaternionSlerp(currentQuat, targetQuat, rotationT);
+        DirectX::XMStoreFloat4(&currentRotation, newQuat);
+
+        DirectX::XMVECTOR currentPos = DirectX::XMLoadFloat3(&currentCameraPosition);
+        DirectX::XMVECTOR targetPos = DirectX::XMLoadFloat3(&targetCameraPosition);
+
+        // テレポート中は位置の移動速度も調整
+        float effectivePositionSpeed = positionLerpSpeed;
+        if (teleportRecoveryTime > 0.0f)
+        {
+            float recoveryRatio = teleportRecoveryTime / teleportRecoveryDuration;
+            effectivePositionSpeed *= (1.0f - recoveryRatio * (1.0f - teleportSlowdownFactor));
+        }
+
+        float positionT = (std::min)(effectivePositionSpeed * elapsedTime, 1.0f);
+        DirectX::XMVECTOR newPos = DirectX::XMVectorLerp(currentPos, targetPos, positionT);
+        DirectX::XMStoreFloat3(&currentCameraPosition, newPos);
+
+        // =============================================
+        // カメラに設定
+        // =============================================
+        eye = currentCameraPosition;
+
+        if (eye.y < minCameraHeight)
+        {
+            eye.y = minCameraHeight;
+            currentCameraPosition.y = minCameraHeight;
+        }
+
+        if (std::isnan(eye.x) || std::isnan(eye.y) || std::isnan(eye.z))
+        {
+            eye.x = target.x;
+            eye.y = target.y + 2.0f;
+            eye.z = target.z - 5.0f;
+            currentCameraPosition = eye;
+        }
+
+        camera.SetPosition(eye);
+        camera.SetRotation(currentRotation);
+        camera.UpdateMatrices();
     }
     else
     {
+        // ロックオン解除時はスムーズ化された位置をリセット
+    	smoothedPlayerPosition = target;
+        smoothedFocusTarget = target;
+
         SetLockonPoint();
         angle.y = normalizeAngle(angle.y);
 
-        // ロックオンを解除した直後であれば、eyeの更新をスキップ
+        // ロックオン解除時は初期化フラグをリセット
+        isFirstLockOn = true;
+        teleportRecoveryTime = 0.0f;
+
         if (!(oldLockFlag && !islockon)) {
             eye = {
                 target.x - front.x * range,
@@ -205,17 +394,21 @@ void CameraController::Update(float elapsedTime)
                 DirectX::XMLoadFloat3(&eye));
             vec = DirectX::XMVector3Normalize(vec);
 
-            float yaw = atan2f(vec.m128_f32[0], vec.m128_f32[2]);     // y軸回転（左右）
-            float pitch = asinf(-vec.m128_f32[1]);                     // x軸回転（上下）
+            float yaw = atan2f(vec.m128_f32[0], vec.m128_f32[2]);
+            float pitch = asinf(-vec.m128_f32[1]);
 
             angle.y = yaw;
             angle.x = pitch;
             eye = newEye;
         }
+
+        bothInView = false;
+
+        Camera& camera = Camera::Instance();
+        camera.SetLookAt(eye, target, DirectX::XMFLOAT3(0, 1, 0));
     }
 
 #ifdef CameraLerp
-
     newEye.x = Mathf::Lerp(newEye.x, eye.x, lerpSpeed * elapsedTime);
     newEye.y = Mathf::Lerp(newEye.y, eye.y, lerpSpeed * elapsedTime);
     newEye.z = Mathf::Lerp(newEye.z, eye.z, lerpSpeed * elapsedTime);
@@ -225,9 +418,9 @@ void CameraController::Update(float elapsedTime)
         if (closestEnemy)
         {
             newTarget = {
-                Mathf::Lerp(newTarget.x, lockonpoint.x, lerpSpeed * elapsedTime),
-                Mathf::Lerp(newTarget.y, lockonpoint.y + 0.9f, lerpSpeed * elapsedTime),
-                Mathf::Lerp(newTarget.z, lockonpoint.z, lerpSpeed * elapsedTime)
+                Mathf::Lerp(newTarget.x, smoothedLockonPoint.x, lerpSpeed * elapsedTime),
+                Mathf::Lerp(newTarget.y, smoothedLockonPoint.y + 0.9f, lerpSpeed * elapsedTime),
+                Mathf::Lerp(newTarget.z, smoothedLockonPoint.z, lerpSpeed * elapsedTime)
             };
         }
     }
@@ -239,41 +432,8 @@ void CameraController::Update(float elapsedTime)
             Mathf::Lerp(newTarget.z, target.z, lerpSpeed * elapsedTime)
         };
     }
-
-    newTarget = {
-            Mathf::Lerp(newTarget.x, target.x, lerpSpeed * elapsedTime),
-            Mathf::Lerp(newTarget.y, target.y + 0.9f, lerpSpeed * elapsedTime),
-            Mathf::Lerp(newTarget.z, target.z, lerpSpeed * elapsedTime)
-    };
-#else
-    eye.x = target.x - front.x * range;
-    eye.y = target.y - front.y * range;
-    eye.z = target.z - front.z * range;
 #endif
 
-#ifdef CameraLerp
-    // レイキャストによる地面判定
-    HitResult hit;
-    if (StageManager::Instance().RayCast(newTarget, newEye, hit))
-    {
-        newEye = hit.position;
-    }
-
-    // カメラ視点と注視点を設定
-    Camera::Instance().SetLookAt(newEye, newTarget, DirectX::XMFLOAT3(0, 1, 0));
-#else
-    // レイキャストによる地面判定
-    HitResult hit;
-    if (StageManager::Instance().RayCast(target, eye, hit))
-    {
-        eye = hit.position;
-    }
-
-    // カメラ視点と注視点を設定
-    Camera::Instance().SetLookAt(eye, target, DirectX::XMFLOAT3(0, 1, 0));
-#endif
-
-    // フリーカメラにするかどうか
     if (freeCameraFlag)
     {
         Camera::Instance().SetFreeCameraFlag(true);
@@ -288,11 +448,11 @@ void CameraController::Update(float elapsedTime)
 
 void CameraController::SetLockonPoint()
 {
-    SilverDragonkin& dragonkin = SilverDragonkin::Instance();
+    EnemyBoss& boss = EnemyBoss::Instance();
 
     closestEnemy = nullptr;
 
-    closestEnemy = dynamic_cast<Enemy*>(&dragonkin); // Use dynamic_cast to convert SilverDragonkin to Enemy  
+    closestEnemy = dynamic_cast<Enemy*>(&boss); // Use dynamic_cast to convert EnemyBoss to Enemy  
 
     if (closestEnemy)  
     {  
@@ -333,48 +493,48 @@ void CameraController::EnemyAlived()
 // カメラシェイク
 void CameraController::CameraShake(float elapsedTime)
 {
-    //Camera& camera = Camera::Instance();
+    Camera& camera = Camera::Instance();
 
-    //if (!camera.GetCameraShakeSwitch()) return;
+    if (!camera.GetCameraShakeSwitch()) return;
 
-    //if (shakeTime < camera.GetCameraShakeTimer())
-    //{
-    //    shakeTime = camera.GetCameraShakeTimer();
-    //    camera.SetCameraShakeSwitch(true, 0, camera.GetCameraShakePower());
-    //}
+    if (shakeTime < camera.GetCameraShakeTimer())
+    {
+        shakeTime = camera.GetCameraShakeTimer();
+        camera.SetCameraShakeSwitch(true, 0, camera.GetCameraShakePower());
+    }
 
-    //// シンプレックスノイズを使用
-    //static FastNoiseLite noiseGenerator;
-    //noiseGenerator.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    //noiseGenerator.SetFrequency(2.0f);  // 周波数（細かさ調整）
+    // シンプレックスノイズを使用
+    static FastNoiseLite noiseGenerator;
+    noiseGenerator.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noiseGenerator.SetFrequency(2.0f);  // 周波数（細かさ調整）
 
-    //// 時間を利用してスムーズな変化を作る
-    //static float timeOffset = 0.0f;
-    //timeOffset += elapsedTime * 5.0f; // 時間を少しずつ進める（速度調整）
+    // 時間を利用してスムーズな変化を作る
+    static float timeOffset = 0.0f;
+    timeOffset += elapsedTime * 5.0f; // 時間を少しずつ進める（速度調整）
 
-    //// カメラの揺れの強さ
-    //float shakePower = camera.GetCameraShakePower() * cameraShakeRange;
+    // カメラの揺れの強さ
+    float shakePower = camera.GetCameraShakePower() * cameraShakeRange;
 
-    //// 各軸ごとに異なるノイズ値を取得
-    //DirectX::XMFLOAT3 shake;
-    //shake.x = noiseGenerator.GetNoise(timeOffset, 0.0f) * shakePower;
-    //shake.y = noiseGenerator.GetNoise(0.0f, timeOffset) * shakePower;
-    //shake.z = noiseGenerator.GetNoise(timeOffset, timeOffset) * shakePower;
+    // 各軸ごとに異なるノイズ値を取得
+    DirectX::XMFLOAT3 shake;
+    shake.x = noiseGenerator.GetNoise(timeOffset, 0.0f) * shakePower;
+    shake.y = noiseGenerator.GetNoise(0.0f, timeOffset) * shakePower;
+    shake.z = noiseGenerator.GetNoise(timeOffset, timeOffset) * shakePower;
 
-    //// 注視点に揺れ値を加える
-    //DirectX::XMFLOAT3 focus = camera.GetFocus();
-    //focus.x += shake.x;
-    //focus.y += shake.y;
-    //focus.z += shake.z;
+    // 注視点に揺れ値を加える
+    DirectX::XMFLOAT3 focus = camera.GetFocus();
+    focus.x += shake.x;
+    focus.y += shake.y;
+    focus.z += shake.z;
 
-    //camera.SetLookAt(camera.GetEye(), focus, camera.GetUp());
+    camera.SetLookAt(camera.GetEye(), focus, camera.GetUp());
 
-    //shakeTime -= elapsedTime;
+    shakeTime -= elapsedTime;
 
-    //if (shakeTime < 0)
-    //{
-    //    camera.SetCameraShakeSwitch(false, 0);
-    //}
+    if (shakeTime < 0)
+    {
+        camera.SetCameraShakeSwitch(false, 0);
+    }
 }
 
 // マウスカメラ操作
@@ -402,10 +562,8 @@ void CameraController::MouseCameraController(float elapsedTime)
 // デバッグ用GUI描画
 void CameraController::DrawDebugGUI()
 {
-    // トランスフォーム
     if (ImGui::CollapsingHeader("CameraController", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        // 回転
         DirectX::XMFLOAT3 a;
         a.x = DirectX::XMConvertToDegrees(angle.x);
         a.y = DirectX::XMConvertToDegrees(angle.y);
@@ -416,46 +574,86 @@ void CameraController::DrawDebugGUI()
         angle.z = DirectX::XMConvertToRadians(a.z);
 
         ImGui::DragFloat3("offsetTarget", &offsetTarget.x, 0.1f);
-
         ImGui::DragFloat("range", &range, 0.1f);
 
-        float b;
-        b = DirectX::XMConvertToDegrees(angleOffset);
+        float b = DirectX::XMConvertToDegrees(angleOffset);
         ImGui::DragFloat("angleOffset", &b);
         angleOffset = DirectX::XMConvertToRadians(b);
 
         ImGui::DragFloat("LeapSpeed", &lerpSpeed);
         ImGui::DragFloat("AngleLeapSpeed", &AnglelerpSpeed);
-
-
         ImGui::DragFloat("dotOffset", &dotOffset);
         ImGui::DragFloat("turnSpeed", &turnSpeed);
 
-        if (ImGui::TreeNode("Lock-On Camera Settings"))
+        if (ImGui::TreeNode("Quaternion Lock-On Camera"))
         {
-            ImGui::DragFloat("Height Angle", &lockOnHeightAngle, 1.0f, 10.0f, 80.0f);
-            ImGui::DragFloat("Side Angle", &lockOnSideAngle, 1.0f, 0.0f, 60.0f);
-            ImGui::DragFloat("FOV Correction", &lockOnFovCorrection, 0.1f, 1.0f, 3.0f);
-            ImGui::Text("Height Angle: カメラの見下ろし角度");
-            ImGui::Text("Side Angle: カメラの横ズレ角度");
-            ImGui::Text("FOV Correction: 画面収まり補正");
+            ImGui::Text("=== Rotation & Position ===");
+            ImGui::DragFloat("Rotation Lerp Speed", &rotationLerpSpeed, 0.1f, 0.5f, 20.0f);
+            ImGui::DragFloat("Position Lerp Speed", &positionLerpSpeed, 0.1f, 0.5f, 20.0f);
+
+            ImGui::Separator();
+            ImGui::Text("=== Viewport Check ===");
+            ImGui::SliderFloat("Viewport Margin", &viewportMargin, 0.0f, 0.3f, "%.2f");
+            ImGui::Text("Both in View: %s", bothInView ? "YES" : "NO");
+            ImGui::TextColored(bothInView ? ImVec4(0, 1, 0, 1) : ImVec4(1, 0, 0, 1),
+                bothInView ? "Camera Rotation Locked" : "Camera Adjusting");
+
+            ImGui::Separator();
+            ImGui::Text("=== Focus Settings ===");
+            ImGui::DragFloat("Switch Distance", &focusSwitchDistance, 0.1f, 5.0f, 50.0f);
+            ImGui::Text("< %.1fm: Focus on Enemy", focusSwitchDistance);
+            ImGui::Text(">= %.1fm: Focus on Midpoint", focusSwitchDistance);
+
+            ImGui::Separator();
+            ImGui::Text("=== Current Quaternion ===");
+            ImGui::Text("X: %.3f, Y: %.3f, Z: %.3f, W: %.3f",
+                currentRotation.x, currentRotation.y, currentRotation.z, currentRotation.w);
+
+            ImGui::Separator();
+            ImGui::Text("=== Safety Settings ===");
+            ImGui::DragFloat("Min Camera Height", &minCameraHeight, 0.1f, 0.0f, 5.0f);
+
             ImGui::TreePop();
         }
-        ImGui::DragFloat("TargetY Offset", &targetYoffset, 0.1f);
 
+        if (ImGui::TreeNode("Lock-On Camera Settings"))
+        {
+            ImGui::Text("=== Basic Settings ===");
+            ImGui::DragFloat("Side Angle", &lockOnSideAngle, 1.0f, -60.0f, 60.0f);
+
+            ImGui::Separator();
+            ImGui::Text("=== Distance Range ===");
+            ImGui::DragFloat("Distance Min", &distanceParamMin, 0.5f, 1.0f, distanceParamMax - 1.0f);
+            ImGui::DragFloat("Distance Max", &distanceParamMax, 0.5f, distanceParamMin + 1.0f, 50.0f);
+
+            ImGui::Separator();
+            ImGui::Text("=== Offset Target Y ===");
+            ImGui::DragFloat("Min Offset Y (Near)", &minOffsetTargetY, 0.1f, -5.0f, maxOffsetTargetY);
+            ImGui::DragFloat("Max Offset Y (Far)", &maxOffsetTargetY, 0.1f, minOffsetTargetY, 5.0f);
+
+            ImGui::Separator();
+            ImGui::Text("=== Height Angle ===");
+            ImGui::DragFloat("Min Height Angle (Near)", &minHeightAngle, 0.5f, 0.0f, maxHeightAngle);
+            ImGui::DragFloat("Max Height Angle (Far)", &maxHeightAngle, 0.5f, minHeightAngle, 80.0f);
+
+            ImGui::Separator();
+            ImGui::Text("=== FOV Correction ===");
+            ImGui::DragFloat("Min FOV (Far)", &minFovCorrection, 0.05f, 0.5f, maxFovCorrection);
+            ImGui::DragFloat("Max FOV (Near)", &maxFovCorrection, 0.05f, minFovCorrection, 5.0f);
+
+            ImGui::TreePop();
+        }
+
+        ImGui::DragFloat("TargetY Offset", &targetYoffset, 0.1f);
         ImGui::DragFloat("lengthLimit 1", &lengthLimit[0], 0.1f, -10.0f, lengthLimit[1]);
         ImGui::DragFloat("lengthLimit 2", &lengthLimit[1], 0.1f, lengthLimit[0], 500.0f);
-
         ImGui::DragFloat("TargetLimit 1", &targetLimit[0], 0.1f);
         ImGui::DragFloat("TargetLimit 2", &targetLimit[1], 0.1f);
-
         ImGui::DragFloat("Min Target Distance", &minTargetDistance, 0.1f, 1.0f, maxTargetDistance);
         ImGui::DragFloat("Max Target Distance", &maxTargetDistance, 0.1f, minTargetDistance, 50.0f);
         ImGui::DragFloat("Distance Easing", &distanceEasingPower, 0.1f, 0.5f, 3.0f);
 
-        // カメラを自由に動かせるかどうか
         ImGui::Checkbox("FreeCamera", &freeCameraFlag);
-
         ImGui::Text("DisAngle %3f", desiredAngle.y);
     }
 }
@@ -500,6 +698,12 @@ void CameraController::InitCamera()
 {
     newEye = Camera::Instance().GetEye();
     newTarget = Camera::Instance().GetFocus();
+    currentCameraPosition = newEye;
+    currentRotation = Camera::Instance().GetRotation();
+
+    // スムーズ化された位置を初期化
+    smoothedPlayerPosition = newTarget;
+    smoothedFocusTarget = newTarget;
 }
 
 float CameraController::CalcSide(DirectX::XMFLOAT3 p1, DirectX::XMFLOAT3 p2)

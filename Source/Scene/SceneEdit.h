@@ -3,7 +3,7 @@
 #include "Stage/Stage.h"
 #include "Character/player.h"
 
-#include "Character/Enemy/SilverDragonkin.h"
+#include "Character/Enemy/EnemyBoss.h"
 #include "Scene.h"
 #include "Graphics/SkyBox.h"
 #include "Graphics/PostEffect.h"
@@ -76,7 +76,7 @@ public:
 	void DrawEventHandles(ImDrawList* draw_list, AnimationConfig* config, int animationIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength);
 private:
 	std::unique_ptr<Player> player;
-	std::unique_ptr<SilverDragonkin> dragonkin;
+	std::unique_ptr<EnemyBoss> boss;
 
 	std::unique_ptr<EditCameraController> cameraController;
 	std::unique_ptr<SkyBox> skyBox;

@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <wrl.h>
 #include <memory>
+#include <mutex>
 #include "FrameBuffer.h"
 #include "RenderState.h"
 #include "Debug/PrimitiveRenderer.h"
@@ -10,6 +11,7 @@
 #include "Model/ModelRenderer.h"
 #include "Shader.h"
 #include "ShadowMap.h"
+#include "Renderer/TrailRenderer.h"
 
 enum class FrameBufferId
 {
@@ -95,6 +97,11 @@ public:
 	// モデルレンダラ取得
 	ModelRenderer* GetModelRenderer() const { return modelRenderer.get(); }
 
+	// トレイルレンダラ取得
+	TrailRenderer* GetTrailRenderer() const { return trailRenderer.get(); }
+
+	std::mutex& GetMutex() { return mutex; }
+
 	void ResizeFrameBuffer(FrameBufferId id, int width, int height);
 
 private:
@@ -117,4 +124,6 @@ private:
 	std::unique_ptr<ShapeRenderer>					shapeRenderer;
 	std::unique_ptr<ModelRenderer>					modelRenderer;
 	std::unique_ptr<ShadowMap>						shadowMap;
+	std::unique_ptr<TrailRenderer>					trailRenderer;
+	std::mutex 									    mutex;
 };

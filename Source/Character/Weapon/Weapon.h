@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Character/Character.h"
+#include "Graphics/Graphics.h"
 #include "Graphics/Shader.h"
 
 class Weapon
@@ -13,7 +14,7 @@ public:
 	virtual void Update(float elapsedTime) {}
 
 	// 描画処理
-	virtual void Render(const RenderContext& rc, Shader* shader) {}
+	virtual void Render(const RenderContext& rc, ShaderId shaderId) {}
 
 	//モデル用ゲッター
 	std::shared_ptr<Model> GetModel() const { return model; }
@@ -31,15 +32,6 @@ public:
 	//アニメーションの攻撃当たり判定をつける
 	void AttackAnimationCollision(Model* character, float animTimeMin, float animTimeMax, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
 	void AttackAnimationCollision(Model* model, AnimationConfig* config, Character* character);
-
-	// パリィ判定と敵の攻撃の衝突処理
-	void CollisionParryVsAttack();
-
-	// パリィの判定を付ける
-	void ParryAnimationCollision(Model* character, float animTimeMin, float animTimeMax);
-
-	bool GetIsParry() { return IsParry; }
-
 protected:
 	//トレイルの描画
 	void TrailRender(const RenderContext& rc);
@@ -49,7 +41,6 @@ protected:
 	void DrawDebugTrailGui();
 
 protected:
-
 	DirectX::XMFLOAT3 position = { 0, 0, 0 };
 	DirectX::XMFLOAT3 angle = { 0, 0, 0 };
 	DirectX::XMFLOAT3 scale = { 1, 1, 1 };
@@ -60,15 +51,13 @@ protected:
 	//Model::EmissiveColors colors;//発光色
 
 	//武器トレイル関係
-	static const int MAX_POLYGON = 16 * 2;//何フレーム文を保存して描くか
+	static const int MAX_POLYGON = 6 * 2;//何フレーム文を保存して描くか
 
 	DirectX::XMFLOAT3					trailPositions[2][MAX_POLYGON];//トレイル用頂点ポジション
 	DirectX::XMFLOAT3					trailoffset[2] =	//トレイル補正用 [0]根本 [1]先端
-		//DirectX::XMFLOAT3					trailPositions[4][MAX_POLYGON];//トレイル用頂点ポジション
-		//DirectX::XMFLOAT3					trailoffset[4] =	//トレイル補正用 [0]先端 [1]中間 [2]根本
 	{
-		{0.0f,  8.5f, 0.0f},
-		{0.0f, 111.5, 0.0f},
+		{0.0f, 0.0f, 0.5f},
+		{0.0f, 0.0f, 1.5f},
 	};
 
 	DirectX::XMFLOAT4 TipBegin = {};//剣周辺色
@@ -80,25 +69,6 @@ protected:
 	float Colorscale{};//先端の色を濃くするためBeginにのみｘ
 
 	float dissolve{};//ディゾルブ
-
-	//static const int MAX_TRAIL = 3;		  //何分割したトレイルを扱うか
-	//struct TrailObject
-	//{
-	//	DirectX::XMFLOAT3					trailPositions[2][MAX_POLYGON];//トレイル用頂点ポジション
-	//	DirectX::XMFLOAT3					trailoffset[2] =	//トレイル補正用 [0]先端 [1]根本
-	//	{
-	//		{0.0f, 111.5, 0.0f},
-	//		{0.0f,  8.5f, 0.0f},
-	//	};
-
-	//	DirectX::XMFLOAT4 Begin = {};//剣周辺色
-	//	DirectX::XMFLOAT4 End = {};//消滅するトレイルの色
-
-	//	float Colorscale{};//先端の色を濃くするためBeginにのみｘ
-
-	//	float dissolve{};//ディゾルブ
-	//};
-	//TrailObject trailObject[3];
 
 	DirectX::XMFLOAT4 pointColor{};
 	float attenuation{};
@@ -116,9 +86,9 @@ protected:
 	int hitSphereIndex = -1;
 	float hitSphereRadius = 0.1f;
 
-	/*std::shared_ptr<Effect> attackHitEffect = nullptr;
+	std::shared_ptr<Effect> attackHitEffect = nullptr;
 	Effekseer::Handle attackHitEffectHandle;
 
-	std::shared_ptr<Effect> parryEffect = nullptr;
+	/*std::shared_ptr<Effect> parryEffect = nullptr;
 	Effekseer::Handle ParryEffectHandle;*/
 };

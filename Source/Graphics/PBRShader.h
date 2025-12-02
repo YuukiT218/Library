@@ -83,7 +83,6 @@ private:
 		//DirectX::XMFLOAT4 Setupdummy;
 	};
 	CbSetUp cbSetUp;
-	std::unique_ptr<CbSetUp>			SetUpConstant{};
 
 	static const int ShadowBufferSize = 4;
 	struct CbShadow
@@ -98,6 +97,14 @@ private:
 		float shadowAttenuation;
 		float shadowBias;
 		float dummy;
+	};
+
+	struct CbRimLight
+	{
+		float rimPower;
+		float rimIntensity;
+		DirectX::XMFLOAT4 rimColor;
+		DirectX::XMFLOAT2 rimDummy;
 	};
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	   sceneConstantBuffer;
@@ -122,6 +129,8 @@ private:
 
 	//IBL Diffuse　補正
 	Microsoft::WRL::ComPtr<ID3D11Buffer>	   setUpConstantBuffer;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer>       rimLightConstantBuffer;
 
 	//	ImageBasedLighting用テクスチャ
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> diffuseIemShaderResourceView;

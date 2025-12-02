@@ -5,7 +5,7 @@
 #include "Model/ResourceManager.h"
 #include "Scene/SceneManager.h"
 //#include "Enemy/EnemyManager.h"
-#include "Character/Enemy/SilverDragonkin.h"
+#include "Character/Enemy/EnemyBoss.h"
 #include "Math/Collision.h"
 #include "Math/Mathf.h"
 #include "System/AnimationConfigLoader.h"
@@ -37,7 +37,7 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     // アニメーションスピード設定
     initAnimSpeed();
 
-    sword = std::make_unique<Sword>(device, "Data/Model/Weapon/Staff.gltf");
+    sword = std::make_unique<Sword>(device, "Data/Model/Weapon/Sword/Sword.gltf");
 
     // プレイヤーの最大体力と体力設定
     maxHealth = 70;
@@ -52,18 +52,15 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     states[static_cast<int>(PlayerStateId::Jump)] = std::make_unique<PlayerJumpState>(this);
     states[static_cast<int>(PlayerStateId::Fall)] = std::make_unique<PlayerFallState>(this);
     states[static_cast<int>(PlayerStateId::Dodge)] = std::make_unique<PlayerDodgeState>(this);
-    states[static_cast<int>(PlayerStateId::DodgeAttack)] = std::make_unique<PlayerDodgeAttackState>(this);
     states[static_cast<int>(PlayerStateId::Combo1)] = std::make_unique<PlayerCombo1State>(this);
     states[static_cast<int>(PlayerStateId::Combo2)] = std::make_unique<PlayerCombo2State>(this);
     states[static_cast<int>(PlayerStateId::Combo3)] = std::make_unique<PlayerCombo3State>(this);
     states[static_cast<int>(PlayerStateId::Combo4)] = std::make_unique<PlayerCombo4State>(this);
     states[static_cast<int>(PlayerStateId::Combo5)] = std::make_unique<PlayerCombo5State>(this);
     states[static_cast<int>(PlayerStateId::Heavy1)] = std::make_unique<PlayerHeavyAttack1State>(this);
-    states[static_cast<int>(PlayerStateId::Heavy2)] = std::make_unique<PlayerHeavyAttack2State>(this);
     states[static_cast<int>(PlayerStateId::GuardIdle)] = std::make_unique<PlayerGuardIdle>(this);
-    states[static_cast<int>(PlayerStateId::GuardWalk)] = std::make_unique<PlayerGuardWalk>(this);
     states[static_cast<int>(PlayerStateId::GuardHit)] = std::make_unique<PlayerGuardHit>(this);
-    states[static_cast<int>(PlayerStateId::GuardParry)] = std::make_unique<PlayerGuardParry>(this);
+    states[static_cast<int>(PlayerStateId::GuardCounter)] = std::make_unique<PlayerGuardCounter>(this);
     states[static_cast<int>(PlayerStateId::Damage)] = std::make_unique<PlayerDamageState>(this);
     states[static_cast<int>(PlayerStateId::Dead)] = std::make_unique<PlayerDeadState>(this);
 
@@ -80,7 +77,7 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     }
 
     // プレイヤーの範囲制限
-    areaSize = 29.5f;
+    areaSize = 21.75f;
 }
 
 Player::~Player()
@@ -201,6 +198,7 @@ void Player::Update(float elapsedTime)
     UpdateTransform();
 
     SetKnockbackPosition();
+    SetEnemyWarpPosition();
 
     // アニメーション更新
 	model->UpdateAnimation(elapsedTime, this);
@@ -343,7 +341,7 @@ void Player::CollisionPlayerVsEnemies()
 
         //// 指定のノードと全ての敵を総当たりで衝突処理
         //EnemyManager& enemyManager = EnemyManager::Instance();
-		SilverDragonkin& dragonkin = SilverDragonkin::Instance();
+		EnemyBoss& boss = EnemyBoss::Instance();
 
         //// 全てのプレイヤー攻撃判定と全ての敵の総当たりで衝突処理
         //int enemyCount = enemyManager.GetEnemyCount();
@@ -351,10 +349,10 @@ void Player::CollisionPlayerVsEnemies()
         //{
         //    Enemy* enemy = enemyManager.GetEnemy(i);
 
-        std::vector<NodeHitSphere> enemyNode = dragonkin.GetNodeHitSpheres();
+        std::vector<NodeHitSphere> enemyNode = boss.GetNodeHitSpheres();
         for (auto& enemyHitSphere : enemyNode)
         {
-            Model* enemyModel = dragonkin.GetModel();
+            Model* enemyModel = boss.GetModel();
             Model::Node* enemyNode = enemyModel->FindNode(enemyHitSphere.nodeName);
 
             // ノード位置取得
@@ -420,6 +418,15 @@ void Player::PlayerMove(float elapsedTime, float moveRate, float turnRate)
     Turn(elapsedTime, moveVec.x * turnRate, moveVec.z * turnRate, turnSpeed * turnRate);
 }
 
+void Player::PlayerTurn(float elapsedTime, float turnRate)
+{
+    // 進行ベクトル取得
+    DirectX::XMFLOAT3 moveVec = GetMoveVec();
+
+    // 旋回処理
+    Turn(elapsedTime, moveVec.x * turnRate, moveVec.z * turnRate, turnSpeed * turnRate);
+}
+
 void Player::PlayerJump(float speed)
 {
     if (IsGround())
@@ -429,22 +436,27 @@ void Player::PlayerJump(float speed)
 }
 
 // ロックオン時敵の方を向く処理
-void Player::LockOnTurnToEnemy(float elapsedTime)
+bool Player::LockOnTurnToEnemy(float elapsedTime)
 {
-    float turn = turnSpeed * elapsedTime;
-    SilverDragonkin& dragon = SilverDragonkin::Instance();
+    // すでに向き終わっている場合は何もしない
+    if (isTurnCompleted)
+    {
+        return true;
+    }
 
-    //if (dragon == nullptr) return;
+    float turn = turnSpeed * 10 * elapsedTime;
+    EnemyBoss& boss = EnemyBoss::Instance();
 
     // ターゲットに向く処理
     DirectX::XMVECTOR Position = DirectX::XMLoadFloat3(&position);
-    DirectX::XMVECTOR Target = DirectX::XMLoadFloat3(&dragon.GetPosition());
+    DirectX::XMVECTOR Target = DirectX::XMLoadFloat3(&boss.GetPosition());
     DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(Target, Position);
 
     // ゼロベクトルでないなら回転処理
     DirectX::XMVECTOR LengthSq = DirectX::XMVector3LengthSq(Vec);
     float lengthSq;
     DirectX::XMStoreFloat(&lengthSq, LengthSq);
+
     if (lengthSq > 0.00001f)
     {
         // ターゲットまでのベクトルを単位ベクトル化
@@ -464,11 +476,22 @@ void Player::LockOnTurnToEnemy(float elapsedTime)
         float dot;
         DirectX::XMStoreFloat(&dot, Dot);
 
+        // ===== 角度差をチェック =====
+        // 内積から角度差を計算（ラジアン）
+        float angleDifference = acosf(std::clamp(dot, -1.0f, 1.0f));
+
+        // 閾値以内なら完了とみなす
+        if (angleDifference <= turnCompletedThreshold)
+        {
+            isTurnCompleted = true;
+            return true;
+        }
+
         // 2つの単位ベクトルの角度が小さいほど1.0に近づくという性質を利用して回転速度を調整する
         float rot = 1.0f - dot;
-        if (rot > turnSpeed)
+        if (rot > turn)
         {
-            rot = turnSpeed;
+            rot = turn;
         }
 
         // 回転処理があるなら回転処理をする
@@ -494,12 +517,59 @@ void Player::LockOnTurnToEnemy(float elapsedTime)
             angle.y = angleY;
         }
     }
+    else
+    {
+        // ターゲットが非常に近い場合は完了とみなす
+        isTurnCompleted = true;
+        return true;
+    }
+
+    return false;  // まだ向き終わっていない
 }
 
 // 移動設定
 void Player::SetMovement(DirectX::XMFLOAT3& Vec, float moveRate)
 {
     Move(Vec.x * moveRate, Vec.z * moveRate, moveSpeed * moveRate);
+}
+
+void Player::SetDamageDirection(const DirectX::XMFLOAT3& attackerPos)
+{
+    damageDirection.x = attackerPos.x - position.x;
+    damageDirection.y = 0.0f;
+    damageDirection.z = attackerPos.z - position.z;
+
+    // 正規化
+    float length = sqrtf(damageDirection.x * damageDirection.x + damageDirection.z * damageDirection.z);
+    if (length > 0.0f)
+    {
+        damageDirection.x /= length;
+        damageDirection.z /= length;
+    }
+}
+
+DirectX::XMFLOAT3 Player::CalculateKnockbackPosition(float power)
+{
+    DirectX::XMFLOAT3 knockbackPos = position;
+
+    float dirLength = sqrtf(damageDirection.x * damageDirection.x + damageDirection.z * damageDirection.z);
+
+    if (dirLength > 0.001f)
+    {
+        // ダメージを受けた方向の逆方向（後方）に移動
+        knockbackPos.x = position.x + damageDirection.x * power;
+        knockbackPos.z = position.z + damageDirection.z * power;
+    }
+    else
+    {
+        // ダメージ方向が設定されていない場合は現在の向きの後方
+        DirectX::XMFLOAT3 backVec = CharacterBack(angle);
+        knockbackPos.x = position.x + backVec.x * power;
+        knockbackPos.z = position.z + backVec.z * power;
+    }
+
+    knockbackPos.y = position.y;
+    return knockbackPos;
 }
 
 // 着地した時に呼ばれる
@@ -617,7 +687,7 @@ void Player::DisplayHealthBar()
 // ノックバック位置設定
 void Player::SetKnockbackPosition()
 {
-    DirectX::SimpleMath::Vector3 vec;
+    SimpleMath::Vector3 vec;
     vec = CharacterForward(angle);
 	knockbackPosition = DirectX::SimpleMath::Vector3{
 		position.x + vec.x * knockBackPower,
@@ -635,9 +705,48 @@ void Player::SetKnockbackPosition()
         position.z + vec.z * heavyKnockBackPower
     };
     launchKnockbackPosition = DirectX::SimpleMath::Vector3{
-        position.x + vec.x * knockBackPower,
+        position.x + vec.x * 1.5f,
         position.y + launchKnockBackPower,
-        position.z + vec.z * knockBackPower
+        position.z + vec.z * 1.5f
+    };
+}
+
+// 敵ワープ地点設定
+void Player::SetEnemyWarpPosition()
+{
+    SimpleMath::Vector3 frontVec = CharacterForward(angle);
+    SimpleMath::Vector3 backVec = CharacterBack(angle);
+    SimpleMath::Vector3 leftVec = CharacterLeft(angle);
+    SimpleMath::Vector3 rightVec = CharacterRight(angle);
+    PlayerFront = SimpleMath::Vector3{
+		position.x + frontVec.x * warpDist,
+		position.y,
+		position.z + frontVec.z * warpDist
+	};
+	PlayerBack = SimpleMath::Vector3{
+		position.x + backVec.x * warpDist,
+		position.y,
+		position.z + backVec.z * warpDist
+	};
+	PlayerLeft = SimpleMath::Vector3{
+		position.x + leftVec.x * warpDist,
+		position.y,
+		position.z + leftVec.z * warpDist
+	};
+	PlayerRight = SimpleMath::Vector3{
+		position.x + rightVec.x * warpDist,
+		position.y,
+		position.z + rightVec.z * warpDist
+	};
+    PlayerFrontLeft = SimpleMath::Vector3{
+		position.x + (frontVec.x + leftVec.x) * warpDist * 0.707f,
+		position.y,
+		position.z + (frontVec.z + leftVec.z) * warpDist * 0.707f
+	};
+    PlayerFrontRight = SimpleMath::Vector3{
+        position.x + (frontVec.x + rightVec.x) * warpDist * 0.707f,
+        position.y,
+        position.z + (frontVec.z + rightVec.z) * warpDist * 0.707f
     };
 }
 
@@ -646,7 +755,7 @@ void Player::Render(const RenderContext& rc, ShaderId shaderId)
 {
     ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
     modelRenderer->Draw(shaderId, model);
-    modelRenderer->Draw(shaderId, sword->GetModel());
+    sword->Render(rc, ShaderId::PBR);
     modelRenderer->Render(rc);
 
     // 体力ゲージ表示
@@ -674,6 +783,13 @@ void Player::DrawDebugPrimitive()
     	shapeRenderer->DrawSphere(heavyKnockbackPosition, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
     	shapeRenderer->DrawSphere(launchKnockbackPosition, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
 
+        shapeRenderer->DrawSphere(PlayerFront, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+        shapeRenderer->DrawSphere(PlayerBack, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+        shapeRenderer->DrawSphere(PlayerLeft, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+        shapeRenderer->DrawSphere(PlayerRight, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+        shapeRenderer->DrawSphere(PlayerFrontLeft, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+        shapeRenderer->DrawSphere(PlayerFrontRight, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
+
     	// 衝突判定用のデバック円柱を描画
     	shapeRenderer->DrawCylinder(position, radius, height, DirectX::XMFLOAT4(0, 0, 0, 1));
 
@@ -692,10 +808,55 @@ void Player::DrawDebugGUI()
         // 位置
         ImGui::DragFloat3("Position", &position.x, 0.10f, -1000, 1000);
 
-        ImGui::DragFloat("KnockbackPosition", &knockBackPower, 0.01f, 0, 5.0f);
-        ImGui::DragFloat("LightKnockbackPosition", &lightKnockBackPower, 0.01f, 0, 5.0f);
-        ImGui::DragFloat("HeavyKnockbackPosition", &heavyKnockBackPower, 0.01f, 0, 10.0f);
-        ImGui::DragFloat("LaunchKnockbackPosition", &launchKnockBackPower, 0.01f, 0, 5.0f);
+        if (ImGui::CollapsingHeader(u8"敵ノックバック、テレポート位置設定", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+	        ImGui::DragFloat("KnockbackPosition", &knockBackPower, 0.01f, 0, 5.0f);
+        	ImGui::DragFloat("LightKnockbackPosition", &lightKnockBackPower, 0.01f, 0, 5.0f);
+        	ImGui::DragFloat("HeavyKnockbackPosition", &heavyKnockBackPower, 0.01f, 0, 10.0f);
+        	ImGui::DragFloat("LaunchKnockbackPosition", &launchKnockBackPower, 0.01f, 0, 5.0f);
+        	ImGui::DragFloat("EnemyWarpDist", &warpDist, 0.01f, 0, 20.0f);
+        }
+
+        if (ImGui::CollapsingHeader(u8"ノックバック設定", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::DragFloat(u8"通常ノックバック強度", &normalKnockbackPower, 0.01f, 0.0f, 10.0f);
+            ImGui::DragFloat(u8"軽ノックバック強度", &lightKnockbackPower, 0.01f, 0.0f, 10.0f);
+            ImGui::DragFloat(u8"重ノックバック強度", &heavyKnockbackPower, 0.01f, 0.0f, 15.0f);
+            ImGui::DragFloat(u8"打ち上げ高度", &launchKnockbackHeight, 0.01f, 0.0f, 10.0f);
+            ImGui::DragFloat(u8"叩き落としノックバック強度", &knockdownKnockbackPower, 0.01f, 0.0f, 10.0f);
+
+            ImGui::Separator();
+            ImGui::Text(u8"ダメージ方向: (%.2f, %.2f, %.2f)", damageDirection.x, damageDirection.y, damageDirection.z);
+
+            // テスト用ボタン
+            if (ImGui::Button(u8"通常ダメージテスト"))
+            {
+                SetDamageDirection(EnemyBoss::Instance().GetPosition());
+                SetDamage(true);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(u8"軽ノックバックテスト"))
+            {
+                SetDamageDirection(EnemyBoss::Instance().GetPosition());
+                SetLightDamage(true);
+            }
+            if (ImGui::Button(u8"重ノックバックテスト"))
+            {
+                SetDamageDirection(EnemyBoss::Instance().GetPosition());
+                SetHeavyDamage(true);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button(u8"打ち上げテスト"))
+            {
+                SetDamageDirection(EnemyBoss::Instance().GetPosition());
+                SetLaunchDamage(true);
+            }
+            if (ImGui::Button(u8"叩き落としテスト"))
+            {
+                SetDamageDirection(EnemyBoss::Instance().GetPosition());
+                SetKnockDownDamage(true);
+            }
+        }
 
         // 回転
         DirectX::XMFLOAT3 a;

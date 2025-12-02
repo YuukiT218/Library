@@ -8,5 +8,5 @@ public:
 	JudgmentBase(ActorType* actor) :owner(actor) {}
 	virtual bool Judgment() = 0;
 protected:
-	std::shared_ptr<ActorType> owner;
+	ActorType* owner;
 };

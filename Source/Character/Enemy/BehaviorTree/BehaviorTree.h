@@ -1,5 +1,9 @@
 ﻿#pragma once
 #include <string>
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
 
 template <typename ActorType>
 class ActionBase;
@@ -47,7 +51,7 @@ private:
 private:
 	// ルートノード
 	NodeBase<ActorType>* root;
-	std::shared_ptr<ActorType> owner;
+	ActorType* owner;
 };
 
 // デストラクタ
@@ -105,6 +109,12 @@ NodeBase<ActorType>* BehaviorTree<ActorType>::SequenceBack(NodeBase<ActorType>* 
 template <typename ActorType>
 NodeBase<ActorType>* BehaviorTree<ActorType>::Run(NodeBase<ActorType>* actionNode, BehaviorData<ActorType>* data, float elapsedTime)
 {
+	// BehaviorDataをActionに設定
+	if (actionNode->action != nullptr)
+	{
+		actionNode->action->SetBehaviorData(data);
+	}
+
 	// ノード実行
 	ActionBase<ActorType>::State state = actionNode->Run(elapsedTime);
 
@@ -140,23 +150,25 @@ NodeBase<ActorType>* BehaviorTree<ActorType>::Run(NodeBase<ActorType>* actionNod
 template <typename ActorType>
 void BehaviorTree<ActorType>::NodeAllClear(NodeBase<ActorType>* delNode)
 {
-	// 子ノードの数を取得
-	size_t count = delNode->children.size();
-	if (count > 0)
+	if (delNode == nullptr) return;
+
+	if (delNode->judgment)
 	{
-		// 子ノードの数だけループ
-		for (NodeBase<ActorType>* node : delNode->children)
-		{
-			// 再帰的に削除
-			NodeAllClear(node);
-		}
-		delete delNode;
+		delete delNode->judgment;
 	}
-	// 子ノードが無ければ
-	else
+	if (delNode->action)
 	{
-		delete delNode;
+		delete delNode->action;
 	}
+
+	// 子ノードを先に削除
+	for (NodeBase<ActorType>* node : delNode->children)
+	{
+		NodeAllClear(node);
+	}
+
+	// 自分自身を削除（NodeBaseのデストラクタが呼ばれる）
+	delete delNode;
 }
 
 

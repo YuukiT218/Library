@@ -206,7 +206,7 @@
     <ClInclude Include="Source\Character\Enemy\BehaviorTree\JudgementBase.h" />
     <ClInclude Include="Source\Character\Enemy\BehaviorTree\JudgementDerived.h" />
     <ClInclude Include="Source\Character\Enemy\BehaviorTree\NodeBase.h" />
-    <ClInclude Include="Source\Character\Enemy\SilverDragonkin.h" />
+    <ClInclude Include="Source\Character\Enemy\EnemyBoss.h" />
     <ClInclude Include="Source\Character\Enemy\StateMachine\StateBase.h" />
     <ClInclude Include="Source\Character\Enemy\StateMachine\StateDerived.h" />
     <ClInclude Include="Source\Character\Enemy\StateMachine\RandomState.h" />
@@ -310,6 +310,10 @@
     <ClInclude Include="Source\nlohmann\ordered_map.hpp" />
     <ClInclude Include="Source\Camera\EditCameraController.h" />
     <ClInclude Include="External\DirectXTK-main\Inc\WICTextureLoader.h" />
+    <ClInclude Include="Source\UI\BattleUI.h" />
+    <ClInclude Include="Source\Effect\Effect.h" />
+    <ClInclude Include="Source\Effect\EffectManager.h" />
+    <ClInclude Include="Source\Graphics\Renderer\TrailRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Framework.cpp">
@@ -471,7 +475,7 @@
     <ClCompile Include="Source\Character\Enemy\Enemy.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Character\Enemy\SilverDragonkin.cpp">
+    <ClCompile Include="Source\Character\Enemy\EnemyBoss.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\System\AnimationConfigLoader.cpp">
@@ -493,6 +497,18 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="External\DirectXTK-main\Src\WICTextureLoader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UI\BattleUI.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Effect\Effect.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Effect\EffectManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Renderer\TrailRenderer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -537,6 +553,12 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Shader\PostEffect\PostShadingFunction.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\SpriteDissolve.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\TrailRenderer.hlsli">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
@@ -623,6 +645,18 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\PostEffect\ToneMappingPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\SpriteDissolvePS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\SpriteDissolveVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TrailRendererPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\TrailRendererVS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

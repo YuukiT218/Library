@@ -1,199 +1,10 @@
 #include "Enemy.h"
-//#include "System/HitStop.h"
+#include "System/HitStop.h"
 //#include "EnemyManager.h"
 #include "Character/Player.h"
 #include "Math/Collision.h"
 #include "Camera/Camera.h"
 #include <string>
-
-// ノードとプレイヤーの衝突処理
-void Enemy::CollisionNodeVsPlayer(std::vector<NodeHitSphere> attackSpheres, int AttackDamage, float invicibleTime)
-{
-	//if (HitStop::Instance().GetPlayerHitStop() || HitStop::Instance().GetEnemyHitStop()) return;
-
-	// ノードの位置と当たり判定を行う
-	for (auto& enemyAttackSpheres : attackSpheres)
-	{
-		this->attackHitSpheres = attackSpheres;
-
-		Model::Node* node = model->FindNode(enemyAttackSpheres.nodeName);
-		if (node != nullptr)
-		{
-			// ノードのワールド座標
-			DirectX::XMFLOAT3 nodePosition(
-				node->worldTransform._41,
-				node->worldTransform._42,
-				node->worldTransform._43
-			);
-
-			//// 当たり判定表示
-			//Graphics::Instance().GetDebugRenderer()->DrawSphere(
-			//	nodePosition, enemyAttackSpheres.radius, DirectX::XMFLOAT4(1, 0, 0, 1)
-			//);
-
-			Player& player = Player::Instance();
-
-			//if (player.GetLeftShield()->GetIsParry()) return;
-
-			std::vector<NodeHitSphere> playerNode = Player::Instance().GetNodeHitSpheres();
-			for (auto& playerHitSphere : playerNode)
-			{
-				std::shared_ptr<Model> playerModel = Player::Instance().GetPlayerModel();
-				Model::Node* playerNode = playerModel->FindNode(playerHitSphere.nodeName);
-
-				// ノード位置取得
-				DirectX::XMFLOAT3 playerNodePosition;
-				playerNodePosition = { playerNode->worldTransform._41, playerNode->worldTransform._42, playerNode->worldTransform._43 };
-
-				DirectX::XMFLOAT3 outPosition;
-				DirectX::XMFLOAT3 HitPosition;
-
-				if (Collision::IntersectSphereVsSphere(
-					nodePosition,
-					enemyAttackSpheres.radius,
-					playerNodePosition,
-					playerHitSphere.radius,
-					outPosition,
-					HitPosition
-				))
-				{
-					// プレイヤーが回避中なら処理を抜ける
-					bool isPlayerRolling = Player::Instance().GetPlayerIsRolling();
-					if (isPlayerRolling)
-					{
-						//HitStop::Instance().HitStopStart(1.0f, 0.1f, 3.0f, 0.1f);
-						//Camera::Instance().SetAcceleration(3.0f);
-						isPlayerInvincible = true;
-					}
-					else if (player.GetPlayerIsGuard())
-					{
-						player.ChangeState(PlayerStateId::GuardHit);
-					}
-					// ダメージを与える
-					else if (player.ApplyDamage(AttackDamage, invicibleTime, true, HitPosition))
-					{
-						//// 敵を吹っ飛ばすベクトルを算出
-						//DirectX::XMFLOAT3 vec;
-						//vec.x = outPosition.x - nodePosition.x;
-						//vec.z = outPosition.z - nodePosition.z;
-						//float length = sqrtf(vec.x * vec.x + vec.z * vec.z);
-						//vec.x /= length;
-						//vec.z /= length;
-
-						//// XZ平面に吹っ飛ばす力をかける
-						//float power = 15.0f;
-						//vec.x *= power;
-						//vec.z *= power;
-						//// Y方向にも力をかける
-						//vec.y = 5.0f;
-
-						//// 吹っ飛ばす
-						//player.AddImpulse(vec);
-
-						//Camera::Instance().SetCameraShakeSwitch(true, 0.5f, 0.1f);
-					}
-				}
-			}
-		}
-	}
-}
-
-// アニメーションの攻撃当たり判定を付ける
-void Enemy::AttackAnimationCollision(std::vector<NodeHitSphere> attackSpheres, float animTimeMin, float animTimeMax, int AttackDamage, float invicibleTime)
-{
-	// 任意のアニメーション再生区間でのみ衝突処理をする
-	float animationTime = model->GetCurrentAnimationSeconds();
-	if (animationTime >= animTimeMin && animationTime <= animTimeMax)
-	{
-		// 攻撃当たり判定球とプレイヤーの衝突判定
-		CollisionNodeVsPlayer(attackSpheres, AttackDamage, invicibleTime);
-		attackFlg = true;
-	}
-	else
-	{
-		attackFlg = false;
-	}
-}
-
-// ブレスエフェクトの当たり判定を付ける
-void Enemy::BreathEffectCollision(float animTimeMin, float animTimeMax, DirectX::XMFLOAT3 startPosition, DirectX::XMFLOAT3 direction, float length, float sphereRadius, int sphereCount, int AttackDamage, float invicibleTime)
-{
-	// 現在のアニメーション時間を取得
-	float animationTime = model->GetCurrentAnimationSeconds();
-
-	// アニメーション時間が指定範囲内でない場合は処理をスキップ
-	if (animationTime < animTimeMin || animationTime > animTimeMax)
-	{
-		return;
-	}
-
-	// ブレスの方向を正規化
-	DirectX::XMVECTOR dirVector = DirectX::XMLoadFloat3(&direction);
-	dirVector = DirectX::XMVector3Normalize(dirVector);
-
-	// 各球の間隔を計算
-	float interval = length / static_cast<float>(sphereCount);
-
-	// 各球の位置を計算し、衝突判定を行う
-	for (int i = 0; i < sphereCount; ++i)
-	{
-		// 球の中心位置を計算
-		DirectX::XMVECTOR spherePosition = DirectX::XMVectorAdd(DirectX::XMLoadFloat3(&startPosition), DirectX::XMVectorScale(dirVector, interval * i));
-		DirectX::XMFLOAT3 spherePositionFloat3;
-		DirectX::XMStoreFloat3(&spherePositionFloat3, spherePosition);
-
-		// デバッグ用に球を描画
-		//Graphics::Instance().GetDebugRenderer()->DrawSphere(spherePositionFloat3, sphereRadius, DirectX::XMFLOAT4(1, 0, 0, 1));
-
-		// プレイヤーとの衝突判定
-		Player& player = Player::Instance();
-		std::vector<NodeHitSphere> playerNode = player.GetNodeHitSpheres();
-		for (auto& playerHitSphere : playerNode)
-		{
-			std::shared_ptr<Model> playerModel = player.GetPlayerModel();
-			Model::Node* playerNode = playerModel->FindNode(playerHitSphere.nodeName);
-
-			// プレイヤーのノード位置を取得
-			DirectX::XMFLOAT3 playerNodePosition = {
-				playerNode->worldTransform._41,
-				playerNode->worldTransform._42,
-				playerNode->worldTransform._43
-			};
-
-			DirectX::XMFLOAT3 outPosition;
-			DirectX::XMFLOAT3 hitPosition;
-
-			// 衝突判定
-			if (Collision::IntersectSphereVsSphere(
-				spherePositionFloat3,
-				sphereRadius,
-				playerNodePosition,
-				playerHitSphere.radius,
-				outPosition,
-				hitPosition
-			))
-			{
-				// プレイヤーが回避中なら処理を抜ける
-				bool isPlayerRolling = Player::Instance().GetPlayerIsRolling();
-				if (isPlayerRolling)
-				{
-					//HitStop::Instance().HitStopStart(1.0f, 0.1f, 3.0f, 0.1f);
-					//Camera::Instance().SetAcceleration(3.0f);
-					isPlayerInvincible = true;
-				}
-				else if (player.GetPlayerIsGuard())
-				{
-					player.ChangeState(PlayerStateId::GuardHit);
-				}
-				// プレイヤーにダメージを与える
-				else if (player.ApplyDamage(AttackDamage, invicibleTime, true, hitPosition))
-				{
-					//Camera::Instance().SetCameraShakeSwitch(true);
-				}
-			}
-		}
-	}
-}
 
 // デバッグプリミティブ描画
 void Enemy::DrawDebugPrimitive()
@@ -207,10 +18,33 @@ void Enemy::DrawDebugPrimitive()
 // デバッグImGui描画
 void Enemy::DrawDebugGUI()
 {
-	/*std::string label = "action##" + std::to_string(reinterpret_cast<uintptr_t>(this));
-	ImGui::Checkbox(label.c_str(), &actionFlag);
+    if (ImGui::TreeNode("Teleport System"))
+    {
+        ImGui::Checkbox("Is Teleporting", &isTeleporting);
+        ImGui::DragFloat("Teleport Timer", &teleportTimer, 0.01f, 0.0f, 1.0f);
+        ImGui::DragFloat("Teleport Duration", &teleportDuration, 0.1f, 0.1f, 2.0f);
 
-	DrawDebugChildGUI();*/
+        ImGui::Separator();
+        ImGui::Text("Visual Position: (%.2f, %.2f, %.2f)",
+            visualPosition.x, visualPosition.y, visualPosition.z);
+        ImGui::Text("Logical Position: (%.2f, %.2f, %.2f)",
+            logicalPosition.x, logicalPosition.y, logicalPosition.z);
+        ImGui::Text("Actual Position: (%.2f, %.2f, %.2f)",
+            position.x, position.y, position.z);
+
+        float distance = 0.0f;
+        if (isTeleporting)
+        {
+            DirectX::XMVECTOR vVisual = DirectX::XMLoadFloat3(&visualPosition);
+            DirectX::XMVECTOR vLogical = DirectX::XMLoadFloat3(&logicalPosition);
+            distance = DirectX::XMVectorGetX(
+                DirectX::XMVector3Length(DirectX::XMVectorSubtract(vVisual, vLogical))
+            );
+        }
+        ImGui::Text("Position Difference: %.2f", distance);
+
+        ImGui::TreePop();
+    }
 }
 
 void Enemy::EditUpdate(float elapsedTime)
@@ -224,12 +58,14 @@ void Enemy::EditUpdate(float elapsedTime)
 	{
 		model->UpdateAnimation(elapsedTime, this);
 		model->UpdateTransform(transform);
-		//model->UpdateShakeModel(transform, 0.25f);
 	}
 }
 
 void Enemy::Update(float elapsedTime)
 {
+    // テレポート更新
+    UpdateTeleport(elapsedTime);
+
 	// 派生クラス専用処理（デフォルトは何もしない）
 	if (actionFlag)
 		UpdateEnemySpecific(elapsedTime/* * HitStop::Instance().GetEnemyTimeScale()*/);
@@ -237,7 +73,7 @@ void Enemy::Update(float elapsedTime)
 	// 共通の更新処理
 	UpdateVelocity(elapsedTime/* * HitStop::Instance().GetEnemyTimeScale()*/);
 	UpdateInvincibleTimer(elapsedTime);
-	UpdateTransform();
+    UpdateTransform();
 
 	if (model)
 	{
@@ -247,9 +83,75 @@ void Enemy::Update(float elapsedTime)
 	}
 }
 
+void Enemy::UpdateTransform()
+{
+    // テレポート中は見た目の位置を使用
+    DirectX::XMFLOAT3 renderPosition = isTeleporting ? visualPosition : position;
+
+    // モデルのトランスフォームを更新（見た目の位置で）
+    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+    DirectX::XMMATRIX X = DirectX::XMMatrixRotationX(angle.x);
+    DirectX::XMMATRIX Y = DirectX::XMMatrixRotationY(angle.y);
+    DirectX::XMMATRIX Z = DirectX::XMMatrixRotationZ(angle.z);
+    DirectX::XMMATRIX R = Y * X * Z;
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(renderPosition.x, renderPosition.y, renderPosition.z);
+    DirectX::XMMATRIX W = S * R * T;
+    DirectX::XMStoreFloat4x4(&transform, W);
+}
+
+// テレポート開始
+void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float duration)
+{
+    isTeleporting = true;
+    teleportTimer = 0.0f;
+    teleportDuration = duration;
+
+    // 開始位置と目標位置を保存
+    teleportStartPosition = position;
+    teleportTargetPosition = targetPos;
+
+    // 論理位置は現在位置から開始
+    logicalPosition = position;
+
+    // 見た目の位置は即座に目標位置へ（瞬間移動に見える）
+    visualPosition = targetPos;
+
+    // モデルの実際のpositionも目標位置へ
+    position = targetPos;
+}
+
+// テレポート更新
+void Enemy::UpdateTeleport(float elapsedTime)
+{
+    if (!isTeleporting) return;
+
+    teleportTimer += elapsedTime;
+
+    // 進行度を計算
+    float t = teleportTimer / teleportDuration;
+    t = std::clamp(t, 0.0f, 1.0f);
+    float easedT = 1.0f - powf(1.0f - t, 3.0f);  // easeOutCubic
+
+    // 論理位置を線形補完で移動（カメラが追従する位置）
+    DirectX::XMVECTOR vStart = XMLoadFloat3(&teleportStartPosition);
+    DirectX::XMVECTOR vTarget = XMLoadFloat3(&teleportTargetPosition);
+    DirectX::XMVECTOR vLogical = DirectX::XMVectorLerp(vStart, vTarget, easedT);
+    XMStoreFloat3(&logicalPosition, vLogical);
+
+    // テレポート完了判定
+    if (teleportTimer >= teleportDuration)
+    {
+        isTeleporting = false;
+        teleportTimer = 0.0f;
+
+        // 位置を同期
+        logicalPosition = position;
+        visualPosition = position;
+    }
+}
+
 // 破棄
 void Enemy::Destroy()
 {
-	//EnemyManager::Instance().Remove(this);
 	Destroy();
 }

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <DirectXMath.h>
+#include <SimpleMath.h>
 // 浮動小数算術
 class Mathf
 {

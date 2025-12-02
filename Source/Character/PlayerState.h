@@ -30,42 +30,31 @@ protected:
 	// ステート変更
 	void ChangeState(PlayerStateId stateId);
 
-	// 回避入力
-	bool InputDodge() const;
-
-	//// コンボ入力
-	//bool InputCombo() const;
-
 	// 歩き移動入力
 	bool InputWalkMove() const;
 
 	// 走り移動入力
 	bool InputRunMove() const;
 
-	// ジャンプ入力
-	bool InputJump() const;
-
-	// ガード入力
-	bool InputGuard() const;
-
-	// パリィ入力
-	bool InputGuardParry() const;
-
 	// ロックオンしている場合はストレイフ
 	void LockOnStrafe(int rightIndex, int leftIndex, int frontIndex, int backIndex);
 
-	enum class InputComboType
+	enum class InputActionType
 	{
 		None,
-		Light,
-		Heavy,
+		LightAttack,
+		HeavyAttack,
+		Dodge,
+		Guard,
+		Jump
 	};
 
-	InputComboType InputCombo();
+	InputActionType InputAction();
+	InputActionType currentInput;
 
 protected:
 	Player* player = nullptr;
-	std::unordered_map<InputComboType, PlayerStateId> inputToNextState;
+	std::unordered_map<InputActionType, PlayerStateId> inputToNextState;
 };
 
 // 待機ステート
@@ -217,25 +206,8 @@ private:
 	int rollingFrontMovePow = 3;
 	float timer = 0.0f;
 	bool isDodgeBack = false;
+	InputActionType nextInput;
 	bool nextShiftReady = false;
-};
-
-// 回避攻撃ステート
-class PlayerDodgeAttackState : public PlayerState
-{
-public:
-	PlayerDodgeAttackState(Player* player);
-
-protected:
-	// 開始処理
-	void Enter() override;
-
-	// 更新処理
-	void Update(float elapsedTime) override;
-
-private:
-	int dodgeAttackAnimationIndex = -1;
-	float timer = 0.0f;
 };
 
 // コンボステート
@@ -256,7 +228,7 @@ protected:
 
 protected:
 	PlayerStateId nextStateId = PlayerStateId::EnumCount;
-	InputComboType nextInput;
+	InputActionType nextInput;
 	int comboAnimationIndex = -1;
 	int airComboAnimationIndex = -1;
 	int dashAttackAnimationIndex = -1;
@@ -352,16 +324,6 @@ public:
 	void DrawDebugGUI() override;
 };
 
-// 強攻撃2ステート
-class PlayerHeavyAttack2State : public PlayerComboState
-{
-public:
-	PlayerHeavyAttack2State(Player* player);
-
-	// デバッグ用GUI描画
-	void DrawDebugGUI() override;
-};
-
 // ガード待機ステート
 class PlayerGuardIdle : public PlayerState
 {
@@ -385,38 +347,13 @@ private:
 	int guardStartAnimationIndex = -1;
 	int guardLoopAnimationIndex = -1;
 	int guardEndAnimationIndex = -1;
+	int index;
 	float guardIdleAnimationSpeed = 1.0f;
-	float timer = 0;
-};
-
-// ガード歩きステート
-class PlayerGuardWalk : public PlayerState
-{
-public:
-	PlayerGuardWalk(Player* player);
-
-protected:
-	// 開始処理
-	void Enter() override;
-
-	// 更新処理
-	void Update(float elapsedTime) override;
-
-	// 終了処理
-	void Exit() override;
-
-	// デバッグ用GUI描画
-	void DrawDebugGUI() override;
-
-private:
-	int guardFrontWalkAnimationIndex = -1;
-	int guardBackWalkAnimationIndex = -1;
-	int guardRightWalkAnimationIndex = -1;
-	int guardLeftWalkAnimationIndex = -1;
-	float guardWalkAnimationSpeed = 1.0f;
-	float guardWalkAnimationMoveRate = 0.6f;
-
-	int currentGuardWalkAnimationIndex = -1;
+	float frame = 0.0f;
+	float timer = 0.0f;
+	bool isLoop = false;
+	AnimationConfig* config;
+	InputActionType nextInput;
 };
 
 // ガードヒットステート
@@ -438,13 +375,15 @@ protected:
 private:
 	int guardHitAnimationIndex = -1;
 	float timer = 0.0f;
+	bool nextShiftReady;
+	InputActionType nextInput;
 };
 
-// ガードパリィステート
-class PlayerGuardParry : public PlayerState
+// ガードカウンターステート
+class PlayerGuardCounter : public PlayerState
 {
 public:
-	PlayerGuardParry(Player* player);
+	PlayerGuardCounter(Player* player);
 
 protected:
 	// 開始処理
@@ -452,6 +391,9 @@ protected:
 
 	// 更新処理
 	void Update(float elapsedTime) override;
+
+	// 終了処理
+	void Exit() override;
 
 	// デバッグ用GUI描画
 	void DrawDebugGUI() override;
@@ -461,11 +403,19 @@ private:
 	float guardParryAnimationSpeed = 1.0f;
 	float timer = 0.0f;
 
-	// 攻撃判定必要変数
-	float parryCollisionStartFrame = 0.03f;
-	float parryCollisionEndFrame = 0.09f;
+	bool nextShiftReady;
+	InputActionType nextInput;
 };
 
+// ダメージの種類を定義
+enum class DamageType
+{
+	Normal,      // 通常ダメージ
+	Light,       // 軽いノックバック
+	Heavy,       // 重いノックバック
+	Launch,      // 打ち上げ
+	Knockdown    // 打ち落とし
+};
 // ダメージステート
 class PlayerDamageState : public PlayerState
 {
@@ -479,8 +429,89 @@ protected:
 	// 更新処理
 	void Update(float elapsedTime) override;
 
+	// 終了処理
+	void Exit() override;
+
+	// デバッグ用GUI描画
+	void DrawDebugGUI() override;
+
 private:
-	int damageAnimationIndex = -1;
+	// アニメーションインデックス
+	struct DamageAnimations
+	{
+		int normalGround;
+		int lightGround;
+		int heavyGround;
+		int airStart;
+		int airLoop;
+		int airEnd;
+		int getUp;
+	} anims;
+
+	DamageType currentDamageType = DamageType::Normal;
+	float pauseTimer = 0.0f;
+	int step = 0;
+	DirectX::XMFLOAT3 knockbackTargetPosition = { 0.0f, 0.0f, 0.0f };
+
+	// ダメージタイプ判定
+	DamageType GetCurrentDamageType()
+	{
+		if (player->IsKnockDownDamage())
+			return DamageType::Knockdown;
+		else if (player->IsLaunchDamage())
+			return DamageType::Launch;
+		else if (player->IsHeavyDamage())
+			return DamageType::Heavy;
+		else if (player->IsLightDamage())
+			return DamageType::Light;
+		else
+			return DamageType::Normal;
+	}
+
+	// ダメージタイプ別の初期処理
+	void HandleDamageStart(DamageType type, float elapsedTime);
+
+	DirectX::XMFLOAT3 GetKnockbackPosition(DamageType type)
+	{
+		switch (type)
+		{
+		case DamageType::Normal:
+			return player->CalculateKnockbackPosition(player->normalKnockbackPower);
+		case DamageType::Light:
+			return player->CalculateKnockbackPosition(player->lightKnockbackPower);
+		case DamageType::Heavy:
+			return player->CalculateKnockbackPosition(player->heavyKnockbackPower);
+		case DamageType::Launch:
+		{
+			DirectX::XMFLOAT3 launchPos = player->CalculateKnockbackPosition(1.5f);
+			launchPos.y = player->GetPosition().y + player->launchKnockbackHeight;
+			return launchPos;
+		}
+		case DamageType::Knockdown:
+			return player->CalculateKnockbackPosition(player->knockdownKnockbackPower);
+		default:
+			return player->CalculateKnockbackPosition(player->normalKnockbackPower);
+		}
+	}
+
+	void TurnToDamageDirection(float elapsedTime)
+	{
+		DirectX::XMFLOAT3 damageDir = player->GetDamageDirection();
+
+		// ダメージ方向がゼロベクトルの場合は処理しない
+		float length = sqrtf(damageDir.x * damageDir.x + damageDir.z * damageDir.z);
+		if (length < 0.001f) return;
+
+		// ダメージ方向を向く角度を計算
+		float targetAngle = atan2f(damageDir.x, damageDir.z);
+
+		// 現在の角度を取得
+		DirectX::XMFLOAT3 angle = player->GetAngle();
+
+		// 即座に向きを変更
+		angle.y = targetAngle;
+		player->SetAngle(angle);
+	}
 };
 
 // 死亡ステート

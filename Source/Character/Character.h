@@ -8,7 +8,7 @@
 #include "Model/Model.h"
 #include "Camera/Camera.h"
 #include "Input/Input.h"
-//#include "Effect/Effect.h"
+#include "Effect/Effect.h"
 
 // ノードの当たり判定構造体
 struct NodeHitSphere
@@ -30,29 +30,21 @@ public:
 	// 行列更新処理
 	void UpdateTransform(DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 angle, DirectX::XMFLOAT3 position, DirectX::XMFLOAT4X4* transform);
 
-	// 位置取得
+	// 位置設定・取得
+	void SetPosition(const DirectX::XMFLOAT3& position) { this->position = position; }
 	const DirectX::XMFLOAT3& GetPosition() const { return position; }
 
-	// 位置取得
-	void SetPosition(const DirectX::XMFLOAT3& position) { this->position = position; }
-
-	// 回転取得
+	// 回転設定・取得
+	void SetAngle(const DirectX::XMFLOAT3& angle) { this->angle = angle; }
 	const DirectX::XMFLOAT3& GetAngle() const { return angle; }
 
-	// 回転設定
-	void SetAngle(const DirectX::XMFLOAT3& angle) { this->angle = angle; }
-
-	// スケール取得
+	// スケール設定・取得
+	void SetScale(const DirectX::XMFLOAT3& scale) { this->scale = scale; }
 	const DirectX::XMFLOAT3& GetScale() const { return scale; }
 
-	// スケール設定
-	void SetScale(const DirectX::XMFLOAT3& scale) { this->scale = scale; }
-
-	// 速力取得
-	const DirectX::XMFLOAT3& GetVelocity() const { return velocity; }
-
-	// 速力設定
+	// 速力設定・取得
 	void SetVelocity(const DirectX::XMFLOAT3& velocity) { this->velocity = velocity; }
+	const DirectX::XMFLOAT3& GetVelocity() const { return velocity; }
 
 	// 半径取得
 	float GetRadius() const { return radius; }
@@ -72,38 +64,38 @@ public:
 	// キャラクター右方向計算
 	DirectX::XMFLOAT3 CharacterRight(DirectX::XMFLOAT3 angle);
 
-	DirectX::XMFLOAT3 Arrive(const DirectX::XMFLOAT3& targetPos, const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3 velocity);
-
 	// 地面に接しているか
 	bool IsGround() const { return isGround; }
 
 	// 高さ取得
 	float GetHeight() const { return height; }
 
-	// 行列取得
+	// 行列設定・取得
+	void SetTransform(DirectX::XMFLOAT4X4 transform) { this->transform = transform; }
 	DirectX::XMFLOAT4X4 GetTransform() const { return transform; }
 
-	// 行列設定
-	void SetTransform(DirectX::XMFLOAT4X4 transform) { this->transform = transform; }
-
-	// 健康状態を取得
+	// 残り体力設定・取得
+	void SetHealth(float num) { health = num; }
 	int GetHealth() const { return health; }
 
-	// 健康状態設定
-	void SetHealth(float num) { health = num; }
-
-	// 最大健康状態を取得
+	// 体力最大値設定・取得
+	void SetMaxHealth(float num) { maxHealth = num; }
 	int GetMaxHealth() const { return  maxHealth; }
 
+	// 重力の設定・取得
 	void SetGravity(float gravity) { this->gravity = gravity; }
-
 	float GetGravity() const { return gravity; }
 
-	// 生存状態取得
+	// 生存状態設定・取得
+	void SetDeathFlag(bool flag) { deathFlag = flag; }
 	bool IsDeathFlag() { return deathFlag; }
 
-	// 生存状態設定
-	void SetDeathFlag(bool flag) { deathFlag = flag; }
+	// スーパーアーマー状態の設定・取得
+	void SetSuperArmor(bool armor) { isSuperArmor = armor; }
+	bool IsSuperArmor() const { return isSuperArmor; }
+
+	// 名前取得
+	virtual std::string GetName() = 0;
 
 	// ダメージを与える
 	bool ApplyDamage(int damage, float invicibleTime, bool isState = true, DirectX::XMFLOAT3 HitPosition = {});
@@ -114,6 +106,7 @@ public:
 	// ターゲットとの距離を計算
 	float calcTargetDist(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 targetPosition);
 
+	// モデル取得
 	virtual Model* GetModel() { return model.get(); }
 
 	std::unordered_map<int, float> animSpeed;
@@ -182,24 +175,25 @@ protected:
 		0, 0, 1, 0,
 		0, 0, 0, 1
 	};
+	DirectX::XMFLOAT3 velocity = { 0, 0, 0 };
 
 	float radius = 0.5f;
 	float gravity = -0.3f;
-	DirectX::XMFLOAT3 velocity = { 0, 0, 0 };
-	bool isGround = true;
+	float invincibleTimer = 1.0f;
 	float height = 2.0f;
 	int health = 1000000;
 	int maxHealth = 1000000;
-	bool drawCollisionPrimitive = false;
+	bool isGround = true;
+	bool isSuperArmor = false;  // スーパーアーマー状態フラグ
 	bool deathFlag = false;	// キャラクターが死亡したらtrueになる変数
-	float invincibleTimer = 1.0f;
-	float friction = 1.5f;
+	bool drawCollisionPrimitive = false;
 
 	// 慣性移動
 	float acceleration = 1.0f;
 	float maxSpeed = 5.0f;
 	float moveVecX = 0.0f;
 	float moveVecZ = 0.0f;
+	float friction = 1.5f;
 
 	// 空中制御
 	float airControl = 0.3f;
@@ -211,5 +205,5 @@ protected:
 	DirectX::XMFLOAT3 areaCenter = { 0.0f, -2.7f, 0.0f };
 	float areaSize = 10.0f;
 
-	std::shared_ptr<Model> model;
+	std::shared_ptr<Model> model = nullptr;
 };

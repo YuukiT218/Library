@@ -41,7 +41,7 @@ void SceneEdit::Initialize()
 
 	// プレイヤー初期化
 	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/Mannequin/SK_Mannequin.gltf", 1.0f);
+	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Mannequin/SK_Mannequin.gltf", 1.0f);
 
 	Camera& camera = Camera::Instance();
 
@@ -112,7 +112,7 @@ void SceneEdit::Update(float elapsedTime)
 	//player->SetLockOnCamera(cameraController->GetRockOnEnemy());
 	player->EditUpdate(elapsedTime);
 
-	dragonkin->EditUpdate(elapsedTime);
+	boss->EditUpdate(elapsedTime);
 
 	// エフェクト更新処理
 	//EffectManager::Instance().Update(elapsedTime);
@@ -165,7 +165,7 @@ void SceneEdit::Render(float elapsedTime, int width, int height)
 	{
 		StageManager::Instance().ShadowRender(rc, shadowMap);
 		player->ShadowRender(rc, shadowMap);
-		dragonkin->ShadowRender(rc, shadowMap);
+		boss->ShadowRender(rc, shadowMap);
 	}
 	shadowMap->End(rc);
 
@@ -174,7 +174,7 @@ void SceneEdit::Render(float elapsedTime, int width, int height)
 	{
 		StageManager::Instance().Render(rc, ShaderId::PBR);
 		player->Render(rc, ShaderId::PBR);
-		dragonkin->Render(rc, ShaderId::PBR);
+		boss->Render(rc, ShaderId::PBR);
 	}
 
 	// スカイボックス描画
@@ -208,7 +208,7 @@ void SceneEdit::Render(float elapsedTime, int width, int height)
 	player->DrawDebugPrimitive();
 
 	//エネミーデバッグプリミティブ描画
-	dragonkin->DrawDebugPrimitive();
+	boss->DrawDebugPrimitive();
 
 	// デバッグレンダラ描画実行
 	graphics.GetShapeRenderer()->Render(dc, camera.GetView(), camera.GetProjection());
@@ -293,7 +293,7 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 	ImGui::End();
 
 	// Debug Menuウィンドウを開始
-	if (ImGui::Begin("Character", nullptr, ImGuiWindowFlags_None))
+	if (ImGui::Begin("Animation", nullptr, ImGuiWindowFlags_None))
 	{
 		//プレイヤー,敵キャラクターをリストに追加
 		std::vector<Character*> characterList;
@@ -302,12 +302,12 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 		characterList.push_back(player.get());  // unique_ptr から生ポインタを取得して追加
 
 		// 敵もリストに追加
-		characterList.push_back(dragonkin.get());
+		characterList.push_back(boss.get());
 
 		// キャラクターの名前リストを作成
 		std::vector<std::string> characterNames;
 		characterNames.push_back("Player");
-		characterNames.push_back("SilverDragonkin");
+		characterNames.push_back("EnemyBoss");
 
 		// ImGuiのコンボボックスでキャラクター選択
 		static int selectedIndex = 0;
@@ -425,6 +425,7 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 		// Debug Menuウィンドウを終了
 	}
 	ImGui::End();
+
 	ImGui::GetStyle() = originalStyle; // スタイルを復元
 }
 
@@ -902,7 +903,7 @@ void SceneEdit::DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* con
 			lineColor = IM_COL32(100, 255, 100, 200);
 			circleColor = IM_COL32(150, 255, 150, 255);
 			break;
-		case AnimationFlag::Parry:
+		case AnimationFlag::Guard:
 			fillColor = IM_COL32(100, 100, 255, 60);
 			lineColor = IM_COL32(100, 100, 255, 200);
 			circleColor = IM_COL32(150, 150, 255, 255);
@@ -1256,8 +1257,8 @@ void SceneEdit::DrawEventSequencerWindow(float elapsedTime)
 	float secondsLength = animations[animationIndex].secondsLength;
 
 	// キャラクター名取得
-	std::vector<std::string> characterNames = { "Player", "SilverDragonkin" };
-	std::vector<Character*> characterList = { player.get(), dragonkin.get() };
+	std::vector<std::string> characterNames = { "Player", "EnemyBoss" };
+	std::vector<Character*> characterList = { player.get(), boss.get() };
 	int selectedIndex = 0;
 	for (size_t i = 0; i < characterList.size(); ++i) {
 		if (characterList[i] == selectedCharacter) {
@@ -1507,7 +1508,7 @@ void SceneEdit::DrawSequencerTimeline(AnimationConfig* config, float secondsLeng
 			fillColor = IM_COL32(80, 220, 80, 200);
 			borderColor = IM_COL32(100, 255, 100, 255);
 			break;
-		case AnimationFlag::Parry:
+		case AnimationFlag::Guard:
 			fillColor = IM_COL32(80, 80, 220, 200);
 			borderColor = IM_COL32(100, 100, 255, 255);
 			break;
@@ -1537,7 +1538,7 @@ void SceneEdit::DrawSequencerTimeline(AnimationConfig* config, float secondsLeng
 		{
 		case AnimationFlag::Attack: attrLabel = u8"攻撃"; break;
 		case AnimationFlag::Invincible: attrLabel = u8"無敵"; break;
-		case AnimationFlag::Parry: attrLabel = u8"パリィ"; break;
+		case AnimationFlag::Guard: attrLabel = u8"ガード"; break;
 		case AnimationFlag::SuperArmor: attrLabel = u8"スーパーアーマー"; break;
 		default: attrLabel = u8"無し"; break;
 		}
@@ -1769,10 +1770,10 @@ void SceneEdit::DrawAttributeListSection(AnimationConfig* config, int& selectedA
 		config->attributes.push_back(newAttr);
 	}
 
-	if (ImGui::Button(u8"+ パリィ属性追加", ImVec2(-1, 0)))
+	if (ImGui::Button(u8"+ ガード属性追加", ImVec2(-1, 0)))
 	{
 		AnimationAttribute newAttr;
-		newAttr.flag = AnimationFlag::Parry;
+		newAttr.flag = AnimationFlag::Guard;
 		newAttr.startTime = 0.0f;
 		newAttr.endTime = 0.5f;
 		config->attributes.push_back(newAttr);
@@ -1811,9 +1812,9 @@ void SceneEdit::DrawAttributeListSection(AnimationConfig* config, int& selectedA
 			icon = u8"🛡️";
 			name = u8"無敵";
 			break;
-		case AnimationFlag::Parry:
+		case AnimationFlag::Guard:
 			icon = u8"⚡";
-			name = u8"パリィ";
+			name = u8"ガード";
 			break;
 		case AnimationFlag::SuperArmor:
 			icon = u8"💪";
@@ -1859,7 +1860,7 @@ void SceneEdit::DrawAttributeEditPanel(AnimationConfig* config, int selectedAttr
 		u8"無し",
 		u8"攻撃",
 		u8"無敵",
-		u8"パリィ",
+		u8"ガード",
 		u8"スーパーアーマー"
 	};
 	int flagIndex = static_cast<int>(attr.flag);
@@ -1895,11 +1896,12 @@ void SceneEdit::DrawAttributeEditPanel(AnimationConfig* config, int selectedAttr
 		u8"弱",
 		u8"強",
 		u8"打ち上げ",
+		u8"撃ち落とし",
 		};
 		int knockbackType = static_cast<int>(ap.knockbackType);
 		ImGui::Spacing();
 		ImGui::Separator();
-		if (ImGui::Combo(u8"ノックバックタイプ", &knockbackType, flagNames, 4))
+		if (ImGui::Combo(u8"ノックバックタイプ", &knockbackType, flagNames, 5))
 		{
 			ap.knockbackType = static_cast<KnockbackType>(knockbackType);
 		}
@@ -1911,6 +1913,7 @@ void SceneEdit::DrawAttributeEditPanel(AnimationConfig* config, int selectedAttr
 
 		ImGui::DragInt(u8"攻撃ダメージ", &ap.attackDamage, 1, 0, 9999);
 		ImGui::DragFloat(u8"無敵時間", &ap.invisibleTime, 0.01f, 0.0f, 10.0f);
+		ImGui::DragInt(u8"リベンジ値蓄積量", &ap.revengeValue, 1, 0, 10);
 
 		ImGui::Spacing();
 

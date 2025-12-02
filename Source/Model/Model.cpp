@@ -217,16 +217,44 @@ bool Model::IsPlayAnimation() const
 // アニメーション更新処理
 void Model::UpdateAnimation(float elapsedTime, Character* character)
 {
-	if (!IsPlayRootMotion())
+	if (!animationPause)
 	{
-		ComputeAnimation(elapsedTime * animationSpeed * baseAnimationSpeed);
-	}
-	else
-	{
-		ComputeRootAnimation(elapsedTime * animationSpeed * baseAnimationSpeed, character);
-	}
+		if (character)
+		{
+			float currentTime = currentAnimationSeconds;
+			AnimationConfig* config = GetAnimationConfig(
+				character->GetName(),
+				currentAnimationIndex
+			);
 
-	ComputeBlending(elapsedTime * animationSpeed * baseAnimationSpeed);
+			bool hasSuperArmor = false;
+			if (config)
+			{
+				for (const auto& attribute : config->attributes)
+				{
+					if (attribute.flag == AnimationFlag::SuperArmor &&
+						attribute.IsActive(currentTime))
+					{
+						hasSuperArmor = true;
+						break;
+					}
+				}
+			}
+
+			character->SetSuperArmor(hasSuperArmor);
+		}
+
+		if (!IsPlayRootMotion())
+		{
+			ComputeAnimation(elapsedTime * animationSpeed * baseAnimationSpeed);
+		}
+		else
+		{
+			ComputeRootAnimation(elapsedTime * animationSpeed * baseAnimationSpeed, character);
+		}
+
+		ComputeBlending(elapsedTime * animationSpeed * baseAnimationSpeed);
+	}
 }
 
 // アニメーション計算処理
@@ -687,6 +715,10 @@ void Model::DebugGui(const char* name)
 	ImGui::DragFloat(labelEmissiveDissolve, &dissolveConstants.emissivedissolve, 0.01f, -0.1f, 1.0f);
 	ImGui::DragFloat(labelAlpha, &dissolveConstants.alphaFactor, 0.01f, 0.0f, 1.0f);
 	ImGui::ColorEdit4(labelOverColor, &dissolveConstants.OverwriteColor.x);
+
+	ImGui::DragFloat("RimPower", &rimLightConstants.rimPower, 0.01f, -1.0f, 1.0f);
+	ImGui::DragFloat("RimIntensity", &rimLightConstants.rimIntensity, 0.001f, -1.0f, 1.0f);
+	ImGui::ColorEdit4("RimColor", &rimLightConstants.rimColor.x);
 
 	ImGui::DragFloat3("BeginPose", &beginPose.position.x);
 	ImGui::DragFloat3("OldPose", &oldPose.position.x);

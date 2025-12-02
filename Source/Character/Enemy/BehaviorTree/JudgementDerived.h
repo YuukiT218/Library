@@ -65,39 +65,13 @@ public:
 };
 
 // DamageNodeに遷移できるか判定
+// 任意のダメージを検出する判定クラス
 template <typename ActorType>
-class DamageJudgment : public JudgmentBase<ActorType>
+class AnyDamageJudgment : public JudgmentBase<ActorType>
 {
 public:
-	DamageJudgment(ActorType* actor) :JudgmentBase(actor) {};
-	// 判定
-	bool Judgment();
-};
+	AnyDamageJudgment(ActorType* actor) : JudgmentBase<ActorType>(actor) {}
 
-template <typename ActorType>
-class LightDamageJudgment : public JudgmentBase<ActorType>
-{
-public:
-	LightDamageJudgment(ActorType* actor) :JudgmentBase(actor) {};
-	// 判定
-	bool Judgment();
-};
-
-template <typename ActorType>
-class HeavyDamageJudgment : public JudgmentBase<ActorType>
-{
-public:
-	HeavyDamageJudgment(ActorType* actor) :JudgmentBase(actor) {};
-	// 判定
-	bool Judgment();
-};
-
-template <typename ActorType>
-class LaunchDamageJudgment : public JudgmentBase<ActorType>
-{
-public:
-	LaunchDamageJudgment(ActorType* actor) :JudgmentBase(actor) {};
-	// 判定
 	bool Judgment();
 };
 
@@ -193,7 +167,7 @@ bool LongRangeJudgment<ActorType>::Judgment()
 	float vz = targetPosition.z - position.z;
 	float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 	// XZ平面での距離を算出
-	if (dist > owner->GetAttackRange() + 4.0f && dist < owner->GetAttackRange() + 23.0f)
+	if (dist > owner->GetAttackRange() + 4.0f && dist < owner->GetAttackRange() + 40.0f)
 	{
 		// LongRangeNodeへ遷移できる
 		return true;
@@ -243,39 +217,9 @@ bool WanderJudgment<ActorType>::Judgment()
 }
 
 template<typename ActorType>
-bool DamageJudgment<ActorType>::Judgment()
+bool AnyDamageJudgment<ActorType>::Judgment()
 {
-	if (owner->IsDamage())
-	{
-		return true;
-	}
-	return false;
-}
-
-template<typename ActorType>
-bool LightDamageJudgment<ActorType>::Judgment()
-{
-	if (owner->IsLightKbDamage())
-	{
-		return true;
-	}
-	return false;
-}
-
-template<typename ActorType>
-bool HeavyDamageJudgment<ActorType>::Judgment()
-{
-	if (owner->IsHeavyKbDamage())
-	{
-		return true;
-	}
-	return false;
-}
-
-template<typename ActorType>
-bool LaunchDamageJudgment<ActorType>::Judgment()
-{
-	if (owner->IsLaunchKbDamage())
+	if (owner->IsAnyDamage())
 	{
 		return true;
 	}

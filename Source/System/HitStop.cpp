@@ -3,20 +3,6 @@
 // 更新処理
 void HitStop::Update(float elapsedTime)
 {
-    //if (hitStop)
-    //{
-    //    // ヒットストップ時間のカウントダウン
-    //    hitStopLastSeconds -= elapsedTime;
-    //    if (hitStopLastSeconds <= 0.0f)
-    //    {
-    //        // リセット
-    //        hitStopLastSeconds = 0.0f;
-    //        timeScale = 1.0f;
-    //        // ヒットストップ終了
-    //        hitStop = false;
-    //    }
-    //}
-
     if (hitStop)
     {
         // プレイヤーのヒットストップ時間のカウントダウン

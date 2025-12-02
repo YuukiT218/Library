@@ -5,7 +5,7 @@ template <typename ActorType>
 class ActionBase
 {
 public:
-	ActionBase(ActorType* actor) :owner(actor) {}
+	ActionBase(ActorType* actor) :owner(actor), behaviorData(nullptr) {}
 	// Àsî•ñ
 	enum class State
 	{
@@ -16,7 +16,11 @@ public:
 
 	// Àsˆ—(ƒˆ‰¼‘zŠÖ”)
 	virtual State Run(float elapsedTime) = 0;
+
+	// BehaviorData‚ğİ’è
+	void SetBehaviorData(BehaviorData<ActorType>* data) { behaviorData = data; }
 protected:
-	std::shared_ptr<ActorType> owner;
+	ActorType* owner;
+	BehaviorData<ActorType>* behaviorData;
 	int step = 0;
 };

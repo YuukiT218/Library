@@ -62,7 +62,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -71,8 +71,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;xinput.lib;xaudio2.lib;winmm.lib;SphereCast.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\External\SphereCast\lib\vs2022\$(PlatformTarget)\MT\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;xinput.lib;xaudio2.lib;winmm.lib;SphereCast.lib;Effekseer.lib;EffekseerRendererDX11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\External\SphereCast\lib\vs2022\$(PlatformTarget)\MT\$(Configuration);.\External\Effekseer170e\lib\vs2022\MT\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -92,7 +92,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -103,8 +103,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;xinput.lib;xaudio2.lib;winmm.lib;SphereCast.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\External\SphereCast\lib\vs2022\$(PlatformTarget)\MT\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;xinput.lib;xaudio2.lib;winmm.lib;SphereCast.lib;Effekseer.lib;EffekseerRendererDX11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\External\SphereCast\lib\vs2022\$(PlatformTarget)\MT\$(Configuration);.\External\Effekseer170e\lib\vs2022\MT\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -115,6 +115,10 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Effect\Effect.h" />
+    <ClInclude Include="Source\Effect\EffectManager.h" />
+    <ClInclude Include="Source\Graphics\Renderer\TrailRenderer.h" />
+    <ClInclude Include="Source\UI\BattleUI.h" />
     <ClInclude Include="External\DirectXTK-main\Inc\WICTextureLoader.h" />
     <ClInclude Include="External\imgui-docking\imconfig.h" />
     <ClInclude Include="External\imgui-docking\imgui.h" />
@@ -190,7 +194,7 @@
     <ClInclude Include="Source\Character\Enemy\StateMachine\SequenceState.h" />
     <ClInclude Include="Source\Character\Enemy\StateMachine\StateBase.h" />
     <ClInclude Include="Source\Character\Enemy\Enemy.h" />
-    <ClInclude Include="Source\Character\Enemy\SilverDragonkin.h" />
+    <ClInclude Include="Source\Character\Enemy\EnemyBoss.h" />
     <ClInclude Include="Source\Character\Enemy\StateMachine\StateDerived.h" />
     <ClInclude Include="Source\Character\Player.h" />
     <ClInclude Include="Source\Character\PlayerState.h" />
@@ -292,6 +296,10 @@
     <ClInclude Include="Source\Math\TransformUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Effect\Effect.cpp" />
+    <ClCompile Include="Source\Effect\EffectManager.cpp" />
+    <ClCompile Include="Source\Graphics\Renderer\TrailRenderer.cpp" />
+    <ClCompile Include="Source\UI\BattleUI.cpp" />
     <ClCompile Include="External\DirectXTK-main\Src\WICTextureLoader.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp" />
     <ClCompile Include="External\imgui-docking\imgui_demo.cpp" />
@@ -307,7 +315,7 @@
     <ClCompile Include="Source\Camera\EditCameraController.cpp" />
     <ClCompile Include="Source\Character\Character.cpp" />
     <ClCompile Include="Source\Character\Enemy\Enemy.cpp" />
-    <ClCompile Include="Source\Character\Enemy\SilverDragonkin.cpp" />
+    <ClCompile Include="Source\Character\Enemy\EnemyBoss.cpp" />
     <ClCompile Include="Source\Character\Player.cpp" />
     <ClCompile Include="Source\Character\PlayerState.cpp" />
     <ClCompile Include="Source\Character\Weapon\EnemySword.cpp" />
@@ -369,6 +377,8 @@
     <None Include="Shader\Skinning.hlsli" />
     <None Include="Shader\SkyBox.hlsli" />
     <None Include="Shader\Sprite.hlsli" />
+    <None Include="Shader\SpriteDissolve.hlsli" />
+    <None Include="Shader\TrailRenderer.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shader\BasicPS.hlsl">
@@ -475,11 +485,27 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shader\SpriteDissolvePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SpriteDissolveVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="Shader\SpritePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\SpriteVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\TrailRendererPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\TrailRendererVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>

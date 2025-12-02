@@ -9,22 +9,10 @@ struct VS_OUT
 };
 
 #define POINT_MAX (64)
-cbuffer CbScene : register(b7)
-{
-    row_major float4x4 viewProjection;
-    float4 lightDirection;
-    float4 lightColor;
-    float4 cameraPosition;
-    row_major float4x4 lightViewProjection;
-    float4 pointLight[POINT_MAX];
-    float4 pointColor[POINT_MAX];
-};
 
 cbuffer CbMesh : register(b0)
 {
     float4 materialColor;
-    // ボーン行列にワールド行列の計算が加味されているので必要なくなった
-    //row_major float4x4 worldTransform;
 };
 // register b2 ワールド変換用にskeltonで使用
 
@@ -60,15 +48,6 @@ cbuffer CbSetUp : register(b3)
     //float4 setupdummy;
 }
 
-cbuffer CbConstants : register(b5)
-{
-    float emissivedissolve;
-    float dissolve;
-    float alphaFactor;
-    float dummyconstants;
-    float4 OverwriteColor;
-}
-
 //シャドウマップ用の定数
 //	カスケードシャドウマップ
 static const int ShadowBufferSize = 4;
@@ -89,3 +68,31 @@ cbuffer CbShadow : register(b4)
     
     float dummy; //パディング
 };
+
+cbuffer CbConstants : register(b5)
+{
+    float emissivedissolve;
+    float dissolve;
+    float alphaFactor;
+    float dummyconstants;
+    float4 OverwriteColor;
+}
+
+cbuffer CbScene : register(b7)
+{
+    row_major float4x4 viewProjection;
+    float4 lightDirection;
+    float4 lightColor;
+    float4 cameraPosition;
+    row_major float4x4 lightViewProjection;
+    float4 pointLight[POINT_MAX];
+    float4 pointColor[POINT_MAX];
+};
+
+cbuffer CbRimLight : register(b8)
+{
+    float rimPower;
+    float rimIntensity;
+    float4 rimColor;
+    float2 rimDummy;
+}

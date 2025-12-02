@@ -8,9 +8,10 @@
 #include "Stage/StageManager.h"
 #include "Stage/StageMain.h"
 #include "Graphics/GpuResourceUtils.h"
-//#include "Effect/EffectManager.h"
-//#include "BattleUI/HitPointUI.h"
+#include "Effect/EffectManager.h"
+#include "UI/BattleUI.h"
 #include "Input/Input.h"
+#include "System/HitStop.h"
 #include <map>
 //#include "BattleUI/Pause.h"
 //#include "BattleUI/DieUI.h"
@@ -41,7 +42,7 @@ void SceneGame::Initialize()
 
 	// プレイヤー初期化
 	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	dragonkin = std::make_unique<SilverDragonkin>(device, "Data/Model/Mannequin/SK_Mannequin.gltf", 1.0f);
+	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Mannequin/SK_Mannequin.gltf", 1.0f);
 
 	Camera& camera = Camera::Instance();
 
@@ -80,8 +81,8 @@ void SceneGame::Initialize()
 
 	//isEventCamera = false;
 
-	////HPUI初期化
-	//HitPointUI::Instance().Initialize(player->GetMaxHealth(), 3);
+	///HPUI初期化
+	BattleUI::Instance().Initialize(player->GetMaxHealth(), 3);
 
 	//combatUI = std::make_unique<CombatUIManager>();
 
@@ -131,15 +132,7 @@ void SceneGame::Update(float elapsedTime)
 	}
 
 	// ヒットストップ更新処理
-	//HitStop::Instance().Update(elapsedTime);
-	//if (isWorldTime)
-	//{
-	//	hitStopTimeScale = worldTime;
-	//}
-	//else
-	//{
-	//	hitStopTimeScale = HitStop::Instance().GetTimeScale();
-	//}
+	HitStop::Instance().Update(elapsedTime);
 
 	SelectedCamera(elapsedTime);
 
@@ -155,21 +148,19 @@ void SceneGame::Update(float elapsedTime)
 	StageManager::Instance().Update(elapsedTime);
 
 
-	//// プレイヤー更新処理
+	// プレイヤー更新処理
 	player->SetLockOnCamera(CameraParam::Instance().GetLockOnEnemy());
-	//player->Update(elapsedTime * HitStop::Instance().GetPlayerTimeScale());
-	player->Update(elapsedTime);
+	player->Update(elapsedTime * HitStop::Instance().GetPlayerTimeScale());
 
-	////エネミーマネージャー更新
-	//EnemyManager::Instance().Update(elapsedTime);
-	dragonkin->Update(elapsedTime);
+	//エネミー更新
+	boss->Update(elapsedTime);
 
-	//// エフェクト更新処理
-	//EffectManager::Instance().Update(elapsedTime * HitStop::Instance().GetEnemyTimeScale());
+	// エフェクト更新処理
+	EffectManager::Instance().Update(elapsedTime);
 
-	////HPUI更新
-	////HitPointUI::Instance().SetLockOnEnemy(cameraController->GetLockOnEnemy());
-	//HitPointUI::Instance().Update(elapsedTime, player->GetHealth(), 3);
+	//HPUI更新
+	//HitPointUI::Instance().SetLockOnEnemy(cameraController->GetLockOnEnemy());
+	BattleUI::Instance().Update(elapsedTime, player->GetHealth(), 3);
 	//DieUI::Instance().Update(elapsedTime);
 
 	//combatUI->Update(elapsedTime);
@@ -188,7 +179,7 @@ void SceneGame::Update(float elapsedTime)
 	LightManager& lightManager = LightManager::Instance();
 
 	// ポイントライト設定
-	/*PointLight pointLight;
+	PointLight pointLight;
 	for (int i = 0; i < POINT_MAX; i++)
 	{
 		pointLight.position.x = lightManager.GetPointLight(i).position.x + offsetPosition.x;
@@ -197,7 +188,7 @@ void SceneGame::Update(float elapsedTime)
 	}
 	pointLight.position.w = attenuation;
 	pointLight.color = pointColor;
-	lightManager.SetPointLight(pointLight, 1);*/
+	lightManager.SetPointLight(pointLight, 1);
 
 	timer += elapsedTime;
 
@@ -253,7 +244,7 @@ void SceneGame::Render(float elapsedTime)
 	{
 		StageManager::Instance().ShadowRender(rc, shadowMap);
 		player->ShadowRender(rc, shadowMap);
-		dragonkin->ShadowRender(rc, shadowMap);
+		boss->ShadowRender(rc, shadowMap);
 	}
 	shadowMap->End(rc);
 
@@ -262,27 +253,22 @@ void SceneGame::Render(float elapsedTime)
 	{
 		StageManager::Instance().Render(rc, ShaderId::PBR);
 		player->Render(rc, ShaderId::PBR);
-		dragonkin->Render(rc, ShaderId::PBR);
+		boss->Render(rc, ShaderId::PBR);
 	}
 
-	//{//トレイル描画
-
-	//	TrailRenderer* trailRenderer = graphics.GetTrailRenderer();
-	//	trailRenderer->Render(dc, rc, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
-	//}
-
-	/*rc.dissove = enemysupport.dissolve;
-	rc.alphaFactor = enemysupport.alphaFactor;
-	rc.OverriteColor = enemysupport.OverwriteColor;*/
+	// トレイル描画
+	{
+		TrailRenderer* trailRenderer = graphics.GetTrailRenderer();
+		trailRenderer->Render(dc, rc, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	}
 
 	// スカイボックス描画
 	skyBox->Begin(rc);
 	skyBox->Render(rc);
 	skyBox->End(rc);
 
-	//// 3Dエフェクト描画
-	//EffectManager::Instance().Render(camera.GetView(), camera.GetProjection());
+	// 3Dエフェクト描画
+	EffectManager::Instance().Render(camera.GetView(), camera.GetProjection());
 
 	//ポストプロセス
 	{
@@ -302,19 +288,17 @@ void SceneGame::Render(float elapsedTime)
 		posteffect->End(rc);
 	}
 
-	//// プレイヤーデバッグプリミティブ描画
+	// プレイヤーデバッグプリミティブ描画
 	player->DrawDebugPrimitive();
 
 	//エネミーデバッグプリミティブ描画
-	dragonkin->DrawDebugPrimitive();
+	boss->DrawDebugPrimitive();
 
 	//エネミー体力ゲージ描画
 	//RenderEnemyGauge(dc, camera.GetView(), camera.GetProjection());
 
 	//プレイヤー体力ゲージ描画処理
-	/*if (!EnemyManager::Instance().IsElderDragonDead()) {
-		HitPointUI::Instance().Render(elapsedTime);
-	}*/
+	BattleUI::Instance().Render(elapsedTime);	
 
 	//ダメージ表記
 	/*combatUI->Render(dc, rc);
@@ -351,7 +335,7 @@ void SceneGame::DrawDebugGUI()
 
 	// プレイヤーデバッグ描画
 	player->DrawDebugGUI();
-	dragonkin->DrawDebugGUI();
+	boss->DrawDebugGUI();
 
 	/*EnemyManager::Instance().DrawDebugGUI();
 
@@ -363,9 +347,6 @@ void SceneGame::DrawDebugGUI()
 	if (ImGui::Begin("Graphics Menu", nullptr, ImGuiWindowFlags_None))
 	{
 		posteffect->DrawDebugGUI();
-
-		/*Shader* ActorPBR = Graphics::Instance().GetShader(ShaderId::ActorPBR);
-		ActorPBR->DebugImGui();*/
 
 		Shader* PBR = Graphics::Instance().GetShader(ShaderId::PBR);
 		PBR->ImGui();
@@ -384,7 +365,7 @@ void SceneGame::DrawDebugGUI()
 				direction.z /= x;
 			}
 			ImGui::ColorEdit3("Directioncolor", &Directioncolor.x);
-			ImGui::SliderFloat("intensity", &Directioncolor.w, 0.0f, +100.0f);
+			ImGui::SliderFloat("intensity", &Directioncolor.w, 0.0f, +1000.0f);
 
 			directionalLight = { direction,Directioncolor };
 
@@ -404,8 +385,8 @@ void SceneGame::DrawDebugGUI()
 			ImGui::DragFloat("attenuation", &attenuation, 0.1f);
 		}
 
-		//TrailRenderer* trailRenderer = Graphics::Instance().GetTrailRenderer();
-		//trailRenderer->ImGui();
+		TrailRenderer* trailRenderer = Graphics::Instance().GetTrailRenderer();
+		trailRenderer->ImGui();
 
 		{//シャドウマップ用ImGUI
 			ShadowMap* shadowMap = Graphics::Instance().GetShadowMap();

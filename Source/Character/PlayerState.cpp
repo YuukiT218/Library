@@ -1,6 +1,6 @@
 ﻿#include "PlayerState.h"
 #include "Camera/CameraParam.h"
-#include "Enemy/SilverDragonkin.h"
+#include "Enemy/EnemyBoss.h"
 #include "Math/Collision.h"
 #include "Math/Mathf.h"
 
@@ -19,28 +19,34 @@ void PlayerState::ChangeState(PlayerStateId stateId)
     player->ChangeState(stateId);
 }
 
-// コンボ入力
-PlayerState::InputComboType PlayerState::InputCombo()
+// アクション入力
+PlayerState::InputActionType PlayerState::InputAction()
 {
     GamePad& gamepad = Input::Instance().GetGamePad();
     const Mouse& mouse = Input::Instance().GetMouse();
-
-    if (gamepad.GetButtonDown() & GamePad::BTN_A) return InputComboType::Heavy;
-    if (gamepad.GetButtonDown() & GamePad::BTN_B || mouse.GetButtonDown() & Mouse::BTN_LEFT) return InputComboType::Light;
-    return InputComboType::None;
-}
-
-// 回避入力
-bool PlayerState::InputDodge() const
-{
-    const GamePad& gamepad = Input::Instance().GetGamePad();
-
+    if (gamepad.GetButtonDown() & GamePad::BTN_A)
+    {
+        currentInput = InputActionType::HeavyAttack;
+	    return InputActionType::HeavyAttack;
+    }
+    if (gamepad.GetButtonDown() & GamePad::BTN_B || mouse.GetButtonDown() & Mouse::BTN_LEFT)
+    {
+        currentInput = InputActionType::LightAttack;
+	    return InputActionType::LightAttack;
+    }
     if (gamepad.GetLAxisPower() != 0 && gamepad.GetButtonDown() & GamePad::BTN_X)
     {
-        return true;
+	    return InputActionType::Dodge;
     }
-
-    return false;
+	if (gamepad.GetButtonDown() & GamePad::BTN_A)
+	{
+		return InputActionType::Jump;
+	}
+	if (gamepad.GetLAxisPower() == 0 && gamepad.GetButton() & GamePad::BTN_X)
+	{
+		return InputActionType::Guard;
+	}
+    return InputActionType::None;
 }
 
 // 歩き移動処理
@@ -57,48 +63,6 @@ bool PlayerState::InputRunMove() const
     const GamePad& gamepad = Input::Instance().GetGamePad();
 
     return gamepad.GetLAxisPower() > 0.5f;
-}
-
-// ジャンプ入力
-bool PlayerState::InputJump() const
-{
-    const GamePad& gamepad = Input::Instance().GetGamePad();
-
-    if (gamepad.GetButtonDown() & GamePad::BTN_A)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-// ガード入力
-bool PlayerState::InputGuard() const
-{
-    const GamePad& gamepad = Input::Instance().GetGamePad();
-
-    // LBが押されている間
-    if (gamepad.GetLAxisPower() == 0 && gamepad.GetButton() & GamePad::BTN_X)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-// パリィ入力
-bool PlayerState::InputGuardParry() const
-{
-    const GamePad& gamepad = Input::Instance().GetGamePad();
-    const Mouse& mouse = Input::Instance().GetMouse();
-
-    // Bボタンが押された瞬間
-   /* if (gamepad.GetButtonDown() & GamePad::BTN_B || mouse.GetButtonDown() & Mouse::BTN_LEFT)
-    {
-        return true;
-    }*/
-
-    return false;
 }
 
 // ロックオンしている場合はストレイフ
@@ -175,12 +139,12 @@ void PlayerIdleState::Enter()
 void PlayerIdleState::Update(float elapsedTime)
 {
     // コンボ1ステートに遷移
-    if (InputCombo() == InputComboType::Light)
+    if (InputAction() == InputActionType::LightAttack)
     {
         ChangeState(PlayerStateId::Combo1);
     }
     // 回避ステートに遷移
-    else if (InputDodge())
+    else if (InputAction() == InputActionType::Dodge)
     {
         ChangeState(PlayerStateId::Dodge);
     }
@@ -195,16 +159,14 @@ void PlayerIdleState::Update(float elapsedTime)
         ChangeState(PlayerStateId::Walk);
     }
     // ガード待機に遷移
-    else if (InputGuard())
+    else if (InputAction() == InputActionType::Guard)
     {
         ChangeState(PlayerStateId::GuardIdle);
     }
-    else if (InputJump())
+    else if (InputAction() == InputActionType::HeavyAttack)
     {
         ChangeState(PlayerStateId::Jump);
     }
-
-    //player->GetPlayerModel()->SetBaseAnimationSpeed(idleAnimationSpeed);
 }
 
 // デバッグ用GUI描画
@@ -253,17 +215,17 @@ void PlayerWalkState::Update(float elapsedTime)
     walkAnimationSpeed = Mathf::Lerp(0.2f, 0.8f, t);
 
     // コンボ1ステートに遷移
-    if (InputCombo() == InputComboType::Light)
+    if (InputAction() == InputActionType::LightAttack)
     {
         ChangeState(PlayerStateId::Combo1);
     }
     // 回避ステートに遷移
-    else if (InputDodge())
+    else if (InputAction() == InputActionType::Dodge)
     {
         ChangeState(PlayerStateId::Dodge);
     }
     // ガード待機ステート遷移
-    else if (InputGuard())
+    else if (InputAction() == InputActionType::Guard)
     {
         ChangeState(PlayerStateId::GuardIdle);
     }
@@ -277,7 +239,7 @@ void PlayerWalkState::Update(float elapsedTime)
     {
         ChangeState(PlayerStateId::Idle);
     }
-    else if (InputJump())
+    else if (InputAction() == InputActionType::HeavyAttack)
     {
         ChangeState(PlayerStateId::Jump);
     }
@@ -331,17 +293,17 @@ void PlayerRunState::Update(float elapsedTime)
     }
 
     // コンボ1ステートに遷移
-    if (InputCombo() == InputComboType::Light)
+    if (InputAction() == InputActionType::LightAttack)
     {
         ChangeState(PlayerStateId::Combo1);
     }
     // 回避ステートに遷移
-    else if (InputDodge())
+    else if (InputAction() == InputActionType::Dodge)
     {
         ChangeState(PlayerStateId::Dodge);
     }
     // ガード待機ステート遷移
-    else if (InputGuard())
+    else if (InputAction() == InputActionType::Guard)
     {
         ChangeState(PlayerStateId::GuardIdle);
     }
@@ -355,7 +317,7 @@ void PlayerRunState::Update(float elapsedTime)
     {
         ChangeState(PlayerStateId::Idle);
     }
-	else if (InputJump())
+	else if (InputAction() == InputActionType::HeavyAttack)
 	{
 		ChangeState(PlayerStateId::Jump);
 	}
@@ -410,16 +372,16 @@ void PlayerJumpState::Update(float elapsedTime)
     }
 
     // コンボ1ステートに遷移
-    if (InputCombo() == InputComboType::Light)
+    if (InputAction() == InputActionType::LightAttack)
     {
         ChangeState(PlayerStateId::Combo1);
     }
     // 回避ステートに遷移
-    else if (InputDodge())
+    else if (InputAction() == InputActionType::Dodge)
     {
         ChangeState(PlayerStateId::Dodge);
     }
-    else if (InputGuard())
+    else if (InputAction() == InputActionType::Guard)
     {
         ChangeState(PlayerStateId::GuardIdle);
     }
@@ -473,16 +435,16 @@ void PlayerFallState::Update(float elapsedTime)
     player->PlayerMove(elapsedTime, fallAnimationMoveRate);
 
     // コンボ1ステートに遷移
-    if (InputCombo() == InputComboType::Light)
+    if (InputAction() == InputActionType::LightAttack)
     {
         ChangeState(PlayerStateId::Combo1);
     }
     // 回避ステートに遷移
-    else if (InputDodge())
+    else if (InputAction() == InputActionType::Dodge)
     {
         ChangeState(PlayerStateId::Dodge);
     }
-    else if (InputGuard())
+    else if (InputAction() == InputActionType::Guard)
     {
         ChangeState(PlayerStateId::GuardIdle);
     }
@@ -524,11 +486,25 @@ PlayerDodgeState::PlayerDodgeState(Player* player)
 // 開始処理
 void PlayerDodgeState::Enter()
 {
-    int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
-    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+    // スティック入力方向を取得
+    DirectX::XMFLOAT3 moveVec = player->GetMoveVec();
+    float moveVecLength = sqrtf(moveVec.x * moveVec.x + moveVec.z * moveVec.z);
+
+    // スティック入力がある場合、その方向に即座に向く
+    if (moveVecLength > 0.0f)
+    {
+        // 入力方向の角度を計算
+        float targetAngle = atan2f(moveVec.x, moveVec.z);
+
+        // プレイヤーの角度を入力方向に即座に設定
+        DirectX::XMFLOAT3 angle = player->GetAngle();
+        angle.y = targetAngle;
+        player->SetAngle(angle);
+    }
 
     const Camera& camera = Camera::Instance();
     const GamePad& gamepad = Input::Instance().GetGamePad();
+    
     DirectX::XMVECTOR Vec;
     DirectX::XMFLOAT3 vec;
 
@@ -568,9 +544,10 @@ void PlayerDodgeState::Update(float elapsedTime)
     timer -= elapsedTime;
     if (frame >= config->advanceInputStartFrame || frame <= config->advanceInputEndFrame)
     {
-        if (InputCombo() != InputComboType::None || InputDodge())
+        if (InputAction() != InputActionType::None)
         {
             nextShiftReady = true;
+            nextInput = InputAction();
         }
     }
 
@@ -578,11 +555,11 @@ void PlayerDodgeState::Update(float elapsedTime)
     {
         if (nextShiftReady)
         {
-            if (InputDodge())
+            if (nextInput == InputActionType::Dodge)
             {
                 ChangeState(PlayerStateId::Dodge);
             }
-            if (InputCombo() == InputComboType::Light)
+            if (nextInput == InputActionType::LightAttack)
             {
                 ChangeState(PlayerStateId::Combo1);
             }
@@ -649,64 +626,6 @@ void PlayerDodgeState::DrawDebugGUI()
 }
 
 //-------------------------------------------------------------
-// 回避攻撃ステート
-//-------------------------------------------------------------
-// コンストラクタ
-PlayerDodgeAttackState::PlayerDodgeAttackState(Player* player)
-    : PlayerState(player)
-{
-    dodgeAttackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorAttackDodge");
-}
-
-// 開始処理
-void PlayerDodgeAttackState::Enter()
-{
-    DirectX::XMVECTOR Vec;
-
-    player->GetPlayerModel()->PlayAnimation(dodgeAttackAnimationIndex, false, 0.1f);
-    timer = 0.95f;
-
-    Vec = DirectX::XMLoadFloat3(&player->CharacterForward(player->GetAngle()));
-    Vec = DirectX::XMVector3Normalize(Vec);
-
-    // 回避
-    Vec = DirectX::XMVectorScale(Vec, 20.0f);
-
-    DirectX::XMFLOAT3 vec;
-    DirectX::XMStoreFloat3(&vec, Vec);
-
-    player->SetMovement(vec, 2.0f);
-}
-
-// 更新処理
-void PlayerDodgeAttackState::Update(float elapsedTime)
-{
-    /*int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
-    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
-    player->GetWeaponRight()->AttackAnimationCollision(player->GetModel(), config);*/
-
-    timer -= elapsedTime;
-    if (timer <= 0.0f)
-    {
-        // 走りステート遷移
-        if (InputRunMove())
-        {
-            ChangeState(PlayerStateId::Run);
-        }
-        // 歩きステート遷移
-        else if (InputWalkMove())
-        {
-            ChangeState(PlayerStateId::Walk);
-        }
-        // 待機ステート遷移
-        else
-        {
-            ChangeState(PlayerStateId::Idle);
-        }
-    }
-}
-
-//-------------------------------------------------------------
 // コンボステート
 //-------------------------------------------------------------
 // コンストラクタ
@@ -720,12 +639,17 @@ void PlayerComboState::Enter()
 {
     forwarded = false;
     nextShiftReady = false;
+    player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
+    float targetDist = player->calcTargetDist(player->GetPosition(), EnemyBoss::Instance().GetPosition());
     if (player->IsGround())
     {
-        if (player->calcTargetDist(player->GetPosition(), SilverDragonkin::Instance().GetPosition()) > 5.0f
+        if (targetDist > 4.0f && targetDist < 12.5f
             && comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
         {
             player->GetPlayerModel()->PlayRootMotion(dashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
+            player->SetPosition({ Mathf::Lerp(player->GetPosition().x, EnemyBoss::Instance().GetPosition().x, 0.2f),
+                        Mathf::Lerp(player->GetPosition().y, EnemyBoss::Instance().GetPosition().y, 0.15f),
+                        Mathf::Lerp(player->GetPosition().z, EnemyBoss::Instance().GetPosition().z, 0.2f) });
         }
         else
         {
@@ -737,14 +661,23 @@ void PlayerComboState::Enter()
         player->SetGravity(-0.0001f);
         player->SetHorizonVelocity(0);
         player->SetVerticalVelocity(0);
-        if (player->calcTargetDist(player->GetPosition(), SilverDragonkin::Instance().GetPosition()) > 5.0f
+        if (targetDist > 4.0f && targetDist < 12.5f
             && airComboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
         {
             player->GetPlayerModel()->PlayRootMotion(airDashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
+            player->SetPosition({ Mathf::Lerp(player->GetPosition().x, EnemyBoss::Instance().GetPosition().x, 0.2f),
+                        Mathf::Lerp(player->GetPosition().y, EnemyBoss::Instance().GetPosition().y, 0.15f),
+                        Mathf::Lerp(player->GetPosition().z, EnemyBoss::Instance().GetPosition().z, 0.2f) });
         }
         else
         {
             player->GetPlayerModel()->PlayRootMotion(airComboAnimationIndex, false, isBakeY, 0.1f, "Character1_Hips");
+            if (CameraParam::Instance().GetIsLockOn())
+            {
+	            player->SetPosition({ player->GetPosition().x,
+							  Mathf::Lerp(player->GetPosition().y, EnemyBoss::Instance().GetPosition().y, 0.15f),
+								player->GetPosition().z });
+            }
         }
     }
 }
@@ -766,21 +699,45 @@ void PlayerComboState::Update(float elapsedTime)
 
     if (CameraParam::Instance().GetIsLockOn())
     {
-        player->LockOnTurnToEnemy(elapsedTime);
+        if (!player->IsTurnCompleted())
+        {
+            player->LockOnTurnToEnemy(elapsedTime);
+        }
+
+        if (frame >= config->advanceInputStartFrame && frame <= config->advanceInputEndFrame)
+        {
+            if (currentInput == InputActionType::LightAttack && !player->IsGround())
+            {
+                DirectX::XMFLOAT3 playerPos = player->GetPosition();
+                DirectX::XMFLOAT3 enemyPos = EnemyBoss::Instance().GetPosition();
+
+                // Y座標の差分を計算
+                float yDifference = abs(playerPos.y - enemyPos.y);
+
+                // epsilon.yの閾値を超えている場合のみ補正
+                if (yDifference > player->epsilon.y)
+                {
+                    // 線形補間で滑らかに補正（補正率は調整可能）
+                    float correctionRate = 0.1f;
+                    float newY = Mathf::Lerp(playerPos.y, enemyPos.y, correctionRate);
+
+                    player->SetPosition({ playerPos.x, newY, playerPos.z });
+                }
+            }
+        }
     }
 
     player->GetSword()->AttackAnimationCollision(player->GetModel(), config, player);
-    //player->GetSword()->AttackAnimationCollision(player->GetModel(), attackCollisionStartFrame, attackCollisionEndFrame, attackDamage, invisibleTime, attackLeftVibrate, attackRightVibrate, attackHitStopTime, attackHitStopSpeed);
     
-    InputComboType input = InputCombo();
+    InputActionType input = InputAction();
 
     // 次のコンボステート処理
     if (inputToNextState.count(input))
     {
         // 先行入力処理
-        if (input != InputComboType::None)
+        if (input != InputActionType::None)
         {
-            if (input == InputComboType::Heavy && !player->IsGround())
+            if (input == InputActionType::HeavyAttack && !player->IsGround())
                 return;
             if (frame >= config->advanceInputStartFrame && frame <= config->advanceInputEndFrame)
             {
@@ -790,12 +747,26 @@ void PlayerComboState::Update(float elapsedTime)
         }
     }
 
+    if (InputAction() == InputActionType::Dodge || InputAction() == InputActionType::Guard)
+    {
+        if (frame >= config->advanceInputStartFrame && frame <= config->advanceInputEndFrame)
+        {
+            nextShiftReady = true;
+            nextInput = InputAction();
+        }
+    }
+
     // 次のコンボステートへ遷移
     if (nextShiftReady)
     {
         if (frame >= config->advanceInputEndFrame)
         {
-            ChangeState(inputToNextState[nextInput]);
+            if (nextInput == InputActionType::Dodge)
+                ChangeState(PlayerStateId::Dodge);
+            if (nextInput == InputActionType::Guard)
+                ChangeState(PlayerStateId::GuardIdle);
+        	if (nextInput == InputActionType::LightAttack || nextInput == InputActionType::HeavyAttack)
+                ChangeState(inputToNextState[nextInput]);
         }
     }
 
@@ -850,8 +821,8 @@ PlayerCombo1State::PlayerCombo1State(Player* player)
     attackHitStopTime = 0.0f;
     attackHitStopSpeed = 0.1f;
 
-    inputToNextState[InputComboType::Light] = PlayerStateId::Combo2;
-    inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
+    inputToNextState[InputActionType::LightAttack] = PlayerStateId::Combo2;
+    inputToNextState[InputActionType::HeavyAttack] = PlayerStateId::Heavy1;
 }
 
 // デバッグ用GUI描画
@@ -861,6 +832,7 @@ void PlayerCombo1State::DrawDebugGUI()
 
     if (ImGui::TreeNode(u8"コンボ1"))
     {
+
         //ImGui::Text(player->GetPlayerModel()->GetAnimationName(comboAnimationIndex));
         //ImGui::SameLine();
         //ImGui::Text(u8"終了フレーム:%.3f", player->GetPlayerModel()->GetAnimationLength(comboAnimationIndex));
@@ -886,8 +858,8 @@ void PlayerCombo1State::DrawDebugGUI()
 PlayerCombo2State::PlayerCombo2State(Player* player)
     : PlayerComboState(player)
 {
-    inputToNextState[InputComboType::Light] = PlayerStateId::Combo3;
-    inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
+    inputToNextState[InputActionType::LightAttack] = PlayerStateId::Combo3;
+    inputToNextState[InputActionType::HeavyAttack] = PlayerStateId::Heavy1;
     nextShiftFrame = 0.5f;
     poseFrame = 0.5f;
     endFrame = 0.816f;
@@ -949,8 +921,8 @@ void PlayerCombo2State::DrawDebugGUI()
 PlayerCombo3State::PlayerCombo3State(Player* player)
     : PlayerComboState(player)
 {
-    inputToNextState[InputComboType::Light] = PlayerStateId::Combo4;
-    inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
+    inputToNextState[InputActionType::LightAttack] = PlayerStateId::Combo4;
+    inputToNextState[InputActionType::HeavyAttack] = PlayerStateId::Heavy1;
     nextShiftFrame = 0.63f;
     poseFrame = 0.63f;
     endFrame = 0.9f;
@@ -1012,8 +984,8 @@ void PlayerCombo3State::DrawDebugGUI()
 PlayerCombo4State::PlayerCombo4State(Player* player)
     : PlayerComboState(player)
 {
-    inputToNextState[InputComboType::Light] = PlayerStateId::Combo5;
-	inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
+    inputToNextState[InputActionType::LightAttack] = PlayerStateId::Combo5;
+	inputToNextState[InputActionType::HeavyAttack] = PlayerStateId::Heavy1;
     nextShiftFrame = 0.7f;
     poseFrame = 0.7f;
     endFrame = 1.016f;
@@ -1069,14 +1041,14 @@ void PlayerCombo4State::DrawDebugGUI()
 }
 
 //-------------------------------------------------------------
-// コンボ4ステート
+// コンボ5ステート
 //-------------------------------------------------------------
 // コンストラクタ
 PlayerCombo5State::PlayerCombo5State(Player* player)
     : PlayerComboState(player)
 {
-    //inputToNextState[InputComboType::Light] = PlayerStateId::Heavy1;
-    inputToNextState[InputComboType::Heavy] = PlayerStateId::Heavy1;
+    inputToNextState[InputActionType::LightAttack] = PlayerStateId::Combo1;
+    inputToNextState[InputActionType::HeavyAttack] = PlayerStateId::Heavy1;
     nextShiftFrame = 0.7f;
     poseFrame = 0.7f;
     endFrame = 1.016f;
@@ -1138,7 +1110,7 @@ void PlayerCombo5State::DrawDebugGUI()
 PlayerHeavyAttack1State::PlayerHeavyAttack1State(Player* player)
     : PlayerComboState(player)
 {
-    inputToNextState[InputComboType::Light] = PlayerStateId::Combo1;
+    inputToNextState[InputActionType::LightAttack] = PlayerStateId::Combo1;
     nextShiftFrame = 0.75f;
     poseFrame = 0.4f;
     endFrame = 0.95f;
@@ -1192,63 +1164,6 @@ void PlayerHeavyAttack1State::DrawDebugGUI()
 }
 
 //-------------------------------------------------------------
-// 強攻撃2ステート
-//-------------------------------------------------------------
-// コンストラクタ
-PlayerHeavyAttack2State::PlayerHeavyAttack2State(Player* player)
-    : PlayerComboState(player)
-{
-    poseFrame = 0.55f;
-    endFrame = 0.816f;
-    comboAttackSpeed = 1.0f;
-    comboPoseSpeed = 1.0f;
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorAttackHeavy2");
-
-    forwardFrame = 0.0f;
-    forwardPower = 13.0f;
-    moveRate = 0.5f;
-    turnRate = 0.5f;
-
-    // 攻撃判定必要変数
-    attackCollisionStartFrame = 0.23f;
-    attackCollisionEndFrame = 0.45f;
-    attackDamage = 10.0f;
-    invisibleTime = 0.5f;
-
-    // コントローラーの振動変数
-    attackLeftVibrate = 1.0f;
-    attackRightVibrate = 1.0f;
-
-    // 攻撃時ヒットストップ変数
-    attackHitStopTime = 0.0f;
-    attackHitStopSpeed = 0.1f;
-}
-
-void PlayerHeavyAttack2State::DrawDebugGUI()
-{
-    ImGui::Separator();
-
-    if (ImGui::TreeNode(u8"強攻撃2"))
-    {
-        //ImGui::Text(player->GetPlayerModel()->GetAnimationName(comboAnimationIndex));
-        //ImGui::SameLine();
-        //ImGui::Text(u8"終了フレーム:%.3f", player->GetPlayerModel()->GetAnimationLength(comboAnimationIndex));
-        ImGui::Checkbox(u8"先行入力しているか", &nextShiftReady);
-        ImGui::DragFloat(u8"攻撃スピード", &comboAttackSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"構えスピード", &comboPoseSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"先行入力受付開始フレーム", &nextShiftFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"先行入力受付終了フレーム", &endFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動開始フレーム", &forwardFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動値", &forwardPower, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの左振動の強さ", &attackLeftVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの右振動の強さ", &attackRightVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時に何秒間止めるか", &attackHitStopTime, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時にどれぐらいの速さにするか", &attackHitStopSpeed, 0.01f, 0.0f);
-        ImGui::TreePop();
-    }
-}
-
-//-------------------------------------------------------------
 // ガード待機ステート
 //-------------------------------------------------------------
 // コンストラクタ
@@ -1267,44 +1182,61 @@ void PlayerGuardIdle::Enter()
     player->SetVerticalVelocity(0);
     player->SetHorizonVelocity(0);
 
-    //player->GetPlayerModel()->PlayRootMotion(guardStartAnimationIndex, false, true, 0.1f, "Character1_Reference");
-    player->GetPlayerModel()->PlayRootMotion(guardLoopAnimationIndex, false, true, 0.2f, "Character1_Reference");
+    player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
+
+    player->GetPlayerModel()->PlayRootMotion(guardStartAnimationIndex, false, true, 0.1f, "Character1_Reference");
 
     player->SetPlayerGuard(true);
-    timer = 1.7f;
 }
 
 // 更新処理
 void PlayerGuardIdle::Update(float elapsedTime)
 {
-    timer -= elapsedTime;
+    if (!player->GetPlayerModel()->IsPlayAnimation())
+    {
+        player->GetPlayerModel()->PlayRootMotion(guardLoopAnimationIndex, false, true, 0.2f, "Character1_Reference");
+        index = player->GetPlayerModel()->GetCurrentAnimationIndex();
+        config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+        isLoop = true;
+        timer = 0.0f;
+    }
 
     if (CameraParam::Instance().GetIsLockOn())
     {
-        player->LockOnTurnToEnemy(elapsedTime);
+        // まだ向き終わっていない場合のみ実行
+        if (!player->IsTurnCompleted())
+        {
+            player->LockOnTurnToEnemy(elapsedTime);
+        }
     }
 
-    if (timer <= 0.0f)
-    {
-        if (player->IsGround())
-        {
-            ChangeState(PlayerStateId::Idle);
-        }
-        else
-        {
-            ChangeState(PlayerStateId::Fall);
-        }
-    }
-    else if (timer >= 0.8f)
-    {
-	    player->GetPlayerModel()->PlayRootMotion(guardEndAnimationIndex, false, true, 0.1f, "Character1_Reference");
-    	player->SetPlayerGuard(false);
-    }
+    if (isLoop)
+	{
+        timer += elapsedTime;
+        frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
+		if (config->advanceInputEndFrame <= timer)
+		{
+			if (player->IsGround())
+			{
+				ChangeState(PlayerStateId::Idle);
+			}
+			else
+			{
+				ChangeState(PlayerStateId::Fall);
+			}
+		}
+		else if (config->attributes[0].endTime <= frame)
+		{
+			player->GetPlayerModel()->PlayRootMotion(guardEndAnimationIndex, false, true, 0.1f, "Character1_Reference");
+			player->SetPlayerGuard(false);
+		}
+	}
 }
 
 // 終了処理
 void PlayerGuardIdle::Exit()
 {
+    isLoop = false;
     player->SetGravity(-0.3f);
 }
 
@@ -1323,77 +1255,6 @@ void PlayerGuardIdle::DrawDebugGUI()
     }
 }
 
-//-------------------------------------------------------------
-// ガード歩きステート
-//-------------------------------------------------------------
-// コンストラクタ
-PlayerGuardWalk::PlayerGuardWalk(Player* player)
-    : PlayerState(player)
-{
-    guardFrontWalkAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorGuardWalkForward");
-    guardBackWalkAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorGuardWalkBackward");
-    guardRightWalkAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorGuardWalkRightward");
-    guardLeftWalkAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorGuardWalkLeftward");
-}
-
-// 開始処理
-void PlayerGuardWalk::Enter()
-{
-    player->SetPlayerGuard(true);
-}
-
-// 更新処理
-void PlayerGuardWalk::Update(float elapsedTime)
-{
-    LockOnStrafe(guardRightWalkAnimationIndex, guardLeftWalkAnimationIndex, guardFrontWalkAnimationIndex, guardBackWalkAnimationIndex);
-
-    player->PlayerMove(elapsedTime, guardWalkAnimationMoveRate);
-
-    // 待機ステート遷移
-    if (!InputGuard())
-    {
-        ChangeState(PlayerStateId::Idle);
-    }
-    // ガードパリィステート遷移
-    else if (InputGuard() && InputGuardParry())
-    {
-        ChangeState(PlayerStateId::GuardParry);
-    }
-    // ガード待機ステート遷移
-    else if (InputGuard() && !InputWalkMove() && !InputRunMove())
-    {
-        ChangeState(PlayerStateId::GuardIdle);
-    }
-    // 回避ステート遷移
-    else if (InputDodge())
-    {
-        ChangeState(PlayerStateId::Dodge);
-    }
-
-    //player->GetPlayerModel()->SetBaseAnimationSpeed(guardWalkAnimationSpeed);
-}
-
-// 終了処理
-void PlayerGuardWalk::Exit()
-{
-    player->SetPlayerGuard(false);
-}
-
-// デバッグ用GUI描画
-void PlayerGuardWalk::DrawDebugGUI()
-{
-    ImGui::Separator();
-
-    if (ImGui::TreeNode(u8"ガード歩き"))
-    {
-        //ImGui::Text(player->GetPlayerModel()->GetAnimationName(guardFrontWalkAnimationIndex));
-        //ImGui::SameLine();
-        //ImGui::Text(u8"終了フレーム:%.3f", player->GetPlayerModel()->GetAnimationLength(guardFrontWalkAnimationIndex));
-        ImGui::DragFloat(u8"ガード歩き移動率", &guardWalkAnimationMoveRate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"アニメーションスピード", &guardWalkAnimationSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::TreePop();
-    }
-}
 
 //-------------------------------------------------------------
 // ガードヒットステート
@@ -1402,70 +1263,49 @@ void PlayerGuardWalk::DrawDebugGUI()
 PlayerGuardHit::PlayerGuardHit(Player* player)
     : PlayerState(player)
 {
-    guardHitAnimationIndex = player->GetModel()->GetAnimationIndex("WarriorGuardHit2");
+    guardHitAnimationIndex = player->GetModel()->GetAnimationIndex("Block_Hit_2_Seq_0");
 }
 
 void PlayerGuardHit::Enter()
 {
-    player->GetModel()->PlayAnimation(guardHitAnimationIndex, false, 0.1f);
+    player->GetModel()->PlayRootMotion(guardHitAnimationIndex, false, true, 0.1f, "Character1_Hips");
 
     player->SetPlayerGuard(true);
 
     GamePad& gamepad = Input::Instance().GetGamePad();
 
     gamepad.Vibrate(0.7f, 0.7f);
-
-    timer = 0.567f;
 }
 
 void PlayerGuardHit::Update(float elapsedTime)
 {
+    float frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
+    int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
     GamePad& gamepad = Input::Instance().GetGamePad();
-
-    timer -= elapsedTime;
-
-    if (timer <= 0.0f)
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+    
+    if (config->advanceInputEndFrame <= frame)
     {
         // コンボ1ステートに遷移
-        if (InputCombo() == InputComboType::Light)
+        if (InputAction() == InputActionType::LightAttack)
         {
-            ChangeState(PlayerStateId::Combo1);
+            ChangeState(PlayerStateId::GuardCounter);
         }
         // 強攻撃1ステートに遷移
-        else if (InputCombo() == InputComboType::Heavy)
+        else if (InputAction() == InputActionType::HeavyAttack)
         {
             ChangeState(PlayerStateId::Heavy1);
         }
         // 回避ステートに遷移
-        else if (InputDodge())
+        else if (InputAction() == InputActionType::Dodge)
         {
             ChangeState(PlayerStateId::Dodge);
         }
-        // ガード待機ステート遷移
-        else if (InputGuard())
-        {
-            ChangeState(PlayerStateId::GuardIdle);
-        }
-        // 走りステートに遷移
-        else if (InputRunMove())
-        {
-            ChangeState(PlayerStateId::Run);
-        }
-        // 歩きステートに遷移
-        else if (InputWalkMove())
-        {
-            ChangeState(PlayerStateId::Walk);
-        }
-        // アイドルステートに遷移
-        else if (!InputWalkMove() && !InputRunMove())
-        {
-            ChangeState(PlayerStateId::Idle);
-        }
     }
-    else if (timer <= 0.4f)
-    {
-        gamepad.Vibrate(0.0f, 0.0f);
-    }
+    if (!player->GetPlayerModel()->IsPlayAnimation())
+	{
+        ChangeState(PlayerStateId::Idle);
+	}
 }
 
 // 終了処理
@@ -1478,53 +1318,81 @@ void PlayerGuardHit::Exit()
 // ガードパリィステート
 //-------------------------------------------------------------
 // コンストラクタ
-PlayerGuardParry::PlayerGuardParry(Player* player)
+PlayerGuardCounter::PlayerGuardCounter(Player* player)
     : PlayerState(player)
 {
-    guardParryAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorParry");
+    guardParryAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Parry_Counter_Attack_R_Seq_0");
 }
 
-void PlayerGuardParry::Enter()
+void PlayerGuardCounter::Enter()
 {
-    player->GetPlayerModel()->PlayAnimation(guardParryAnimationIndex, false, 0.1f);
-    timer = 0.5f;
-
-    player->SetPlayerParry(true);
+    player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex, false, false, 0.1f, "Character1_Hips");
+    player->SetPlayerRolling(true);
 }
 
-void PlayerGuardParry::Update(float elapsedTime)
+void PlayerGuardCounter::Update(float elapsedTime)
 {
+    float frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
     int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
-    //AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
-    //player->GetLeftShield()->ParryAnimationCollision(player->GetModel(), config);
 
-    timer -= elapsedTime;
-    if (timer <= 0.0f)
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+    
+    player->GetSword()->AttackAnimationCollision(player->GetModel(), config, player);
+
+    if (CameraParam::Instance().GetIsLockOn())
     {
-        player->SetPlayerParry(false);
+        player->LockOnTurnToEnemy(elapsedTime);
+    }
 
-        // 待機ステート遷移
-        if (!InputGuard())
+    // 先行入力処理
+    if (InputAction() != InputActionType::None)
+    {
+        if (InputAction() == InputActionType::HeavyAttack && !player->IsGround())
+            return;
+        if (frame >= config->advanceInputStartFrame && frame <= config->advanceInputEndFrame)
         {
-            ChangeState(PlayerStateId::Idle);
-        }
-        // ガード歩きステート遷移
-        else if (InputGuard() && (InputWalkMove() || InputRunMove()))
-        {
-            ChangeState(PlayerStateId::GuardWalk);
-        }
-        // ガード待機ステート遷移
-        else if (InputGuard())
-        {
-            ChangeState(PlayerStateId::GuardIdle);
+            nextShiftReady = true;
+            nextInput = InputAction();
         }
     }
 
-    //  player->GetPlayerModel()->SetBaseAnimationSpeed(guardParryAnimationSpeed);
+    if (frame >= config->advanceInputEndFrame)
+    {
+	    if (nextShiftReady)
+	    {
+	    	if (nextInput == InputActionType::LightAttack)
+	    	{
+	    		ChangeState(PlayerStateId::Combo1);
+	    	}
+	    	else if (nextInput == InputActionType::HeavyAttack)
+	    	{
+	    		ChangeState(PlayerStateId::Heavy1);
+	    	}
+	    	else if (nextInput == InputActionType::Dodge)
+	    	{
+	    		ChangeState(PlayerStateId::Dodge);
+	    	}
+	    	else if (nextInput == InputActionType::Guard)
+	    	{
+	    		ChangeState(PlayerStateId::GuardIdle);
+	    	}
+	    }
+    }
+
+    if (!player->GetPlayerModel()->IsPlayAnimation())
+    {
+        // 待機ステート遷移
+    	ChangeState(PlayerStateId::Idle);
+    }
+}
+
+void PlayerGuardCounter::Exit()
+{
+    player->SetPlayerRolling(false);
 }
 
 // デバッグ用GUI描画
-void PlayerGuardParry::DrawDebugGUI()
+void PlayerGuardCounter::DrawDebugGUI()
 {
     ImGui::Separator();
 
@@ -1547,16 +1415,161 @@ void PlayerGuardParry::DrawDebugGUI()
 PlayerDamageState::PlayerDamageState(Player* player)
     : PlayerState(player)
 {
-    damageAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorHit2");
+    anims.normalGround = player->GetPlayerModel()->GetAnimationIndex("Hit_Combat_F_Seq_0");
+    anims.lightGround = player->GetPlayerModel()->GetAnimationIndex("Hit_Large_Combat_F_Seq_0");
+    anims.heavyGround = player->GetPlayerModel()->GetAnimationIndex("Hit_Large_Combat_Death_Seq_0");
+    anims.airStart = player->GetPlayerModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_Start_Seq_0");
+    anims.airLoop = player->GetPlayerModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_Loop_Seq_0");
+    anims.airEnd = player->GetPlayerModel()->GetAnimationIndex("Hit_Combat_Air_Large_To_Floor_End_Seq_0");
+    anims.getUp = player->GetPlayerModel()->GetAnimationIndex("Get_Up_Combat_Seq_0");
+}
+
+// ダメージタイプ別の初期処理
+void PlayerDamageState::HandleDamageStart(DamageType type, float elapsedTime)
+{
+    // 攻撃を受けた方向を向く
+    TurnToDamageDirection(elapsedTime);
+
+    // ダメージフラグをリセット
+    player->SetDamage(false);
+    player->SetLightDamage(false);
+    player->SetHeavyDamage(false);
+    player->SetLaunchDamage(false);
+    player->SetKnockDownDamage(false);
+
+    // ノックバック目標位置を計算
+    knockbackTargetPosition = GetKnockbackPosition(type);
+
+    switch (type)
+    {
+    case DamageType::Normal:
+        if (!player->IsGround())
+        {
+            // 空中ダメージ
+            player->SetGravity(-0.15f);
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.15f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.15f)
+                });
+            player->SetVerticalVelocity(2.0f);
+            player->GetPlayerModel()->PlayRootMotion(anims.airStart, false, true, 0.2f, "Character1_Hips");
+        }
+        else
+        {
+            // 地上ダメージ
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.25f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.25f)
+                });
+            player->GetPlayerModel()->PlayRootMotion(anims.normalGround, false, true, 0.1f, "Character1_Hips");
+        }
+        break;
+
+    case DamageType::Light:
+        if (!player->IsGround())
+        {
+            player->SetGravity(-0.15f);
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.4f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.4f)
+                });
+            player->SetVerticalVelocity(2.0f);
+            player->GetPlayerModel()->PlayRootMotion(anims.airStart, false, true, 0.2f, "Character1_Hips");
+        }
+        else
+        {
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.3f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.3f)
+                });
+            player->GetPlayerModel()->PlayRootMotion(anims.lightGround, false, true, 0.1f, "Character1_Hips");
+        }
+        break;
+
+    case DamageType::Heavy:
+        if (!player->IsGround())
+        {
+            player->SetGravity(-0.2f);
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.3f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.3f)
+                });
+        }
+        else
+        {
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.2f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.2f)
+                });
+            player->SetVerticalVelocity(1.5f);
+        }
+        player->GetPlayerModel()->PlayRootMotion(anims.heavyGround, false, true, 0.1f, "Character1_Hips");
+        break;
+
+    case DamageType::Launch:
+    {
+        player->SetGravity(-0.1f);
+        // 打ち上げアニメーション再生
+        player->GetPlayerModel()->PlayRootMotion(anims.airStart, false, true, 0.1f, "Character1_Hips");
+
+        // 水平方向の位置を補間で移動
+        player->SetPosition({
+            Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.5f),
+            player->GetPosition().y,
+            Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.5f)
+            });
+
+        // 目標高度までの距離を計算
+        float targetHeight = knockbackTargetPosition.y;
+        float currentHeight = player->GetPosition().y;
+        float heightDiff = targetHeight - currentHeight;
+
+        // 打ち上げに必要な初速度を計算
+        float launchVelocity = sqrtf(100.0f * fabsf(player->GetGravity()) * heightDiff);
+        player->SetVerticalVelocity(launchVelocity);
+        break;
+    }
+
+    case DamageType::Knockdown:
+        // 叩き落としは空中でのみ発動
+        if (!player->IsGround())
+        {
+            // 強制的に下方向に加速
+            player->SetGravity(-1.0f);
+            player->SetVerticalVelocity(-15.0f);  // 強力な下向きの速度
+
+            // 水平方向にもノックバック
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.4f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.4f)
+                });
+
+            player->GetPlayerModel()->PlayRootMotion(anims.airStart, false, true, 0.1f, "Character1_Hips");
+        }
+        else
+        {
+            // 地上にいる場合はHeavyダメージとして処理
+            currentDamageType = DamageType::Heavy;
+            HandleDamageStart(DamageType::Heavy, elapsedTime);
+        }
+        break;
+    }
 }
 
 // 開始処理
 void PlayerDamageState::Enter()
 {
-    player->GetModel()->PlayAnimation(damageAnimationIndex, false, 0.1f);
+    currentDamageType = GetCurrentDamageType();
+    step = 0;
 
     GamePad& gamepad = Input::Instance().GetGamePad();
-
     gamepad.Vibrate(0.3f, 0.3f);
 }
 
@@ -1565,45 +1578,226 @@ void PlayerDamageState::Update(float elapsedTime)
 {
     GamePad& gamepad = Input::Instance().GetGamePad();
 
-    if (!player->GetModel()->IsPlayAnimation())
+    switch (step)
     {
-        gamepad.Vibrate(0.0f, 0.0f);
+    case 0: // ダメージ開始
+        HandleDamageStart(currentDamageType, elapsedTime);
+        step++;
+        break;
 
-        // コンボ1ステートに遷移
-        if (InputCombo() == InputComboType::Light)
+    case 1: // アニメーション再生中
+        // Normal/Lightダメージで地上アニメーションが終了した場合
+        if ((currentDamageType == DamageType::Normal || currentDamageType == DamageType::Light) &&
+            player->IsGround() &&
+            !player->GetPlayerModel()->IsPlayAnimation())
         {
-            ChangeState(PlayerStateId::Combo1);
-        }
-        // 強攻撃1ステートに遷移
-        else if (InputCombo() == InputComboType::Heavy)
-        {
-            ChangeState(PlayerStateId::Heavy1);
-        }
-        // 回避ステートに遷移
-        else if (InputDodge())
-        {
-            ChangeState(PlayerStateId::Dodge);
-        }
-        // ガード待機ステート遷移
-        else if (InputGuard())
-        {
-            ChangeState(PlayerStateId::GuardIdle);
-        }
-        // 走りステートに遷移
-        else if (InputRunMove())
-        {
-            ChangeState(PlayerStateId::Run);
-        }
-        // 歩きステートに遷移
-        else if (InputWalkMove())
-        {
-            ChangeState(PlayerStateId::Walk);
-        }
-        // アイドルステートに遷移
-        else if (!InputWalkMove() && !InputRunMove())
-        {
+            player->SetGravity(-0.3f);
+            step = 0;
+
+            // 先行入力チェック
+            if (InputAction() == InputActionType::LightAttack)
+            {
+                ChangeState(PlayerStateId::Combo1);
+                return;
+            }
+            else if (InputAction() == InputActionType::HeavyAttack)
+            {
+                ChangeState(PlayerStateId::Heavy1);
+                return;
+            }
+            else if (InputAction() == InputActionType::Dodge)
+            {
+                ChangeState(PlayerStateId::Dodge);
+                return;
+            }
+            else if (InputAction() == InputActionType::Guard)
+            {
+                ChangeState(PlayerStateId::GuardIdle);
+                return;
+            }
+
             ChangeState(PlayerStateId::Idle);
+            return;
         }
+
+        // Heavyダメージで地上着地した場合、起き上がりへ
+        if (currentDamageType == DamageType::Heavy &&
+            player->IsGround() &&
+            !player->GetPlayerModel()->IsPlayAnimation())
+        {
+            player->SetVerticalVelocity(0.0f);
+            player->GetPlayerModel()->PlayRootMotion(anims.getUp, false, true, 0.1f, "Character1_Hips");
+            step = 4; // 起き上がりステップへ
+            break;
+        }
+
+        // Knockdownダメージの処理
+        if (currentDamageType == DamageType::Knockdown)
+        {
+            // 水平方向の移動を継続
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.3f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.3f)
+                });
+
+            // 地面に着地したら
+            if (player->IsGround())
+            {
+                player->SetGravity(-0.3f);
+                player->SetVerticalVelocity(0.0f);
+                player->GetPlayerModel()->PlayRootMotion(anims.airEnd, false, true, 0.1f, "Character1_Hips");
+                step = 3; // 着地アニメーションへ
+                break;
+            }
+
+            // アニメーション終了でループに切り替え
+            if (!player->GetPlayerModel()->IsPlayAnimation())
+            {
+                player->GetPlayerModel()->PlayRootMotion(anims.airLoop, true, true, 0.1f, "Character1_Hips");
+            }
+        }
+
+        // 空中からのダメージでアニメーションが終了
+        if (!player->IsGround() && !player->GetPlayerModel()->IsPlayAnimation() &&
+            currentDamageType != DamageType::Knockdown)
+        {
+            player->GetPlayerModel()->PlayRootMotion(anims.airLoop, true, true, 0.2f, "Character1_Hips");
+            step++;
+        }
+
+        // Launchダメージの場合の特別処理
+        if (currentDamageType == DamageType::Launch)
+        {
+            // 水平方向の位置を継続的に補間
+            player->SetPosition({
+                Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.3f),
+                player->GetPosition().y,
+                Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.3f)
+                });
+
+            // 最高高度に到達したか確認
+            if (player->GetVelocity().y <= 0.0f)
+            {
+                player->SetVerticalVelocity(0.0f);
+                player->SetGravity(0.0f);
+                pauseTimer = 0.3f;
+                step = 5; // 打ち上げ専用ステップへ
+            }
+
+            // アニメーション終了でループに切り替え
+            if (!player->GetPlayerModel()->IsPlayAnimation())
+            {
+                player->GetPlayerModel()->PlayRootMotion(anims.airLoop, true, true, 0.1f, "Character1_Hips");
+            }
+        }
+        break;
+
+    case 2: // 空中ループ中(着地待ち)
+        if (player->IsGround())
+        {
+            player->GetPlayerModel()->PlayRootMotion(anims.airEnd, false, true, 0.2f, "Character1_Hips");
+            step++;
+        }
+        break;
+
+    case 3: // 着地アニメーション
+        if (!player->GetPlayerModel()->IsPlayAnimation())
+        {
+            player->GetPlayerModel()->PlayRootMotion(anims.getUp, false, true, 0.2f, "Character1_Hips");
+            step++;
+        }
+        break;
+
+    case 4: // 起き上がりアニメーション
+        if (!player->GetPlayerModel()->IsPlayAnimation())
+        {
+            step = 0;
+            player->SetGravity(-0.3f);
+
+            // 先行入力チェック
+            if (InputAction() == InputActionType::LightAttack)
+            {
+                ChangeState(PlayerStateId::Combo1);
+            }
+            else if (InputAction() == InputActionType::HeavyAttack)
+            {
+                ChangeState(PlayerStateId::Heavy1);
+            }
+            else if (InputAction() == InputActionType::Dodge)
+            {
+                ChangeState(PlayerStateId::Dodge);
+            }
+            else if (InputAction() == InputActionType::Guard)
+            {
+                ChangeState(PlayerStateId::GuardIdle);
+            }
+            else if (InputRunMove())
+            {
+                ChangeState(PlayerStateId::Run);
+            }
+            else if (InputWalkMove())
+            {
+                ChangeState(PlayerStateId::Walk);
+            }
+            else
+            {
+                ChangeState(PlayerStateId::Idle);
+            }
+        }
+        break;
+
+    case 5: // 打ち上げ専用:最高高度で一時停止
+        pauseTimer -= elapsedTime;
+
+        if (pauseTimer <= 0.0f)
+        {
+            player->SetGravity(-0.3f);
+            player->GetPlayerModel()->PlayRootMotion(anims.airLoop, true, true, 0.1f, "Character1_Hips");
+            step = 2; // 落下処理へ
+        }
+        break;
+    }
+
+    // ダメージを受けた場合は即座に遷移
+    if (player->IsAnyDamage())
+    {
+        player->SetGravity(-0.3f);
+        player->SetVerticalVelocity(0.0f);
+        step = 0;
+        currentDamageType = GetCurrentDamageType();
+        HandleDamageStart(currentDamageType, elapsedTime);
+        step = 1;
+    }
+}
+
+// 終了処理
+void PlayerDamageState::Exit()
+{
+    player->SetGravity(-0.3f);
+    step = 0;
+
+    GamePad& gamepad = Input::Instance().GetGamePad();
+    gamepad.Vibrate(0.0f, 0.0f);
+}
+
+void PlayerDamageState::DrawDebugGUI()
+{
+    ImGui::Separator();
+
+    if (ImGui::TreeNode(u8"統合ダメージ"))
+    {
+        const char* damageTypeNames[] = { "Normal", "Light", "Heavy", "Launch", "Knockdown" };
+        int typeIndex = static_cast<int>(currentDamageType);
+        ImGui::Text(u8"現在のダメージタイプ: %s", damageTypeNames[typeIndex]);
+        ImGui::Text(u8"ステップ: %d", step);
+        ImGui::DragFloat(u8"一時停止タイマー", &pauseTimer, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat3(u8"ノックバック目標位置", &knockbackTargetPosition.x, 0.1f);
+
+        DirectX::XMFLOAT3 damageDir = player->GetDamageDirection();
+        ImGui::Text(u8"ダメージ方向: (%.2f, %.2f, %.2f)", damageDir.x, damageDir.y, damageDir.z);
+
+        ImGui::TreePop();
     }
 }
 

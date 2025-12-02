@@ -1,0 +1,4807 @@
+{
+    "EnemyBoss": [
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 0,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 1.2000000476837158,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 1,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "KnockDown",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.47168609499931335,
+                    "flag": "Attack",
+                    "startTime": 0.08918917179107666
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 2,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 3,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.20000000298023224,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 4,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.46666666865348816,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 5,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 6,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 7,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 8,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.6000000238418579,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 9,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.4666666984558105,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Launch",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4900897145271301,
+                    "flag": "Attack",
+                    "startTime": 0.3086227774620056
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 10,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 11,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 12,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 13,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 14,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 15,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 16,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 17,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.5149999856948853,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 18,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.44803711771965027,
+                    "flag": "Attack",
+                    "startTime": 0.20632252097129822
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5152832269668579,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.8450000286102295,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 19,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.35135188698768616,
+                    "flag": "Attack",
+                    "startTime": 0.1638512909412384
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.6486486792564392,
+                    "flag": "Attack",
+                    "startTime": 0.4645270109176636
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.8445958495140076,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.5600000023841858,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 20,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5600000023841858,
+                    "flag": "SuperArmor",
+                    "startTime": 9.313225746154785e-09
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4135136306285858,
+                    "flag": "Attack",
+                    "startTime": 0.18198198080062866
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.5249994993209839
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.494999647140503
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.550000011920929,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 21,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Heavy",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.2685328722000122,
+                    "flag": "Attack",
+                    "startTime": 0.18587514758110046
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Heavy",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.3860202729701996,
+                    "flag": "Attack",
+                    "startTime": 0.30686935782432556
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Heavy",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.6052114963531494,
+                    "flag": "Attack",
+                    "startTime": 0.40682104229927063
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5824172496795654,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0017535383813083172
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 22,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.45446735620498657,
+                    "flag": "Attack",
+                    "startTime": 0.18213346600532532
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.8824806213378906,
+                    "flag": "Attack",
+                    "startTime": 0.6253248453140259
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.2346057891845703,
+                    "flag": "Attack",
+                    "startTime": 0.9319167137145996
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.74457848072052,
+                    "flag": "Attack",
+                    "startTime": 1.4995644092559814
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.99045991897583,
+                    "flag": "Attack",
+                    "startTime": 1.8820457458496094
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 2.075456142425537,
+                    "flag": "Attack",
+                    "startTime": 2.0216825008392334
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 2.3031227588653564,
+                    "flag": "Attack",
+                    "startTime": 2.100606918334961
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 2.341217041015625,
+                    "flag": "SuperArmor",
+                    "startTime": 1.3969838619232178e-09
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 23,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 24,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 25,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 26,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 27,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.6000000238418579,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 28,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.5833333730697632,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5382077097892761,
+                    "flag": "Attack",
+                    "startTime": 0.12532176077365875
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.5,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 29,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.4166666269302368,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4494039714336395,
+                    "flag": "Attack",
+                    "startTime": 0.10119041055440903
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 30,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 31,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 32,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.382625550031662,
+                    "flag": "Attack",
+                    "startTime": 0.12837839126586914
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.7824321985244751,
+                    "flag": "Attack",
+                    "startTime": 0.5428569912910461
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.193243145942688,
+                    "flag": "Attack",
+                    "startTime": 0.994015097618103
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.7434346675872803,
+                    "flag": "Attack",
+                    "startTime": 1.5405399799346924
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 2.6127405166625977,
+                    "flag": "Attack",
+                    "startTime": 2.472201108932495
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 2.5797317028045654,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 33,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 34,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 35,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 36,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 37,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 38,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 39,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 40,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 41,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 42,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 43,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 44,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 45,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 46,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 47,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 48,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 49,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 50,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 51,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 52,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 53,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 54,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 55,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 56,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 57,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 58,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 59,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 60,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 61,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 62,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 63,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.5,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 64,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5,
+                    "flag": "Invincible",
+                    "startTime": 0.0
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 65,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 66,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 67,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 68,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 69,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 70,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 71,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 72,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 73,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 74,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.4949995279312134
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 2.0199992656707764
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 75,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 76,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 77,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 78,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.9949978590011597
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.43125003576278687,
+                    "value": 3.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 3.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 79,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 80,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 81,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 82,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 83,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 84,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 85,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 86,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 87,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 88,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.47874999046325684,
+                    "value": 1.5299999713897705
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.5012496709823608,
+                    "value": 3.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 3.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 89,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 90,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 91,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 92,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.48124995827674866,
+                    "value": 1.4999996423721313
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.5037500858306885,
+                    "value": 3.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 3.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 93,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 94,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 95,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 96,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 97,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 98,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 99,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 100,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 101,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 102,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 103,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 104,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 105,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 106,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 107,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 108,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 109,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 110,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 111,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 112,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 113,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 114,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 115,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 116,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 117,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 118,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 119,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 120,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.2549999952316284,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 121,
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "Light",
+                        "moveRate": 1.0,
+                        "revengeValue": 0,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.5558558106422424,
+                    "flag": "Attack",
+                    "startTime": 0.2633203864097595
+                }
+            ],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 122,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 123,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 124,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 125,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 126,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 127,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 128,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 129,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 130,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 131,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 132,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 133,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 134,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 135,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 136,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 137,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 138,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 139,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 140,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 141,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 142,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 143,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 144,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 145,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 146,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 147,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 148,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        },
+        {
+            "advanceInputEndFrame": 0.0,
+            "advanceInputStartFrame": 0.0,
+            "animationIndex": 149,
+            "attributes": [],
+            "cameraKeyframes": [],
+            "characterName": "EnemyBoss",
+            "events": [],
+            "speedCurve": [
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0,
+                    "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 1.0
+                }
+            ]
+        }
+    ]
+}

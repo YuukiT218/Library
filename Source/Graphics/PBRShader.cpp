@@ -51,28 +51,41 @@ PBRShader::PBRShader(ID3D11Device* device)
 		sizeof(CbMaterial),
 		materialConstantBuffer.GetAddressOf());
 
-	//PBRセットアップ用定数バッファ
+	// PBRセットアップ用定数バッファ
 	GpuResourceUtils::CreateConstantBuffer(
 		device,
 		sizeof(CbSetUp),
 		setUpConstantBuffer.GetAddressOf());
 
+	// リムライト用定数バッファ
+	GpuResourceUtils::CreateConstantBuffer(
+		device,
+		sizeof(CbRimLight),
+		rimLightConstantBuffer.GetAddressOf());
+
 	//IBLテクスチャを読み込み
 	{
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/nightSkyDiffuseHDR.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/duskSkyDiffuseHDR.dds",
 			diffuseIemShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/nightSkySpecularHDR.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/duskSkySpecularHDR.dds",
 			specularPmremShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/nightSkyBrdf.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/duskSkyBrdf.dds",
 			lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
+
+		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky_/nightSkyDiffuseHDR.dds",
+		//	diffuseIemShaderResourceView.GetAddressOf(), &texture2dDesc);
+
+		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky_/nightSkySpecularHDR.dds",
+		//	specularPmremShaderResourceView.GetAddressOf(), &texture2dDesc);
+
+		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky_/nightSkyBrdf.dds",
+		//	lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
+
 	}
-	SetUpConstant = std::make_unique<CbSetUp>();
-	cbSetUp.IBLDiffuseScale = 0.7f;
-	cbSetUp.IBLSpecularScale = 0.7f;
 }
 
 // 描画開始
@@ -96,6 +109,7 @@ void PBRShader::Begin(const RenderContext& rc)
 	dc->VSSetConstantBuffers(0, _countof(constantBuffers), constantBuffers);
 	// ピクセルシェーダーにも定数バッファを設定する
 	dc->PSSetConstantBuffers(0, _countof(constantBuffers), constantBuffers);
+	dc->PSSetConstantBuffers(8, 1, rimLightConstantBuffer.GetAddressOf());
 
 	// サンプラーステート設定
 	ID3D11SamplerState* samplerStates[] =
@@ -160,6 +174,21 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh,
 		cbMaterial.emissiveColor = mesh.material->emissiveColor;
 		cbMaterial.metalicindex = mesh.material->metalness;
 		dc->UpdateSubresource(materialConstantBuffer.Get(), 0, 0, &cbMaterial, 0, 0);
+
+		//リムライト用定数バッファ更新
+		CbRimLight cbRimLight{};
+		cbRimLight.rimPower = model->rimLightConstants.rimPower;
+		cbRimLight.rimIntensity = model->rimLightConstants.rimIntensity;
+		cbRimLight.rimColor.x = model->rimLightConstants.rimColor.x;
+		cbRimLight.rimColor.y = model->rimLightConstants.rimColor.y;
+		cbRimLight.rimColor.z = model->rimLightConstants.rimColor.z;
+		cbRimLight.rimColor.w = model->rimLightConstants.rimColor.w;
+		dc->UpdateSubresource(rimLightConstantBuffer.Get(), 0, 0, &cbRimLight, 0, 0);
+
+		CbSetUp setUpConstants{};
+		setUpConstants.IBLDiffuseScale = cbSetUp.IBLDiffuseScale;
+		setUpConstants.IBLSpecularScale = cbSetUp.IBLSpecularScale;
+		dc->UpdateSubresource(setUpConstantBuffer.Get(), 0, 0, &setUpConstants, 0, 0);
 
 		// シェーダーリソースビュー設定
 		ID3D11ShaderResourceView* srvs[] =

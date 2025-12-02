@@ -68,7 +68,7 @@ enum class AnimationFlag
 	None,
 	Attack,
 	Invincible,
-	Parry,
+	Guard,
 	SuperArmor
 };
 
@@ -77,7 +77,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(AnimationFlag, {
 	{AnimationFlag::None, "None"},
 	{AnimationFlag::Attack, "Attack"},
 	{AnimationFlag::Invincible, "Invincible"},
-	{AnimationFlag::Parry, "Parry"},
+	{AnimationFlag::Guard, "Guard"},
 	{AnimationFlag::SuperArmor, "SuperArmor"}
 	})
 
@@ -96,7 +96,8 @@ enum class KnockbackType
 	None,
 	Light,
 	Heavy,
-	Launch
+	Launch,
+	KnockDown
 };
 
 // enum <-> string 変換のための定義
@@ -104,7 +105,8 @@ NLOHMANN_JSON_SERIALIZE_ENUM(KnockbackType, {
 	{KnockbackType::None, "None"},
 	{KnockbackType::Light, "Light"},
 	{KnockbackType::Heavy, "Heavy"},
-	{KnockbackType::Launch, "Launch"}
+	{KnockbackType::Launch, "Launch"},
+	{KnockbackType::KnockDown, "KnockDown"}
 	})
 
 struct AttackAnimParam
@@ -132,6 +134,9 @@ struct AttackAnimParam
 
 	// ノックバックの種類
 	KnockbackType knockbackType = KnockbackType::None;
+
+	// リベンジ値蓄積量
+	int revengeValue = 1.0f;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
 	moveRate, turnRate,
@@ -139,7 +144,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
 	attackDamage, invisibleTime,
 	attackLeftVibrate, attackRightVibrate,
 	attackHitStopTime, attackHitStopSpeed,
-	knockbackType)
+	knockbackType, revengeValue)
 
 struct AnimationAttribute
 {
@@ -243,6 +248,14 @@ public:
 		DirectX::XMFLOAT4 OverwriteColor = { 1.0f,1.0f,1.0f,1.0f };//モデルの色を変化
 	};
 
+	struct RimLightConstants
+	{
+		float rimPower = 1.0f;
+		float rimIntensity = 0.0f;
+		DirectX::XMFLOAT4 rimColor = { 0.0f,0.0f,1.0f, 1.0f };
+	};
+	RimLightConstants rimLightConstants;
+
 	void DrawGui();
 
 	// ノードデータ取得
@@ -297,6 +310,9 @@ public:
 	// アニメーション計算処理
 	void ComputeAnimation(float elapsedTime);
 	void ComputeRootAnimation(float elapsedTime, Character* character);
+
+	// アニメーション一時停止、再開
+	void PauseAnimation(bool animationPause) { this->animationPause = animationPause; }
 
 	// ブレンディング計算処理
 	void ComputeBlending(float elapsedTime);
@@ -427,7 +443,7 @@ private:
 	EmissiveColors emissive;
 	//ディゾルブ
 	DissolveConstants dissolveConstants;
-
+	
 	int currentAnimationIndex = -1;
 	float currentAnimationSeconds = 0;
 	float oldAnimationSeconds = 0;
@@ -443,6 +459,7 @@ private:
 	float currentAnimationBlendSeconds = 0.0f;
 	float animationBlendSecondsLength = -1.0f;
 	bool animationBlending = false;
+	bool animationPause = false;
 
 	const char* filename = nullptr;
 	const char* rootNodeName = nullptr;

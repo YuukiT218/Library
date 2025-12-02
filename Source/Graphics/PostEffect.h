@@ -58,11 +58,11 @@ private:
 		// 定数バッファは16バイトアライメントでしか作成できないのでパディングする。
 		//float padding[2];
 		float gaussianSigma = 1.0f;
-		float bloomIntensity = 0.1f;
+		float bloomIntensity = 0.3f;
 
 		float exposure = 1.2f;
 		float fExposureLevel = 32.0f;
-		float threshold = 1.5f;//闘値
+		float threshold = 0.8f;//闘値
 		//時間
 		float time = 0;//現在の時間
 		float oldTime = 0;//前フレームの時間

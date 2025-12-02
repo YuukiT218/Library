@@ -118,37 +118,37 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
             float3 L = normalize(lightDirection.xyz);
             DirectBDRF(diffuse_reflectance, F0, N, V, L,
 					   LightColor, roughness,diffuse, specular);
-            if (cascadeFlags.y > 0)
-            {
+//            if (cascadeFlags.y > 0)
+//            {
             
-                //	平行光源用カスケードシャドウマップ
-                for (int index = 0; index < ShadowBufferSize; ++index)
-                {
-		        // ライトから見たNDC座標を算出
-                    float4 wvpPos = mul(float4(pin.position.xyz, 1.0f), CascadeLightViewProjection[index]);
+//                //	平行光源用カスケードシャドウマップ
+//                for (int index = 0; index < ShadowBufferSize; ++index)
+//                {
+//		        // ライトから見たNDC座標を算出
+//                    float4 wvpPos = mul(float4(pin.position.xyz, 1.0f), CascadeLightViewProjection[index]);
 
-                // NDC座標からUV座標を算出する
-                    wvpPos /= wvpPos.w;
-                    wvpPos.y = -wvpPos.y;
-                    wvpPos.xy = 0.5f * wvpPos.xy + 0.5f;
+//                // NDC座標からUV座標を算出する
+//                    wvpPos /= wvpPos.w;
+//                    wvpPos.y = -wvpPos.y;
+//                    wvpPos.xy = 0.5f * wvpPos.xy + 0.5f;
 
-		        // シャドウマップのUV範囲内か、深度値が範囲内か判定する
-                    if (wvpPos.z >= 0 && wvpPos.z <= 1 && wvpPos.x >= 0 && wvpPos.x <= 1 && wvpPos.y >= 0 && wvpPos.y <= 1)
-                    {
-						float3 shadowAtten = ShadowMapFetchPCF(cascadeShadowMap[index], shadowSampler, index, wvpPos.xyz,
-                                       shadowColor, shadowAttenuation, CascadeShadowBias[index], 3.0f);
+//		        // シャドウマップのUV範囲内か、深度値が範囲内か判定する
+//                    if (wvpPos.z >= 0 && wvpPos.z <= 1 && wvpPos.x >= 0 && wvpPos.x <= 1 && wvpPos.y >= 0 && wvpPos.y <= 1)
+//                    {
+//						float3 shadowAtten = ShadowMapFetchPCF(cascadeShadowMap[index], shadowSampler, index, wvpPos.xyz,
+//                                       shadowColor, shadowAttenuation, CascadeShadowBias[index], 3.0f);
                         
-                        diffuse *= shadowAtten;
-                        specular *= shadowAtten;
+//                        diffuse *= shadowAtten;
+//                        specular *= shadowAtten;
                         
-#if 01  //  本来はデバッグ用の機能なのでいらない
-                        DebugShadowMapIndex = index;
-#endif  //  defined(_DEBUG)
-                        break;
-                    }
-                }
-            }
-            else
+//#if 01  //  本来はデバッグ用の機能なのでいらない
+//                        DebugShadowMapIndex = index;
+//#endif  //  defined(_DEBUG)
+//                        break;
+//                    }
+//                }
+//            }
+//            else
             {
                 float3 shadowAtten = ShadowMapFetchPCF(shadowMap, shadowSampler, 1, pin.shadow,
                                        shadowColor, shadowAttenuation, shadowBias, 3.0f);
@@ -160,8 +160,29 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
             total_diffuse += diffuse;
             total_specular += specular;
         }
-    }
 
+        // 点光源
+        for (int i = 0; i < POINT_MAX; ++i)
+        {
+            float4 point_light = pointLight[i];
+            float4 point_color = pointColor[i];
+
+            float3 L = pin.position.xyz - point_light.xyz;
+            float len = length(L);
+            if (len >= point_light.w)
+                continue;
+            float attenuateLength = saturate(1.0f - len / point_light.w);
+            float attenuation = attenuateLength * attenuateLength;
+            L /= len;
+            float3 diffuse = (float3) 0, specular = (float3) 0;
+            DirectBDRF(diffuse_reflectance, F0, N, V, L,
+                       point_color.rgb * 100, roughness,
+                       diffuse, specular);
+            total_diffuse += diffuse * attenuation;
+            total_specular += specular * attenuation;
+        }
+    }
+    
     //IBL処理
     total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0,
               diffuseiem, linearSampler) * IBLDiffuseScale;
@@ -174,7 +195,6 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
    
     //	色生成
     float3 color = total_diffuse + total_specular + emissive_color;
-    //return float4(color, base_color.a);
     color = pow(color, 1.0f / GammaFactor);
 
     //  カスケード表示
@@ -193,6 +213,13 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
             color.rgb = 0;
         }
     }
+
+	// リムライト（安定版：pow の利点を残しつつ 0 でオフに）
+    V = normalize(cameraPosition.xyz - pin.position.xyz);
+    float rimBase = 1.0f - saturate(dot(N, V));
+    float rimRange = pow(rimBase, rimPower); // 立ち上がりカーブ
+    float rimFactor = rimRange * rimIntensity; // 明るさ
+    color.rgb += rimColor * rimFactor;
 
     return float4(color, base_color.a);
 }

@@ -17,11 +17,11 @@ EnemySword::EnemySword(ID3D11Device* device, const char* filename)
 	//当たり判定用初期設定
 	hitSphereIndex = 5;
 	weaponHitOffset[0] = { 0.0f, 0.0f, 0.0f };
-	weaponHitOffset[1] = { 0.0f, 0.0f, 0.2f };
-	weaponHitOffset[2] = { 0.0f, 0.0f, 0.4f };
-	weaponHitOffset[3] = { 0.0f, 0.0f, 0.6f };
-	weaponHitOffset[4] = { 0.0f, 0.0f, 1.0f };
-	hitSphereRadius = 0.15f;
+	weaponHitOffset[1] = { 0.0f, 0.0f, 0.6f };
+	weaponHitOffset[2] = { 0.0f, 0.0f, 0.85f };
+	weaponHitOffset[3] = { 0.0f, 0.0f, 1.1f };
+	weaponHitOffset[4] = { 0.0f, 0.0f, 1.35f };
+	hitSphereRadius = 0.225f;
 
 	//炎トレイル用ポイントライト
 	attenuation = 1.1f;
@@ -34,8 +34,8 @@ EnemySword::EnemySword(ID3D11Device* device, const char* filename)
 	RootEnd = { Mathf::Color255ToNormalized({255.f,9.f,9.f,10.0f}) };
 	dissolve = 0.5f;
 	Colorscale = 1.2f;
-	/*attackHitEffect = std::make_shared<Effect>("Data/Effect/akaslash/akaslash_middle.efk");
-	parryEffect = std::make_shared<Effect>("Data/Effect/Parry/ParrySpark.efkefc");*/
+	attackHitEffect = std::make_shared<Effect>("Data/Effect/HitEffect/HitEffect.efkefc");
+	/*parryEffect = std::make_shared<Effect>("Data/Effect/Parry/ParrySpark.efkefc");*/
 }
 
 EnemySword::~EnemySword()
@@ -54,12 +54,12 @@ void EnemySword::Update(float elapsedTime)
 	//model->SetEmissiveColors(colors);
 }
 
-void EnemySword::Render(const RenderContext& rc, Shader* shader)
+void EnemySword::Render(const RenderContext& rc, ShaderId shaderId)
 {
 	ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
-	modelRenderer->Draw(ShaderId::Lambert, model);
+	modelRenderer->Draw(ShaderId::PBR, model);
 	modelRenderer->Render(rc);
-	//if (IsAttack)TrailRender(rc);
+	if (IsAttack)TrailRender(rc);
 }
 
 void EnemySword::DrawDebugImGUi()

@@ -10,7 +10,7 @@ public:
 
 	void Update(float elapsedTime) override;
 
-	void Render(const RenderContext& rc, Shader* shader) override;
+	void Render(const RenderContext& rc, ShaderId shaderId) override;
 
 	void DrawDebugImGUi();
 };

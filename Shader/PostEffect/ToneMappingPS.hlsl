@@ -25,7 +25,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     // 露出レベルを適用
     color *= fExposureLevel;
     
-     //トーンマップ
+	//トーンマップ
     //color.rgb = color.rgb / (color.rgb + 30.0);
 
     // ガンマ補正を適用

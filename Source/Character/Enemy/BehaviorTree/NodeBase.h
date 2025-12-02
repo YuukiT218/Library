@@ -12,6 +12,7 @@
 template <typename ActorType>
 class NodeBase
 {
+	friend class BehaviorTree<ActorType>;
 public:
 	// コンストラクタ
 	NodeBase(std::string name, NodeBase* parent, int priority,
@@ -42,6 +43,8 @@ public:
 	NodeBase* SearchNode(std::string searchName);
 	// ノード推論
 	NodeBase* Inference(BehaviorData<ActorType>* data);
+	// 子ノード数を取得
+	size_t GetChildrenCount() const { return children.size(); }
 	// 実行
 	typename ActionBase<ActorType>::State Run(float elapsedTime);
 	std::vector<NodeBase*>		children;							// 子ノード
@@ -55,14 +58,10 @@ protected:
 	NodeBase* parent;												// 親ノード
 };
 
-
-
-
 // デストラクタ
 template <typename ActorType>
 NodeBase<ActorType>::~NodeBase()
 {
-	
 }
 
 // ノード検索
