@@ -39,10 +39,16 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	model->SetAdRoughness(0.0f);
 
 	sword = std::make_unique<EnemySword>(device, "Data/Model/Weapon/Sword/Sword.gltf");
+	lightBall = std::make_unique<Effect>("Data/Effect/LightBall.efkefc");
+	teleportEffect = std::make_unique<Effect>("Data/Effect/Teleport.efkefc");
+	attackSign = std::make_unique<Effect>("Data/Effect/AttackSign.efkefc");
+	magicCircle = std::make_unique<Effect>("Data/Effect/MagicCircle.efkefc");
+	deathEffect = std::make_shared<Effect>("Data/Effect/Death.efkefc");
 
 	radius = 0.5f;
 	height = 1.0f;
 	IsGameClear = false;
+	specialReady = true;
 
 	initAnimSpeed();
 
@@ -55,7 +61,8 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	{
 		aiTree->AddNode("Root", "Battle", 1, BehaviorTree<EnemyBoss>::SelectRule::Priority, new BattleJudgment(this), nullptr);
 		aiTree->AddNode("Battle", "Dead", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, new DeadJudgment(this), new DeadAction(this));
-		aiTree->AddNode("Battle", "Damage", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, new AnyDamageJudgment(this), new UnifiedDamageAction(this));
+		aiTree->AddNode("Battle", "Damage", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, new AnyDamageJudgment(this), new UnifiedDamageAction(this));
+		aiTree->AddNode("Battle", "Fall", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, new FallJudgment(this), new FallAction(this));
 		aiTree->AddNode("Battle", "Pursuit", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new PursuitAction(this));
 	}
 	{
@@ -63,7 +70,17 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 		aiTree->AddNode("Attack", "SlashCombo", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SlashCombo1Action(this));
 		aiTree->AddNode("Attack", "TeleportCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TeleportCombo(this));
 		aiTree->AddNode("Attack", "TeleportAssault", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
-
+		aiTree->AddNode("Attack", "NormalTeleport", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new NormalTeleport(this));
+		{
+			aiTree->AddNode("Attack", "TeleportDashSlash", 4, BehaviorTree<EnemyBoss>::SelectRule::Sequence, nullptr, nullptr);
+			aiTree->AddNode("TeleportDashSlash", "NormalTeleport", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new NormalTeleport(this));
+			aiTree->AddNode("TeleportDashSlash", "DashSlash", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
+		}
+		{
+			aiTree->AddNode("Attack", "TeleportSlashWave", 4, BehaviorTree<EnemyBoss>::SelectRule::Sequence, nullptr, nullptr);
+			aiTree->AddNode("TeleportSlashWave", "NormalTeleport", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new NormalTeleport(this));
+			aiTree->AddNode("TeleportSlashWave", "SlashWave", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SlashWave(this));
+		}
 	}
 	{
 		aiTree->AddNode("Battle", "LongRange", 2, BehaviorTree<EnemyBoss>::SelectRule::Random, new LongRangeJudgment(this), nullptr);
@@ -75,13 +92,24 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 			aiTree->AddNode("DashSlashCombo", "DashSlash", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
 		}
 		aiTree->AddNode("LongRange", "TripleTeleport", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TripleTeleportAction(this));
-		aiTree->AddNode("LongRange", "TeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
 		{
 			aiTree->AddNode("LongRange", "TripleTeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Sequence, nullptr, nullptr);
 			aiTree->AddNode("TripleTeleportAssault", "TeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
 			aiTree->AddNode("TripleTeleportAssault", "TeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
 			aiTree->AddNode("TripleTeleportAssault", "TeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
 		}
+		aiTree->AddNode("LongRange", "TeleportCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TeleportCombo(this));
+		aiTree->AddNode("LongRange", "SlashWave", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SlashWave(this));
+		aiTree->AddNode("LongRange", "PillarSpiral", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new PillarSpiral(this));
+	}
+	{
+		aiTree->AddNode("Battle", "Revenge", 1, BehaviorTree<EnemyBoss>::SelectRule::Random, new RevengeJudgment(this), nullptr);
+		aiTree->AddNode("Revenge", "RevengeDive", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new RevengeDive(this));
+		aiTree->AddNode("Revenge", "RevengeAssault", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new RevengeAssault(this));
+	}
+	{
+		aiTree->AddNode("Battle", "Special", 1, BehaviorTree<EnemyBoss>::SelectRule::Priority, new SpecialAttackJudgment(this), nullptr);
+		aiTree->AddNode("Special", "SpecialAttack", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SpecialAttack(this));
 	}
 	{
 		aiTree->AddNode("Root", "Scout", 2, BehaviorTree<EnemyBoss>::SelectRule::Priority, nullptr, nullptr);
@@ -102,12 +130,13 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 		{"foot_r", nodeRadius[8]},
 	};
 
-	SetPosition(DirectX::XMFLOAT3(-1.0f, -2.4f, 6.5f));
+	SetPosition(DirectX::XMFLOAT3(-1.0f, -1.4f, 6.5f));
 	SetAngle(DirectX::XMFLOAT3(0.0f, DirectX::XMConvertToRadians(180.0f), 0.0f));
 	SetTerritory(GetPosition(), 10.0f);
+	searchRange = 20.0f;
 
-	SetMaxHealth(75000);
-	SetHealth(75000);
+	SetMaxHealth(600);
+	SetHealth(600);
 
 	SetRandomTargetPosition();
 
@@ -143,24 +172,50 @@ void EnemyBoss::UpdateEnemySpecific(float elapsedTime)
 		model->SetAnimationSpeed(speed);
 	}
 
-	// 現在実行されているノードが無ければ
-	if (activeNode == nullptr)
+	// 反撃値チェック
+	if (GetRevengeValue() > revengeTolerance)
 	{
-		// 次に実行するノードを推論する。
-		activeNode = aiTree->ActiveNodeInference(behaviorData.get());
+		SetRevengeState(true);
+		SetSuperArmor(true);
+		ResetRevengeValue();
+	}	
+
+	// スーパーアーマー中は全てのダメージリアクションをキャンセルする
+	if (isSuperArmor)
+	{
+		ResetDamage();
 	}
-	// 現在実行するノードがあれば
-	if (activeNode != nullptr)
+
+	if (isTeleporting)
+		SetInvincible(true);
+	else
+		SetInvincible(false);
+
+	// 現在実行されているノードが無ければ
+	if (actionFlag)
 	{
-		// ビヘイビアツリーからノードを実行。
-		activeNode = aiTree->Run(activeNode, behaviorData.get(), elapsedTime);
+		if (activeNode == nullptr)
+		{
+			sword->ResetAttackState();
+			// 次に実行するノードを推論する。
+			activeNode = aiTree->ActiveNodeInference(behaviorData.get());
+		}
+		// 現在実行するノードがあれば
+		if (activeNode != nullptr)
+		{
+			if (activeNode->GetName() != "Damage" && GetRevengeValue() > 0)
+			{
+				SubRevengeValue();
+			}
+			// ビヘイビアツリーからノードを実行。
+			activeNode = aiTree->Run(activeNode, behaviorData.get(), elapsedTime);
+		}
 	}
 
 	// アタッチメント
 	sword->Attach("weapon_r", model.get());
 
 	SetWarpPosition();
-	SetKnockBackPosition();
 
 	sword->Update(elapsedTime);
 
@@ -201,9 +256,51 @@ void EnemyBoss::EditUpdate(float elapsedTime)
 void EnemyBoss::Render(const RenderContext& rc, ShaderId shaderId)
 {
 	ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
-	modelRenderer->Draw(shaderId, model);
-	sword->Render(rc, shaderId);
-	modelRenderer->Render(rc);
+
+	// テレポート中かどうかで描画方法を切り替え
+	if (HasAfterimage())
+	{
+		const auto& afterimage = GetAfterimage();
+		modelRenderer->DrawAfterimage(
+			shaderId,
+			model,
+			afterimage.nodes,
+			afterimage.transform,
+			afterimage.alpha,
+			afterimage.darkness
+		);
+	}
+
+	// === キャラクター本体の描画 ===
+	TeleportPhase phase = GetTeleportPhase();
+
+	if (phase == TeleportPhase::FadeOut)
+	{
+		// === FadeOut: 残像を残して消える（エフェクトなし） ===
+		// 単純にアルファ値を下げて消えていく
+		float progress = GetTeleportProgress();
+		float alpha = 1.0f - progress;  // 1.0 → 0.0
+
+		modelRenderer->DrawWithTeleport(shaderId, model, progress, totalGameTime, TeleportRenderMode::DissolveDistortion);
+	}
+	else if (phase == TeleportPhase::Moving)
+	{
+		// === Moving: 描画しない ===
+		return;
+	}
+	else if (phase == TeleportPhase::FadeIn)
+	{
+		// === FadeIn: ディゾルブ+ディストーションで出現 ===
+		float progress = GetTeleportProgress();
+
+		modelRenderer->DrawWithTeleport(shaderId, model, progress, totalGameTime, TeleportRenderMode::DissolveDistortion);
+	}
+	else
+	{
+		// === 通常状態 ===
+		modelRenderer->Draw(shaderId, model);
+		sword->Render(rc, shaderId);
+	}
 }
 
 void EnemyBoss::ShadowRender(const RenderContext& rc, ShadowMap* shadowMap)
@@ -215,7 +312,8 @@ void EnemyBoss::ShadowRender(const RenderContext& rc, ShadowMap* shadowMap)
 // 死亡した時に呼ばれる
 void EnemyBoss::OnDead()
 {
-	
+	SetDeathFlag(true);
+	GetModel()->PlayRootMotion(GetModel()->GetAnimationIndex("Hit_Large_Combat_Death_Seq_0"), false, true, 0.1f, "root");
 }
 
 void EnemyBoss::DrawDebugPrimitive()
@@ -230,11 +328,6 @@ void EnemyBoss::DrawDebugPrimitive()
 		debugRenderer->DrawSphere(WarpPosition[0], radius, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 		debugRenderer->DrawSphere(WarpPosition[1], radius, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 		debugRenderer->DrawSphere(WarpPosition[2], radius, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-
-		debugRenderer->DrawSphere(KnockBackPosition[0], radius, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
-		debugRenderer->DrawSphere(KnockBackPosition[1], radius, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
-		debugRenderer->DrawSphere(KnockBackPosition[2], radius, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
-		debugRenderer->DrawSphere(KnockBackPosition[3], radius, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		// 縄張り範囲をデバッグ円柱描画
 		debugRenderer->DrawCylinder(territoryOrigin, territoryRange, 1.0f, DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
@@ -424,6 +517,7 @@ void EnemyBoss::DrawDebugGUI()
 		ImGui::InputFloat3("Scale", &scale.x);
 
 		ImGui::DragFloat("AttackRange", &attackRange, 0.1f);
+		ImGui::DragFloat("TeleportOffset", &teleportOffset, 0.1f);
 
 		ImGui::InputInt("Health", &health);
 		ImGui::InputInt("RevengeValue", &revengeValue);
@@ -435,12 +529,25 @@ void EnemyBoss::DrawDebugGUI()
 		ImGui::Checkbox("IsGround", &isGround);
 		bool isAnyDamage = IsAnyDamage();
 		ImGui::Checkbox("DamageReaction", &isAnyDamage);
+		ImGui::Checkbox("SuperArmor", &isSuperArmor);
+		ImGui::Checkbox("RevengeState", &isRevenge);
 
 		ImGui::Checkbox("ActionFlag", &actionFlag);
 
 		ImGui::Text(u8"Behavior　%s", str.c_str());
 
 		ImGui::Checkbox(u8"当たり判定描画フラグ", &drawCollisionPrimitive);
+
+		if (ImGui::TreeNode("Teleport Effect"))
+		{
+			if (ImGui::Button("Test Teleport"))
+			{
+				DirectX::XMFLOAT3 targetPos = position;
+				StartTeleport(targetPos, 0.2f);
+			}
+
+			ImGui::TreePop();
+		}
 
 		Enemy::DrawDebugGUI();
 
@@ -496,14 +603,14 @@ void EnemyBoss::SetWarpPosition()
 	// ワープ位置を設定
 	// 位置0: プレイヤー方向 + 右側
 	WarpPosition[0] = DirectX::SimpleMath::Vector3{
-		position.x + toPlayer.x * 5.0f + rightVec.x * 7.0f,
+		position.x + toPlayer.x * 5.0f + rightVec.x * 10.0f,
 		position.y,
-		position.z + toPlayer.z * 5.0f + rightVec.z * 7.0f
+		position.z + toPlayer.z * 3.0f + rightVec.z * 4.0f
 	};
 
 	// 位置1: プレイヤー方向 + 左側
 	WarpPosition[1] = DirectX::SimpleMath::Vector3{
-		position.x + toPlayer.x * 5.0f + leftVec.x * 7.0f,
+		position.x + toPlayer.x * 5.0f + leftVec.x * 10.0f,
 		position.y,
 		position.z + toPlayer.z * 5.0f + leftVec.z * 7.0f
 	};
@@ -514,26 +621,8 @@ void EnemyBoss::SetWarpPosition()
 		position.y,
 		position.z + toPlayer.z * 10.0f
 	};
-}
 
-void EnemyBoss::SetKnockBackPosition()
-{
-	DirectX::SimpleMath::Vector3 vec;
-	vec = CharacterForward(angle);
-	KnockBackPosition[0] = DirectX::SimpleMath::Vector3{
-		position.x + vec.x * 2.0f,
-		position.y,
-		position.z + vec.z * 2.0f };
-	KnockBackPosition[1] = DirectX::SimpleMath::Vector3{
-		position.x + vec.x * 5.0f,
-		position.y,
-		position.z + vec.z * 5.0f };
-	KnockBackPosition[2] = DirectX::SimpleMath::Vector3{
-		position.x + vec.x * 3.0f,
-		position.y + 3.0f,
-		position.z + vec.z * 3.0f };
-	KnockBackPosition[3] = DirectX::SimpleMath::Vector3{
-		position.x + vec.x * 1.5f,
-		-1.4f,
-		position.z + vec.z * 1.5f };
+	KeepAreaLimit(WarpPosition[0]);
+	KeepAreaLimit(WarpPosition[1]);
+	KeepAreaLimit(WarpPosition[2]);
 }

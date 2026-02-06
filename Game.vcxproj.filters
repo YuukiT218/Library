@@ -314,6 +314,9 @@
     <ClInclude Include="Source\Effect\Effect.h" />
     <ClInclude Include="Source\Effect\EffectManager.h" />
     <ClInclude Include="Source\Graphics\Renderer\TrailRenderer.h" />
+    <ClInclude Include="Source\Character\Projectile\Projectile.h" />
+    <ClInclude Include="Source\Character\Projectile\ProjectileManager.h" />
+    <ClInclude Include="Source\UI\Pause.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Framework.cpp">
@@ -511,6 +514,15 @@
     <ClCompile Include="Source\Graphics\Renderer\TrailRenderer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Character\Projectile\Projectile.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\Projectile\ProjectileManager.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UI\Pause.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Sprite.hlsli">
@@ -657,6 +669,12 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\TrailRendererVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\SilhouettePS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GaugePS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

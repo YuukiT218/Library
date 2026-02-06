@@ -115,6 +115,8 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Character\Projectile\Projectile.h" />
+    <ClInclude Include="Source\Character\Projectile\ProjectileManager.h" />
     <ClInclude Include="Source\Effect\Effect.h" />
     <ClInclude Include="Source\Effect\EffectManager.h" />
     <ClInclude Include="Source\Graphics\Renderer\TrailRenderer.h" />
@@ -294,8 +296,11 @@
     <ClInclude Include="Source\Graphics\Shader.h" />
     <ClInclude Include="Source\Sprite\Sprite.h" />
     <ClInclude Include="Source\Math\TransformUtils.h" />
+    <ClInclude Include="Source\UI\Pause.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Character\Projectile\Projectile.cpp" />
+    <ClCompile Include="Source\Character\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Source\Effect\Effect.cpp" />
     <ClCompile Include="Source\Effect\EffectManager.cpp" />
     <ClCompile Include="Source\Graphics\Renderer\TrailRenderer.cpp" />
@@ -361,6 +366,7 @@
     <ClCompile Include="Source\Graphics\RenderState.cpp" />
     <ClCompile Include="Source\Sprite\Sprite.cpp" />
     <ClCompile Include="Source\Math\TransformUtils.cpp" />
+    <ClCompile Include="Source\UI\Pause.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Basic.hlsli" />
@@ -392,6 +398,10 @@
     <FxCompile Include="Shader\FullScreenQuad\FullScreenQuadVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\GaugePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\LambertPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -476,6 +486,10 @@
     <FxCompile Include="Shader\PrimitiveRendererVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SilhouettePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\SkyBoxPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

@@ -74,7 +74,9 @@ private:
     DirectX::XMFLOAT3 currentCameraPosition = { 0, 0, 0 };
     DirectX::XMFLOAT3 targetCameraPosition = { 0, 0, 0 };
 
+    float defaultRotationLerpSpeed = 15.0f;
     float rotationLerpSpeed = 15.0f;
+    float defaultPositionLerpSpeed = 20.0f;
     float positionLerpSpeed = 20.0f;
 
     // 画角チェック設定

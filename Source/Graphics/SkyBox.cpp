@@ -14,8 +14,8 @@ SkyBox::SkyBox(ID3D11Device* device)
 	};
 
 	// 空用描画スプライト
-	skyBoxRenderSprite = std::make_unique<Sprite>(device, "Data/SkyBox/dusk_sky/duskSkyEnvHDR.dds");
-	//skyBoxRenderSprite = std::make_unique<Sprite>(device, "Data/SkyBox/night_sky_/nightSkyEnvHDR.dds");
+	skyBoxRenderSprite = std::make_unique<Sprite>(device, "Data/SkyBox/dusk_sky/EnvHDR.dds");
+	//skyBoxRenderSprite = std::make_unique<Sprite>(device, "Data/SkyBox/night_sky/EnvHDR.dds");
 
 	// 空描画用シェーダー
 	GpuResourceUtils::LoadVertexShader(
@@ -102,7 +102,7 @@ void SkyBox::Render(const RenderContext& rc)
 	rc.deviceContext->PSSetShader(skyBoxPixelShader.Get(), nullptr, 0);
 
 	// 描画
-	skyBoxRenderSprite->Render(rc.deviceContext, 0.0f, 0.0f, 0.0f, 1280, 720, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, skyBoxVertexShader.Get(), skyBoxPixelShader.Get());
+	skyBoxRenderSprite->Render(rc.deviceContext, 0.0f, 0.0f, 0.0f, 1920, 1080, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, skyBoxVertexShader.Get(), skyBoxPixelShader.Get());
 }
 
 void SkyBox::End(const RenderContext& rc)

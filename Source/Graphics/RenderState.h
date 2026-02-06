@@ -24,6 +24,7 @@ enum class DepthState
 	TestOnly,
 	WriteOnly,
 	NoTestNoWrite,
+	TestGreater,
 
 	EnumCount
 };
@@ -47,6 +48,7 @@ enum class RasterizerState
 	Solid,
 	SolidCullNone,
 	SolidCullBack,
+	SolidCullFront,
 	WireCullNone,
 	WireCullBack,
 

@@ -61,7 +61,7 @@ private:
 		float bloomIntensity = 0.3f;
 
 		float exposure = 1.2f;
-		float fExposureLevel = 32.0f;
+		float fExposureLevel = 0.5f;
 		float threshold = 0.8f;//闘値
 		//時間
 		float time = 0;//現在の時間

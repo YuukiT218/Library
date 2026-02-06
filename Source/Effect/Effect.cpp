@@ -2,6 +2,11 @@
 #include "Effect.h"
 #include "EffectManager.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 // コンストラクタ
 Effect::Effect(const char* filename)
 {
@@ -23,11 +28,12 @@ Effect::Effect(const char* filename)
 }
 
 // 再生
-Effekseer::Handle Effect::Play(const DirectX::XMFLOAT3& position, float scale)
+Effekseer::Handle Effect::Play(const DirectX::XMFLOAT3& position, float scale, const DirectX::XMFLOAT3& rotation)
 {
 	Effekseer::ManagerRef effekseerManager = EffectManager::Instance().GetEffekseerManager();
 
 	Effekseer::Handle handle = effekseerManager->Play(effekseerEffect, position.x, position.y, position.z);
+	effekseerManager->SetRotation(handle, rotation.x, rotation.y, rotation.z);
 	effekseerManager->SetScale(handle, scale, scale, scale);
 	return handle;
 }

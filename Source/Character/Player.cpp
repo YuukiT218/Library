@@ -11,6 +11,11 @@
 #include "System/AnimationConfigLoader.h"
 #include "Camera/CameraParam.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 static Player* instance = nullptr;
 
 // インスタンス取得
@@ -31,16 +36,18 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
 
     // ステージの高さに合わせる
     position.x = -1.0f;
-    //position.y = -2.4f;
+    position.y = -1.432f;
     position.z = -15.0f;
 
     // アニメーションスピード設定
     initAnimSpeed();
 
     sword = std::make_unique<Sword>(device, "Data/Model/Weapon/Sword/Sword.gltf");
+    guardEffect = std::make_unique<Effect>("Data/Effect/Guard.efkefc");
+    deathEffect = std::make_shared<Effect>("Data/Effect/Death.efkefc");
 
     // プレイヤーの最大体力と体力設定
-    maxHealth = 70;
+    maxHealth = 150;
     health = maxHealth;
 
     //healthBar = std::make_unique<Sprite>(device);
@@ -83,6 +90,7 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
 Player::~Player()
 {
     // 今は何もしない
+
 }
 
 #include <DirectXMath.h>
@@ -198,7 +206,6 @@ void Player::Update(float elapsedTime)
     UpdateTransform();
 
     SetKnockbackPosition();
-    SetEnemyWarpPosition();
 
     // アニメーション更新
 	model->UpdateAnimation(elapsedTime, this);
@@ -226,7 +233,7 @@ void Player::EditUpdate(float elapsedTime)
 
     sword->AttackAnimationCollision(model.get(), config, this);
 
-    // 速力処理更新
+	// 速力処理更新
     UpdateVelocity(elapsedTime);
 
     // プレイヤーとエネミーの衝突処理
@@ -258,7 +265,7 @@ DirectX::XMFLOAT3 Player::GetMoveVec() const
     float ax = gamePad.GetAxisLX();
     float ay = gamePad.GetAxisLY();
 
-    // カメラ方向とステックの入力値によって進行方向を計算する
+    // カメラ方向とスティックの入力値によって進行方向を計算する
     Camera& camera = Camera::Instance();
     const DirectX::XMFLOAT3& cameraRight = camera.GetRight();
     const DirectX::XMFLOAT3& cameraFront = camera.GetFront();
@@ -278,11 +285,38 @@ DirectX::XMFLOAT3 Player::GetMoveVec() const
     float cameraFrontX = cameraFront.x;
     float cameraFrontZ = cameraFront.z;
     float cameraFrontLength = sqrtf(cameraFrontX * cameraFrontX + cameraFrontZ * cameraFrontZ);
-    if (cameraFrontLength > 0.0f)
+
+    // 閾値を少し大きめ(0.01f)に設定して、完全に0でなくても垂直に近いなら回避処理を行う
+    if (cameraFrontLength > 0.01f)
     {
-        // 単位ベクトル化
+        // 通常時：単位ベクトル化
         cameraFrontX /= cameraFrontLength;
         cameraFrontZ /= cameraFrontLength;
+    }
+    else
+    {
+        // カメラがほぼ真上・真下を向いている場合
+        // FrontベクトルのXZ成分が消失するため、代わりにUpベクトル（カメラの上方向）を利用する
+
+        // 真下を向いている時、画面の上方向（スティック上）は、カメラのUpベクトル（頭の向き）と一致するため
+        const DirectX::XMFLOAT3& cameraUp = camera.GetUp();
+        float cameraUpX = cameraUp.x;
+        float cameraUpZ = cameraUp.z;
+        float cameraUpLength = sqrtf(cameraUpX * cameraUpX + cameraUpZ * cameraUpZ);
+
+        if (cameraUpLength > 0.001f)
+        {
+            cameraFrontX = cameraUpX / cameraUpLength;
+            cameraFrontZ = cameraUpZ / cameraUpLength;
+
+            // もし真上を見上げている場合(Front.y > 0)、Upベクトルは画面下方向（背中側）を向くことが多いので反転させる
+            // (真下を見ているときは Front.y < 0 なのでそのまま使用)
+            if (cameraFront.y > 0.0f)
+            {
+                cameraFrontX = -cameraFrontX;
+                cameraFrontZ = -cameraFrontZ;
+            }
+        }
     }
 
     // スティックの水平入力値をカメラ右方向に反映し、
@@ -339,15 +373,7 @@ void Player::CollisionPlayerVsEnemies()
         DirectX::XMFLOAT3 playerNodePosition;
         playerNodePosition = { playerNode->worldTransform._41, playerNode->worldTransform._42, playerNode->worldTransform._43 };
 
-        //// 指定のノードと全ての敵を総当たりで衝突処理
-        //EnemyManager& enemyManager = EnemyManager::Instance();
 		EnemyBoss& boss = EnemyBoss::Instance();
-
-        //// 全てのプレイヤー攻撃判定と全ての敵の総当たりで衝突処理
-        //int enemyCount = enemyManager.GetEnemyCount();
-        //for (int i = 0; i < enemyCount; ++i)
-        //{
-        //    Enemy* enemy = enemyManager.GetEnemy(i);
 
         std::vector<NodeHitSphere> enemyNode = boss.GetNodeHitSpheres();
         for (auto& enemyHitSphere : enemyNode)
@@ -360,32 +386,30 @@ void Player::CollisionPlayerVsEnemies()
             enemyNodePosition = { enemyNode->worldTransform._41, enemyNode->worldTransform._42, enemyNode->worldTransform._43 };
 
             DirectX::XMFLOAT3 outPosition, hitPosition;
-            if (Collision::IntersectSphereVsSphere(
-                enemyNodePosition,
-                enemyHitSphere.radius,
-                playerNodePosition,
-                playerHitSphere.radius,
-                outPosition,
-                hitPosition))
+            if (!boss.IsTeleporting())
             {
-                DirectX::XMVECTOR Move;
-                DirectX::XMVECTOR PlayerNodePosition = DirectX::XMLoadFloat3(&playerNodePosition);
-                DirectX::XMVECTOR OutPosition = DirectX::XMLoadFloat3(&outPosition);
+	            if (Collision::IntersectSphereVsSphere(
+				   enemyNodePosition,
+				   enemyHitSphere.radius,
+				   playerNodePosition,
+				   playerHitSphere.radius,
+				   outPosition,
+				   hitPosition))
+	            {
+	            	DirectX::XMVECTOR Move;
+	            	DirectX::XMVECTOR PlayerNodePosition = DirectX::XMLoadFloat3(&playerNodePosition);
+	            	DirectX::XMVECTOR OutPosition = DirectX::XMLoadFloat3(&outPosition);
 
-                Move = DirectX::XMVectorSubtract(OutPosition, PlayerNodePosition);
-                Move = DirectX::XMVectorSetY(Move, 0.0f);
-                DirectX::XMVECTOR PlayerPosition = DirectX::XMLoadFloat3(&this->position);
-                PlayerPosition = DirectX::XMVectorAdd(PlayerPosition, Move);
+	            	Move = DirectX::XMVectorSubtract(OutPosition, PlayerNodePosition);
+	            	Move = DirectX::XMVectorSetY(Move, 0.0f);
+	            	DirectX::XMVECTOR PlayerPosition = DirectX::XMLoadFloat3(&this->position);
+	            	PlayerPosition = DirectX::XMVectorAdd(PlayerPosition, Move);
 
-                DirectX::XMStoreFloat3(&this->position, PlayerPosition);
-
-                //複数の判定と押し出ししてしまうと、何重にも位置が加算されて吹っ飛ぶので
-                //最初にあたった判定のみ動作させる　
-                // （ここは移動幅が大きいところで処理するように改良した方がいいかも）
-                break;
+	            	DirectX::XMStoreFloat3(&this->position, PlayerPosition);
+	            	break;
+	            }
             }
         }
-        //}
     }
 }
 
@@ -711,45 +735,6 @@ void Player::SetKnockbackPosition()
     };
 }
 
-// 敵ワープ地点設定
-void Player::SetEnemyWarpPosition()
-{
-    SimpleMath::Vector3 frontVec = CharacterForward(angle);
-    SimpleMath::Vector3 backVec = CharacterBack(angle);
-    SimpleMath::Vector3 leftVec = CharacterLeft(angle);
-    SimpleMath::Vector3 rightVec = CharacterRight(angle);
-    PlayerFront = SimpleMath::Vector3{
-		position.x + frontVec.x * warpDist,
-		position.y,
-		position.z + frontVec.z * warpDist
-	};
-	PlayerBack = SimpleMath::Vector3{
-		position.x + backVec.x * warpDist,
-		position.y,
-		position.z + backVec.z * warpDist
-	};
-	PlayerLeft = SimpleMath::Vector3{
-		position.x + leftVec.x * warpDist,
-		position.y,
-		position.z + leftVec.z * warpDist
-	};
-	PlayerRight = SimpleMath::Vector3{
-		position.x + rightVec.x * warpDist,
-		position.y,
-		position.z + rightVec.z * warpDist
-	};
-    PlayerFrontLeft = SimpleMath::Vector3{
-		position.x + (frontVec.x + leftVec.x) * warpDist * 0.707f,
-		position.y,
-		position.z + (frontVec.z + leftVec.z) * warpDist * 0.707f
-	};
-    PlayerFrontRight = SimpleMath::Vector3{
-        position.x + (frontVec.x + rightVec.x) * warpDist * 0.707f,
-        position.y,
-        position.z + (frontVec.z + rightVec.z) * warpDist * 0.707f
-    };
-}
-
 // 描画処理
 void Player::Render(const RenderContext& rc, ShaderId shaderId)
 {
@@ -783,13 +768,6 @@ void Player::DrawDebugPrimitive()
     	shapeRenderer->DrawSphere(heavyKnockbackPosition, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
     	shapeRenderer->DrawSphere(launchKnockbackPosition, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
 
-        shapeRenderer->DrawSphere(PlayerFront, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
-        shapeRenderer->DrawSphere(PlayerBack, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
-        shapeRenderer->DrawSphere(PlayerLeft, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
-        shapeRenderer->DrawSphere(PlayerRight, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
-        shapeRenderer->DrawSphere(PlayerFrontLeft, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
-        shapeRenderer->DrawSphere(PlayerFrontRight, radius, DirectX::XMFLOAT4(1, 0, 0, 1));
-
     	// 衝突判定用のデバック円柱を描画
     	shapeRenderer->DrawCylinder(position, radius, height, DirectX::XMFLOAT4(0, 0, 0, 1));
 
@@ -814,7 +792,6 @@ void Player::DrawDebugGUI()
         	ImGui::DragFloat("LightKnockbackPosition", &lightKnockBackPower, 0.01f, 0, 5.0f);
         	ImGui::DragFloat("HeavyKnockbackPosition", &heavyKnockBackPower, 0.01f, 0, 10.0f);
         	ImGui::DragFloat("LaunchKnockbackPosition", &launchKnockBackPower, 0.01f, 0, 5.0f);
-        	ImGui::DragFloat("EnemyWarpDist", &warpDist, 0.01f, 0, 20.0f);
         }
 
         if (ImGui::CollapsingHeader(u8"ノックバック設定", ImGuiTreeNodeFlags_DefaultOpen))

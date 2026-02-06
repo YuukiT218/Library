@@ -4,6 +4,11 @@
 #include "Math/Collision.h"
 #include "Math/Mathf.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 //-------------------------------------------------------------
 // ステート基盤
 //-------------------------------------------------------------
@@ -16,6 +21,8 @@ PlayerState::PlayerState(Player* player)
 // ステート切り替え
 void PlayerState::ChangeState(PlayerStateId stateId)
 {
+    player->GetSword()->ResetAttackState();
+
     player->ChangeState(stateId);
 }
 
@@ -132,7 +139,7 @@ PlayerIdleState::PlayerIdleState(Player* player)
 // 開始処理
 void PlayerIdleState::Enter()
 {
-    player->GetPlayerModel()->PlayAnimation(idleAnimationIndex, true, 0.3f);
+    player->GetPlayerModel()->PlayAnimation(idleAnimationIndex, true, 0.1f);
 }
 
 // 更新処理
@@ -200,7 +207,7 @@ PlayerWalkState::PlayerWalkState(Player* player)
 // 開始処理
 void PlayerWalkState::Enter()
 {
-    player->GetPlayerModel()->PlayRootMotion(walkFrontAnimationIndex, true, true, 0.1f, "Character1_Hips");
+    player->GetPlayerModel()->PlayRootMotion(walkFrontAnimationIndex, true, true, 0.4f, "Character1_Hips");
 }
 
 // 更新処理
@@ -280,7 +287,7 @@ PlayerRunState::PlayerRunState(Player* player)
 // 開始処理
 void PlayerRunState::Enter()
 {
-    player->GetPlayerModel()->PlayRootMotion(runStartAnimationIndex, false, true, 0.1f, "Character1_Hips");
+    player->GetPlayerModel()->PlayRootMotion(runStartAnimationIndex, false, true, 0.4f, "Character1_Hips");
 }
 
 // 更新処理
@@ -315,7 +322,8 @@ void PlayerRunState::Update(float elapsedTime)
     // アイドルステートに遷移
     else if (!InputWalkMove() && !InputRunMove())
     {
-        ChangeState(PlayerStateId::Idle);
+        player->GetPlayerModel()->PlayRootMotion(runEndAnimationIndex, false, true, 0.1f, "Character1_Hips");
+    	ChangeState(PlayerStateId::Idle);
     }
 	else if (InputAction() == InputActionType::HeavyAttack)
 	{
@@ -640,16 +648,20 @@ void PlayerComboState::Enter()
     forwarded = false;
     nextShiftReady = false;
     player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
-    float targetDist = player->calcTargetDist(player->GetPosition(), EnemyBoss::Instance().GetPosition());
+    // 距離判定：Y座標を無視してXZ平面の距離のみで判定する
+    DirectX::XMFLOAT3 playerPos = player->GetPosition();
+    enemyPos = EnemyBoss::Instance().GetPosition();
+    float diffX = playerPos.x - enemyPos.x;
+    float diffZ = playerPos.z - enemyPos.z;
+    float targetDist = sqrtf(diffX * diffX + diffZ * diffZ);
+
+    // ダッシュ攻撃の判定と再生
     if (player->IsGround())
     {
-        if (targetDist > 4.0f && targetDist < 12.5f
+        if (targetDist > 2.0f && targetDist < 12.5f
             && comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
         {
             player->GetPlayerModel()->PlayRootMotion(dashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
-            player->SetPosition({ Mathf::Lerp(player->GetPosition().x, EnemyBoss::Instance().GetPosition().x, 0.2f),
-                        Mathf::Lerp(player->GetPosition().y, EnemyBoss::Instance().GetPosition().y, 0.15f),
-                        Mathf::Lerp(player->GetPosition().z, EnemyBoss::Instance().GetPosition().z, 0.2f) });
         }
         else
         {
@@ -661,23 +673,14 @@ void PlayerComboState::Enter()
         player->SetGravity(-0.0001f);
         player->SetHorizonVelocity(0);
         player->SetVerticalVelocity(0);
-        if (targetDist > 4.0f && targetDist < 12.5f
+        if (targetDist > 2.0f && targetDist < 12.5f
             && airComboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
         {
             player->GetPlayerModel()->PlayRootMotion(airDashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
-            player->SetPosition({ Mathf::Lerp(player->GetPosition().x, EnemyBoss::Instance().GetPosition().x, 0.2f),
-                        Mathf::Lerp(player->GetPosition().y, EnemyBoss::Instance().GetPosition().y, 0.15f),
-                        Mathf::Lerp(player->GetPosition().z, EnemyBoss::Instance().GetPosition().z, 0.2f) });
         }
         else
         {
             player->GetPlayerModel()->PlayRootMotion(airComboAnimationIndex, false, isBakeY, 0.1f, "Character1_Hips");
-            if (CameraParam::Instance().GetIsLockOn())
-            {
-	            player->SetPosition({ player->GetPosition().x,
-							  Mathf::Lerp(player->GetPosition().y, EnemyBoss::Instance().GetPosition().y, 0.15f),
-								player->GetPosition().z });
-            }
         }
     }
 }
@@ -704,25 +707,49 @@ void PlayerComboState::Update(float elapsedTime)
             player->LockOnTurnToEnemy(elapsedTime);
         }
 
-        if (frame >= config->advanceInputStartFrame && frame <= config->advanceInputEndFrame)
+        if (frame <= config->advanceInputEndFrame)
         {
-            if (currentInput == InputActionType::LightAttack && !player->IsGround())
+            DirectX::XMFLOAT3 playerPos = player->GetPosition();
+
+            // 距離計算：ここでもXZ平面距離を使用することで、高さがある場合でも正しく吸い付き判定を行う
+            float diffX = playerPos.x - enemyPos.x;
+            float diffZ = playerPos.z - enemyPos.z;
+            float dist = sqrtf(diffX * diffX + diffZ * diffZ);
+
+            bool isUpdated = false;
+
+            // ダッシュ攻撃（地上・空中）の場合のホーミング処理
+            if (index == dashAttackAnimationIndex || index == airDashAttackAnimationIndex)
             {
-                DirectX::XMFLOAT3 playerPos = player->GetPosition();
-                DirectX::XMFLOAT3 enemyPos = EnemyBoss::Instance().GetPosition();
-
-                // Y座標の差分を計算
-                float yDifference = abs(playerPos.y - enemyPos.y);
-
-                // epsilon.yの閾値を超えている場合のみ補正
-                if (yDifference > player->epsilon.y)
+                if (dist >= 6.0f)
                 {
-                    // 線形補間で滑らかに補正（補正率は調整可能）
-                    float correctionRate = 0.1f;
-                    float newY = Mathf::Lerp(playerPos.y, enemyPos.y, correctionRate);
-
-                    player->SetPosition({ playerPos.x, newY, playerPos.z });
+                    float lerpRateXZ = 5.0f * elapsedTime;
+                    playerPos.x = Mathf::Lerp(playerPos.x, enemyPos.x, lerpRateXZ);
+                    playerPos.z = Mathf::Lerp(playerPos.z, enemyPos.z, lerpRateXZ);
+                    isUpdated = true;
                 }
+            }
+
+            // 高さ補正処理
+            if (!player->IsGround() || index == airDashAttackAnimationIndex || index == airComboAnimationIndex)
+            {
+                float yDiff = EnemyBoss::Instance().GetPosition().y - playerPos.y;
+                float heightLimit = -2.0f;
+
+                bool isTooHigh = (yDiff > heightLimit);
+
+                if (!isTooHigh)
+                {
+                    float lerpRateY = 10.0f * elapsedTime;
+                    playerPos.y = Mathf::Lerp(playerPos.y, EnemyBoss::Instance().GetPosition().y, lerpRateY);
+                    isUpdated = true;
+                }
+            }
+
+            // 変更があった場合のみ適用
+            if (isUpdated)
+            {
+                player->SetPosition(playerPos);
             }
         }
     }
@@ -1182,9 +1209,11 @@ void PlayerGuardIdle::Enter()
     player->SetVerticalVelocity(0);
     player->SetHorizonVelocity(0);
 
-    player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
-
-    player->GetPlayerModel()->PlayRootMotion(guardStartAnimationIndex, false, true, 0.1f, "Character1_Reference");
+    if (!player->GetPlayerIsGuard())
+    {
+	    player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
+    	player->GetPlayerModel()->PlayRootMotion(guardStartAnimationIndex, false, true, 0.1f, "Character1_Reference");
+    }
 
     player->SetPlayerGuard(true);
 }
@@ -1212,6 +1241,19 @@ void PlayerGuardIdle::Update(float elapsedTime)
 
     if (isLoop)
 	{
+        // ガードカウンターステートに遷移
+        if (player->GetPlayerIsCounter() && InputAction() == InputActionType::LightAttack)
+        {
+            player->SetPlayerCounter(false);
+            player->SetPlayerGuard(false);
+            ChangeState(PlayerStateId::GuardCounter);
+        }
+        else if (player->GetPlayerIsCounter() && InputAction() == InputActionType::Dodge)
+        {
+            player->SetPlayerCounter(false);
+            player->SetPlayerGuard(false);
+            ChangeState(PlayerStateId::Dodge);
+        }
         timer += elapsedTime;
         frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
 		if (config->advanceInputEndFrame <= timer)
@@ -1263,18 +1305,20 @@ void PlayerGuardIdle::DrawDebugGUI()
 PlayerGuardHit::PlayerGuardHit(Player* player)
     : PlayerState(player)
 {
-    guardHitAnimationIndex = player->GetModel()->GetAnimationIndex("Block_Hit_2_Seq_0");
+    guardHitAnimationIndex = player->GetModel()->GetAnimationIndex("Block_Hit_Seq_0");
 }
 
 void PlayerGuardHit::Enter()
 {
-    player->GetModel()->PlayRootMotion(guardHitAnimationIndex, false, true, 0.1f, "Character1_Hips");
+    player->GetModel()->PlayRootMotion(guardHitAnimationIndex, false, true, 0.1f, "Character1_Reference");
+
+    player->guardEffect->Play(player->GetPosition(), 0.2f);
 
     player->SetPlayerGuard(true);
+    player->SetPlayerCounter(true);
+    player->ResetTurnCompleted();
 
     GamePad& gamepad = Input::Instance().GetGamePad();
-
-    gamepad.Vibrate(0.7f, 0.7f);
 }
 
 void PlayerGuardHit::Update(float elapsedTime)
@@ -1283,51 +1327,81 @@ void PlayerGuardHit::Update(float elapsedTime)
     int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
     GamePad& gamepad = Input::Instance().GetGamePad();
     AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
-    
+
+    if (!player->IsTurnCompleted())
+    {
+        player->LockOnTurnToEnemy(elapsedTime);
+    }
+
     if (config->advanceInputEndFrame <= frame)
     {
-        // コンボ1ステートに遷移
+        // ガードカウンターステートに遷移
         if (InputAction() == InputActionType::LightAttack)
         {
+            player->SetPlayerCounter(false);
+            player->SetPlayerGuard(false);
             ChangeState(PlayerStateId::GuardCounter);
-        }
-        // 強攻撃1ステートに遷移
-        else if (InputAction() == InputActionType::HeavyAttack)
-        {
-            ChangeState(PlayerStateId::Heavy1);
         }
         // 回避ステートに遷移
         else if (InputAction() == InputActionType::Dodge)
         {
+            player->SetPlayerCounter(false);
+            player->SetPlayerGuard(false);
             ChangeState(PlayerStateId::Dodge);
         }
     }
     if (!player->GetPlayerModel()->IsPlayAnimation())
 	{
-        ChangeState(PlayerStateId::Idle);
+        ChangeState(PlayerStateId::GuardIdle);
 	}
 }
 
 // 終了処理
 void PlayerGuardHit::Exit()
 {
-    player->SetPlayerGuard(false);
+    
 }
 
 //-------------------------------------------------------------
-// ガードパリィステート
+// ガードカウンターステート
 //-------------------------------------------------------------
 // コンストラクタ
 PlayerGuardCounter::PlayerGuardCounter(Player* player)
     : PlayerState(player)
 {
     guardParryAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Parry_Counter_Attack_R_Seq_0");
+    guardParryAnimationIndex1 = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Wave_05_04_Seq_0");
+    guardParryAnimationIndex2 = player->GetPlayerModel()->GetAnimationIndex("Run_Attack_02_Seq_0");
 }
 
 void PlayerGuardCounter::Enter()
 {
-    player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex, false, false, 0.1f, "Character1_Hips");
+    // 敵との距離を計算（XZ平面距離）
+    DirectX::XMFLOAT3 playerPos = player->GetPosition();
+    enemyPos = EnemyBoss::Instance().GetPosition();
+    float diffX = playerPos.x - enemyPos.x;
+    float diffZ = playerPos.z - enemyPos.z;
+    float dist = sqrtf(diffX * diffX + diffZ * diffZ);
+
+    // 距離に応じたアニメーション分岐
+    if (dist > 5.0f)
+    {
+        // 遠距離：突進攻撃 (Run Attack)
+        player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex2, false, true, 0.1f, "Character1_Hips");
+    }
+    else if (dist < 2.0f)
+    {
+        // 近距離：密着攻撃 (Combo Attack Wave)
+        player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex1, false, true, 0.1f, "Character1_Hips");
+    }
+    else
+    {
+        // 中距離：通常カウンター
+        player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex, false, true, 0.1f, "Character1_Hips");
+    }
+
     player->SetPlayerRolling(true);
+    player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
 }
 
 void PlayerGuardCounter::Update(float elapsedTime)
@@ -1341,7 +1415,33 @@ void PlayerGuardCounter::Update(float elapsedTime)
 
     if (CameraParam::Instance().GetIsLockOn())
     {
-        player->LockOnTurnToEnemy(elapsedTime);
+        // 距離計算（XZ平面距離）
+        DirectX::XMFLOAT3 playerPos = player->GetPosition();
+        float diffX = playerPos.x - enemyPos.x;
+        float diffZ = playerPos.z - enemyPos.z;
+        float dist = sqrtf(diffX * diffX + diffZ * diffZ);
+
+        // オービット対策
+        if (dist >= 2.0f)
+        {
+            if (!player->IsTurnCompleted())
+            {
+                player->LockOnTurnToEnemy(elapsedTime);
+            }
+        }
+
+        // --- 遠距離突進攻撃(Run_Attack_02)の場合のホーミング処理 ---
+        if (index == guardParryAnimationIndex2 && frame <= config->advanceInputEndFrame)
+        {
+            if (dist >= 6.0f)
+            {
+                float lerpRate = 5.0f * elapsedTime;
+                playerPos.x = Mathf::Lerp(playerPos.x, enemyPos.x, lerpRate);
+                playerPos.z = Mathf::Lerp(playerPos.z, enemyPos.z, lerpRate);
+
+                player->SetPosition(playerPos);
+            }
+        }
     }
 
     // 先行入力処理
@@ -1458,11 +1558,11 @@ void PlayerDamageState::HandleDamageStart(DamageType type, float elapsedTime)
         else
         {
             // 地上ダメージ
-            player->SetPosition({
+            /*player->SetPosition({
                 Mathf::Lerp(player->GetPosition().x, knockbackTargetPosition.x, 0.25f),
                 player->GetPosition().y,
                 Mathf::Lerp(player->GetPosition().z, knockbackTargetPosition.z, 0.25f)
-                });
+                });*/
             player->GetPlayerModel()->PlayRootMotion(anims.normalGround, false, true, 0.1f, "Character1_Hips");
         }
         break;
@@ -1531,7 +1631,7 @@ void PlayerDamageState::HandleDamageStart(DamageType type, float elapsedTime)
         float heightDiff = targetHeight - currentHeight;
 
         // 打ち上げに必要な初速度を計算
-        float launchVelocity = sqrtf(100.0f * fabsf(player->GetGravity()) * heightDiff);
+        float launchVelocity = sqrtf(80.0f * fabsf(player->GetGravity()) * heightDiff);
         player->SetVerticalVelocity(launchVelocity);
         break;
     }
@@ -1570,7 +1670,6 @@ void PlayerDamageState::Enter()
     step = 0;
 
     GamePad& gamepad = Input::Instance().GetGamePad();
-    gamepad.Vibrate(0.3f, 0.3f);
 }
 
 // 更新処理
@@ -1808,7 +1907,7 @@ void PlayerDamageState::DrawDebugGUI()
 PlayerDeadState::PlayerDeadState(Player* player)
     : PlayerState(player)
 {
-    deadAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("WarriorDeath");
+    deadAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Hit_Large_Combat_Death_Seq_0");
 }
 
 // 開始処理
@@ -1817,7 +1916,8 @@ void PlayerDeadState::Enter()
     GamePad& gamePad = Input::Instance().GetGamePad();
     gamePad.Vibrate(0.0f, 0.0f);
 
-    player->GetModel()->PlayAnimation(deadAnimationIndex, false, 0.1f);
+    player->GetModel()->PlayRootMotion(deadAnimationIndex, false, false, 0.1f, "Character1_Hips");
+    handle = player->deathEffect->Play({ player->GetPosition().x, player->GetPosition().y + 1.0f, player->GetPosition().z }, 0.5f);
 
     player->SetDeathFlag(true);
 }
@@ -1827,8 +1927,9 @@ void PlayerDeadState::Update(float elapsedTime)
 {
     GamePad& gamePad = Input::Instance().GetGamePad();
     Mouse& mouse = Input::Instance().GetMouse();
+    player->deathEffect->SetPosition(handle, { player->GetPosition().x, player->GetPosition().y + 1.0f, player->GetPosition().z });
 
-    if (gamePad.GetButtonDown() & gamePad.BTN_DOWN)
+   /* if (gamePad.GetButtonDown() & gamePad.BTN_DOWN)
     {
         player->currentSelection = Player::DeathMenuOption::Continue;
     }
@@ -1856,5 +1957,5 @@ void PlayerDeadState::Update(float elapsedTime)
         default:
             break;
         }
-    }
+    }*/
 }

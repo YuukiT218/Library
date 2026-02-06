@@ -2,7 +2,6 @@
 #include "Graphics/Graphics.h"
 #include "Model/Model.h"
 #include "Character/Enemy/Enemy.h"
-#include "Graphics/Light.h"
 #include "Character/Weapon/EnemySword.h"
 
 template <typename ActorType>
@@ -26,7 +25,7 @@ public:
 	static EnemyBoss& Instance();
 
 	EnemyBoss(ID3D11Device* device, const char* filename, float scale);
-	~EnemyBoss()override;
+	~EnemyBoss() override;
 
 	// 更新処理
 	void UpdateEnemySpecific(float elapsedTime)override;
@@ -94,9 +93,34 @@ public:
 	// 実行タイマー取得
 	float GetRunTimer() { return runTimer; }
 
+	// 反撃値加算
 	void AddRevengeValue(int num) { revengeValue += num; }
 
+	// 反撃値減算
+	void SubRevengeValue() { revengeValue -= 1; }
+
+	// 反撃値取得
 	float GetRevengeValue() { return revengeValue; }
+
+	// 反撃許容値設定
+	void SetRevengeTolerance(int num) { revengeTolerance = num; }
+
+	// 反撃値リセット
+	void ResetRevengeValue() { revengeValue = 0; }
+
+	// 反撃状態設定
+	void SetRevengeState(bool state) { isRevenge = state; }
+
+	// 反撃状態取得
+	bool GetRevengeState() { return isRevenge; }
+
+	void SetSpecialReady(bool flag) { specialReady = flag; }
+	bool GetSpecialReady() { return specialReady; }
+
+	void SetSearchRange(float range) { searchRange = range; }
+
+	void SetPlayedEffect(bool flag) { playedEffect = flag; }
+	bool GetPlayedEffect() { return playedEffect; }
 
 	float GetBlendSeconds() { return blendSeconds; }
 
@@ -109,7 +133,6 @@ public:
 	void SetKnockBackPosition();
 
 	DirectX::SimpleMath::Vector3 WarpPosition[3];
-	DirectX::SimpleMath::Vector3 KnockBackPosition[4];
 
 	EnemySword* GetSword() { return sword.get(); }
 	Character* GetCharacter() { return this; }
@@ -122,6 +145,13 @@ public:
 		0.4f, 0.3f, 0.3f, 0.3f, 0.25f, 0.25f, 0.25f, 0.25f, 0.25f
 	};
 
+	std::unique_ptr<Effect> lightBall = nullptr;
+	std::unique_ptr<Effect> attackSign = nullptr;
+	std::unique_ptr<Effect> teleportEffect = nullptr;
+	std::unique_ptr<Effect> magicCircle = nullptr;
+	Effekseer::Handle handle = -1;
+	bool playedFadeEffect = false;
+
 protected:
 	// 死亡したときに呼ばれる
 	void OnDead() override;
@@ -132,13 +162,18 @@ private:
 	float				territoryRange = 255.0f;
 	float				moveSpeed = 2.5f;
 	float				turnSpeed = DirectX::XMConvertToRadians(360);
-	float				searchRange = 20.0f;
+	float				searchRange = 25.0f;
 	float				attackRange = 2.0f;
 	float				runTimer = 0.0f;
 	float 			    blendSeconds = 0.1f;
+	float 				teleportOffset = 17.5f;
 	bool 				isBattle = false;
+	bool				isRevenge = false;
+	bool				playedEffect = false;
+	bool				specialReady = true;
 	int 				step = 0;
-	int 				revengeValue = 0;
+	int 				revengeValue = 0;		// 反撃値
+	int					revengeTolerance = 20;	// 反撃許容値
 
 	BehaviorTree<EnemyBoss>* aiTree = nullptr;
 	std::unique_ptr<BehaviorData<EnemyBoss>> behaviorData = nullptr;
@@ -147,9 +182,5 @@ private:
 	SequenceState<EnemyBoss>* sequenceState = nullptr;
 	std::unique_ptr<RootState<EnemyBoss>> rootState = nullptr;
 	std::unique_ptr<EnemySword> sword;
-
-	//ポイントライト
-	//std::vector<AnimatedLight> AnimPointLights;
-
 	std::vector<std::string> NodeName;
 };

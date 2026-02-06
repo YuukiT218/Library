@@ -87,6 +87,7 @@ cbuffer CbScene : register(b7)
     row_major float4x4 lightViewProjection;
     float4 pointLight[POINT_MAX];
     float4 pointColor[POINT_MAX];
+    float4 targetPosition;
 };
 
 cbuffer CbRimLight : register(b8)
@@ -95,4 +96,20 @@ cbuffer CbRimLight : register(b8)
     float rimIntensity;
     float4 rimColor;
     float2 rimDummy;
+}
+
+cbuffer CbTeleport : register(b9)
+{
+    float teleportProgress; // 0.0?1.0 (0=通常, 1=完全テレポート)
+    float teleportTime; // アニメーション用経過時間
+    float dissolveEdgeWidth; // ディゾルブエッジの幅
+    float distortionIntensity; // 歪み強度
+    
+    float3 dissolveEdgeColor; // エッジの発光色
+    float teleportCenterY; // テレポート中心のY座標
+    
+    float afterimageAlpha;
+    float afterimageDarkness;
+    float enableDissolve;
+    float enableDistortion;
 }

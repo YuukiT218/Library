@@ -16,22 +16,30 @@ public:
 	// 描画処理
 	virtual void Render(const RenderContext& rc, ShaderId shaderId) {}
 
-	//モデル用ゲッター
+	// モデル用ゲッター
 	std::shared_ptr<Model> GetModel() const { return model; }
 
-	//アタッチ
+	// アタッチ
 	void Attach(std::string nodeName, Model* character);
 
-	//トレイル用アップデート
+	// トレイル用アップデート
 	void TrailUpdate(float elapsedTime);
 
-	//ノードとエネミーの衝突処理
+	// ノードとエネミーの衝突処理
 	void CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
 	void CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config, AnimationAttribute* activeAttribute, Character* character);
 
-	//アニメーションの攻撃当たり判定をつける
+	// アニメーションの攻撃当たり判定をつける
 	void AttackAnimationCollision(Model* character, float animTimeMin, float animTimeMax, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
 	void AttackAnimationCollision(Model* model, AnimationConfig* config, Character* character);
+
+	// テレポートエフェクト設定
+	void SetTeleportEffect(bool enable, float progress, float time);
+	void ClearTeleportEffect();
+	bool HasTeleportEffect() const { return hasTeleportEffect; }
+	float GetTeleportProgress() const { return teleportProgress; }
+	float GetTeleportTime() const { return teleportTime; }
+	void ResetAttackState();
 protected:
 	//トレイルの描画
 	void TrailRender(const RenderContext& rc);
@@ -48,21 +56,23 @@ protected:
 	std::shared_ptr<Model> model;
 	DirectX::XMFLOAT3 weaponHitOffset[5];
 	DirectX::XMFLOAT3 weaponHitPosition[5];
-	//Model::EmissiveColors colors;//発光色
+	Model::EmissiveColors colors;//発光色
 
-	//武器トレイル関係
+	// テレポートエフェクト用
+	bool hasTeleportEffect = false;
+	float teleportProgress = 0.0f;
+	float teleportTime = 0.0f;
+
+	// 武器トレイル関係
 	static const int MAX_POLYGON = 6 * 2;//何フレーム文を保存して描くか
-
 	DirectX::XMFLOAT3					trailPositions[2][MAX_POLYGON];//トレイル用頂点ポジション
 	DirectX::XMFLOAT3					trailoffset[2] =	//トレイル補正用 [0]根本 [1]先端
 	{
 		{0.0f, 0.0f, 0.5f},
 		{0.0f, 0.0f, 1.5f},
 	};
-
 	DirectX::XMFLOAT4 TipBegin = {};//剣周辺色
 	DirectX::XMFLOAT4 TipEnd = {};//消滅するトレイルの色
-
 	DirectX::XMFLOAT4 RootBegin = {};//剣周辺色
 	DirectX::XMFLOAT4 RootEnd = {};//消滅するトレイルの色
 
@@ -72,7 +82,6 @@ protected:
 
 	DirectX::XMFLOAT4 pointColor{};
 	float attenuation{};
-
 
 	bool IsAttack{};//トレイルの描画を判定
 

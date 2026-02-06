@@ -22,6 +22,8 @@ TextureCube diffuseiem : register(t33);
 TextureCube specularpmrem : register(t34);
 Texture2D lut_ggx : register(t35);
 
+// === 追加: ディゾルブ用ノイズテクスチャ ===
+Texture2D noiseTexture : register(t36); // ノイズテクスチャ
 
 // テクスチャから値を比較するサンプラ
 SamplerState linearSampler : register(s0);
@@ -30,6 +32,54 @@ SamplerState shadowSampler : register(s2);
 
 float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
 {
+    if (targetPosition.w > 0.5)
+    {
+        float3 camPos = cameraPosition.xyz;
+        float3 playerPos = targetPosition.xyz;
+        float3 pixelPos = pin.position.xyz;
+
+        // カメラ -> プレイヤー のベクトル
+        float3 vecCamToPlayer = playerPos - camPos;
+        float distCamToPlayer = length(vecCamToPlayer);
+        
+        // カメラ -> 現在のピクセル のベクトル
+        float3 vecCamToPixel = pixelPos - camPos;
+        float distCamToPixel = length(vecCamToPixel);
+
+        // 「プレイヤーより手前」かつ「カメラに十分近い」場合のみ判定
+        // (-0.5はプレイヤー自身の描画が消えないようにするためのオフセット)
+        if (distCamToPixel < distCamToPlayer - 0.5f)
+        {
+            float3 rayDir = normalize(vecCamToPlayer);
+            
+            // ピクセルが視線（レイ）からどれくらい離れているか（円筒判定）
+            float3 crossProd = cross(rayDir, vecCamToPixel);
+            float distFromRay = length(crossProd);
+
+            // 透過させる半径（0.5メートル以内なら透けさせる）
+            float clipRadius = 1.25f;
+
+            if (distFromRay < clipRadius)
+            {
+                // ノイズテクスチャを使ったディザリング
+                // スクリーン座標ベースでサンプリングするとカメラが動いてもノイズがちらつきにくい
+                float2 noiseUV = pin.vertex.xy / 100.0f; // スケーリングは適宜調整
+                float noise = noiseTexture.Sample(linearSampler, noiseUV).r;
+
+                // 中心に近いほど消える確率を上げる（透明度を上げる）
+                // 外側(clipRadius)にいくほど不透明(1.0)になる
+                float threshold = distFromRay / clipRadius;
+                
+                // ノイズ値が閾値より大きければピクセルを破棄
+                // (noise: 0~1, threshold: 0~1)
+                // 中心付近(threshold=0) -> noise > 0 はほぼ成立 -> ほぼ消える
+                if (noise > threshold)
+                {
+                    discard;
+                }
+            }
+        }
+    }
 
     //	ガンマ係数
     static const float GammaFactor = 2.2f;
@@ -40,6 +90,35 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
         float4 sampled = albedoMap.Sample(anisotropic, pin.texcoord);
         sampled.rgb = pow(sampled.rgb, GammaFactor);
         base_color *= sampled;
+    }
+
+    // === テレポートエフェクト: Dissolve (溶解) ===
+    if (enableDissolve > 0.5 && teleportProgress > 0.0)
+    {
+        float2 noiseUV = pin.texcoord * 2.0 + float2(teleportTime * 0.1, teleportTime * 0.05);
+        float noise = noiseTexture.Sample(linearSampler, noiseUV).r;
+        float noise2 = noiseTexture.Sample(linearSampler, noiseUV * 2.13 + 0.37).r;
+        noise = noise * 0.7 + noise2 * 0.3;
+        
+        float dissolveThreshold = teleportProgress;
+        float dissolveEdge = dissolveThreshold - dissolveEdgeWidth;
+        
+        if (noise < dissolveThreshold)
+        {
+            if (noise > dissolveEdge)
+            {
+                float edgeFactor = (noise - dissolveEdge) / dissolveEdgeWidth;
+                float3 edgeGlow = dissolveEdgeColor * (1.0 - edgeFactor);
+                float pulse = sin(teleportTime * 10.0) * 0.5 + 0.5;
+                edgeGlow *= (1.5 + pulse * 0.5);
+                base_color.rgb += edgeGlow;
+                base_color.a *= edgeFactor;
+            }
+            else
+            {
+                discard;
+            }
+        }
     }
 
 	//	自己発光色を取得
@@ -118,37 +197,6 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
             float3 L = normalize(lightDirection.xyz);
             DirectBDRF(diffuse_reflectance, F0, N, V, L,
 					   LightColor, roughness,diffuse, specular);
-//            if (cascadeFlags.y > 0)
-//            {
-            
-//                //	平行光源用カスケードシャドウマップ
-//                for (int index = 0; index < ShadowBufferSize; ++index)
-//                {
-//		        // ライトから見たNDC座標を算出
-//                    float4 wvpPos = mul(float4(pin.position.xyz, 1.0f), CascadeLightViewProjection[index]);
-
-//                // NDC座標からUV座標を算出する
-//                    wvpPos /= wvpPos.w;
-//                    wvpPos.y = -wvpPos.y;
-//                    wvpPos.xy = 0.5f * wvpPos.xy + 0.5f;
-
-//		        // シャドウマップのUV範囲内か、深度値が範囲内か判定する
-//                    if (wvpPos.z >= 0 && wvpPos.z <= 1 && wvpPos.x >= 0 && wvpPos.x <= 1 && wvpPos.y >= 0 && wvpPos.y <= 1)
-//                    {
-//						float3 shadowAtten = ShadowMapFetchPCF(cascadeShadowMap[index], shadowSampler, index, wvpPos.xyz,
-//                                       shadowColor, shadowAttenuation, CascadeShadowBias[index], 3.0f);
-                        
-//                        diffuse *= shadowAtten;
-//                        specular *= shadowAtten;
-                        
-//#if 01  //  本来はデバッグ用の機能なのでいらない
-//                        DebugShadowMapIndex = index;
-//#endif  //  defined(_DEBUG)
-//                        break;
-//                    }
-//                }
-//            }
-//            else
             {
                 float3 shadowAtten = ShadowMapFetchPCF(shadowMap, shadowSampler, 1, pin.shadow,
                                        shadowColor, shadowAttenuation, shadowBias, 3.0f);
@@ -221,5 +269,17 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     float rimFactor = rimRange * rimIntensity; // 明るさ
     color.rgb += rimColor * rimFactor;
 
-    return float4(color, base_color.a);
+    if (afterimageDarkness > 0.0)
+    {
+        color.rgb = lerp(color.rgb, float3(0.15, 0.02, 0.02), afterimageDarkness);
+    }
+
+    float4 finalColor = float4(color, base_color.a);
+
+    if (afterimageAlpha < 1.0)
+    {
+        finalColor.a *= afterimageAlpha;
+    }
+
+    return finalColor;
 }

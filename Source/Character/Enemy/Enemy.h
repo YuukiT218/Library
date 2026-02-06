@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Character/Character.h"
 #include "Model/Model.h"
@@ -10,41 +10,41 @@ public:
 	Enemy() {}
 	~Enemy() override {}
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	void Update(float elapsedTime);
 
-	// s—ñXVˆ—
+	// è¡Œåˆ—æ›´æ–°å‡¦ç†
 	void UpdateTransform();
 
-	// •`‰æˆ—
+	// æç”»å‡¦ç†
 	virtual void Render(const RenderContext& rc, ShaderId shaderId) = 0;
 
-	// ”jŠü
+	// ç ´æ£„
 	void Destroy();
 
-	// ƒm[ƒh‚ÆƒvƒŒƒCƒ„[‚ÌÕ“Ëˆ—
+	// ãƒãƒ¼ãƒ‰ã¨ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®è¡çªå‡¦ç†
 	void CollisionNodeVsPlayer(std::vector<NodeHitSphere> attackSpheres, int AttackDamage, float invicibleTime);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌUŒ‚“–‚½‚è”»’è‚ğ•t‚¯‚é
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ”»æ’ƒå½“ãŸã‚Šåˆ¤å®šã‚’ä»˜ã‘ã‚‹
 	void AttackAnimationCollision(std::vector<NodeHitSphere> attackSpheres, float animTimeMin, float animTimeMax, int AttackDamage, float invicibleTime = 0.5f);
 
-	// ƒuƒŒƒXƒGƒtƒFƒNƒg‚Ì“–‚½‚è”»’è‚ğ•t‚¯‚é
+	// ãƒ–ãƒ¬ã‚¹ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å½“ãŸã‚Šåˆ¤å®šã‚’ä»˜ã‘ã‚‹
 	void BreathEffectCollision(float animTimeMin, float animTimeMax, DirectX::XMFLOAT3 startPosition, DirectX::XMFLOAT3 direction, float length, float sphereRadius, int sphereCount, int AttackDamage, float invicibleTime);
 
-	// ƒfƒoƒbƒOƒvƒŠƒ~ƒeƒBƒu•`‰æ
+	// ãƒ‡ãƒãƒƒã‚°ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–æç”»
 	virtual void DrawDebugPrimitive();
 
-	// ƒfƒoƒbƒOƒGƒlƒ~[î•ñ•\¦
+	// ãƒ‡ãƒãƒƒã‚°ã‚¨ãƒãƒŸãƒ¼æƒ…å ±è¡¨ç¤º
 	virtual void DrawDebugGUI();
 	virtual void DrawDebugChildGUI() {};
 
-	// UŒ‚ƒtƒ‰ƒOæ“¾
+	// æ”»æ’ƒãƒ•ãƒ©ã‚°å–å¾—
 	bool GetAttackFlg() { return attackFlg; }
-	// UŒ‚ƒtƒ‰ƒOƒZƒbƒg
+	// æ”»æ’ƒãƒ•ãƒ©ã‚°ã‚»ãƒƒãƒˆ
 	void SetAttackFlg(bool flg) { attackFlg = flg; };
 	virtual void	SetId(int id) { this->id = id; }
 	virtual int		GetId() { return id; }
-	// UŒ‚”ÍˆÍæ“¾
+	// æ”»æ’ƒç¯„å›²å–å¾—
 	virtual float GetAttackRange() { return attackRange; }
 
 	virtual void SetTerritory(DirectX::XMFLOAT3 position, float range) {};
@@ -53,15 +53,15 @@ public:
 
 	int GetDeathCount() { return deathCount; }
 
-	// ƒpƒŠƒB‚âƒWƒƒƒXƒg‰ñ”ğ‚ª¬Œ÷‚µ‚Ä‚¢‚éê‡”»’è‚ğƒ‚[ƒVƒ‡ƒ“I—¹‚Ü‚ÅÁ‚·—p‚Ìƒtƒ‰ƒO
+	// ãƒ‘ãƒªã‚£ã‚„ã‚¸ãƒ£ã‚¹ãƒˆå›é¿ãŒæˆåŠŸã—ã¦ã„ã‚‹å ´åˆåˆ¤å®šã‚’ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†ã¾ã§æ¶ˆã™ç”¨ã®ãƒ•ãƒ©ã‚°
 	bool isPlayerInvincible = false;
 
-	// “–‚½‚è”»’è\‘¢‘Ìæ“¾
+	// å½“ãŸã‚Šåˆ¤å®šæ§‹é€ ä½“å–å¾—
 	std::vector<NodeHitSphere> GetNodeHitSpheres() { return nodeHitSpheres; }
 
 	std::vector<NodeHitSphere> nodeHitSpheres;
 
-	// UŒ‚”»’èæ“¾
+	// æ”»æ’ƒåˆ¤å®šå–å¾—
 	std::vector<NodeHitSphere> GetAttackHitSpheres() { return attackHitSpheres; }
 
 	std::vector<NodeHitSphere> attackNodeHitSpheres;
@@ -69,7 +69,7 @@ public:
 	virtual void EditUpdate(float elapsedTime);
 
 protected:
-	// ”h¶ƒNƒ‰ƒXê—p‚ÌXVˆ—
+	// æ´¾ç”Ÿã‚¯ãƒ©ã‚¹å°‚ç”¨ã®æ›´æ–°å‡¦ç†
 	virtual void UpdateEnemySpecific(float elapsedTime) {}
 
 protected:
@@ -83,17 +83,6 @@ protected:
 	int deathCount = 0;
 
 	std::vector<NodeHitSphere> attackHitSpheres;
-
-	// ƒeƒŒƒ|[ƒg—p‚Ì•Ï”
-	bool isTeleporting = false;                          // ƒeƒŒƒ|[ƒg’†ƒtƒ‰ƒO
-	DirectX::XMFLOAT3 visualPosition;                    // Œ©‚½–Ú‚ÌˆÊ’uiƒ‚ƒfƒ‹•`‰æ—pj
-	DirectX::XMFLOAT3 logicalPosition;                   // ˜_—“I‚ÈˆÊ’uiƒJƒƒ‰’Ç]—pj
-	DirectX::XMFLOAT3 teleportStartPosition;             // ƒeƒŒƒ|[ƒgŠJnˆÊ’u
-	DirectX::XMFLOAT3 teleportTargetPosition;            // ƒeƒŒƒ|[ƒg–Ú•WˆÊ’u
-	float teleportProgress = 0.0f;                       // ƒeƒŒƒ|[ƒgis“x (0.0 ~ 1.0)
-	float teleportDuration = 0.5f;                       // ƒeƒŒƒ|[ƒg‚É‚©‚©‚éŠÔi•bj
-	float teleportVisualDelay = 0.1f;                    // Œ©‚½–Ú‚Ì’x‰„ŠÔi•bj
-	float teleportTimer = 0.0f;							 // Œo‰ßŠÔ‚ğ’¼ÚƒJƒEƒ“ƒg
 
 private:
 	bool isFocus = false;
@@ -114,24 +103,103 @@ public:
 	bool IsHeavyKbDamage() const { return isHeavyKnockbackDamage; }
 	void SetLaunchKbDamage(bool damage) { isLaunchKnockbackDamage = damage; }
 	bool IsLaunchKbDamage() const { return isLaunchKnockbackDamage; }
+	void ResetDamage() { isDamage = isLightKnockbackDamage = isHeavyKnockbackDamage = isLaunchKnockbackDamage = false; }
 	bool IsAnyDamage() const { return isDamage || isLightKnockbackDamage || isHeavyKnockbackDamage || isLaunchKnockbackDamage; }
 	bool actionFlag = true;
 	bool isTeleport = false;
 	std::string name = " ";
 
-	// ƒeƒŒƒ|[ƒgŠJn
-	void StartTeleport(const DirectX::XMFLOAT3& targetPos, float duration = 0.5f);
+	// ã‚«ãƒ¡ãƒ©ãŒè¿½å¾“ã™ã¹ãä½ç½®ã‚’å–å¾—ï¼ˆè«–ç†ä½ç½®ï¼‰
+	DirectX::XMFLOAT3 GetCameraTrackingPosition() const { return teleportTargetPosition; }
 
-	// ƒeƒŒƒ|[ƒgXV
-	void UpdateTeleport(float elapsedTime);
-
-	// ƒeƒŒƒ|[ƒg’†‚©‚Ç‚¤‚©
-	bool IsTeleporting() const { return isTeleporting; }
-
-	// ƒJƒƒ‰‚ª’Ç]‚·‚×‚«ˆÊ’u‚ğæ“¾i˜_—ˆÊ’uj
-	DirectX::XMFLOAT3 GetCameraTrackingPosition() const { return logicalPosition; }
-
-	// Œ©‚½–Ú‚ÌˆÊ’u‚ğæ“¾iƒ‚ƒfƒ‹•`‰æ—pj
+	// è¦‹ãŸç›®ã®ä½ç½®ã‚’å–å¾—ï¼ˆãƒ¢ãƒ‡ãƒ«æç”»ç”¨ï¼‰
 	DirectX::XMFLOAT3 GetVisualPosition() const { return isTeleporting ? visualPosition : position; }
 
+	float GetTotalGameTime() const { return totalGameTime; }
+
+protected:
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆç”¨ã®å¤‰æ•°
+	bool isTeleporting = false;                          // ãƒ†ãƒ¬ãƒãƒ¼ãƒˆä¸­ãƒ•ãƒ©ã‚°
+	DirectX::XMFLOAT3 visualPosition;                    // è¦‹ãŸç›®ã®ä½ç½®ï¼ˆãƒ¢ãƒ‡ãƒ«æç”»ç”¨ï¼‰
+	DirectX::XMFLOAT3 logicalPosition;                   // è«–ç†çš„ãªä½ç½®ï¼ˆã‚«ãƒ¡ãƒ©è¿½å¾“ç”¨ï¼‰
+	DirectX::XMFLOAT3 teleportStartPosition;             // ãƒ†ãƒ¬ãƒãƒ¼ãƒˆé–‹å§‹ä½ç½®
+	DirectX::XMFLOAT3 teleportTargetPosition;            // ãƒ†ãƒ¬ãƒãƒ¼ãƒˆç›®æ¨™ä½ç½®
+	float totalGameTime = 0.0f;
+	float teleportPhaseTimer = 0.0f;
+	float fadeOutDuration = 0.5f;   // æ¶ˆå¤±ã«ã‹ã‘ã‚‹æ™‚é–“
+	float moveDuration = 0.1f;      // ç§»å‹•ã«ã‹ã‘ã‚‹æ™‚é–“
+	float fadeInDuration = 0.5f;    // å‡ºç¾ã«ã‹ã‘ã‚‹æ™‚é–“
+
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆæ¼”å‡ºã®ãƒ•ã‚§ãƒ¼ã‚ºç®¡ç†
+	enum class TeleportPhase
+	{
+		None,              // ãƒ†ãƒ¬ãƒãƒ¼ãƒˆã—ã¦ã„ãªã„
+		FadeOut,           // æ¶ˆå¤±æ¼”å‡º
+		Moving,            // ä½ç½®ç§»å‹•ï¼ˆè¦‹ãˆãªã„çŠ¶æ…‹ï¼‰
+		FadeIn,            // å‡ºç¾æ¼”å‡º
+	};
+	TeleportPhase teleportPhase = TeleportPhase::None;
+
+	// æ®‹åƒç”¨ã®å¤‰æ•°
+	struct Afterimage
+	{
+		DirectX::XMFLOAT3 position;
+		DirectX::XMFLOAT3 angle;
+		DirectX::XMFLOAT4X4 transform;
+		float alpha;               // é€æ˜åº¦ï¼ˆ1.0â†’0.0ã«æ¸›è¡°ï¼‰
+		float lifetime;            // æ®‹ã‚Šæ™‚é–“
+		std::vector<Model::Node> nodes;  // ãƒœãƒ¼ãƒ³æƒ…å ±ã‚’ã‚³ãƒ”ãƒ¼
+		float darkness;
+
+		~Afterimage()
+		{
+			ClearNodes();
+		}
+
+		void ClearNodes()
+		{
+			if (!nodes.empty())
+			{
+				nodes.clear();
+				nodes.shrink_to_fit();
+			}
+		}
+	};
+
+	Afterimage afterimage;         // æ®‹åƒï¼ˆ1ã¤ã ã‘ï¼‰
+	bool hasAfterimage = false;    // æ®‹åƒãŒæœ‰åŠ¹ã‹
+	float afterimageDuration = 1.0f;  // æ®‹åƒã®æŒç¶šæ™‚é–“
+	float afterimageDarkness = 0.8f;
+
+public:
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆé–‹å§‹
+	void StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime = 0.5f);
+
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆæ›´æ–°
+	void UpdateTeleport(float elapsedTime);
+
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆä¸­ã‹ã©ã†ã‹
+	bool IsTeleporting() const { return teleportPhase != TeleportPhase::None; }
+
+	// ç¾åœ¨ã®ãƒ†ãƒ¬ãƒãƒ¼ãƒˆé€²è¡Œåº¦ï¼ˆ0.0ã€œ1.0ï¼‰
+	float GetTeleportProgress() const;
+
+	// ç¾åœ¨ã®ãƒ†ãƒ¬ãƒãƒ¼ãƒˆãƒ•ã‚§ãƒ¼ã‚ºå–å¾—
+	TeleportPhase GetTeleportPhase() const { return teleportPhase; }
+
+	// æ®‹åƒæ›´æ–°
+	void UpdateAfterimage(float elapsedTime);
+
+	// æ®‹åƒç™ºç”Ÿãƒ•ãƒ©ã‚°ãƒã‚§ãƒƒã‚¯
+	bool HasAfterimage() const { return hasAfterimage; }
+
+	// æ®‹åƒæƒ…å ±å–å¾—
+	const Afterimage& GetAfterimage() const { return afterimage; }
+
+	// æŒ‡å®šã—ãŸåº§æ¨™ãŒç”»é¢å†…ï¼ˆã‚¹ã‚¯ãƒªãƒ¼ãƒ³å†…ï¼‰ã«å…¥ã£ã¦ã„ã‚‹ã‹åˆ¤å®š
+	bool IsPositionVisible(const DirectX::XMFLOAT3& worldPos);
+
+	// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å‘¨å›²ã‹ã‚‰ç”»é¢å†…ã®ãƒ†ãƒ¬ãƒãƒ¼ãƒˆå…ˆã‚’è¨ˆç®—ã—ã¦è¿”ã™
+	// distance: ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‹ã‚‰ã®è·é›¢
+	DirectX::XMFLOAT3 CalculateVisibleTeleportPos(float distance, bool bakeY = false);
 };

@@ -262,6 +262,8 @@ protected:
 	// 攻撃時ヒットストップ変数
 	float attackHitStopTime = 1.0f;
 	float attackHitStopSpeed = 0.1f;
+
+	DirectX::XMFLOAT3 enemyPos;
 };
 
 // コンボス1ステート
@@ -400,11 +402,14 @@ protected:
 
 private:
 	int guardParryAnimationIndex = -1;
+	int guardParryAnimationIndex1 = -1;
+	int guardParryAnimationIndex2 = -1;
 	float guardParryAnimationSpeed = 1.0f;
 	float timer = 0.0f;
 
 	bool nextShiftReady;
 	InputActionType nextInput;
+	DirectX::XMFLOAT3 enemyPos;
 };
 
 // ダメージの種類を定義
@@ -483,7 +488,7 @@ private:
 			return player->CalculateKnockbackPosition(player->heavyKnockbackPower);
 		case DamageType::Launch:
 		{
-			DirectX::XMFLOAT3 launchPos = player->CalculateKnockbackPosition(1.5f);
+			DirectX::XMFLOAT3 launchPos = player->CalculateKnockbackPosition(-1.5f);
 			launchPos.y = player->GetPosition().y + player->launchKnockbackHeight;
 			return launchPos;
 		}
@@ -530,4 +535,5 @@ protected:
 private:
 	int deadAnimationIndex = -1;
 	bool notificated = false;
+	Effekseer::Handle handle = -1;
 };

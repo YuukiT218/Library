@@ -11,7 +11,7 @@ public:
 	~Effect() {};
 
 	// çƒê∂
-	Effekseer::Handle Play(const DirectX::XMFLOAT3& position, float scale = 1.0f);
+	Effekseer::Handle Play(const DirectX::XMFLOAT3& position, float scale = 1.0f, const DirectX::XMFLOAT3& rotation = {});
 
 	// í‚é~
 	void Stop(Effekseer::Handle handle);

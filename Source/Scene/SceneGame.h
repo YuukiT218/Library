@@ -5,33 +5,37 @@
 #include "Camera/FreeCameraController.h"
 #include "Character/player.h"
 #include "Character/Enemy/EnemyBoss.h"
+#include "Character/Projectile/ProjectileManager.h"
 #include "Scene.h"
 #include "Graphics/SkyBox.h"
 #include "Graphics/PostEffect.h"
 //#include "BattleUI/CombatUIManager.h"
+
+// ゲームの進行状態
+enum class GameState
+{
+	Intro,      // 開幕演出
+	Battle,     // 戦闘中
+	Ending      // 決着（スローモーション演出）
+};
 
 // ゲームシーン
 class SceneGame : public Scene
 {
 public:
 	SceneGame() {}
-	//~SceneGame() {}
 	~SceneGame() override {}
 
 	// 初期化
-	//void Initialize();
 	void Initialize() override;
 
 	// 終了化
-	//void Finalize();
 	void Finalize() override;
 
 	// 更新処理
-	//void Update(float elapsedTime);
 	void Update(float elapsedTime) override;
 
 	// 描画処理
-	//void Render();
 	void Render(float elapsedTime) override;
 
 	// デバッグ用GUI描画
@@ -72,4 +76,19 @@ private:
 
 	bool isEventCamera = false;
 	float lagTimer = 0.0f;
+
+	// 演出制御用変数
+	GameState currentState = GameState::Intro; // 現在の状態
+	float eventTimer = 0.0f;        // 演出用タイマー
+	float cameraSwitchTimer = 0.0f; // カメラ切り替え用タイマー（死亡時用）
+	int cameraAngleIndex = 0;       // 現在のカメラアングル番号
+	bool isWallTransparencyEnabled = true;
+
+	// ホワイトアウト用
+	std::unique_ptr<Sprite> whiteOutSprite;
+	float whiteOutAlpha = 0.0f;
+
+	// 演出用ヘルパー関数
+	void UpdateIntroCamera(float elapsedTime);
+	void UpdateEndingCamera(float elapsedTime, Character* deadCharacter);
 };

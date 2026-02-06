@@ -1,57 +1,50 @@
-﻿#include "Graphics/Graphics.h"
-#include <imgui.h>
+﻿#include <imgui.h>
+#include <algorithm>
+
 #include "SceneLoading.h"
 #include "SceneManager.h"
+#include "Graphics/Graphics.h"
 #include "Math/Mathf.h"
 #include "Input/Input.h"
 
-#include "Math/Easing.h"
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
 
-// t: 0?1の値
-float EaseInOutQuad(float t)
-{
-	return t < 0.5f ? 2.0f * t * t : -1.0f + (4.0f - 2.0f * t) * t;
-}
-
-float EaseOutBack(float t, float s = 1.70158f)
-{
-	t = t - 1.0f;
-	return (t * t * ((s + 1.0f) * t + s) + 1.0f);
-}
-
-float EaseInBack(float t, float s = 1.70158f)
-{
-	return t * t * ((s + 1.0f) * t - s);
-}
+//// t: 0?1の値
+//float EaseInOutQuad(float t)
+//{
+//	return t < 0.5f ? 2.0f * t * t : -1.0f + (4.0f - 2.0f * t) * t;
+//}
+//
+//float EaseOutBack(float t, float s = 1.70158f)
+//{
+//	t = t - 1.0f;
+//	return (t * t * ((s + 1.0f) * t + s) + 1.0f);
+//}
+//
+//float EaseInBack(float t, float s = 1.70158f)
+//{
+//	return t * t * ((s + 1.0f) * t - s);
+//}
 
 // 初期化
 void SceneLoading::Initialize()
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
+	//背景用
+	AddSprite("Back", CreateSpriteData(device, "Data/Sprite/Title_Back.png", { 0,0,0 }, { 1280, 720 }, { 0,0 }, { 1920,1080 }, 0, { 1,1,1,1 }));
 
-	////背景用
-	//AddSprite("Back", CreateSpriteData(device, "Data/Sprite/Title_Back.png", { 0,0,0 }, { 1280, 720 }, { 0,0 }, { 1920,1080 }, 0, { 1,1,1,1 }));
+	//操作説明
+	AddSprite("PadInst", CreateSpriteData(device, "Data/Sprite/PadInstruction.png", { 145.0f,100.0f,0.01f }, { 1137.8f, 640.0f }, { 0,0 }, { 1166, 591 }, 0, { 1,1,1,0 }));
+	AddSprite("KeyMouInst", CreateSpriteData(device, "Data/Sprite/KeyMouInstruction.png", { 145.0f,100,0 }, { 1137.8f, 640.0f }, { 0,0 }, { 1052, 561 }, 0, { 1,1,1,0 }));
 
-	////操作説明
-	//AddSprite("PauseBack1", CreateSpriteData(device, "Data/Sprite/PauseBack_Con.png", { 3.0f,16.0f,0 }, { 1137.8f, 640.0f }, { 0,0 }, { 1280, 720 }, 0, { 1,1,1,0 }));
-	//AddSprite("PauseBack2", CreateSpriteData(device, "Data/Sprite/PauseBack_KeyMou.png", { 0,2,0 }, { 1137.8f, 640.0f }, { 0,0 }, { 1280, 720 }, 0, { 1,1,1,0 }));
-
-	//AddSprite("Hint", CreateSpriteData(device, "Data/Sprite/Hint.png", { 1249.0f,552.0f,0 }, { 590.0f, 189.8f }, { 0,0 }, { 1024,256 }, 0, { 1,1,1,1 }));
-	//AddSprite("Hint1", CreateSpriteData(device, "Data/Sprite/Hint1.png", { 1249.0f,552.0f,0 }, { 551.0f, 167.0f }, { 0,0 }, { 1024,256 }, 0, { 1,1,1,1 }));
-
-	//AddSprite("LoadingIcon", CreateSpriteData(device, "Data/Sprite/LoadingIcon.png", { 1000.0f,-245.0f,0.1f }, { 512.0f, 512.0f }, { 0,0 }, { 512,512 }, 0, { 1,1,1,1 }));
-	//AddSprite("LoadingIconB", CreateSpriteData(device, "Data/Sprite/LoadingIconBack.png", { 1000.0f,-245.0f,0 }, { 512.0f, 512.0f }, { 0,0 }, { 512,512 }, 0, { 1,1,1,1 }));
+	AddSprite("LoadingIcon", CreateSpriteData(device, "Data/Sprite/LoadingIcon.png", { 1000.0f,-245.0f,0.1f }, { 512.0f, 512.0f }, { 0,0 }, { 512,512 }, 0, { 1,1,1,1 }));
+	AddSprite("LoadingIconB", CreateSpriteData(device, "Data/Sprite/LoadingIconBack.png", { 1000.0f,-245.0f,0 }, { 512.0f, 512.0f }, { 0,0 }, { 512,512 }, 0, { 1,1,1,1 }));
 
 	bool isController = true;
-
-	hintStartPos = { 1249.0f,552.0f,0 };
-	hintMidPos = { 0.0f,552.0f,0 };
-	hintEndPos = { -560.0f,552.0f,0 };
-
-	hint1StartPos = { 1249.0f,552.0f,0 };
-	hint1MidPos = { 0.0f,552.0f,0 };
-	hint1EndPos = { -560.0f,552.0f,0 };
 
 	// スレッド開始
 	thread = new std::thread(LoadingThread, this);
@@ -73,20 +66,34 @@ void SceneLoading::Finalize()
 void SceneLoading::Update(float elapsedTime)
 {
 	isController = Input::Instance().GetIsLastGamePad();
-	/*float fadeSpeed = 6.0f * elapsedTime;
+	float fadeSpeed = 6.0f * elapsedTime;
+
+	// 画面サイズ取得
+	float screenWidth = static_cast<float>(Graphics::Instance().GetScreenWidth());
+	float screenHeight = static_cast<float>(Graphics::Instance().GetScreenHeight());
+
+	// 背景を画面サイズに合わせる
+	sprite["Back"].size = { screenWidth, screenHeight };
+
+	// アイコンを背景の右上基準で配置
+	const float iconOffsetX = -250.0f;
+	const float iconOffsetY = -250.0f;
+
+	sprite["LoadingIcon"].position.x = screenWidth + iconOffsetX;
+	sprite["LoadingIcon"].position.y = iconOffsetY;
+	sprite["LoadingIconB"].position.x = screenWidth + iconOffsetX;
+	sprite["LoadingIconB"].position.y = iconOffsetY;
 
 	auto SetAlphaLerp = [&](const std::string& name, float target)
 		{
 			sprite[name].color.w = Mathf::Lerp(sprite[name].color.w, target, fadeSpeed);
 		};
 
-	SetAlphaLerp("PauseBack1", isController ? 1.0f : 0.0f);
-	SetAlphaLerp("PauseBack2", isController ? 0.0f : 1.0f);
-
 	sprite["LoadingIcon"].angle -= 180.0f * elapsedTime;
 	sprite["LoadingIconB"].angle -= 60.0f * elapsedTime;
 
-	MoveHintText(elapsedTime);*/
+	SetAlphaLerp("PadInst", isController ? 1.0f : 0.0f);
+	SetAlphaLerp("KeyMouInst", isController ? 0.0f : 1.0f);
 
 	if (!nextScene)return;
 
@@ -113,7 +120,6 @@ void SceneLoading::Render(float elapsedTime)
 		renderState->GetSamplerState(SamplerState::PointClamp)
 	};
 
-
 	// SpriteDataへのポインタを持つvectorを作成
 	std::vector<std::pair<std::string, SpriteDataLoad*>> spriteVec;
 
@@ -127,6 +133,14 @@ void SceneLoading::Render(float elapsedTime)
 		[](const auto& a, const auto& b) {
 			return a.second->position.z < b.second->position.z;
 		});
+
+	dc->OMSetBlendState(
+		renderState->GetBlendState(BlendState::Transparency),
+		nullptr,
+		0xFFFFFFFF
+	);
+	dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+	dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
 	// ソートした順に描画
 	for (auto& [name, dataPtr] : spriteVec)
@@ -309,110 +323,5 @@ void SceneLoading::DrawDebugGUI()
 		previousSpriteState[name].color = data.color;
 		previousSpriteState[name].texPos = data.texPos;
 		previousSpriteState[name].texSize = data.texSize;
-	}
-}
-
-void SceneLoading::MoveHintText(float elapsedTime)
-{
-	// --- Hintの動き ---
-	switch (hintPhase)
-	{
-	case MovePhase::MoveIn:
-	{
-		hintTimer += elapsedTime;
-		float t = min(hintTimer / moveDuration, 1.0f);
-		float easedT = EaseOutBack(t);
-		float newPos = Mathf::Lerp(hintStartPos.x, hintMidPos.x, easedT);
-		sprite["Hint"].position.x = newPos;
-
-		if (t >= 1.0f)
-		{
-			hintPhase = MovePhase::Wait;
-			hintTimer = 0.0f;
-		}
-		break;
-	}
-	case MovePhase::Wait:
-	{
-		hintTimer += elapsedTime;
-		if (hintTimer >= waitDuration)
-		{
-			hintPhase = MovePhase::MoveOut;
-			hintTimer = 0.0f;
-		}
-		break;
-	}
-	case MovePhase::MoveOut:
-	{
-		hintTimer += elapsedTime;
-		float t = min(hintTimer / moveDuration, 1.0f);
-		float easedT = EaseInBack(t);
-		float newPos = Mathf::Lerp(hintMidPos.x, hintEndPos.x, easedT);
-		sprite["Hint"].position.x = newPos;
-
-		if (t >= 1.0f)
-		{
-			hintPhase = MovePhase::Done;
-			hint1Phase = MovePhase::MoveIn; // 次のHint1をスタート
-			hintTimer = 0.0f;
-
-			// 元の位置に戻して次回に備える
-			sprite["Hint"].position.x = hintStartPos.x;
-		}
-		break;
-	}
-	default:
-		break;
-	}
-
-	// --- Hint1の動き ---
-	switch (hint1Phase)
-	{
-	case MovePhase::MoveIn:
-	{
-		hint1Timer += elapsedTime;
-		float t = min(hint1Timer / moveDuration, 1.0f);
-		float easedT = EaseOutBack(t);
-		float newPos = Mathf::Lerp(hint1StartPos.x, hint1MidPos.x, easedT);
-		sprite["Hint1"].position.x = newPos;
-
-		if (t >= 1.0f)
-		{
-			hint1Phase = MovePhase::Wait;
-			hint1Timer = 0.0f;
-		}
-		break;
-	}
-	case MovePhase::Wait:
-	{
-		hint1Timer += elapsedTime;
-		if (hint1Timer >= waitDuration)
-		{
-			hint1Phase = MovePhase::MoveOut;
-			hint1Timer = 0.0f;
-		}
-		break;
-	}
-	case MovePhase::MoveOut:
-	{
-		hint1Timer += elapsedTime;
-		float t = min(hint1Timer / moveDuration, 1.0f);
-		float easedT = EaseInBack(t); // ここ！
-		float newPos = Mathf::Lerp(hint1MidPos.x, hint1EndPos.x, easedT);
-		sprite["Hint1"].position.x = newPos;
-
-		if (t >= 1.0f)
-		{
-			hint1Phase = MovePhase::Done;
-			hint1Timer = 0.0f;
-
-			// 次のHintを再スタート
-			hintPhase = MovePhase::MoveIn;
-			sprite["Hint1"].position.x = hint1StartPos.x;
-		}
-		break;
-	}
-	default:
-		break;
 	}
 }

@@ -64,6 +64,7 @@ public:
 
 	float GetTextureWidth() const { return textureWidth; }
 	float GetTextureHeight() const { return textureHeight; }
+	ID3D11ShaderResourceView* GetSRV() const { return shaderResourceView.Get(); }
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>			vertexShader;

@@ -94,6 +94,12 @@ public:
 	// プレイヤーのガード状態設定
 	void SetPlayerGuard(bool guardFlag) { isGuard = guardFlag; }
 
+	// ガードカウンター可能か状態取得
+	bool GetPlayerIsCounter() { return isStandbyCounter; }
+
+	// ガードカウンター可能か状態設定
+	void SetPlayerCounter(bool flag) { isStandbyCounter = flag; }
+
 	// プレイヤーのパリィ状態取得
 	bool GetPlayerIsParry() { return isParry; }
 
@@ -169,15 +175,6 @@ public:
 	DirectX::SimpleMath::Vector3 launchKnockbackPosition;
 	float launchKnockBackPower = 3.0f;
 
-	// 敵ワープ地点
-	DirectX::SimpleMath::Vector3 PlayerFront;
-	DirectX::SimpleMath::Vector3 PlayerBack;
-	DirectX::SimpleMath::Vector3 PlayerLeft;
-	DirectX::SimpleMath::Vector3 PlayerRight;
-	DirectX::SimpleMath::Vector3 PlayerFrontLeft;
-	DirectX::SimpleMath::Vector3 PlayerFrontRight;
-	float warpDist = 8.0f;
-
 	// コンボのY座標補正実行判定の閾値
 	DirectX::SimpleMath::Vector3 epsilon {1000.0f, 0.8f, 1000.0f};
 
@@ -219,6 +216,9 @@ public:
 	// ノックバック位置を計算（攻撃を受けた方向から後方へ）
 	DirectX::XMFLOAT3 CalculateKnockbackPosition(float power);
 
+	std::unique_ptr<Effect> guardEffect = nullptr;
+	Effekseer::Handle effectHandle;
+
 protected:
 	// 着地した時に呼ばれる
 	void OnLanding() override;
@@ -232,12 +232,17 @@ protected:
 private:
 	std::unique_ptr<Sword> sword;
 
-	float nodeRadius[6] =
+	float nodeRadius[11] =
 	{
 		0.15f,
 		0.15f,
 		0.2f,
 		0.15f,
+		0.1f,
+		0.1f,
+		0.2f,
+		0.1f,
+		0.1f,
 		0.1f,
 		0.1f,
 	};
@@ -250,6 +255,11 @@ private:
 		{"Character1_Head", nodeRadius[3]},
 		{"Character1_LeftForeArm", nodeRadius[4]},
 		{"Character1_RightForeArm", nodeRadius[5]},
+		{"Character1_Spine2", nodeRadius[6]},
+		{"Character1_LeftShoulder", nodeRadius[7]},
+		{"Character1_RightShoulder", nodeRadius[8]},
+		{"Character1_LeftFoot", nodeRadius[9]},
+		{"Character1_RightFoot", nodeRadius[10]},
 	};
 
 private:
@@ -281,9 +291,6 @@ private:
 	// ノックバック位置設定
 	void SetKnockbackPosition();
 
-	// 敵ワープ地点設定
-	void SetEnemyWarpPosition();
-
 	// ステート取得
 	PlayerState& GetState(PlayerStateId stateId)
 	{
@@ -298,6 +305,7 @@ private:
 	int jumpLimit = 2;
 	bool isRolling = false;
 	bool isGuard = false;
+	bool isStandbyCounter = false;
 	bool isParry = false;
 	bool isDamage = false;
 	bool isLightDamage = false;
@@ -312,9 +320,7 @@ private:
 	bool isTurnCompleted = false;
 	float turnCompletedThreshold = DirectX::XMConvertToRadians(3.0f);  // 3度以内なら完了とみなす
 
-	/*std::unique_ptr<Effect> effect = nullptr;
-	Effekseer::Handle effectHandle;
-	std::unique_ptr<Sprite> healthBar = nullptr;*/
+	//std::unique_ptr<Sprite> healthBar = nullptr;
 
 	Enemy* LockOnEnemy = nullptr;
 

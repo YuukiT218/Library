@@ -87,16 +87,20 @@ void ShapeRenderer::DrawCylinder(
 	float height,
 	const DirectX::XMFLOAT4& color)
 {
-	/*Instance& instance = instances.emplace_back();
+	Instance& instance = instances.emplace_back();
 	instance.mesh = &cylinderMesh;
-	DirectX::XMMATRIX World;
-	DirectX::XMMATRIX Transform = DirectX::XMLoadFloat4x4(&transform);
-	World.r[0] = DirectX::XMVectorScale(Transform.r[0], radius);
-	World.r[1] = DirectX::XMVectorScale(Transform.r[1], height);
-	World.r[2] = DirectX::XMVectorScale(Transform.r[2], radius);
-	World.r[3] = Transform.r[3];
-	DirectX::XMStoreFloat4x4(&instance.worldTransform, World);
-	instance.color = color;*/
+	instance.color = color;
+
+	// 拡大縮小 (X, Zは半径、Yは高さ)
+	// コンストラクタで円柱メッシュは (幅1.0, 高さ1.0) で生成されているため、
+	// そのままスケーリングに使用できます。
+	DirectX::XMMATRIX S = DirectX::XMMatrixScaling(radius, height, radius);
+
+	// 平行移動
+	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+
+	// 行列の合成 (S * R * T)
+	DirectX::XMStoreFloat4x4(&instance.worldTransform, S * T);
 }
 
 // カプセル描画

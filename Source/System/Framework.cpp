@@ -8,6 +8,7 @@
 #include "Scene/SceneManager.h"
 #include "Scene/SceneTitle.h"
 #include "Scene/SceneGame.h"
+#include "Scene/SceneResult.h"
 #include "Scene/SceneEdit.h"
 #include "Scene/SceneLoading.h"
 #include "System/AnimationConfigLoader.h"
@@ -28,11 +29,10 @@ Framework::Framework(HWND hWnd)
 	ImGuiRenderer::Initialize(hWnd, Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
 
 	EffectManager::Instance().Initialize();
+	AnimationConfigLoader::LoadAllConfigs();
 
 	// シーン初期化
-	SceneManager::Instance().ChangeScene(new SceneGame);
-
-	AnimationConfigLoader::LoadAllConfigs();
+	SceneManager::Instance().ChangeScene(new SceneTitle);
 }
 
 // デストラクタ
@@ -59,6 +59,7 @@ void Framework::Update(float elapsedTime)
 // 描画処理
 void Framework::Render(float elapsedTime)
 {
+	std::lock_guard<std::mutex>lock(Graphics::Instance().GetMutex());
 	ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
 
 	// IMGUIフレーム開始処理	
@@ -133,6 +134,12 @@ void Framework::Render(float elapsedTime)
 			if (ImGui::MenuItem("Game Scene")) {
 				currentSceneType = SceneType::Game;
 				SceneManager::Instance().ChangeScene(new SceneLoading(new SceneGame()));
+				ResizeSceneFramebufferToWindow();
+			}
+
+			if (ImGui::MenuItem("Result Scene")) {
+				currentSceneType = SceneType::Result;
+				SceneManager::Instance().ChangeScene(new SceneLoading(new SceneResult()));
 				ResizeSceneFramebufferToWindow();
 			}
 
@@ -260,7 +267,7 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 	case WM_CREATE:
 		break;
 	case WM_KEYDOWN:
-		if (wParam == VK_ESCAPE) PostMessage(hWnd, WM_CLOSE, 0, 0);
+		//if (wParam == VK_ESCAPE) PostMessage(hWnd, WM_CLOSE, 0, 0);
 		input.OnKeyDown();
 		input.SetIsLastGamePad(false);
 		break;

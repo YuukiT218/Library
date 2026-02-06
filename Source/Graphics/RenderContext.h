@@ -14,4 +14,6 @@ struct RenderContext
 	const ShadowMap*		shadowMap;
 
 	float timer;
+	DirectX::XMFLOAT3 targetPosition;
+	bool enableWallTransparency;
 };

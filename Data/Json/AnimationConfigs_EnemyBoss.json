@@ -34,7 +34,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 5,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -70,8 +70,24 @@
                     "handleOffsetY": 0.0,
                     "inTangent": 0.0,
                     "outTangent": 0.0,
+                    "time": 0.7212497591972351,
+                    "value": 0.9899998903274536
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.7337497472763062,
+                    "value": 0.31499993801116943
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
                     "time": 1.0,
-                    "value": 1.0
+                    "value": 0.31000036001205444
                 }
             ]
         },
@@ -312,7 +328,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -576,7 +592,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -644,7 +660,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -664,7 +680,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -752,7 +768,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -794,13 +810,13 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.550000011920929,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 1.2000000476837158,
+            "advanceInputStartFrame": 0.550000011920929,
             "animationIndex": 21,
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -820,7 +836,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -840,7 +856,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 5,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -896,8 +912,24 @@
                     "handleOffsetY": 0.0,
                     "inTangent": 0.0,
                     "outTangent": 0.0,
+                    "time": 0.8237500190734863,
+                    "value": 0.9900001287460327
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.84375,
+                    "value": 0.315000057220459
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
                     "time": 1.0,
-                    "value": 1.0
+                    "value": 0.32500049471855164
                 }
             ]
         },
@@ -1144,10 +1176,51 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
+            "advanceInputEndFrame": 0.6000000238418579,
             "advanceInputStartFrame": 0.0,
             "animationIndex": 25,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.28939715027809143,
+                    "flag": "Attack",
+                    "startTime": 0.14758791029453278
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.699999988079071,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "EnemyBoss",
             "events": [],
@@ -1174,7 +1247,48 @@
             "advanceInputEndFrame": 0.0,
             "advanceInputStartFrame": 0.0,
             "animationIndex": 26,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 5,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4441370368003845,
+                    "flag": "Attack",
+                    "startTime": 0.14254598319530487
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.7176721096038818,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "EnemyBoss",
             "events": [],
@@ -1251,7 +1365,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -1319,7 +1433,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 2,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -1968,10 +2082,31 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 0.25,
+            "advanceInputStartFrame": 0.14977489411830902,
             "animationIndex": 48,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.45109403133392334,
+                    "flag": "Attack",
+                    "startTime": 0.14977489411830902
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "EnemyBoss",
             "events": [],
@@ -1995,10 +2130,31 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 0.27000001072883606,
+            "advanceInputStartFrame": 0.18796657025814056,
             "animationIndex": 49,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.4570781886577606,
+                    "flag": "Attack",
+                    "startTime": 0.18796657025814056
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "EnemyBoss",
             "events": [],
@@ -2022,10 +2178,31 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 0.27000001072883606,
+            "advanceInputStartFrame": 0.12400257587432861,
             "animationIndex": 50,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.3729730546474457,
+                    "flag": "Attack",
+                    "startTime": 0.12400257587432861
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "EnemyBoss",
             "events": [],
@@ -2049,10 +2226,31 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 0.36000001430511475,
+            "advanceInputStartFrame": 0.1754826158285141,
             "animationIndex": 51,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.470752477645874,
+                    "flag": "Attack",
+                    "startTime": 0.1754826158285141
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "EnemyBoss",
             "events": [],
@@ -2420,8 +2618,28 @@
                         "revengeValue": 0,
                         "turnRate": 1.0
                     },
-                    "endTime": 0.5,
+                    "endTime": 1.3333333730697632,
                     "flag": "Invincible",
+                    "startTime": 0.0
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.3333333730697632,
+                    "flag": "SuperArmor",
                     "startTime": 0.0
                 }
             ],
@@ -3285,7 +3503,15 @@
                     "inTangent": 0.0,
                     "outTangent": 0.0,
                     "time": 0.0,
-                    "value": 1.0
+                    "value": 1.0150001049041748
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.7874998450279236,
+                    "value": 0.4950003921985626
                 },
                 {
                     "handleOffsetX": 0.05000000074505806,
@@ -3293,7 +3519,15 @@
                     "inTangent": 0.0,
                     "outTangent": 0.0,
                     "time": 1.0,
-                    "value": 1.0
+                    "value": 0.4949999451637268
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 1.0,
+                    "value": 0.47500038146972656
                 }
             ]
         },
@@ -3733,7 +3967,28 @@
             "advanceInputEndFrame": 0.0,
             "advanceInputStartFrame": 0.0,
             "animationIndex": 111,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.75,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "EnemyBoss",
             "events": [],
@@ -3760,7 +4015,28 @@
             "advanceInputEndFrame": 0.0,
             "advanceInputStartFrame": 0.0,
             "animationIndex": 112,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.3333333432674408,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "EnemyBoss",
             "events": [],
@@ -4000,13 +4276,13 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.2549999952316284,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 1.5,
+            "advanceInputStartFrame": 0.2549999952316284,
             "animationIndex": 121,
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 1,
+                        "attackDamage": 3,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 1.0,
                         "attackLeftVibrate": 1.0,
@@ -4022,7 +4298,7 @@
                     },
                     "endTime": 0.5558558106422424,
                     "flag": "Attack",
-                    "startTime": 0.2633203864097595
+                    "startTime": 0.2433719038963318
                 }
             ],
             "cameraKeyframes": [],
@@ -4042,8 +4318,24 @@
                     "handleOffsetY": 0.0,
                     "inTangent": 0.0,
                     "outTangent": 0.0,
+                    "time": 0.8262500166893005,
+                    "value": 0.9900001287460327
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.842499852180481,
+                    "value": 0.24000026285648346
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
                     "time": 1.0,
-                    "value": 1.0
+                    "value": 0.23500029742717743
                 }
             ]
         },

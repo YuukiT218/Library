@@ -11,7 +11,7 @@ SamplerState LinearBorderWhiteSampler : register(s4);
 
 Texture2D colorMap : register(t0);
 Texture2D luminanceMap : register(t1);
-
+Texture2D depthMap : register(t2);
 
 // コントラスト(明暗の差)
 float3 Contrast(float3 color)
@@ -422,8 +422,8 @@ float3 Vignette(float3 color, float2 texcoord)
 float4 main(VS_OUT pin) : SV_TARGET
 {
 
-    //float4 color = colorMap.Sample(LinearSampler, pin.texcoord);
-    float4 color;
+    float4 color = colorMap.Sample(LinearSampler, pin.texcoord);
+    //float4 color;
     //color.rgb = ChromaticAberration(pin.texcoord);
     color.rgb = fxaa(colorMap, LinearSampler, pin.texcoord, 1.0f / float2(1200, 720));
     //color.rgb = RadialBlur(pin.texcoord);
@@ -436,8 +436,6 @@ float4 main(VS_OUT pin) : SV_TARGET
     float3 fragment_color = color.rgb + bloom.rgb;
     
     float alpha = color.a;
-    
-
     
     //fragment_color = radialColor;
     
@@ -461,19 +459,19 @@ float4 main(VS_OUT pin) : SV_TARGET
     fragment_color.rgb = Accelaration(float4(fragment_color, alpha), pin.texcoord);
     
     fragment_color.rgb = GrayScall(fragment_color.rgb);
-    
-    //return float4(fragment_color, alpha);
-	// Tone map
-    //fragment_color += ACESFilmToneMapping(fragment_color);
-    fragment_color = hlsl_tone_map(color, bloom, pin.texcoord);
-	//fragment_color = reinhard_tone_mapping(fragment_color);
-    
-    return float4(fragment_color, alpha);
 
-    
-	//// Gamma correction
- //   const float INV_GAMMA = 1.0 / 2.2;
- //   fragment_color = pow(fragment_color, INV_GAMMA);
+	// Tone map
+    fragment_color += ACESFilmToneMapping(fragment_color);
+    //fragment_color = hlsl_tone_map(color, bloom, pin.texcoord);
+	//fragment_color = reinhard_tone_mapping(fragment_color);
+    //return float4(fragment_color, alpha);
+    // 露出調整 (C++から送られた fExposureLevel を使用)
+    // ※注意: hlsl_tone_map内のローカル変数ではなく、Globalの変数を使うか、ここで掛ける
+    fragment_color.rgb *= fExposureLevel;
+
+    // ガンマ補正 (モニター出力用に暗く戻す)
+    //const float INV_GAMMA = 1.0 / 2.2;
+    //fragment_color.rgb = pow(fragment_color.rgb, INV_GAMMA);
     
     return float4(fragment_color, alpha);
 

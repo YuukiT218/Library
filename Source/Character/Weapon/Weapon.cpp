@@ -8,6 +8,11 @@
 #include "Graphics/Light.h"
 #include "Math/Mathf.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 void Weapon::Attach(std::string nodeName, Model* character)
 {
     std::string objName = nodeName;
@@ -39,18 +44,10 @@ void Weapon::TrailUpdate(float elapsedTime)
 {
     DirectX::XMMATRIX weaponWorldTransform = DirectX::XMLoadFloat4x4(&transform);
 
-    // 保存していた頂点座標を１フレーム分ずらす
+    DirectX::XMFLOAT3 currentRootPos;
+    DirectX::XMFLOAT3 currentTipPos;
     {
-        for (int i = MAX_POLYGON - 1; i > 0; i--)
-        {
-            trailPositions[0][i] = trailPositions[0][i - 1];
-            trailPositions[1][i] = trailPositions[1][i - 1];
-        }
-    }
-
-    // 剣の根本と先端の座標を取得し、最新の頂点座標を保存
-    {
-        //剣の原点から根本と先端までのオフセット値
+        // 剣の原点から根本と先端までのオフセット値
         DirectX::XMVECTOR RootOffset = DirectX::XMVectorSet(trailoffset[0].x, trailoffset[0].y, trailoffset[0].z, 0);
         DirectX::XMVECTOR TipOffset = DirectX::XMVectorSet(trailoffset[1].x, trailoffset[1].y, trailoffset[1].z, 0);
 
@@ -58,14 +55,40 @@ void Weapon::TrailUpdate(float elapsedTime)
         DirectX::XMVECTOR Root = DirectX::XMVector3TransformCoord(RootOffset, W);
         DirectX::XMVECTOR Tip = DirectX::XMVector3TransformCoord(TipOffset, W);
 
-        DirectX::XMStoreFloat3(&trailPositions[0][0], Root);//根本
-        DirectX::XMStoreFloat3(&trailPositions[1][0], Tip);//先端
+        DirectX::XMStoreFloat3(&currentRootPos, Root); // 根本
+        DirectX::XMStoreFloat3(&currentTipPos, Tip);   // 先端
+    }
+
+    if (IsAttack)
+    {
+        // 攻撃中：履歴を1つずつ後ろにずらして、先頭に最新座標を入れる
+        // (これにより軌跡が作られる)
+        for (int i = MAX_POLYGON - 1; i > 0; i--)
+        {
+            trailPositions[0][i] = trailPositions[0][i - 1];
+            trailPositions[1][i] = trailPositions[1][i - 1];
+        }
+
+        // 最新の座標を保存
+        trailPositions[0][0] = currentRootPos;
+        trailPositions[1][0] = currentTipPos;
+    }
+    else
+    {
+        // 攻撃中でない（待機、移動、怯み、回避など）：
+        // 履歴配列の【すべて】を「現在の座標」で上書きする。
+        // これにより、トレイルの長さが「0」の状態が維持される。
+        // 次に IsAttack が true になったとき、古い場所からの引き延ばしが発生しなくなる。
+        for (int i = 0; i < MAX_POLYGON; i++)
+        {
+            trailPositions[0][i] = currentRootPos;
+            trailPositions[1][i] = currentTipPos;
+        }
     }
 }
 
 void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed)
 {
-    if (!IsAttack) IsAttack = !IsAttack;
 
     GamePad& gamepad = Input::Instance().GetGamePad();
 
@@ -190,6 +213,10 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
                 if (character == static_cast<Character*>(&player) && activeAttribute && activeAttribute->flag == AnimationFlag::Attack)
                 {
                     auto& ap = activeAttribute->attackParam;
+					if (boss.GetInvincibleTimer() > 0.0f || boss.IsInvincible())
+					{
+						return;
+					}
                     if (boss.IsSuperArmor())
                     {
                         if(boss.ApplyDamage(ap.attackDamage, ap.invisibleTime, true, outHitPoint))
@@ -225,7 +252,7 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
                     auto& ap = activeAttribute->attackParam;
                     // プレイヤーが回避中なら処理を抜ける
                     bool isPlayerRolling = Player::Instance().GetPlayerIsRolling();
-                    if (isPlayerRolling)
+                    if (isPlayerRolling || player.GetInvincibleTimer() > 0.0f)
                     {
                         return;
                     }
@@ -251,6 +278,7 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
                         if (player.ApplyDamage(ap.attackDamage, ap.invisibleTime, true, outHitPoint))
                         {
                             Camera::Instance().SetCameraShakeSwitch(true, 0.2f, 1.0f);
+                            attackHitEffectHandle = attackHitEffect->Play(outHitPoint, 0.2f);
                         }
                     }
                 }
@@ -308,6 +336,20 @@ void Weapon::AttackAnimationCollision(Model* model, AnimationConfig* config, Cha
         if (IsAttack) IsAttack = !IsAttack;
         gamepad.Vibrate(0.0f, 0.0f);
     }
+}
+
+void Weapon::SetTeleportEffect(bool enable, float progress, float time)
+{
+    hasTeleportEffect = enable;
+    teleportProgress = progress;
+    teleportTime = time;
+}
+
+void Weapon::ClearTeleportEffect()
+{
+    hasTeleportEffect = false;
+    teleportProgress = 0.0f;
+    teleportTime = 0.0f;
 }
 
 void Weapon::TrailRender(const RenderContext& rc)
@@ -381,12 +423,29 @@ void Weapon::TrailRender(const RenderContext& rc)
     }
 }
 
+void Weapon::ResetAttackState()
+{
+    // 攻撃中だった場合のみ処理
+    if (IsAttack)
+    {
+        IsAttack = false;
+
+        // コントローラーの振動が残らないように停止
+        Input::Instance().GetGamePad().Vibrate(0.0f, 0.0f);
+
+        // トレイルを即座にリセットするために更新をかける
+        // (IsAttack = false にした状態で呼ぶことで、前回の修正コードの else ループが走り、履歴がクリアされる)
+        TrailUpdate(0.0f);
+    }
+}
+
 void Weapon::DrawDebugTrailGui()
 {
     if (ImGui::CollapsingHeader("Trail", ImGuiTreeNodeFlags_DefaultOpen))
     {
         if (ImGui::TreeNode("Trail "))
         {
+            ImGui::Checkbox("AttackFlag", &IsAttack);
             ImGui::DragFloat3("TrailTip", &trailoffset[1].x, 0.1f);
             ImGui::DragFloat3("TrailRoot", &trailoffset[0].x, 0.1f);
 
@@ -406,3 +465,5 @@ void Weapon::DrawDebugTrailGui()
     ImGui::ColorEdit4("TrailPointColor", &pointColor.x);
     ImGui::DragFloat("TrailPAttenuation", &attenuation, 0.1f);
 }
+
+

@@ -4,6 +4,11 @@
 //#include "System/MessageData.h"
 //#include "System/Messenger.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 // 行列更新処理
 void Character::UpdateTransform()
 {
@@ -149,6 +154,35 @@ DirectX::XMFLOAT3 Character::CharacterRight(DirectX::XMFLOAT3 angle)
     vec.z = rightZ;
 
     return vec;
+}
+
+float Character::GetDistanceFromGround()
+{
+    // レイの始点：足元（position）から少しだけ上に持ち上げる
+        // ※ 完全に0地点から始めると、床のポリゴンと重なって判定がすり抜ける場合があるため
+    DirectX::XMFLOAT3 start = position;
+    start.y += 0.5f;
+
+    // レイの終点：始点から真下に十分な距離を伸ばす
+    // ここでは10.0f（10メートル）下に設定。これ以上離れていれば「無限遠」扱いとする
+    DirectX::XMFLOAT3 end = start;
+    end.y -= 10.0f;
+
+    HitResult hit;
+
+    // ステージマネージャーを通してレイキャストを実行
+    // start と end の間で衝突判定を行う
+    if (StageManager::Instance().RayCast(start, end, hit))
+    {
+        // 衝突した場合
+        // 「現在の足元のY座標」と「ヒットした地面のY座標」の差分を返す
+        // hit.position.y はワールド座標での衝突点
+        return position.y - hit.position.y;
+    }
+
+    // 地面が見つからない場合（崖の外や、空高くにいる場合）
+    // 判定に引っかからないよう、非常に大きな値を返す
+    return FLT_MAX;
 }
 
 // ダメージを与える

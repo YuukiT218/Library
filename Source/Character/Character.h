@@ -70,6 +70,9 @@ public:
 	// 高さ取得
 	float GetHeight() const { return height; }
 
+	// 地面との距離を取得
+	float GetDistanceFromGround();
+
 	// 行列設定・取得
 	void SetTransform(DirectX::XMFLOAT4X4 transform) { this->transform = transform; }
 	DirectX::XMFLOAT4X4 GetTransform() const { return transform; }
@@ -94,6 +97,13 @@ public:
 	void SetSuperArmor(bool armor) { isSuperArmor = armor; }
 	bool IsSuperArmor() const { return isSuperArmor; }
 
+	// 無敵状態の設定・取得
+	void SetInvincible(bool flag) { isInvincible = flag; }
+	bool IsInvincible() const { return isInvincible; }
+
+	// 無敵時間取得
+	float GetInvincibleTimer() const { return invincibleTimer; }
+
 	// 名前取得
 	virtual std::string GetName() = 0;
 
@@ -112,6 +122,7 @@ public:
 	std::unordered_map<int, float> animSpeed;
 
 	void initAnimSpeed();
+
 protected:
 	// 移動処理
 	void Move(float vx, float vz, float speed);
@@ -185,6 +196,7 @@ protected:
 	int maxHealth = 1000000;
 	bool isGround = true;
 	bool isSuperArmor = false;  // スーパーアーマー状態フラグ
+	bool isInvincible = false;
 	bool deathFlag = false;	// キャラクターが死亡したらtrueになる変数
 	bool drawCollisionPrimitive = false;
 
@@ -206,4 +218,6 @@ protected:
 	float areaSize = 10.0f;
 
 	std::shared_ptr<Model> model = nullptr;
+public:
+	std::shared_ptr<Effect> deathEffect = nullptr;
 };

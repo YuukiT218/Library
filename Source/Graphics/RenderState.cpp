@@ -189,6 +189,16 @@ RenderState::RenderState(ID3D11Device* device)
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
+	{
+		D3D11_DEPTH_STENCIL_DESC desc = {};
+		desc.DepthEnable = TRUE;
+		desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // シルエットは深度を書き込まない（推奨）
+		desc.DepthFunc = D3D11_COMPARISON_GREATER;         // ★重要: 手前に壁がある(=バッファの深度の方が小さい)場合にパスする
+		// ... (Stencil設定などは適宜)
+		HRESULT hr = device->CreateDepthStencilState(&desc, &depthStencilStates[static_cast<int>(DepthState::TestGreater)]);
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
+
 	// 合成なし
 	{
 		D3D11_BLEND_DESC desc{};
@@ -307,6 +317,22 @@ RenderState::RenderState(ID3D11Device* device)
 		desc.AntialiasedLineEnable = false;
 		HRESULT hr = device->CreateRasterizerState(&desc,
 			rasterizerStates[static_cast<int>(RasterizerState::SolidCullBack)].GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+	}
+	{
+		D3D11_RASTERIZER_DESC desc{};
+		desc.FrontCounterClockwise = false;
+		desc.DepthBias = 0;
+		desc.DepthBiasClamp = 0;
+		desc.SlopeScaledDepthBias = 0;
+		desc.DepthClipEnable = true;
+		desc.ScissorEnable = false;
+		desc.MultisampleEnable = true;
+		desc.FillMode = D3D11_FILL_SOLID;
+		desc.CullMode = D3D11_CULL_FRONT;
+		desc.AntialiasedLineEnable = false;
+		HRESULT hr = device->CreateRasterizerState(&desc,
+			rasterizerStates[static_cast<int>(RasterizerState::SolidCullFront)].GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 	// ワイヤーフレーム＆カリングなし

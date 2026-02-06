@@ -3,6 +3,11 @@
 #include "PBRShader.h"
 #include <imgui.h>
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 PBRShader::PBRShader(ID3D11Device* device)
 {
 	// 入力レイアウト
@@ -67,24 +72,23 @@ PBRShader::PBRShader(ID3D11Device* device)
 	{
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/duskSkyDiffuseHDR.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/DiffuseHDR.dds",
 			diffuseIemShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/duskSkySpecularHDR.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/SpecularHDR.dds",
 			specularPmremShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/duskSkyBrdf.dds",
+		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/Brdf.dds",
 			lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky_/nightSkyDiffuseHDR.dds",
+		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/DiffuseHDR.dds",
 		//	diffuseIemShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky_/nightSkySpecularHDR.dds",
+		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/SpecularHDR.dds",
 		//	specularPmremShaderResourceView.GetAddressOf(), &texture2dDesc);
 
-		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky_/nightSkyBrdf.dds",
+		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/Brdf.dds",
 		//	lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
-
 	}
 }
 

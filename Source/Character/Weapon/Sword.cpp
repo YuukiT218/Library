@@ -3,6 +3,11 @@
 #include "Graphics/Graphics.h"
 #include <imgui.h>
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 Sword::Sword(ID3D11Device* device, const char* filename)
 {
 	//初期設定
@@ -33,8 +38,7 @@ Sword::Sword(ID3D11Device* device, const char* filename)
 	RootEnd = { Mathf::Color255ToNormalized({255.f,255.f,80.f,10.0f}) };
 	dissolve = 0.5f;
 	Colorscale = 1.2f;
-	attackHitEffect = std::make_shared<Effect>("Data/Effect/HitEffect/HitEffect.efkefc");
-	/*parryEffect = std::make_shared<Effect>("Data/Effect/Parry/ParrySpark.efkefc");*/
+	attackHitEffect = std::make_shared<Effect>("Data/Effect/HitEffect.efkefc");
 }
 
 Sword::~Sword()

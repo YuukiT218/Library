@@ -104,6 +104,34 @@ public:
 	// 判定
 	bool Judgment();
 };
+
+// 落下中か判定
+template <typename ActorType>
+class FallJudgment : public JudgmentBase<ActorType>
+{
+public:
+	FallJudgment(ActorType* actor) :JudgmentBase(actor) {};
+	// 判定
+	bool Judgment();
+};
+
+// 反撃値が一定以上まで蓄積したか判定
+template <typename ActorType>
+class RevengeJudgment : public JudgmentBase<ActorType>
+{
+public:
+	RevengeJudgment(ActorType* actor) :JudgmentBase(actor) {};
+	// 判定
+	bool Judgment();
+};
+
+template <typename ActorType>
+class SpecialAttackJudgment : public JudgmentBase<ActorType>
+{
+public:
+	SpecialAttackJudgment(ActorType* actor) :JudgmentBase(actor) {}
+	bool Judgment();
+};
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
@@ -231,7 +259,7 @@ template <typename ActorType>
 bool DeadJudgment<ActorType>::Judgment()
 {
 	// hpが0なら死ぬ
-	if (owner->GetHealth() <= 0)
+	if (owner->IsDeathFlag())
 	{
 		return true;
 	}
@@ -259,4 +287,43 @@ bool DyingJudgment<ActorType>::Judgment()
 	}
 	return false;
 }
+
+
+
+// 落下中か判定
+template <typename ActorType>
+bool FallJudgment<ActorType>::Judgment()
+{
+	// 地面に接地していない
+	if (!owner->IsGround())
+	{
+		// 地面との距離が 0.5m 以上離れている場合のみ落下とみなす
+		if (owner->GetDistanceFromGround() > 0.5f)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+template<typename ActorType>
+bool RevengeJudgment<ActorType>::Judgment()
+{
+	if (owner->GetRevengeState())
+	{
+		return true;
+	}
+	return false;
+}
+
 //-------------------------------------------------------------
+
+template<typename ActorType>
+bool SpecialAttackJudgment<ActorType>::Judgment()
+{
+	if (owner->GetHealth() <= owner->GetMaxHealth() * 0.5 && owner->GetSpecialReady())
+	{
+		return true;
+	}
+	return false;
+}

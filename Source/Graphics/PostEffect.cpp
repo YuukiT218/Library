@@ -4,6 +4,11 @@
 #include "Graphics/Graphics.h"
 #include <map>
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 PostEffect::PostEffect(ID3D11Device* device)
 {
 	// フルスクリーンクアッド頂点シェーダー読み込み
@@ -110,10 +115,10 @@ PostEffect::PostEffect(ID3D11Device* device)
 	cbPostEffect.luminanceExtractionLowerEdge = 0.6f;
 	cbPostEffect.luminanceExtractionHigherEdge = 0.8f;
 	cbPostEffect.gaussianSigma = 1.0f;
-	cbPostEffect.bloomIntensity = 0.3f;
+	cbPostEffect.bloomIntensity = 0.2f;
 	cbPostEffect.exposure = 10.0f;
-	cbPostEffect.fExposureLevel = 32.0f;
-	cbPostEffect.threshold = 0.8f;
+	cbPostEffect.fExposureLevel = 0.55f;
+	cbPostEffect.threshold = 1.25f;
 	cbPostEffect.time = 0.0f;
 	cbPostEffect.oldTime = 0.0f;
 	//cbGaussianFilter
@@ -131,8 +136,8 @@ PostEffect::PostEffect(ID3D11Device* device)
 	vignetteSetData.vignetteSmoothness = 0.2f;
 	vignetteSetData.vignetteRounded = false;
 	vignetteSetData.vignetteRoundness = 1.0f;
-	cbFpost.contrast = 1.2f;
-	cbFpost.saturation = 1.4f;
+	cbFpost.contrast = 1.0f;
+	cbFpost.saturation = 1.0f;
 	cbFpost.chromatic_aberration = 0.000f;
 	cbFpost.flashAmount = 0.0f;//0.0 ~　1.0で白さを調整
 	cbFpost.colorFilter = { 1.05f, 0.9f, 0.9f };

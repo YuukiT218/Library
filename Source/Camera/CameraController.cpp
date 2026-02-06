@@ -12,6 +12,11 @@
 //#include	"System/MessageData.h"
 //#include	"System/Messenger.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 void CameraController::Update(float elapsedTime)
 {
     auto normalizeAngle = [](float angle) {
@@ -271,10 +276,53 @@ void CameraController::Update(float elapsedTime)
         // =============================================
         // 目標クォータニオンの計算
         // =============================================
+        //{
+        //    DirectX::XMVECTOR vEye = newTargetEyePos;
+        //    DirectX::XMVECTOR vFocus = DirectX::XMLoadFloat3(&focusTarget);
+        //    DirectX::XMVECTOR vUp = DirectX::XMVectorSet(0, 1, 0, 0);
+
+        //    // 注視点もスムーズ化（攻撃時の揺れを抑制）
+        //    DirectX::XMVECTOR vSmoothedFocus = DirectX::XMLoadFloat3(&smoothedFocusTarget);
+        //    float focusSmoothT = (std::min)(focusSmoothSpeed * elapsedTime, 1.0f);
+        //    vFocus = DirectX::XMVectorLerp(vSmoothedFocus, vFocus, focusSmoothT);
+        //    DirectX::XMStoreFloat3(&smoothedFocusTarget, vFocus);
+
+        //    DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookAtLH(
+        //        vEye,
+        //        vFocus,
+        //        vUp
+        //    );
+
+        //    DirectX::XMMATRIX worldMatrix = DirectX::XMMatrixInverse(nullptr, viewMatrix);
+        //    DirectX::XMVECTOR newTargetQuat = DirectX::XMQuaternionRotationMatrix(worldMatrix);
+        //    DirectX::XMStoreFloat4(&targetRotation, newTargetQuat);
+        //}
         {
             DirectX::XMVECTOR vEye = newTargetEyePos;
             DirectX::XMVECTOR vFocus = DirectX::XMLoadFloat3(&focusTarget);
+
+            // --- 修正箇所 開始 ---
+
+            // デフォルトの上方向ベクトル
             DirectX::XMVECTOR vUp = DirectX::XMVectorSet(0, 1, 0, 0);
+
+            // 視線ベクトル（正規化）を計算
+            DirectX::XMVECTOR vDir = DirectX::XMVectorSubtract(vFocus, vEye);
+            vDir = DirectX::XMVector3Normalize(vDir);
+
+            // 視線とUpベクトルの内積を計算（平行具合をチェック）
+            float dot = fabsf(DirectX::XMVectorGetX(DirectX::XMVector3Dot(vDir, vUp)));
+
+            // 平行に近い場合（ほぼ真上・真下を見ている場合）
+            // 0.99f は約8度以内の垂直状態を意味します
+            if (dot > 0.99f)
+            {
+                // UpベクトルをZ軸方向にずらして特異点を回避する
+                // これにより外積計算が安定し、急激なロール回転を防ぎます
+                vUp = DirectX::XMVectorSet(0, 0, 1, 0);
+            }
+
+            // --- 修正箇所 終了 ---
 
             // 注視点もスムーズ化（攻撃時の揺れを抑制）
             DirectX::XMVECTOR vSmoothedFocus = DirectX::XMLoadFloat3(&smoothedFocusTarget);

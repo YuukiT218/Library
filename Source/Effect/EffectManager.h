@@ -31,6 +31,8 @@ public:
 	// 描画処理
 	void Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection);
 
+	void StopAllEffects();
+
 	// Effeckeerマネージャーの取得
 	Effekseer::ManagerRef GetEffekseerManager() { return effekseerManager; }
 

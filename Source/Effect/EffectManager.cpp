@@ -1,6 +1,11 @@
 ﻿#include "Graphics/Graphics.h"
 #include "EffectManager.h"
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
 // 初期化
 void EffectManager::Initialize()
 {
@@ -58,4 +63,12 @@ void EffectManager::Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLO
 
 	// Effekseer描画終了
 	effekseerRenderer->EndRendering();
+}
+
+void EffectManager::StopAllEffects()
+{
+	if (effekseerManager != nullptr)
+	{
+		effekseerManager->StopAllEffects();
+	}
 }
