@@ -298,7 +298,7 @@ void PlayerRunState::Update(float elapsedTime)
     {
         player->GetPlayerModel()->PlayRootMotion(runLoopAnimationIndex, true, true, 0.1f, "Character1_Hips");
     }
-
+    //
     // コンボ1ステートに遷移
     if (InputAction() == InputActionType::LightAttack)
     {
