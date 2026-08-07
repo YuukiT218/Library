@@ -3,16 +3,18 @@
 #include "Graphics/Graphics.h"
 #include <imgui.h>
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
+#include "System/Audio/Audio.h"
+
 
 EnemySword::EnemySword(ID3D11Device* device, const char* filename)
 {
 	//初期設定
-	position = { 0.025f, 0.01f, 0.015f };
-	angle = { -3.45f, 3.15f, 0.0f };
+	position = { 0.025f, 0.01f, 0.030f };
+	angle = { -1.5f, -1.0f, -1.6f };
 	scale = { 1.0f, 1.0f, 1.0f };
 	model = std::make_unique<Model>(device, filename, 1.0f);
 	model->SetAdMetalness(1.0f);
@@ -33,18 +35,23 @@ EnemySword::EnemySword(ID3D11Device* device, const char* filename)
 	pointColor = { Mathf::Color255ToNormalized({240.0f,135.0f,15.0f,0.0f}) };
 
 	//武器用トレイル初期設定
-	TipBegin = { Mathf::Color255ToNormalized({243.f,201.f,104.f,200.0f}) };
-	TipEnd = { Mathf::Color255ToNormalized({255.f,9.f,9.f,200.0f}) };
-	RootBegin = { Mathf::Color255ToNormalized({255.f,9.f,9.f,200.0f}) };
-	RootEnd = { Mathf::Color255ToNormalized({255.f,9.f,9.f,10.0f}) };
+	TipBegin = { Mathf::Color255ToNormalized({255.f,9.f,16.f,200.0f}) };
+	TipEnd = { Mathf::Color255ToNormalized({255.f,135.f,9.f,200.0f}) };
+	RootBegin = { Mathf::Color255ToNormalized({255.f,16.f,16.f,200.0f}) };
+	RootEnd = { Mathf::Color255ToNormalized({255.f,135.f,9.f,10.0f}) };
 	dissolve = 0.5f;
 	Colorscale = 1.2f;
 	attackHitEffect = std::make_shared<Effect>("Data/Effect/HitEffect.efkefc");
-	/*parryEffect = std::make_shared<Effect>("Data/Effect/Parry/ParrySpark.efkefc");*/
+	lightSE = Audio::Instance().LoadAudioSource("Data/Sound/SE/light_punch1.wav");
+	mediumSE = Audio::Instance().LoadAudioSource("Data/Sound/SE/medium_punch1.wav");
+	heavySE = Audio::Instance().LoadAudioSource("Data/Sound/SE/heavy_punch1.wav");
 }
 
 EnemySword::~EnemySword()
 {
+	delete lightSE;
+	delete mediumSE;
+	delete heavySE;
 }
 
 void EnemySword::Update(float elapsedTime)
@@ -88,7 +95,6 @@ void EnemySword::DrawDebugImGUi()
 		ImGui::DragFloat3("WeaponPosition", &position.x, 0.01f);
 		ImGui::DragFloat3("WeaponAngle", &angle.x, 0.01f);
 		ImGui::DragFloat3("WeaponScale", &scale.x, 0.01f);
-		//ImGui::Checkbox(u8"WeaponIsEmissive", &colors.isEmissive);
 		ImGui::DragFloat("WeaponEmissiveFactor", &colors.emissiveFactor, 0.1f, 0.0f, 10.0f);
 		ImGui::ColorEdit4("WeaponEmissiveColor", &colors.adjustColor.x);
 

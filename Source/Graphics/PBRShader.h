@@ -97,6 +97,7 @@ private:
 		float shadowAttenuation;
 		float shadowBias;
 		float dummy;
+		DirectX::XMFLOAT4 cascadeSplits;
 	};
 
 	struct CbRimLight

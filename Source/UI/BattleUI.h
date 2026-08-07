@@ -61,6 +61,10 @@ private:
     std::unique_ptr<Sprite> spritePlayerHP_Back;   // HPGauge.png
     std::unique_ptr<Sprite> spritePlayerHP_Fill;   // HPBar.png
     std::unique_ptr<Sprite> spritePlayerHP_Mask;   // HPBarMask.png (テクスチャとして使用)
+    std::unique_ptr<Sprite> counter;
+    std::unique_ptr<Sprite> launcher;
+    std::unique_ptr<Sprite> counterPC;
+    std::unique_ptr<Sprite> launcherPC;
 
     // ボス用
     std::unique_ptr<Sprite> spriteBossHP_Back;     // BossHPGauge.png
@@ -68,6 +72,7 @@ private:
     std::unique_ptr<Sprite> spriteBossStock_Back;  // HPStockGauge.png
     std::unique_ptr<Sprite> spriteBossStock_Fill;  // HPStockBar.png
 
+    // 操作説明
     std::unique_ptr<Sprite> padInstructionUI;
     std::unique_ptr<Sprite> keyMouInstructionUI;
 
@@ -84,7 +89,7 @@ private:
     float bossGaugeScale = 1.1f;                           // スケール
 
     // ボスストックパラメータ
-    DirectX::XMFLOAT2 bossStockStartPos = { 1660.0f, 85.0f };// ストック開始位置
+    DirectX::XMFLOAT2 bossStockStartPos = { 1600.0f, 85.0f };// ストック開始位置
     float bossStockOffset = 30.0f;                         // アイコンの間隔
     float bossStockScale = 1.1f;                           // ストックスケール
 
@@ -95,4 +100,6 @@ private:
 
     DirectX::XMFLOAT2 instructionPos = { 1455.0f, 800.0f }; // 位置
     float instructionScale = 1.1f;                         // スケール
+
+    bool isController = false;
 };

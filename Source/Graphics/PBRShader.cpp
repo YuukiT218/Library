@@ -3,10 +3,10 @@
 #include "PBRShader.h"
 #include <imgui.h>
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 PBRShader::PBRShader(ID3D11Device* device)
 {
@@ -80,15 +80,6 @@ PBRShader::PBRShader(ID3D11Device* device)
 
 		GpuResourceUtils::LoadTexture(device, "Data/SkyBox/dusk_sky/Brdf.dds",
 			lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
-
-		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/DiffuseHDR.dds",
-		//	diffuseIemShaderResourceView.GetAddressOf(), &texture2dDesc);
-
-		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/SpecularHDR.dds",
-		//	specularPmremShaderResourceView.GetAddressOf(), &texture2dDesc);
-
-		//GpuResourceUtils::LoadTexture(device, "Data/SkyBox/night_sky/Brdf.dds",
-		//	lutGgxShaderResourceView.GetAddressOf(), &texture2dDesc);
 	}
 }
 
@@ -161,9 +152,26 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh,
 		cbMesh.materialColor = mesh.material->baseColor;
 		dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
 
+		const Model::EmissiveColors modelEmissive =
+			model->GetEmissiveColors();
+
+		const DirectX::XMFLOAT4& materialEmissive =
+			mesh.material->emissiveColor;
+
+		const bool hasMaterialEmission =
+			!mesh.material->emissiveTextureFileName.empty() ||
+			materialEmissive.x > 0.0001f ||
+			materialEmissive.y > 0.0001f ||
+			materialEmissive.z > 0.0001f;
+
 		//カラー用定数バッファ更新
 		CbColor cbColor{};
-		cbColor.isEmissive = mesh.material->IsEmissive;
+		cbColor.isEmissive =
+			hasMaterialEmission &&
+			modelEmissive.emissiveFactor > 0.0f
+			? 1.0f
+			: 0.0f;
+		cbColor.emissiveFactor = (std::max)(0.0f, modelEmissive.emissiveFactor);
 		cbColor.adjustColor = mesh.material->emissiveColor;
 		dc->UpdateSubresource(colorConstantBuffer.Get(), 0, 0, &cbColor, 0, 0);
 

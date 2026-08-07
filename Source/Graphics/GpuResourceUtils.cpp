@@ -70,6 +70,62 @@ HRESULT GpuResourceUtils::LoadPixelShader(
 	return hr;
 }
 
+// コンピュートシェーダー読み込み
+HRESULT GpuResourceUtils::LoadComputeShader(
+	ID3D11Device* device,
+	const char* filename,
+	ID3D11ComputeShader** computeShader)
+{
+	// ファイルを開く
+	FILE* fp = nullptr;
+	fopen_s(&fp, filename, "rb");
+	_ASSERT_EXPR_A(fp, "Compute Shader File not found");
+
+	// ファイルのサイズを求める
+	fseek(fp, 0, SEEK_END);
+	long size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	// メモリ上に頂点シェーダーデータを格納する領域を用意する
+	std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
+	fread(data.get(), size, 1, fp);
+	fclose(fp);
+
+	// ピクセルシェーダー生成
+	HRESULT hr = device->CreateComputeShader(data.get(), size, nullptr, computeShader);
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	return hr;
+}
+
+// ジオメトリシェーダー読み込み
+HRESULT GpuResourceUtils::LoadGeometryShader(
+	ID3D11Device* device,
+	const char* filename,
+	ID3D11GeometryShader** geometryShader)
+{
+	// ファイルを開く
+	FILE* fp = nullptr;
+	fopen_s(&fp, filename, "rb");
+	_ASSERT_EXPR_A(fp, "Geometry Shader File not found");
+
+	// ファイルのサイズを求める
+	fseek(fp, 0, SEEK_END);
+	long size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+
+	// メモリ上に頂点シェーダーデータを格納する領域を用意する
+	std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
+	fread(data.get(), size, 1, fp);
+	fclose(fp);
+
+	// ピクセルシェーダー生成
+	HRESULT hr = device->CreateGeometryShader(data.get(), size, nullptr, geometryShader);
+	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	return hr;
+}
+
 // テクスチャ読み込み
 HRESULT GpuResourceUtils::LoadTexture(
 	ID3D11Device* device,
@@ -273,6 +329,61 @@ HRESULT GpuResourceUtils::CreateConstantBuffer(
 
 	HRESULT hr = device->CreateBuffer(&desc, 0, constantBuffer);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+
+	return hr;
+}
+
+// 構造化バッファ (Structured Buffer) と UAV / SRV の作成
+HRESULT GpuResourceUtils::CreateStructuredBuffer(
+	ID3D11Device* device,
+	UINT elementSize,
+	UINT elementCount,
+	const void* initData,
+	ID3D11Buffer** buffer,
+	ID3D11ShaderResourceView** srv,
+	ID3D11UnorderedAccessView** uav)
+{
+	HRESULT hr = S_OK;
+
+	// バッファ本体の作成
+	// Compute Shaderでの読み書き(UAV)と、描画時の読み取り(SRV)の両方を許可します
+	D3D11_BUFFER_DESC desc = {};
+	desc.ByteWidth = elementSize * elementCount;
+	desc.Usage = D3D11_USAGE_DEFAULT; // GPU側で高速に読み書きするためDEFAULT
+	desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	desc.StructureByteStride = elementSize;
+
+	D3D11_SUBRESOURCE_DATA data = {};
+	data.pSysMem = initData;
+
+	// initDataがnullptrの場合は初期データなしでバッファだけ確保します
+	hr = device->CreateBuffer(&desc, initData ? &data : nullptr, buffer);
+	if (FAILED(hr)) return hr;
+
+	// SRV (Shader Resource View) の作成
+	// 頂点/ジオメトリシェーダーでパーティクルの位置を読み取るために使います
+	if (srv) {
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = DXGI_FORMAT_UNKNOWN; // 構造化バッファの場合はUNKNOWNを指定します
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srvDesc.Buffer.FirstElement = 0;
+		srvDesc.Buffer.NumElements = elementCount;
+		hr = device->CreateShaderResourceView(*buffer, &srvDesc, srv);
+		if (FAILED(hr)) return hr;
+	}
+
+	// UAV (Unordered Access View) の作成
+	// コンピュートシェーダーでパーティクルの計算結果を書き込むために使います
+	if (uav) {
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+		uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uavDesc.Buffer.FirstElement = 0;
+		uavDesc.Buffer.NumElements = elementCount;
+		hr = device->CreateUnorderedAccessView(*buffer, &uavDesc, uav);
+		if (FAILED(hr)) return hr;
+	}
 
 	return hr;
 }

@@ -5,6 +5,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Develop|x64">
+      <Configuration>Develop</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -32,6 +36,10 @@
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
   </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">
+    <PlatformToolset>v143</PlatformToolset>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -45,7 +53,6 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
     <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -62,7 +69,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\nlohmann;%(AdditionalIncludeDirectories);C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -71,8 +78,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;xinput.lib;xaudio2.lib;winmm.lib;SphereCast.lib;Effekseer.lib;EffekseerRendererDX11.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\External\SphereCast\lib\vs2022\$(PlatformTarget)\MT\$(Configuration);.\External\Effekseer170e\lib\vs2022\MT\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;xinput.lib;xaudio2.lib;winmm.lib;SphereCast.lib;Effekseer.lib;EffekseerRendererDX11.lib;vld.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\External\SphereCast\lib\vs2022\$(PlatformTarget)\MT\$(Configuration);.\External\Effekseer170e\lib\vs2022\MT\$(PlatformTarget)\$(Configuration);C:\Program Files (x86)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.0</ShaderModel>
@@ -92,7 +99,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\nlohmann;%(AdditionalIncludeDirectories);C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -114,12 +121,30 @@
       <AssemblerOutputFile>Data\Shader\%(Filename).cod</AssemblerOutputFile>
     </FxCompile>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>;C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\AttackActions.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\DamageActions.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\MoveActions.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerAttackStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerDamageStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerGuardStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerMoveStates.h" />
     <ClInclude Include="Source\Character\Projectile\Projectile.h" />
     <ClInclude Include="Source\Character\Projectile\ProjectileManager.h" />
     <ClInclude Include="Source\Effect\Effect.h" />
     <ClInclude Include="Source\Effect\EffectManager.h" />
+    <ClInclude Include="Source\Effect\GPUParticle.h" />
+    <ClInclude Include="Source\Effect\GPUParticleSystem.h" />
     <ClInclude Include="Source\Graphics\Renderer\TrailRenderer.h" />
+    <ClInclude Include="Source\Scene\SceneGameOver.h" />
+    <ClInclude Include="Source\System\Audio\Audio.h" />
+    <ClInclude Include="Source\System\Audio\AudioResource.h" />
+    <ClInclude Include="Source\System\Audio\AudioSource.h" />
     <ClInclude Include="Source\UI\BattleUI.h" />
     <ClInclude Include="External\DirectXTK-main\Inc\WICTextureLoader.h" />
     <ClInclude Include="External\imgui-docking\imconfig.h" />
@@ -198,8 +223,8 @@
     <ClInclude Include="Source\Character\Enemy\Enemy.h" />
     <ClInclude Include="Source\Character\Enemy\EnemyBoss.h" />
     <ClInclude Include="Source\Character\Enemy\StateMachine\StateDerived.h" />
-    <ClInclude Include="Source\Character\Player.h" />
-    <ClInclude Include="Source\Character\PlayerState.h" />
+    <ClInclude Include="Source\Character\Player\Player.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerState.h" />
     <ClInclude Include="Source\Character\Weapon\EnemySword.h" />
     <ClInclude Include="Source\Character\Weapon\Sword.h" />
     <ClInclude Include="Source\Character\Weapon\Weapon.h" />
@@ -268,7 +293,7 @@
     <ClInclude Include="Source\Scene\SceneGame.h" />
     <ClInclude Include="Source\Scene\SceneLoading.h" />
     <ClInclude Include="Source\Scene\SceneManager.h" />
-    <ClInclude Include="Source\Scene\SceneResult.h" />
+    <ClInclude Include="Source\Scene\SceneClear.h" />
     <ClInclude Include="Source\Scene\SceneTitle.h" />
     <ClInclude Include="Source\Stage\Stage.h" />
     <ClInclude Include="Source\Stage\StageMain.h" />
@@ -299,11 +324,20 @@
     <ClInclude Include="Source\UI\Pause.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Character\Player\States\PlayerAttackStates.cpp" />
+    <ClCompile Include="Source\Character\Player\States\PlayerDamageStates.cpp" />
+    <ClCompile Include="Source\Character\Player\States\PlayerGuardStates.cpp" />
+    <ClCompile Include="Source\Character\Player\States\PlayerMoveStates.cpp" />
     <ClCompile Include="Source\Character\Projectile\Projectile.cpp" />
     <ClCompile Include="Source\Character\Projectile\ProjectileManager.cpp" />
     <ClCompile Include="Source\Effect\Effect.cpp" />
     <ClCompile Include="Source\Effect\EffectManager.cpp" />
+    <ClCompile Include="Source\Effect\GPUParticleSystem.cpp" />
     <ClCompile Include="Source\Graphics\Renderer\TrailRenderer.cpp" />
+    <ClCompile Include="Source\Scene\SceneGameOver.cpp" />
+    <ClCompile Include="Source\System\Audio\Audio.cpp" />
+    <ClCompile Include="Source\System\Audio\AudioResource.cpp" />
+    <ClCompile Include="Source\System\Audio\AudioSource.cpp" />
     <ClCompile Include="Source\UI\BattleUI.cpp" />
     <ClCompile Include="External\DirectXTK-main\Src\WICTextureLoader.cpp" />
     <ClCompile Include="External\imgui-docking\imgui.cpp" />
@@ -321,8 +355,8 @@
     <ClCompile Include="Source\Character\Character.cpp" />
     <ClCompile Include="Source\Character\Enemy\Enemy.cpp" />
     <ClCompile Include="Source\Character\Enemy\EnemyBoss.cpp" />
-    <ClCompile Include="Source\Character\Player.cpp" />
-    <ClCompile Include="Source\Character\PlayerState.cpp" />
+    <ClCompile Include="Source\Character\Player\Player.cpp" />
+    <ClCompile Include="Source\Character\Player\States\PlayerState.cpp" />
     <ClCompile Include="Source\Character\Weapon\EnemySword.cpp" />
     <ClCompile Include="Source\Character\Weapon\Sword.cpp" />
     <ClCompile Include="Source\Character\Weapon\Weapon.cpp" />
@@ -344,7 +378,7 @@
     <ClCompile Include="Source\Scene\SceneGame.cpp" />
     <ClCompile Include="Source\Scene\SceneLoading.cpp" />
     <ClCompile Include="Source\Scene\SceneManager.cpp" />
-    <ClCompile Include="Source\Scene\SceneResult.cpp" />
+    <ClCompile Include="Source\Scene\SceneClear.cpp" />
     <ClCompile Include="Source\Scene\SceneTitle.cpp" />
     <ClCompile Include="Source\Stage\StageMain.cpp" />
     <ClCompile Include="Source\Stage\StageManager.cpp" />
@@ -371,6 +405,7 @@
   <ItemGroup>
     <None Include="Shader\Basic.hlsli" />
     <None Include="Shader\FullScreenQuad\FullScreenQuad.hlsli" />
+    <None Include="Shader\GPUParticle.hlsli" />
     <None Include="Shader\Lambert.hlsli" />
     <None Include="Shader\PBR.hlsli" />
     <None Include="Shader\PostEffect\PostEffect.hlsli" />
@@ -402,6 +437,26 @@
     <FxCompile Include="Shader\GaugePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\GPUParticleCS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticleGS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticlePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticleVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Shader\LambertPS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>

@@ -1,13 +1,11 @@
 #include "Character.h"
 #include "Stage/StageManager.h"
 #include <Math/Mathf.h>
-//#include "System/MessageData.h"
-//#include "System/Messenger.h"
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 // 行列更新処理
 void Character::UpdateTransform()
@@ -213,7 +211,7 @@ bool Character::ApplyDamage(int damage, float invicibleTime, bool isState, Direc
     }
 
     // 死亡通知
-    if (health <= 0)
+    if (health <= 0 && !isSuperArmor)
     {
         OnDead();
     }
@@ -557,9 +555,6 @@ void Character::UpdateHorizontalVelocity(float elapsedTime)
         // 摩擦力
         float friction = this->friction * elapsedTime;
 
-        // 空中にいる時は摩擦力を減らす
-        //if (isGround == false) friction *= airControl;
-
         // 摩擦による横方向の減速処理
         if (length > friction)
         {
@@ -577,42 +572,6 @@ void Character::UpdateHorizontalVelocity(float elapsedTime)
             velocity.z = 0.0f;
         }
     }
-
-    //// XZ平面の速力を加速する
-    //if (length <= maxMoveSpeed)
-    //{
-    //    // 移動ベクトルがゼロベクトルでないなら加速する
-    //    float moveVecLength = sqrtf(moveVecX * moveVecX + moveVecZ * moveVecZ);
-    //    if (moveVecLength > 0.0f)
-    //    {
-    //        // 加速力
-    //        float acceleration = this->acceleration * elapsedTime;
-
-    //        // 空中にいる時は摩擦力を減らす
-    //        if (isGround == false) acceleration *= airControl;
-
-    //        // 移動ベクトルによる加速処理
-    //        velocity.x += moveVecX * acceleration;
-    //        velocity.z += moveVecZ * acceleration;
-
-    //        // 最大速度制限
-    //        float length = sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
-    //        if (length > maxMoveSpeed)
-    //        {
-    //            float vx = velocity.x / length;
-    //            float vz = velocity.z / length;
-
-    //            velocity.x -= vx * acceleration;
-    //            velocity.z -= vz * acceleration;
-    //        }
-
-    //        // 下り坂でガタガタしないようにする
-    //        if (isGround && slopeRate > 0.0f)
-    //        {
-    //            velocity.y -= length * slopeRate * elapsedTime;
-    //        }
-    //    }
-    //}
 
     // XZ平面の速力を直接セット（加速なし）
     float moveVecLength = sqrtf(moveVecX * moveVecX + moveVecZ * moveVecZ);
@@ -680,7 +639,7 @@ void Character::UpdateHorizontalMove(float elapsedTime)
             if (StageManager::Instance().RayCast(start, o, hit))
             {
                 //めり込んでいた場合はプレイヤーの位置に今回レイキャストした交点を設定する
-                        //プレイヤーの位置が壁にぴったりくっつかないように補正する
+                //プレイヤーの位置が壁にぴったりくっつかないように補正する
                 DirectX::XMVECTOR P = DirectX::XMLoadFloat3(&hit.position);
                 DirectX::XMVECTOR S = DirectX::XMLoadFloat3(&start);
                 DirectX::XMVECTOR PS = DirectX::XMVectorSubtract(S, Start);

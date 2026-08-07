@@ -22,7 +22,7 @@ TextureCube diffuseiem : register(t33);
 TextureCube specularpmrem : register(t34);
 Texture2D lut_ggx : register(t35);
 
-// === 追加: ディゾルブ用ノイズテクスチャ ===
+//ディゾルブ用ノイズテクスチャ
 Texture2D noiseTexture : register(t36); // ノイズテクスチャ
 
 // テクスチャから値を比較するサンプラ
@@ -32,7 +32,8 @@ SamplerState shadowSampler : register(s2);
 
 float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
 {
-    if (targetPosition.w > 0.5)
+    // 障害物の透過処理
+    if (targetPosition.w > 0.5 && enableDither > 0.5)
     {
         float3 camPos = cameraPosition.xyz;
         float3 playerPos = targetPosition.xyz;
@@ -92,7 +93,7 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
         base_color *= sampled;
     }
 
-    // === テレポートエフェクト: Dissolve (溶解) ===
+    // テレポートエフェクト: Dissolve
     if (enableDissolve > 0.5 && teleportProgress > 0.0)
     {
         float2 noiseUV = pin.texcoord * 2.0 + float2(teleportTime * 0.1, teleportTime * 0.05);
@@ -127,7 +128,7 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
         float3 emissive = emissiveMap.Sample(anisotropic, pin.texcoord).rgb;
         emissive.rgb = pow(emissive.rgb, GammaFactor);
         float Factor = emissiveFactor * isEmissive;
-        emissive_color.rgb *= emissive.rgb * adjustColor.rgb * Factor;
+        emissive_color.rgb *= emissive.rgb * adjustColor.rgb * Factor * isEmissive;
     }
 
 	//	法線/従法線/接線
@@ -262,16 +263,22 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
         }
     }
 
-	// リムライト（安定版：pow の利点を残しつつ 0 でオフに）
+	// リムライト
     V = normalize(cameraPosition.xyz - pin.position.xyz);
     float rimBase = 1.0f - saturate(dot(N, V));
     float rimRange = pow(rimBase, rimPower); // 立ち上がりカーブ
     float rimFactor = rimRange * rimIntensity; // 明るさ
-    color.rgb += rimColor * rimFactor;
+    color.rgb += rimColor.rgb * rimFactor;
 
-    if (afterimageDarkness > 0.0)
+    if (afterimageDarkness > 0.0 || afterimageAlpha < 0.99)
     {
-        color.rgb = lerp(color.rgb, float3(0.15, 0.02, 0.02), afterimageDarkness);
+        // スペキュラ（反射）成分をカットする
+        color.rgb = base_color.rgb;
+
+        // 暗くする処理
+        float intensity = saturate(1.0 - afterimageDarkness);
+    	color.rgb *= intensity;
+        color.r *= 1.5;
     }
 
     float4 finalColor = float4(color, base_color.a);

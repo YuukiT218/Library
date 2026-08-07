@@ -8,10 +8,12 @@
 #include "Graphics/GpuResourceUtils.h"
 #include "Math/Mathf.h"
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
+#include "System/Audio/Audio.h"
+
 
 // 初期化
 void SceneTitle::Initialize()
@@ -23,14 +25,14 @@ void SceneTitle::Initialize()
 	TitleName = std::make_unique<Sprite>(device, "Data/Sprite/TitleLogo.png");
 	AnyButton = std::make_unique<Sprite>(device, "Data/Sprite/PressAnyKey.png");
 
-	//Sword = std::make_unique<Sprite>(device, "Data/Sprite/Sword.png");
-
 	EndPause = std::make_unique<Sprite>(device, "Data/Sprite/EndPause.png");
 	EndKey = std::make_unique<Sprite>(device, "Data/Sprite/EndKey.png");
 	EndCon = std::make_unique<Sprite>(device, "Data/Sprite/EndCon.png");
 	EndYes = std::make_unique<Sprite>(device, "Data/Sprite/EndYes.png");
 	EndNo = std::make_unique<Sprite>(device, "Data/Sprite/EndNo.png");
 	EndSele = std::make_unique<Sprite>(device, "Data/Sprite/EndSele.png");
+
+	BGM = Audio::Instance().LoadAudioSource("Data/Sound/BGM/Dearly in Dreams.wav");
 
 	GpuResourceUtils::LoadTexture(device, "Data/Mask/dissolve_animation.png", mask_texture.GetAddressOf(), &mask_texture2dDesc);
 
@@ -49,15 +51,16 @@ void SceneTitle::Initialize()
 // 終了化
 void SceneTitle::Finalize()
 {
-	//TitleBGM->Stop();
-	//delete TitleBGM;
+	delete BGM;
 }
 
 // 更新処理
 void SceneTitle::Update(float elapsedTime)
 {
 	GamePad& gamePad = Input::Instance().GetGamePad();
-	//Mouse& mouse = Input::Instance().GetMouse();
+	Mouse& mouse = Input::Instance().GetMouse();
+
+	BGM->Play(true, 0.5f);
 
 	// なにかボタンを押したらローディングシーンを挟んでゲームシーンへ切り替え
 	const GamePadButton anyButton =
@@ -80,7 +83,7 @@ void SceneTitle::Update(float elapsedTime)
 		{
 			if (NameAlpha >= 0.3f)
 			{
-				if ((Input::Instance().GetAnyButton()) || (gamePad.GetButtonDown() & anyButton) /*|| (mouse.GetButtonDown() & Mouse::BTN_LEFT)*/)
+				if (Input::Instance().GetAnyButton() || (gamePad.GetButtonDown() & anyButton))
 				{
 					SceneLoading* loadingScene = new SceneLoading(new SceneGame());
 					SceneManager::Instance().ChangeScene(loadingScene);
@@ -97,7 +100,7 @@ void SceneTitle::Update(float elapsedTime)
 		if (isYesSelected)
 		{
 			sePos.x = -285.0f;
-			if (gamePad.GetButtonDown() & GamePad::BTN_A_EMU)
+			if (gamePad.GetButtonDown() & GamePad::BTN_A_EMU || gamePad.GetButtonDown() & GamePad::BTN_A)
 			{
 				//ゲームを落とす
 				PostQuitMessage(0);  // メインループでWM_QUITを受け取って終了する
@@ -209,21 +212,15 @@ void SceneTitle::Render(float elapsedTime)
 
 	dc->PSSetShaderResources(1, 1, mask_texture.GetAddressOf());
 
-	//	sprite->Render(dc, 0, 0, 0, 1600, 900, 0, 1, 1, 1, 1);
 	const float screenW = graphics.GetScreenWidth();
 	const float screenH = graphics.GetScreenHeight();
 
-	//sprite->DrawFillRadial(dc, 0, 0, 1280, 720, 0, 0, 1600, 900, amount, screenW, screenH);
-	//ui->Render(dc, pos.x, pos.y, 0.0f, 256, 256, 0.0f, 1, 1, 1, 1);
-	//ui->Render(dc, pos.x + 20, pos.y, 0.0f, 256, 256, 0.0f, 1, 1, 1, 1);
-	TitleBack->Render(dc, 0, 0, 0, 1920, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, 1);
+	TitleBack->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, 1);
 	TitleName->Render(dc, 0, 0, 0, 1228, 819, 0, 0, 1536, 1024, 0, 1, 1, 1, NameAlpha);
-	AnyButton->Render(dc, 0, 0, 0, 1920, 1080, 0, 0, 1920, 1080, 0, 1, 1, 1, AnyAlpha);
+	AnyButton->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1920, 1080, 0, 1, 1, 1, AnyAlpha);
 
-	//Sword->Render(dc, 355, 92, 0, 675, 1140, 0, 0, 882, 1664, 0, 1, 1, 1, 1);
-
-	EndKey->Render(dc, 640, 360, 0, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, keyAlpha);
-	EndCon->Render(dc, 640, 360, 0, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, conAlpha);
+	EndKey->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, keyAlpha);
+	EndCon->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, conAlpha);
 
 
 	if (pauseAlpha > 0.01f)

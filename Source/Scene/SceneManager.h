@@ -1,37 +1,38 @@
 ﻿#pragma once
 
+#include <memory>
+
 #include "Scene.h"
 
 // シーンマネージャー
 class SceneManager
 {
 private:
-	SceneManager() {}
-	~SceneManager() {}
+	SceneManager() = default;
+	~SceneManager() = default;
 
 public:
-	// 唯一のインスタンス取得
 	static SceneManager& Instance()
 	{
 		static SceneManager instance;
 		return instance;
 	}
 
-	// 更新処理
 	void Update(float elapsedTime);
-
-	// 描画処理
 	void Render(float elapsedTime);
 
-	// シーンクリア
+	// 現在のシーンだけを終了・破棄する
 	void Clear();
 
-	// シーン切り替え
+	// scene の所有権を SceneManager に移す
 	void ChangeScene(Scene* scene);
 
-	Scene* GetCurrentScene() { return currentScene; }
+	Scene* GetCurrentScene()
+	{
+		return currentScene.get();
+	}
 
 private:
-	Scene* currentScene = nullptr;
-	Scene* nextScene = nullptr;
+	std::unique_ptr<Scene> currentScene;
+	std::unique_ptr<Scene> nextScene;
 };

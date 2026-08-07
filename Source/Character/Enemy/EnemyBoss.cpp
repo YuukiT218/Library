@@ -1,7 +1,7 @@
 ﻿#include <algorithm>
 #include "Graphics/Graphics.h"
 #include "Math/Mathf.h"
-#include "Character/player.h"
+#include "Character/Player/Player.h"
 #include "EnemyBoss.h"
 #include "Model/ResourceManager.h"
 #include "Scene/SceneManager.h"
@@ -16,10 +16,7 @@
 #include "StateMachine/StateDerived.h"
 #include "System/AnimationConfigLoader.h"
 
-#define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
 
 static EnemyBoss* instance = nullptr;
 
@@ -36,9 +33,9 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 
 	model = std::make_shared<Model>(device, filename, scale);
 	model->SetAdMetalness(1.0f);
-	model->SetAdRoughness(0.0f);
+	model->SetAdRoughness(1.0f);
 
-	sword = std::make_unique<EnemySword>(device, "Data/Model/Weapon/Sword/Sword.gltf");
+	sword = std::make_unique<EnemySword>(device, "Data/Model/Weapon/Katana/RedKatana.gltf");
 	lightBall = std::make_unique<Effect>("Data/Effect/LightBall.efkefc");
 	teleportEffect = std::make_unique<Effect>("Data/Effect/Teleport.efkefc");
 	attackSign = std::make_unique<Effect>("Data/Effect/AttackSign.efkefc");
@@ -71,6 +68,7 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 		aiTree->AddNode("Attack", "TeleportCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TeleportCombo(this));
 		aiTree->AddNode("Attack", "TeleportAssault", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
 		aiTree->AddNode("Attack", "NormalTeleport", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new NormalTeleport(this));
+		aiTree->AddNode("Attack", "PillarSpiralConv", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, new DyingJudgment(this), new PillarSpiralConv(this));
 		{
 			aiTree->AddNode("Attack", "TeleportDashSlash", 4, BehaviorTree<EnemyBoss>::SelectRule::Sequence, nullptr, nullptr);
 			aiTree->AddNode("TeleportDashSlash", "NormalTeleport", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new NormalTeleport(this));
@@ -86,7 +84,7 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 		aiTree->AddNode("Battle", "LongRange", 2, BehaviorTree<EnemyBoss>::SelectRule::Random, new LongRangeJudgment(this), nullptr);
 		aiTree->AddNode("LongRange", "DashSlash", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
 		{
-			aiTree->AddNode("LongRange", "DashSlashCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Sequence, nullptr, nullptr);
+			aiTree->AddNode("LongRange", "DashSlashCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Sequence, new DyingJudgment(this), nullptr);
 			aiTree->AddNode("DashSlashCombo", "DashSlash", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
 			aiTree->AddNode("DashSlashCombo", "DashSlash", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
 			aiTree->AddNode("DashSlashCombo", "DashSlash", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
@@ -100,7 +98,8 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 		}
 		aiTree->AddNode("LongRange", "TeleportCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TeleportCombo(this));
 		aiTree->AddNode("LongRange", "SlashWave", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SlashWave(this));
-		aiTree->AddNode("LongRange", "PillarSpiral", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new PillarSpiral(this));
+		aiTree->AddNode("LongRange", "PillarSpiralDiff", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new PillarSpiralDiff(this));
+		aiTree->AddNode("LongRange", "PillarSpiralConv", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, new DyingJudgment(this), new PillarSpiralConv(this));
 	}
 	{
 		aiTree->AddNode("Battle", "Revenge", 1, BehaviorTree<EnemyBoss>::SelectRule::Random, new RevengeJudgment(this), nullptr);
@@ -135,8 +134,8 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	SetTerritory(GetPosition(), 10.0f);
 	searchRange = 20.0f;
 
-	SetMaxHealth(600);
-	SetHealth(600);
+	SetMaxHealth(800);
+	SetHealth(800);
 
 	SetRandomTargetPosition();
 
@@ -150,26 +149,39 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 		}
 	}
 
-	areaSize = 21.7f;
+	areaSize = 21.0f;
 }
 
 // デストラクタ
 EnemyBoss::~EnemyBoss()
 {
 	delete aiTree;
+	afterimages.clear();
 }
 
 void EnemyBoss::UpdateEnemySpecific(float elapsedTime)
 {
 	int currentIndex = model->GetCurrentAnimationIndex();
-	if (currentIndex >= 0) {
+	const ModelResource* resource = model->GetResource();
+
+	if (resource != nullptr &&
+		currentIndex >= 0 &&
+		currentIndex < static_cast<int>(resource->GetAnimations().size()))
+	{
 		const AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", currentIndex);
 		float animationSeconds = model->GetCurrentAnimationSeconds();
+
+		// 安全に長さを取得
 		float secondsLength = model->GetAnimationLength(currentIndex);
-		float t = animationSeconds / secondsLength;
-		t = std::clamp(t, 0.0f, 1.0f);  // 念のため 0.0～1.0 にクランプ
-		float speed = model->EvaluateSpeed(config->speedCurve, t);
-		model->SetAnimationSpeed(speed);
+
+		// ゼロ除算防止（長さが極端に短い、または0の場合は計算しない）
+		if (secondsLength > 0.0001f)
+		{
+			float t = animationSeconds / secondsLength;
+			t = std::clamp(t, 0.0f, 1.0f);  // 0.0～1.0 にクランプ
+			float speed = model->EvaluateSpeed(config->speedCurve, t);
+			model->SetAnimationSpeed(speed);
+		}
 	}
 
 	// 反撃値チェック
@@ -213,7 +225,7 @@ void EnemyBoss::UpdateEnemySpecific(float elapsedTime)
 	}
 
 	// アタッチメント
-	sword->Attach("weapon_r", model.get());
+	sword->Attach("middle_01_r", model.get());
 
 	SetWarpPosition();
 
@@ -239,7 +251,7 @@ void EnemyBoss::EditUpdate(float elapsedTime)
 	}
 	sword->AttackAnimationCollision(model.get(), config, this);
 
-	sword->Attach("weapon_r", model.get());
+	sword->Attach("middle_01_r", model.get());
 
 	sword->Update(elapsedTime);
 
@@ -260,44 +272,42 @@ void EnemyBoss::Render(const RenderContext& rc, ShaderId shaderId)
 	// テレポート中かどうかで描画方法を切り替え
 	if (HasAfterimage())
 	{
-		const auto& afterimage = GetAfterimage();
-		modelRenderer->DrawAfterimage(
-			shaderId,
-			model,
-			afterimage.nodes,
-			afterimage.transform,
-			afterimage.alpha,
-			afterimage.darkness
-		);
+		const auto& afterimages = GetAfterimages(); // リストを取得
+		for (const auto& afterimage : afterimages)
+		{
+			modelRenderer->DrawAfterimage(
+				shaderId,
+				model,
+				afterimage.nodes,
+				afterimage.transform,
+				afterimage.alpha,
+				afterimage.darkness
+			);
+		}
 	}
 
-	// === キャラクター本体の描画 ===
+	// キャラクター本体の描画
 	TeleportPhase phase = GetTeleportPhase();
 
 	if (phase == TeleportPhase::FadeOut)
 	{
-		// === FadeOut: 残像を残して消える（エフェクトなし） ===
+		// FadeOut: 残像を残して消える（エフェクトなし）
 		// 単純にアルファ値を下げて消えていく
 		float progress = GetTeleportProgress();
 		float alpha = 1.0f - progress;  // 1.0 → 0.0
-
-		modelRenderer->DrawWithTeleport(shaderId, model, progress, totalGameTime, TeleportRenderMode::DissolveDistortion);
 	}
 	else if (phase == TeleportPhase::Moving)
 	{
-		// === Moving: 描画しない ===
+		// Moving: 描画しない
 		return;
 	}
 	else if (phase == TeleportPhase::FadeIn)
 	{
-		// === FadeIn: ディゾルブ+ディストーションで出現 ===
-		float progress = GetTeleportProgress();
 
-		modelRenderer->DrawWithTeleport(shaderId, model, progress, totalGameTime, TeleportRenderMode::DissolveDistortion);
 	}
 	else
 	{
-		// === 通常状態 ===
+		// 通常状態
 		modelRenderer->Draw(shaderId, model);
 		sword->Render(rc, shaderId);
 	}
@@ -625,4 +635,23 @@ void EnemyBoss::SetWarpPosition()
 	KeepAreaLimit(WarpPosition[0]);
 	KeepAreaLimit(WarpPosition[1]);
 	KeepAreaLimit(WarpPosition[2]);
+}
+
+void EnemyBoss::OnTeleportPhaseChanged(TeleportPhase newPhase)
+{
+	if (newPhase == TeleportPhase::FadeIn)
+	{
+		if (teleportEffect)
+		{
+			if (!playedFadeEffect)
+			{
+
+			}
+			playedFadeEffect = true;
+		}
+	}
+	else if (newPhase == TeleportPhase::None)
+	{
+		playedFadeEffect = false;
+	}
 }

@@ -3,12 +3,14 @@
 #include <imgui.h>
 
 #include "Framework.h"
+
+#include "Audio/Audio.h"
 #include "Graphics/Graphics.h"
 #include "Debug/ImGuiRenderer.h"
 #include "Scene/SceneManager.h"
 #include "Scene/SceneTitle.h"
 #include "Scene/SceneGame.h"
-#include "Scene/SceneResult.h"
+#include "Scene/SceneClear.h"
 #include "Scene/SceneEdit.h"
 #include "Scene/SceneLoading.h"
 #include "System/AnimationConfigLoader.h"
@@ -22,8 +24,14 @@ Framework::Framework(HWND hWnd)
 	: hWnd(hWnd)
 	, input(hWnd)
 {
+#if !_DEBUG
+	ShowCursor(false);
+#endif
+
 	// グラフィックス初期化
 	Graphics::Instance().Initialize(hWnd);
+
+	Audio::Instance().Initialize();
 
 	// IMGUI初期化
 	ImGuiRenderer::Initialize(hWnd, Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
@@ -38,7 +46,11 @@ Framework::Framework(HWND hWnd)
 // デストラクタ
 Framework::~Framework()
 {
+	ShowCursor(true);
+
 	SceneManager::Instance().Clear();
+
+	Audio::Instance().Finalize();
 
 	// IMGUI終了化
 	ImGuiRenderer::Finalize();
@@ -50,6 +62,20 @@ Framework::~Framework()
 void Framework::Update(float elapsedTime)
 {
 	input.Update();
+
+#ifndef _DEBUG
+	if (GetForegroundWindow() == hWnd) // 自分のウィンドウがアクティブな時のみ
+	{
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+		// ウィンドウの中央座標を計算
+		POINT center = { (rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2 };
+		// スクリーン座標に変換
+		ClientToScreen(hWnd, &center);
+		// カーソル位置を強制的に中央へセット
+		SetCursorPos(center.x, center.y);
+	}
+#endif
 
 	// シーン更新処理
 	SceneManager::Instance().Update(elapsedTime);
@@ -139,7 +165,7 @@ void Framework::Render(float elapsedTime)
 
 			if (ImGui::MenuItem("Result Scene")) {
 				currentSceneType = SceneType::Result;
-				SceneManager::Instance().ChangeScene(new SceneLoading(new SceneResult()));
+				SceneManager::Instance().ChangeScene(new SceneLoading(new SceneClear()));
 				ResizeSceneFramebufferToWindow();
 			}
 

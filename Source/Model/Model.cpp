@@ -240,7 +240,6 @@ void Model::UpdateAnimation(float elapsedTime, Character* character)
 					}
 				}
 			}
-
 			character->SetSuperArmor(hasSuperArmor);
 		}
 

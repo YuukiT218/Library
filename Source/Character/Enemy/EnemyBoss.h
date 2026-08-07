@@ -156,6 +156,7 @@ protected:
 	// 死亡したときに呼ばれる
 	void OnDead() override;
 
+	void OnTeleportPhaseChanged(TeleportPhase newPhase) override;
 private:
 	DirectX::XMFLOAT3	targetPosition = { 0.0f,0.0f,0.0f };
 	DirectX::XMFLOAT3	territoryOrigin = { 0.0f,0.0f,0.0f };
@@ -163,7 +164,7 @@ private:
 	float				moveSpeed = 2.5f;
 	float				turnSpeed = DirectX::XMConvertToRadians(360);
 	float				searchRange = 25.0f;
-	float				attackRange = 2.0f;
+	float				attackRange = 5.0f;
 	float				runTimer = 0.0f;
 	float 			    blendSeconds = 0.1f;
 	float 				teleportOffset = 17.5f;
@@ -173,7 +174,7 @@ private:
 	bool				specialReady = true;
 	int 				step = 0;
 	int 				revengeValue = 0;		// 反撃値
-	int					revengeTolerance = 20;	// 反撃許容値
+	int					revengeTolerance = 30;	// 反撃許容値
 
 	BehaviorTree<EnemyBoss>* aiTree = nullptr;
 	std::unique_ptr<BehaviorData<EnemyBoss>> behaviorData = nullptr;

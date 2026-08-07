@@ -81,6 +81,9 @@ public:
     float GetCameraShakeTimer() { return shaketimer; }
     float GetCameraShakePower() { return shakepower; }
 
+    // 視錐台の8つの頂点をワールド座標で取得
+    void GetFrustumCorners(float zNear, float zFar, DirectX::XMFLOAT3* corners) const;
+
 private:
     DirectX::XMFLOAT4X4 view;
     DirectX::XMFLOAT4X4 projection;

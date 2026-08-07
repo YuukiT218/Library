@@ -1,16 +1,16 @@
 #include "Enemy.h"
 #include "System/HitStop.h"
-#include "Character/Player.h"
+#include "Character/Player/Player.h"
 #include "Math/Collision.h"
 #include "Graphics/Graphics.h"
 #include "Camera/Camera.h"
 #include <string>
 #include <Math/Mathf.h>
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 // デバッグプリミティブ描画
 void Enemy::DrawDebugPrimitive()
@@ -112,7 +112,7 @@ void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
     teleportPhase = TeleportPhase::FadeOut;
     teleportPhaseTimer = 0.0f;
     fadeOutDuration = fadeOutTime;
-    fadeInDuration = 0.1f;  // 出現も同じ時間
+    fadeInDuration = 0.1f;
 
     teleportStartPosition = position;
     teleportTargetPosition = targetPos;
@@ -120,21 +120,20 @@ void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
     // 見た目の位置は現在位置のまま
     visualPosition = position;
 
-    if (hasAfterimage)
-    {
-        afterimage.ClearNodes();
-    }
-
-    hasAfterimage = true;
-    afterimage.position = position;
-    afterimage.angle = angle;
-    afterimage.transform = transform;
-    afterimage.alpha = 1.0f;
-    afterimage.lifetime = afterimageDuration;
-    afterimage.darkness = afterimageDarkness;
+    // 新しい残像を生成して追加
+    Afterimage& newAfterimage = afterimages.emplace_back();
+    newAfterimage.position = position;
+    newAfterimage.angle = angle;
+    newAfterimage.transform = transform;
+    newAfterimage.alpha = 1.0f;
+    newAfterimage.lifetime = afterimageDuration;
+    newAfterimage.darkness = afterimageDarkness;
 
     // 現在のボーン姿勢をコピー
-    afterimage.nodes = model->GetNodes();
+    if (model)
+    {
+        newAfterimage.nodes = model->GetNodes();
+    }
 }
 
 // テレポート更新
@@ -152,6 +151,7 @@ if (teleportPhase == TeleportPhase::None) return;
         {
             // 消失完了、移動フェーズへ
             teleportPhase = TeleportPhase::Moving;
+            OnTeleportPhaseChanged(teleportPhase);
             teleportPhaseTimer = 0.0f;
         }
         break;
@@ -178,10 +178,12 @@ if (teleportPhase == TeleportPhase::None) return;
             if (teleportPhaseTimer >= moveDuration)
             {
                 // 移動完了、出現フェーズへ
-                teleportPhase = TeleportPhase::FadeIn;
-                teleportPhaseTimer = 0.0f;
                 position = teleportTargetPosition;
                 visualPosition = teleportTargetPosition;
+                teleportPhase = TeleportPhase::FadeIn;
+                OnTeleportPhaseChanged(teleportPhase);
+                teleportPhaseTimer = 0.0f;
+                
             }
         }
         break;
@@ -192,6 +194,7 @@ if (teleportPhase == TeleportPhase::None) return;
         {
             // 出現完了、テレポート終了
             teleportPhase = TeleportPhase::None;
+            OnTeleportPhaseChanged(teleportPhase);
             teleportPhaseTimer = 0.0f;
         }
         break;
@@ -200,19 +203,26 @@ if (teleportPhase == TeleportPhase::None) return;
 
 void Enemy::UpdateAfterimage(float elapsedTime)
 {
-    if (!hasAfterimage) return;
+    // リスト内のすべての残像を更新・寿命が尽きたものを削除
+    if (afterimages.empty()) return;
 
-    afterimage.lifetime -= elapsedTime;
-
-    // 透明度を時間経過で減衰
-    afterimage.alpha = afterimage.lifetime / afterimageDuration;
-
-    // 寿命が尽きたら削除
-    if (afterimage.lifetime <= 0.0f)
+    for (auto it = afterimages.begin(); it != afterimages.end(); )
     {
-        hasAfterimage = false;
-        afterimage.alpha = 0.0f;
-        afterimage.ClearNodes();
+        it->lifetime -= elapsedTime;
+
+        // 透明度を時間経過で減衰
+        it->alpha = it->lifetime;
+
+        // 寿命が尽きたら削除
+        if (it->lifetime <= 0.0f)
+        {
+            // デストラクタでClearNodesが呼ばれる
+            it = afterimages.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
     }
 }
 
@@ -241,9 +251,9 @@ DirectX::XMFLOAT3 Enemy::CalculateVisibleTeleportPos(float distance, bool bakeY)
     std::vector<DirectX::XMFLOAT3> availablePositions;
 
     // 1. 候補地点 (availablePositions) をプレイヤーの周囲 8 方向に生成
-    for (int i = 0; i < 8; ++i)
+    for (int i = 0; i < 36; ++i)
     {
-        float angle = DirectX::XMConvertToRadians(i * 45.0f);
+        float angle = DirectX::XMConvertToRadians(i * 10.0f);
         DirectX::XMFLOAT3 pos = playerPos;
         pos.x += cosf(angle) * distance;
         pos.z += sinf(angle) * distance;

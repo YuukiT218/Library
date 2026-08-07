@@ -220,33 +220,23 @@ void Pause::Update(float elapsedTime)
 			}
 		}
 	}
-
-	//if (offsetIncreasing)
-	//{
-	//	offsetScale.x += offsetSpeed * elapsedTime;
-	//	if (offsetScale.x >= 10.0f)
-	//	{
-	//		offsetScale.x = 10.0f;
-	//		offsetIncreasing = false;
-	//	}
-	//}
-	//else
-	//{
-	//	offsetScale.x -= offsetSpeed * elapsedTime;
-	//	if (offsetScale.x <= -4.0f)
-	//	{
-	//		offsetScale.x = -4.0f;
-	//		offsetIncreasing = true;
-	//	}
-	//}
-
-	//// --- X に応じて Y を逆補完 ---
-	//float t = (offsetScale.x + 4.0f) / 14.0f; // X: [-4,10] → t: [0,1]
-	//offsetScale.y = Mathf::Lerp(10.0f, -4.0f, t); // Y: [10 → -4]
 }
 
 void Pause::Render(float elapsedTime, ID3D11DeviceContext* dc)
 {
+	// グラフィックスシステムとコンテキストの取得
+	Graphics& graphics = Graphics::Instance();
+	RenderState* renderState = graphics.GetRenderState();
+
+	// ステート設定
+	FLOAT blendFactor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	UINT sampleMask = 0xFFFFFFFF;
+	dc->OMSetBlendState(renderState->GetBlendState(BlendState::Transparency), blendFactor, sampleMask);
+	dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+	dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+	ID3D11SamplerState* samplers[] = { renderState->GetSamplerState(SamplerState::LinearClamp) };
+	dc->PSSetSamplers(0, 1, samplers);
+
 	// SpriteDataへのポインタを持つvectorを作成
 	std::vector<std::pair<std::string, SpriteData*>> spriteVec;
 

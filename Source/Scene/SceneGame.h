@@ -3,13 +3,13 @@
 #include "Stage/Stage.h"
 #include "Camera/CameraController.h"
 #include "Camera/FreeCameraController.h"
-#include "Character/player.h"
+#include "Character/Player/Player.h"
 #include "Character/Enemy/EnemyBoss.h"
 #include "Character/Projectile/ProjectileManager.h"
 #include "Scene.h"
 #include "Graphics/SkyBox.h"
 #include "Graphics/PostEffect.h"
-//#include "BattleUI/CombatUIManager.h"
+#include "System/Audio/AudioSource.h"
 
 // ゲームの進行状態
 enum class GameState
@@ -52,14 +52,12 @@ private:
 	std::unique_ptr<EnemyBoss> boss;
 
 	std::unique_ptr<CameraController> cameraController;
-	//std::unique_ptr<DeathCameraController> deathCameraController;
 	std::unique_ptr<SkyBox> skyBox;
 	FreeCameraController freeCameraController;
 
 	std::unique_ptr<PostEffect> posteffect;
-	//std::unique_ptr<Sprite> gauge;
 
-	//std::unique_ptr<CombatUIManager> combatUI;
+	AudioSource* BGM;
 
 	// 点光源
 	DirectX::XMFLOAT4 pointColor{ 0.0f / 255.0f, 50.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f };

@@ -235,16 +235,10 @@ void AttackState<ActorType>::Execute(float elapsedTime)
 		float vx = owner->GetTargetPosition().x - owner->GetPosition().x;
 		float vy = owner->GetTargetPosition().y - owner->GetPosition().y;
 		float vz = owner->GetTargetPosition().z - owner->GetPosition().z;
-		//owner->Turn(elapsedTime, vx, vz, DirectX::XMConvertToRadians(360) * 5.0f);
 	}
-	//owner->AttackAnimationCollision(owner->nodeHitSpheres, owner->attackFrameMin, owner->attackFrameMax, owner->attackDamage);
-	//float timer = owner->GetStateTimer();
-	//timer -= elapsedTime;
-	//owner->SetStateTimer(timer);
 	if (!owner->GetModel()->IsPlayAnimation())
 	{
 		// Pursuitステートに遷移
-		//parentState->ChangeState("RandomState");
 		isComplete = true;
 	}
 }
@@ -288,16 +282,10 @@ void SkillState<ActorType>::Execute(float elapsedTime)
 		float vx = owner->GetTargetPosition().x - owner->GetPosition().x;
 		float vy = owner->GetTargetPosition().y - owner->GetPosition().y;
 		float vz = owner->GetTargetPosition().z - owner->GetPosition().z;
-		//owner->Turn(elapsedTime, vx, vz, DirectX::XMConvertToRadians(360) * 5.0f);
 	}
-	//owner->AttackAnimationCollision(owner->nodeHitSpheres, owner->attackFrameMin, owner->attackFrameMax, owner->attackDamage);
-	//float timer = owner->GetStateTimer();
-	//timer -= elapsedTime;
-	//owner->SetStateTimer(timer);
 	if (!owner->GetModel()->IsPlayAnimation())
 	{
 		// Pursuitステートに遷移
-		//parentState->ChangeState("RandomState");
 		isComplete = true;
 	}
 }
@@ -341,16 +329,10 @@ void Skill1State<ActorType>::Execute(float elapsedTime)
 		float vx = owner->GetTargetPosition().x - owner->GetPosition().x;
 		float vy = owner->GetTargetPosition().y - owner->GetPosition().y;
 		float vz = owner->GetTargetPosition().z - owner->GetPosition().z;
-		//owner->Turn(elapsedTime, vx, vz, DirectX::XMConvertToRadians(360) * 5.0f);
 	}
-	//owner->AttackAnimationCollision(owner->nodeHitSpheres, owner->attackFrameMin, owner->attackFrameMax, owner->attackDamage);
-	//float timer = owner->GetStateTimer();
-	//timer -= elapsedTime;
-	//owner->SetStateTimer(timer);
 	if (!owner->GetModel()->IsPlayAnimation())
 	{
 		// Pursuitステートに遷移
-		//parentState->ChangeState("RandomState");
 		isComplete = true;
 	}
 }

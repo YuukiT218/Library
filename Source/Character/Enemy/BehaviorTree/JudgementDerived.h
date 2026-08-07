@@ -195,7 +195,7 @@ bool LongRangeJudgment<ActorType>::Judgment()
 	float vz = targetPosition.z - position.z;
 	float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 	// XZ平面での距離を算出
-	if (dist > owner->GetAttackRange() + 4.0f && dist < owner->GetAttackRange() + 40.0f)
+	if (dist > owner->GetAttackRange() + 5.0f && dist < owner->GetAttackRange() + 40.0f)
 	{
 		// LongRangeNodeへ遷移できる
 		return true;
@@ -247,7 +247,7 @@ bool WanderJudgment<ActorType>::Judgment()
 template<typename ActorType>
 bool AnyDamageJudgment<ActorType>::Judgment()
 {
-	if (owner->IsAnyDamage())
+	if (owner->IsAnyDamage() && !owner->IsSuperArmor())
 	{
 		return true;
 	}

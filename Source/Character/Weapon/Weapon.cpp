@@ -1,17 +1,18 @@
 #include "Weapon.h"
 #include "Graphics/Graphics.h"
-#include "Character/Player.h"
+#include "Character/Player/Player.h"
 #include "Character/Enemy/EnemyBoss.h"
 #include "Math/Collision.h"
 #include "System/HitStop.h"
 #include <vector>
 #include "Graphics/Light.h"
 #include "Math/Mathf.h"
+#include "Effect/EffectManager.h"
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 void Weapon::Attach(std::string nodeName, Model* character)
 {
@@ -62,7 +63,6 @@ void Weapon::TrailUpdate(float elapsedTime)
     if (IsAttack)
     {
         // 攻撃中：履歴を1つずつ後ろにずらして、先頭に最新座標を入れる
-        // (これにより軌跡が作られる)
         for (int i = MAX_POLYGON - 1; i > 0; i--)
         {
             trailPositions[0][i] = trailPositions[0][i - 1];
@@ -72,6 +72,38 @@ void Weapon::TrailUpdate(float elapsedTime)
         // 最新の座標を保存
         trailPositions[0][0] = currentRootPos;
         trailPositions[1][0] = currentTipPos;
+
+        // 1フレームあたりの発生数
+        int emitCount = 10;
+
+        DirectX::XMVECTOR rootVec = DirectX::XMLoadFloat3(&currentRootPos);
+        DirectX::XMVECTOR tipVec = DirectX::XMLoadFloat3(&currentTipPos);
+
+        for (int i = 0; i < emitCount; ++i)
+        {
+            // 0.0 ～ 1.0 のランダムな割合を作成
+            float t = (float)rand() / RAND_MAX;
+
+            // 根本と先端の間でランダムな座標を計算
+            DirectX::XMVECTOR emitPosVec = DirectX::XMVectorLerp(rootVec, tipVec, t);
+            DirectX::XMFLOAT3 emitPos;
+            DirectX::XMStoreFloat3(&emitPos, emitPosVec);
+
+            // 散らばる速度 (ランダムに弾け飛ぶ)
+            float vx = ((float)rand() / RAND_MAX - 0.5f) * 0.5f;
+            float vy = ((float)rand() / RAND_MAX - 0.5f) * 0.5f;
+            float vz = ((float)rand() / RAND_MAX - 0.5f) * 0.5f;
+            DirectX::XMFLOAT3 velocity = { vx, vy, vz };
+
+            // 色 (トレイルの色 TipBegin に合わせてみるのも綺麗です)
+            DirectX::XMFLOAT4 color = { TipBegin.x, TipBegin.y, TipBegin.z, 1.0f }; // トレイル先端の色を使用
+
+            float size = 0.05f + ((float)rand() / RAND_MAX) * 0.1f;
+            float lifeTime = 0.3f + ((float)rand() / RAND_MAX) ; // 短めでスッと消える
+
+            // パーティクル発生 (behaviorType = 0 を想定)
+            EffectManager::Instance().EmitGpuParticle(emitPos, velocity, color, size, lifeTime, 0);
+        }
     }
     else
     {
@@ -89,7 +121,6 @@ void Weapon::TrailUpdate(float elapsedTime)
 
 void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed)
 {
-
     GamePad& gamepad = Input::Instance().GetGamePad();
 
     // 当たり判定用オフセットを使い、当たり判定位置を求める
@@ -125,36 +156,9 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
                 outPosition,
                 outHitPoint))
             {
-                // ダメージを与える
-                //if (enemy->ApplyDamage(rand() % 200 + config->attackParam.attackDamage, config->attackParam.invisibleTime, true, outHitPoint))
                 {
                     boss.SetDamage(true);
-                    //HitStop::Instance().HitStopStart(config->attackParam.attackHitStopTime, config->attackParam.attackHitStopSpeed, config->attackParam.attackHitStopTime, config->attackParam.attackHitStopSpeed);
                     HitStop::Instance().HitStopStart(3.0f, 0.1f, 3.0f, 0.1f);
-
-                    //gamepad.Vibrate(config->attackParam.attackLeftVibrate, config->attackParam.attackRightVibrate);
-
-                    //attackHitEffectHandle = attackHitEffect->Play(outHitPoint, 0.5f);
-
-                    //Camera::Instance().SetCameraShakeSwitch(true, 0.2f, 0.5f);
-
-                    //// 敵を吹っ飛ばすベクトルを算出
-                    //DirectX::XMFLOAT3 vec;
-                    //vec.x = outPosition.x - object->weaponHitPosition[i].x;
-                    //vec.z = outPosition.z - object->weaponHitPosition[i].z;
-                    //float length = sqrtf(vec.x * vec.x + vec.z * vec.z);
-                    //vec.x /= length;
-                    //vec.z /= length;
-
-                    //// XZ平面に吹っ飛ばす力をかける
-                    //float power = 15.0f;
-                    //vec.x *= power;
-                    //vec.z *= power;
-                    //// Y方向にも力をかける
-                    //vec.y = 5.0f;
-
-                    //// 吹っ飛ばす
-                    //enemy->AddImpulse(vec);
                 }
             }
         }
@@ -223,22 +227,34 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
                             attackHitEffectHandle = attackHitEffect->Play(outHitPoint, 0.2f);
                         return;
                     }
-                    else if (ap.knockbackType == KnockbackType::None)
-                        boss.SetDamage(true);
+                    if (ap.knockbackType == KnockbackType::None)
+                    {
+                        lightSE->Play(false, 0.1f);
+	                    boss.SetDamage(true);
+                    }
                     else if (ap.knockbackType == KnockbackType::Light)
-                        boss.SetLightKbDamage(true);
+                    {
+                        mediumSE->Play(false, 0.1f);
+	                    boss.SetLightKbDamage(true);
+                    }
                     else if (ap.knockbackType == KnockbackType::Heavy)
-                        boss.SetHeavyKbDamage(true);
+                    {
+                        heavySE->Play(false, 0.1f);
+	                    boss.SetHeavyKbDamage(true);
+                    }
                     else if (ap.knockbackType == KnockbackType::Launch)
+                    {
+                        heavySE->Play(false, 0.1f);
 	                    boss.SetLaunchKbDamage(true);
+                    }
                     HitStop::Instance().HitStopStart(
                         ap.attackHitStopTime,
                         ap.attackHitStopSpeed,
                         ap.attackHitStopTime,
                         ap.attackHitStopSpeed
                     );
-
-                    gamepad.Vibrate(ap.attackLeftVibrate, ap.attackRightVibrate);                    
+                    if (Input::Instance().GetIsLastGamePad())
+                        gamepad.Vibrate(ap.attackLeftVibrate, ap.attackRightVibrate); 
                     Camera::Instance().SetCameraShakeSwitch(true, 0.2f, 1.0f);
                     // ダメージ適用（コメントアウト部分を有効化する場合）
                     if (boss.ApplyDamage(ap.attackDamage, ap.invisibleTime, true, outHitPoint))
@@ -266,15 +282,30 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
 
                         // ダメージタイプに応じてフラグを設定
                         if (ap.knockbackType == KnockbackType::None)
-                            player.SetDamage(true);
+                        {
+                            lightSE->Play(false, 0.1f);
+	                        player.SetDamage(true);
+                        }
                         else if (ap.knockbackType == KnockbackType::Light)
-                            player.SetLightDamage(true);
+                        {
+                            mediumSE->Play(false, 0.1f);
+	                        player.SetLightDamage(true);
+                        }
                         else if (ap.knockbackType == KnockbackType::Heavy)
-                            player.SetHeavyDamage(true);
+                        {
+                            heavySE->Play(false, 0.1f);
+	                        player.SetHeavyDamage(true);
+                        }
                         else if (ap.knockbackType == KnockbackType::Launch)
-                            player.SetLaunchDamage(true);
+                        {
+                            heavySE->Play(false, 0.1f);
+	                        player.SetLaunchDamage(true);
+                        }
                         else if (ap.knockbackType == KnockbackType::KnockDown)
-                            player.SetKnockDownDamage(true);
+                        {
+                            heavySE->Play(false, 0.1f);
+	                        player.SetKnockDownDamage(true);
+                        }
                         if (player.ApplyDamage(ap.attackDamage, ap.invisibleTime, true, outHitPoint))
                         {
                             Camera::Instance().SetCameraShakeSwitch(true, 0.2f, 1.0f);

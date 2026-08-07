@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "Sprite/Sprite.h"
+#include "System/Audio/AudioSource.h"
 
 // タイトルシーン
 class SceneTitle : public Scene
@@ -44,8 +45,6 @@ public:
 		OutSine,
 	};
 
-	//AudioSource* TitleBGM = nullptr;
-
 public:
 	D3D11_TEXTURE2D_DESC mask_texture2dDesc;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mask_texture;
@@ -68,6 +67,8 @@ private:
 	std::unique_ptr<Sprite> EndNo;
 	std::unique_ptr<Sprite> EndSele;
 
+	AudioSource* BGM = nullptr;
+
 	EasingData easingData;
 
 	DirectX::XMFLOAT2 pos = { 0.0f, 360.0f };
@@ -78,7 +79,7 @@ private:
 	float AnyAlpha = 0.f;
 
 	float alphaTime = 0.f;
-	float alphaSpeed = 2.0f;
+	float alphaSpeed = 5.0f;
 
 	float timer = 0;
 

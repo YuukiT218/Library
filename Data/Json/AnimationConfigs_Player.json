@@ -721,7 +721,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 2,
+                        "attackDamage": 3,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.019999999552965164,
                         "attackLeftVibrate": 1.0,
@@ -741,7 +741,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 2,
+                        "attackDamage": 3,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.019999999552965164,
                         "attackLeftVibrate": 1.0,
@@ -750,7 +750,7 @@
                         "forwardPower": 0.0,
                         "forwarded": false,
                         "invisibleTime": 0.004999999888241291,
-                        "knockbackType": "None",
+                        "knockbackType": "Light",
                         "moveRate": 1.0,
                         "revengeValue": 1,
                         "turnRate": 1.0
@@ -761,7 +761,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 2,
+                        "attackDamage": 3,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.019999999552965164,
                         "attackLeftVibrate": 1.0,
@@ -781,7 +781,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 2,
+                        "attackDamage": 3,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.019999999552965164,
                         "attackLeftVibrate": 1.0,
@@ -801,7 +801,7 @@
                 },
                 {
                     "attackParam": {
-                        "attackDamage": 5,
+                        "attackDamage": 6,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.029999999329447746,
                         "attackLeftVibrate": 1.0,
@@ -1183,7 +1183,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 3,
+                        "attackDamage": 4,
                         "attackHitStopSpeed": 0.20000000298023224,
                         "attackHitStopTime": 0.029999999329447746,
                         "attackLeftVibrate": 1.0,
@@ -1194,7 +1194,7 @@
                         "invisibleTime": 0.10000000149011612,
                         "knockbackType": "None",
                         "moveRate": 1.0,
-                        "revengeValue": 1,
+                        "revengeValue": 3,
                         "turnRate": 1.0
                     },
                     "endTime": 0.4530807137489319,
@@ -1255,7 +1255,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 3,
+                        "attackDamage": 4,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.029999999329447746,
                         "attackLeftVibrate": 1.0,
@@ -1266,7 +1266,7 @@
                         "invisibleTime": 0.10000000149011612,
                         "knockbackType": "None",
                         "moveRate": 1.0,
-                        "revengeValue": 1,
+                        "revengeValue": 2,
                         "turnRate": 1.0
                     },
                     "endTime": 0.2287202775478363,
@@ -1286,7 +1286,7 @@
                         "invisibleTime": 0.30000001192092896,
                         "knockbackType": "None",
                         "moveRate": 1.0,
-                        "revengeValue": 1,
+                        "revengeValue": 2,
                         "turnRate": 1.0
                     },
                     "endTime": 0.5170615911483765,
@@ -1371,7 +1371,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 4,
+                        "attackDamage": 5,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.029999999329447746,
                         "attackLeftVibrate": 1.0,
@@ -1382,7 +1382,7 @@
                         "invisibleTime": 0.30000001192092896,
                         "knockbackType": "Light",
                         "moveRate": 1.0,
-                        "revengeValue": 1,
+                        "revengeValue": 3,
                         "turnRate": 1.0
                     },
                     "endTime": 0.6227487325668335,
@@ -1467,7 +1467,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 5,
+                        "attackDamage": 10,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.029999999329447746,
                         "attackLeftVibrate": 1.0,
@@ -1478,7 +1478,7 @@
                         "invisibleTime": 0.20000000298023224,
                         "knockbackType": "Heavy",
                         "moveRate": 1.0,
-                        "revengeValue": 1,
+                        "revengeValue": 3,
                         "turnRate": 1.0
                     },
                     "endTime": 0.731785774230957,
@@ -2073,7 +2073,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 5,
+                        "attackDamage": 6,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.029999999329447746,
                         "attackLeftVibrate": 1.0,
@@ -3416,7 +3416,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 5,
+                        "attackDamage": 6,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.029999999329447746,
                         "attackLeftVibrate": 1.0,
@@ -3433,6 +3433,26 @@
                     "endTime": 0.8914729356765747,
                     "flag": "Attack",
                     "startTime": 0.5445736646652222
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 1.8333333730697632,
+                    "flag": "Invincible",
+                    "startTime": 0.0
                 }
             ],
             "cameraKeyframes": [],
@@ -3757,7 +3777,7 @@
             "attributes": [
                 {
                     "attackParam": {
-                        "attackDamage": 5,
+                        "attackDamage": 6,
                         "attackHitStopSpeed": 0.10000000149011612,
                         "attackHitStopTime": 0.029999999329447746,
                         "attackLeftVibrate": 1.0,

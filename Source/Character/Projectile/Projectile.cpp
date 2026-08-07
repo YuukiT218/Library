@@ -2,14 +2,14 @@
 #include "Effect/EffectManager.h"
 #include "Graphics/Graphics.h"
 #include "Debug/ShapeRenderer.h"
-#include "Character/Player.h"
+#include "Character/Player/Player.h"
 #include "Character/Enemy/EnemyBoss.h"
 #include <cmath>
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 Projectile::Projectile(const ProjectileInfo& info, std::shared_ptr<Effect> effectResource)
     : info(info), position(info.spawnPosition), effect(effectResource), ageTimer(0.0f)
@@ -75,6 +75,41 @@ bool Projectile::Update(float elapsedTime)
 
         // ‰ñ“]XV (‚à‚µ—U“±’e‚È‚Ç‚ÅŒü‚«‚ª•Ï‚í‚éê‡‚Íd—v)
         effect->SetRotation(effectHandle, rotation);
+    }
+
+    if (std::string(info.effectPath).find("LightPillar") != std::string::npos)
+    {
+        int emitCount = 5;
+
+        for (int i = 0; i < emitCount; ++i)
+        {
+            // ƒ‰ƒ“ƒ_ƒ€‚ÈŠp“x(0 ` 2PI)
+            float angle = ((float)rand() / RAND_MAX) * DirectX::XM_2PI;
+
+            // ƒ‰ƒ“ƒ_ƒ€‚È”¼Œa (’†S‚©‚ç info.radius ‚Ì”ÍˆÍ)
+            float r = ((float)rand() / RAND_MAX) * info.radius;
+
+            DirectX::XMFLOAT3 emitPos = {
+                position.x + cosf(angle) * r,
+                position.y,
+                position.z + sinf(angle) * r
+            };
+
+            // ”ò‚ÑŽU‚é‘¬“x
+            // XZ•½–Ê‚ÍŠp“x(angle)‚Ì•ûŒü‚ÖAY‚Í­‚µã‚ÖŒü‚©‚í‚¹‚é
+            float speed = 2.0f + ((float)rand() / RAND_MAX) * 3.0f; // ”ò‚ÑŽU‚é¨‚¢
+            float vx = cosf(angle) * speed;
+            float vy = ((float)rand() / RAND_MAX) * 2.0f; // ­‚µã‚Ö
+            float vz = sinf(angle) * speed;
+            DirectX::XMFLOAT3 velocity = { vx, vy, vz };
+
+            // F‚ÆƒTƒCƒY
+            DirectX::XMFLOAT4 color = { 1.0f, 0.9f, 0.4f, 1.0f }; // ƒS[ƒ‹ƒhŒn
+            float size = 0.1f + ((float)rand() / RAND_MAX) * 0.2f;
+            float lifeTime = 0.2f + ((float)rand() / RAND_MAX) * 0.3f; // ’Z‚­’e‚¯‚ÄÁ‚¦‚é
+
+            EffectManager::Instance().EmitGpuParticle(emitPos, velocity, color, size, lifeTime, 1);
+        }
     }
 
     return true; // ¶‘¶
@@ -230,7 +265,8 @@ bool Projectile::OnHit(Character* target)
         	}
             else
             {
-	            Player::Instance().SetDamage(true);
+                Player::Instance().SetDamageDirection(EnemyBoss::Instance().GetPosition());
+	            Player::Instance().SetLightDamage(true);
             }
         }
         else if (target == static_cast<Character*>(&EnemyBoss::Instance()))

@@ -12,7 +12,7 @@ VS_OUT main(
     VS_OUT vout = (VS_OUT) 0;
     
     position = SkinningPosition(position, boneWeight, boneIndices);
-	// === テレポートエフェクト: Distortion (空間歪み) ===
+	// テレポートエフェクト: Distortion (空間歪み)
     if (enableDistortion > 0.5 && teleportProgress > 0.0)
     {
         float3 teleportCenter = float3(position.x, teleportCenterY, position.z);

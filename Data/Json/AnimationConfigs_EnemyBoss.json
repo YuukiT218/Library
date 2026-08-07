@@ -51,6 +51,26 @@
                     "endTime": 0.47168609499931335,
                     "flag": "Attack",
                     "startTime": 0.08918917179107666
+                },
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.24941407144069672,
+                    "flag": "SuperArmor",
+                    "startTime": 0.0
                 }
             ],
             "cameraKeyframes": [],
@@ -1259,7 +1279,7 @@
                         "forwardPower": 0.0,
                         "forwarded": false,
                         "invisibleTime": 0.5,
-                        "knockbackType": "None",
+                        "knockbackType": "Heavy",
                         "moveRate": 1.0,
                         "revengeValue": 1,
                         "turnRate": 1.0
@@ -1300,6 +1320,38 @@
                     "outTangent": 0.0,
                     "time": 0.0,
                     "value": 1.0
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.06999999284744263,
+                    "value": 1.0049998760223389
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.0924999862909317,
+                    "value": 1.0049997568130493
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.2237500101327896,
+                    "value": 0.9900000095367432
+                },
+                {
+                    "handleOffsetX": 0.05000000074505806,
+                    "handleOffsetY": 0.0,
+                    "inTangent": 0.0,
+                    "outTangent": 0.0,
+                    "time": 0.24249999225139618,
+                    "value": 0.9899996519088745
                 },
                 {
                     "handleOffsetX": 0.05000000074505806,
@@ -4291,7 +4343,7 @@
                         "forwardPower": 0.0,
                         "forwarded": false,
                         "invisibleTime": 0.5,
-                        "knockbackType": "Light",
+                        "knockbackType": "Heavy",
                         "moveRate": 1.0,
                         "revengeValue": 0,
                         "turnRate": 1.0

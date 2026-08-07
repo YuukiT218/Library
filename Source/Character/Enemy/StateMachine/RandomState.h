@@ -15,10 +15,8 @@ public:
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, children.size() - 1);
         int idx = dis(gen);
-        //this->currentState = children[idx];
         current = children[idx];
         current->Enter();
-        //this->ChangeState(children[idx]->GetName());
         isComplete = false;
         isFailed = false;
     }

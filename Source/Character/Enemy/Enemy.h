@@ -140,6 +140,8 @@ protected:
 	};
 	TeleportPhase teleportPhase = TeleportPhase::None;
 
+	virtual void OnTeleportPhaseChanged(TeleportPhase newPhase) {}
+
 	// 残像用の変数
 	struct Afterimage
 	{
@@ -166,9 +168,8 @@ protected:
 		}
 	};
 
-	Afterimage afterimage;         // 残像（1つだけ）
-	bool hasAfterimage = false;    // 残像が有効か
-	float afterimageDuration = 1.0f;  // 残像の持続時間
+	std::vector<Afterimage> afterimages;         // 残像
+	float afterimageDuration = 1.0f;			 // 残像の持続時間
 	float afterimageDarkness = 0.8f;
 
 public:
@@ -191,10 +192,10 @@ public:
 	void UpdateAfterimage(float elapsedTime);
 
 	// 残像発生フラグチェック
-	bool HasAfterimage() const { return hasAfterimage; }
+	bool HasAfterimage() const { return !afterimages.empty(); }
 
 	// 残像情報取得
-	const Afterimage& GetAfterimage() const { return afterimage; }
+	const std::vector<Afterimage>& GetAfterimages() const { return afterimages; }
 
 	// 指定した座標が画面内（スクリーン内）に入っているか判定
 	bool IsPositionVisible(const DirectX::XMFLOAT3& worldPos);

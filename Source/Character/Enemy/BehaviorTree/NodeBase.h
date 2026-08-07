@@ -1,269 +1,258 @@
 ﻿#pragma once
 
-#include <vector>
+#include <climits>
+#include <cstdlib>
+#include <ctime>
+#include <memory>
 #include <string>
-#include "BehaviorTree.h"
-#include "ActionBase.h"
+#include <vector>
 
-// メモリリーク調査用
-#define debug_new new(_NORMAL_BLOCK,__FILE__,__LINE__)
+#include "ActionBase.h"
+#include "BehaviorTree.h"
+#include "JudgementBase.h"
 
 // ノード
 template <typename ActorType>
 class NodeBase
 {
 	friend class BehaviorTree<ActorType>;
+
 public:
-	// コンストラクタ
-	NodeBase(std::string name, NodeBase* parent, int priority,
-		typename BehaviorTree<ActorType>::SelectRule selectRule, JudgmentBase<ActorType>* judgment, ActionBase<ActorType>* action) :
-		name(name), parent(parent), priority(priority),
-		selectRule(selectRule), judgment(judgment), action(action), children(NULL)
+	NodeBase(
+		std::string name,
+		NodeBase* parent,
+		int priority,
+		typename BehaviorTree<ActorType>::SelectRule selectRule,
+		JudgmentBase<ActorType>* judgment,
+		ActionBase<ActorType>* action)
+		: name(std::move(name))
+		, selectRule(selectRule)
+		, judgment(judgment)
+		, action(action)
+		, priority(static_cast<unsigned int>(priority))
+		, parent(parent)
 	{
 	}
-	// デストラクタ
-	~NodeBase();
-	// 名前ゲッター
-	std::string GetName() { return name; }
-	// 優先順位ゲッター
-	int GetPriority() { return priority; }
-	// 子ノード追加
-	void AddChild(NodeBase* child) { children.push_back(child); }
-	// 行動データを持っているか
-	bool HasAction() { return action != nullptr ? true : false; }
-	// 実行可否判定
+
+	~NodeBase() = default;
+
+	std::string GetName() const { return name; }
+	int GetPriority() const { return static_cast<int>(priority); }
+
+	void AddChild(std::unique_ptr<NodeBase> child)
+	{
+		children.emplace_back(std::move(child));
+	}
+
+	bool HasAction() const
+	{
+		return action != nullptr;
+	}
+
 	bool Judgment();
-	// 優先順位選択
-	NodeBase* SelectPriority(std::vector<NodeBase*>* list);
-	// ランダム選択
-	NodeBase* SelectRandom(std::vector<NodeBase*>* list);
-	// シーケンス選択
-	NodeBase* SelectSequence(std::vector<NodeBase*>* list, BehaviorData<ActorType>* data);
-	// ノード検索
-	NodeBase* SearchNode(std::string searchName);
-	// ノード推論
+
+	NodeBase* SelectPriority(const std::vector<NodeBase*>* list);
+	NodeBase* SelectRandom(const std::vector<NodeBase*>* list);
+	NodeBase* SelectSequence(
+		const std::vector<NodeBase*>* list,
+		BehaviorData<ActorType>* data);
+
+	NodeBase* SearchNode(const std::string& searchName);
 	NodeBase* Inference(BehaviorData<ActorType>* data);
-	// 子ノード数を取得
-	size_t GetChildrenCount() const { return children.size(); }
-	// 実行
+
+	size_t GetChildrenCount() const
+	{
+		return children.size();
+	}
+
 	typename ActionBase<ActorType>::State Run(float elapsedTime);
-	std::vector<NodeBase*>		children;							// 子ノード
+
+	std::vector<std::unique_ptr<NodeBase>> children;
+
 protected:
-	std::string					name;								// 名前
-	typename BehaviorTree<ActorType>::SelectRule	selectRule;		// 選択ルール
-	JudgmentBase<ActorType>* judgment;								// 判定クラス
-	ActionBase<ActorType>* action;									// 実行クラス
-	unsigned int				priority;							// 優先順位
-	int lastRandomIndex = -1;										// 前回の乱数
-	NodeBase* parent;												// 親ノード
+	std::string name;
+	typename BehaviorTree<ActorType>::SelectRule selectRule;
+	std::unique_ptr<JudgmentBase<ActorType>> judgment;
+	std::unique_ptr<ActionBase<ActorType>> action;
+	unsigned int priority;
+	int lastRandomIndex = -1;
+	NodeBase* parent;
 };
 
-// デストラクタ
 template <typename ActorType>
-NodeBase<ActorType>::~NodeBase()
+NodeBase<ActorType>* NodeBase<ActorType>::SearchNode(
+	const std::string& searchName)
 {
-}
-
-// ノード検索
-template <typename ActorType>
-NodeBase<ActorType>* NodeBase<ActorType>::SearchNode(std::string searchName)
-{
-	// 名前が一致
 	if (name == searchName)
 	{
 		return this;
 	}
-	else {
-		// 子ノードで検索
-		for (auto itr = children.begin(); itr != children.end(); itr++)
-		{
-			NodeBase<ActorType>* ret = (*itr)->SearchNode(searchName);
 
-			if (ret != nullptr)
-			{
-				return ret;
-			}
+	for (const auto& child : children)
+	{
+		NodeBase* result = child->SearchNode(searchName);
+		if (result != nullptr)
+		{
+			return result;
 		}
 	}
 
 	return nullptr;
 }
 
-// ノード推論
 template <typename ActorType>
-NodeBase<ActorType>* NodeBase<ActorType>::Inference(BehaviorData<ActorType>* data)
+NodeBase<ActorType>* NodeBase<ActorType>::Inference(
+	BehaviorData<ActorType>* data)
 {
-	std::vector<NodeBase<ActorType>*> list;
+	std::vector<NodeBase<ActorType>*> candidates;
 	NodeBase<ActorType>* result = nullptr;
 
-	// childrenの数だけループを行う。
-	for (int i = 0; i < children.size(); i++)
+	for (const auto& child : children)
 	{
-		// children.at(i)->judgmentがnullptrでなければ
-		if (children.at(i)->judgment != nullptr)
+		if (child->Judgment())
 		{
-			// children.at(i)->judgment->Judgment()関数を実行し、tureであれば
-			// listにchildren.at(i)を追加していく
-			if (children.at(i)->judgment->Judgment() == true)
-				list.emplace_back(children.at(i));
-		}
-		else
-		{
-			// 判定クラスがなければ無条件に追加
-			list.emplace_back(children.at(i));
+			candidates.emplace_back(child.get());
 		}
 	}
 
-	// 選択ルールでノード決め
 	switch (selectRule)
 	{
-		// 優先順位
 	case BehaviorTree<ActorType>::SelectRule::Priority:
-		result = SelectPriority(&list);
+		result = SelectPriority(&candidates);
 		break;
-		// ランダム
+
 	case BehaviorTree<ActorType>::SelectRule::Random:
-		result = SelectRandom(&list);
+		result = SelectRandom(&candidates);
 		break;
-		// シーケンス
+
 	case BehaviorTree<ActorType>::SelectRule::Sequence:
 	case BehaviorTree<ActorType>::SelectRule::SequentialLooping:
-		result = SelectSequence(&list, data);
+		result = SelectSequence(&candidates, data);
+		break;
+
+	case BehaviorTree<ActorType>::SelectRule::Non:
+	default:
 		break;
 	}
 
-	if (result != nullptr)
+	if (result == nullptr)
 	{
-		// 行動があれば終了
-		if (result->HasAction() == true)
+		return nullptr;
+	}
+
+	if (result->HasAction())
+	{
+		return result;
+	}
+
+	return result->Inference(data);
+}
+
+template <typename ActorType>
+NodeBase<ActorType>* NodeBase<ActorType>::SelectPriority(
+	const std::vector<NodeBase*>* list)
+{
+	if (list == nullptr || list->empty())
+	{
+		return nullptr;
+	}
+
+	NodeBase* selectedNode = nullptr;
+	int lowestPriority = INT_MAX;
+
+	for (NodeBase* node : *list)
+	{
+		const int currentPriority = node->GetPriority();
+		if (currentPriority < lowestPriority)
 		{
-			return result;
-		}
-		else
-		{
-			// 決まったノードで推論開始
-			result = result->Inference(data);
+			lowestPriority = currentPriority;
+			selectedNode = node;
 		}
 	}
 
-	return result;
+	return selectedNode;
 }
 
-// 優先順位でノード選択
 template <typename ActorType>
-NodeBase<ActorType>* NodeBase<ActorType>::SelectPriority(std::vector<NodeBase*>* list)
+NodeBase<ActorType>* NodeBase<ActorType>::SelectRandom(
+	const std::vector<NodeBase*>* list)
 {
-	// 優先順位が高いノードを格納するポインタ
-	NodeBase<ActorType>* selectNode = nullptr;
-	int priority = INT_MAX;
-
-	// 一番優先順位が高いノードを探してselectNodeに格納
-	// リスト内のノードをループ
-	for (auto node : *list)
+	if (list == nullptr || list->empty())
 	{
-		// 現在のノードの優先順位を取得
-		int currentPriority = node->GetPriority();
-
-		// より優先順位が高い（数値が小さい）場合は更新
-		if (currentPriority < priority)
-		{
-			priority = currentPriority;		// 優先順位を更新
-			selectNode = node;              // ノードを選択
-		}
+		return nullptr;
 	}
 
-	return selectNode;
-}
-
-
-// ランダムでノード選択
-template <typename ActorType>
-NodeBase<ActorType>* NodeBase<ActorType>::SelectRandom(std::vector<NodeBase*>* list)
-{
 	static bool initialized = false;
-	if (!initialized) {
-		srand(static_cast<unsigned int>(time(nullptr)));
+	if (!initialized)
+	{
+		std::srand(static_cast<unsigned int>(std::time(nullptr)));
 		initialized = true;
 	}
-	int selectNo = 0;
-	// listのサイズで乱数を取得してselectNoに格納
-	if (list->size() <= 1) {
-		selectNo = 0;
-	}
-	else {
-		do {
-			selectNo = rand() % list->size();
-		} while (selectNo == lastRandomIndex);
-	}
-	lastRandomIndex = selectNo;
 
-	// listのselectNo番目の実態をリターン
-	return (*list).at(selectNo);
+	int selectedIndex = 0;
+	if (list->size() > 1)
+	{
+		do
+		{
+			selectedIndex = std::rand() % static_cast<int>(list->size());
+		} while (selectedIndex == lastRandomIndex);
+	}
+
+	lastRandomIndex = selectedIndex;
+	return list->at(selectedIndex);
 }
 
-// シーケンス・シーケンシャルルーピングでノード選択
 template <typename ActorType>
-NodeBase<ActorType>* NodeBase<ActorType>::SelectSequence(std::vector<NodeBase*>* list, BehaviorData<ActorType>* data)
+NodeBase<ActorType>* NodeBase<ActorType>::SelectSequence(
+	const std::vector<NodeBase*>* list,
+	BehaviorData<ActorType>* data)
 {
-	int step = 0;
-
-	// 指定されている中間ノードのシーケンスがどこまで実行されたか取得する
-	step = data->GetSequenceStep(name);
-
-	// 中間ノードに登録されているノード数以上の場合、
-	if (step >= children.size())
+	if (list == nullptr || data == nullptr || children.empty())
 	{
-		// ルールによって処理を切り替える
-		// ルールがBehaviorTree::SelectRule::SequentialLoopingのときは最初から実行するため、stepに0を代入
-		// ルールがBehaviorTree::SelectRule::Sequenceのときは次に実行できるノードがないため、nullptrをリターン
+		return nullptr;
+	}
+
+	int step = data->GetSequenceStep(name);
+
+	if (step >= static_cast<int>(children.size()))
+	{
 		if (selectRule != BehaviorTree<ActorType>::SelectRule::SequentialLooping)
 		{
 			return nullptr;
 		}
-		else
-		{
-			step = 0;
-		}
+
+		step = 0;
 	}
-	// 実行可能リストに登録されているデータの数だけループを行う
-	for (auto itr = list->begin(); itr != list->end(); itr++)
+
+	NodeBase* nextNode = children.at(step).get();
+
+	for (NodeBase* candidate : *list)
 	{
-		// 子ノードが実行可能リストに含まれているか
-		if (children.at(step)->GetName() == (*itr)->GetName())
+		if (candidate == nextNode)
 		{
-			//シーケンスノードを記録
 			data->PushSequenceNode(this);
-			//シーケンスステップを更新
 			data->SetSequenceStep(GetName(), step + 1);
-			return children.at(step);
+			return nextNode;
 		}
 	}
-	// 指定された中間ノードに実行可能ノードがないのでnullptrをリターンする
+
 	return nullptr;
 }
 
-// 判定
 template <typename ActorType>
 bool NodeBase<ActorType>::Judgment()
 {
-	// judgmentがあるか判断。あればメンバ関数Judgment()実行した結果をリターン。
-	if (judgment != nullptr)
-	{
-		return judgment->Judgment();
-	}
-
-	return true;
+	return judgment == nullptr || judgment->Judgment();
 }
 
-// ノード実行
 template <typename ActorType>
-typename ActionBase<ActorType>::State NodeBase<ActorType>::Run(float elapsedTime)
+typename ActionBase<ActorType>::State NodeBase<ActorType>::Run(
+	float elapsedTime)
 {
-	// actionがあるか判断。あればメンバ関数Run()実行した結果をリターン。
-	if (action != nullptr)
+	if (action == nullptr)
 	{
-		return action->Run(elapsedTime);
+		return ActionBase<ActorType>::State::Failed;
 	}
 
-	return ActionBase<ActorType>::State::Failed;
+	return action->Run(elapsedTime);
 }

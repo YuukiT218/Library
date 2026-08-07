@@ -1,25 +1,18 @@
 ﻿#include "SceneManager.h"
 
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
-
 // 更新処理
 void SceneManager::Update(float elapsedTime)
 {
 	if (nextScene != nullptr)
 	{
-		// 古いシーンを終了処理
 		Clear();
 
-		// 新しいシーンを設定
-		currentScene = nextScene;
-		nextScene = nullptr;
+		currentScene = std::move(nextScene);
 
-		// シーン初期化処理
 		if (!currentScene->IsReady())
+		{
 			currentScene->Initialize();
+		}
 	}
 
 	if (currentScene != nullptr)
@@ -43,14 +36,13 @@ void SceneManager::Clear()
 	if (currentScene != nullptr)
 	{
 		currentScene->Finalize();
-		delete currentScene;
-		currentScene = nullptr;
+		currentScene.reset();
 	}
 }
 
 // シーン切り替え
 void SceneManager::ChangeScene(Scene* scene)
 {
-	// 新しいシーンを設定
-	nextScene = scene;
+	// すでに保留中のシーンがあれば unique_ptr の reset により確実に破棄される。
+	nextScene.reset(scene);
 }

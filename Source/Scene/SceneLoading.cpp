@@ -7,27 +7,27 @@
 #include "Math/Mathf.h"
 #include "Input/Input.h"
 
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
 
-//// t: 0?1の値
-//float EaseInOutQuad(float t)
-//{
-//	return t < 0.5f ? 2.0f * t * t : -1.0f + (4.0f - 2.0f * t) * t;
-//}
-//
-//float EaseOutBack(float t, float s = 1.70158f)
-//{
-//	t = t - 1.0f;
-//	return (t * t * ((s + 1.0f) * t + s) + 1.0f);
-//}
-//
-//float EaseInBack(float t, float s = 1.70158f)
-//{
-//	return t * t * ((s + 1.0f) * t - s);
-//}
+#include <stdlib.h>
+
+
+
+// t: 0?1の値
+float EaseInOutQuad(float t)
+{
+	return t < 0.5f ? 2.0f * t * t : -1.0f + (4.0f - 2.0f * t) * t;
+}
+
+float EaseOutBack(float t, float s = 1.70158f)
+{
+	t = t - 1.0f;
+	return (t * t * ((s + 1.0f) * t + s) + 1.0f);
+}
+
+float EaseInBack(float t, float s = 1.70158f)
+{
+	return t * t * ((s + 1.0f) * t - s);
+}
 
 // 初期化
 void SceneLoading::Initialize()
@@ -44,7 +44,18 @@ void SceneLoading::Initialize()
 	AddSprite("LoadingIcon", CreateSpriteData(device, "Data/Sprite/LoadingIcon.png", { 1000.0f,-245.0f,0.1f }, { 512.0f, 512.0f }, { 0,0 }, { 512,512 }, 0, { 1,1,1,1 }));
 	AddSprite("LoadingIconB", CreateSpriteData(device, "Data/Sprite/LoadingIconBack.png", { 1000.0f,-245.0f,0 }, { 512.0f, 512.0f }, { 0,0 }, { 512,512 }, 0, { 1,1,1,1 }));
 
+	AddSprite("Hint", CreateSpriteData(device, "Data/Sprite/Hint1.png", { 2200.0f,880.0f,0 }, { 900,105 }, { 0,0 }, { 900,105 }, 0, { 1,1,1,1 }));
+	AddSprite("Hint1", CreateSpriteData(device, "Data/Sprite/Hint2.png", { 2200.0f,880.0f,0 }, { 918,105 }, { 0,0 }, { 918,105 }, 0, { 1,1,1,1 }));
+
 	bool isController = true;
+
+	hintStartPos = { 2200.0f,880.0f,0 };
+	hintMidPos = { 50.0f,880.0f,0 };
+	hintEndPos = { -1000.0f,880.0f,0 };
+
+	hint1StartPos = { 2200.0f,880.0f,0 };
+	hint1MidPos = { 50.0f,880.0f,0 };
+	hint1EndPos = { -1000.0f,880.0f,0 };
 
 	// スレッド開始
 	thread = new std::thread(LoadingThread, this);
@@ -94,6 +105,8 @@ void SceneLoading::Update(float elapsedTime)
 
 	SetAlphaLerp("PadInst", isController ? 1.0f : 0.0f);
 	SetAlphaLerp("KeyMouInst", isController ? 0.0f : 1.0f);
+
+	MoveHintText(elapsedTime);
 
 	if (!nextScene)return;
 
@@ -323,5 +336,110 @@ void SceneLoading::DrawDebugGUI()
 		previousSpriteState[name].color = data.color;
 		previousSpriteState[name].texPos = data.texPos;
 		previousSpriteState[name].texSize = data.texSize;
+	}
+}
+
+void SceneLoading::MoveHintText(float elapsedTime)
+{
+	// --- Hintの動き ---
+	switch (hintPhase)
+	{
+	case MovePhase::MoveIn:
+	{
+		hintTimer += elapsedTime;
+		float t = min(hintTimer / moveDuration, 1.0f);
+		float easedT = EaseOutBack(t);
+		float newPos = Mathf::Lerp(hintStartPos.x, hintMidPos.x, easedT);
+		sprite["Hint"].position.x = newPos;
+
+		if (t >= 1.0f)
+		{
+			hintPhase = MovePhase::Wait;
+			hintTimer = 0.0f;
+		}
+		break;
+	}
+	case MovePhase::Wait:
+	{
+		hintTimer += elapsedTime;
+		if (hintTimer >= waitDuration)
+		{
+			hintPhase = MovePhase::MoveOut;
+			hintTimer = 0.0f;
+		}
+		break;
+	}
+	case MovePhase::MoveOut:
+	{
+		hintTimer += elapsedTime;
+		float t = min(hintTimer / moveDuration, 1.0f);
+		float easedT = EaseInBack(t);
+		float newPos = Mathf::Lerp(hintMidPos.x, hintEndPos.x, easedT);
+		sprite["Hint"].position.x = newPos;
+
+		if (t >= 1.0f)
+		{
+			hintPhase = MovePhase::Done;
+			hint1Phase = MovePhase::MoveIn; // 次のHint1をスタート
+			hintTimer = 0.0f;
+
+			// 元の位置に戻して次回に備える
+			sprite["Hint"].position.x = hintStartPos.x;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+
+	// --- Hint1の動き ---
+	switch (hint1Phase)
+	{
+	case MovePhase::MoveIn:
+	{
+		hint1Timer += elapsedTime;
+		float t = min(hint1Timer / moveDuration, 1.0f);
+		float easedT = EaseOutBack(t);
+		float newPos = Mathf::Lerp(hint1StartPos.x, hint1MidPos.x, easedT);
+		sprite["Hint1"].position.x = newPos;
+
+		if (t >= 1.0f)
+		{
+			hint1Phase = MovePhase::Wait;
+			hint1Timer = 0.0f;
+		}
+		break;
+	}
+	case MovePhase::Wait:
+	{
+		hint1Timer += elapsedTime;
+		if (hint1Timer >= waitDuration)
+		{
+			hint1Phase = MovePhase::MoveOut;
+			hint1Timer = 0.0f;
+		}
+		break;
+	}
+	case MovePhase::MoveOut:
+	{
+		hint1Timer += elapsedTime;
+		float t = min(hint1Timer / moveDuration, 1.0f);
+		float easedT = EaseInBack(t); // ここ！
+		float newPos = Mathf::Lerp(hint1MidPos.x, hint1EndPos.x, easedT);
+		sprite["Hint1"].position.x = newPos;
+
+		if (t >= 1.0f)
+		{
+			hint1Phase = MovePhase::Done;
+			hint1Timer = 0.0f;
+
+			// 次のHintを再スタート
+			hintPhase = MovePhase::MoveIn;
+			sprite["Hint1"].position.x = hint1StartPos.x;
+		}
+		break;
+	}
+	default:
+		break;
 	}
 }

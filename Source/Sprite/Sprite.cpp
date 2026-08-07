@@ -82,126 +82,6 @@ Sprite::Sprite(ID3D11Device* device, const char* filename)
 	}
 }
 
-//// 描画実行
-//void Sprite::Render(ID3D11DeviceContext* dc,
-//	float dx, float dy,					// 左上位置
-//	float dz,							// 奥行
-//	float dw, float dh,					// 幅、高さ
-//	float sx, float sy,					// 画像切り抜き位置
-//	float sw, float sh,					// 画像切り抜きサイズ
-//	float angle,						// 角度
-//	float r, float g, float b, float a	// 色
-//	) const
-//{
-//	// 頂点座標
-//	DirectX::XMFLOAT2 positions[] = {
-//		DirectX::XMFLOAT2(dx,      dy),			// 左上
-//		DirectX::XMFLOAT2(dx + dw, dy),			// 右上
-//		DirectX::XMFLOAT2(dx,      dy + dh),	// 左下
-//		DirectX::XMFLOAT2(dx + dw, dy + dh),	// 右下
-//	};
-//
-//	// テクスチャ座標
-//	DirectX::XMFLOAT2 texcoords[] = {
-//		DirectX::XMFLOAT2(sx,      sy),			// 左上
-//		DirectX::XMFLOAT2(sx + sw, sy),			// 右上
-//		DirectX::XMFLOAT2(sx,      sy + sh),	// 左下
-//		DirectX::XMFLOAT2(sx + sw, sy + sh),	// 右下
-//	};
-//
-//	// スプライトの中心で回転させるために４頂点の中心位置が
-//	// 原点(0, 0)になるように一旦頂点を移動させる。
-//	float mx = dx + dw * 0.5f;
-//	float my = dy + dh * 0.5f;
-//	for (auto& p : positions)
-//	{
-//		p.x -= mx;
-//		p.y -= my;
-//	}
-//
-//	// 頂点を回転させる
-//	float theta = DirectX::XMConvertToRadians(angle);
-//	float c = cosf(theta);
-//	float s = sinf(theta);
-//	for (auto& p : positions)
-//	{
-//		DirectX::XMFLOAT2 r = p;
-//		p.x = c * r.x + -s * r.y;
-//		p.y = s * r.x + c * r.y;
-//	}
-//
-//	// 回転のために移動させた頂点を元の位置に戻す
-//	for (auto& p : positions)
-//	{
-//		p.x += mx;
-//		p.y += my;
-//	}
-//
-//	// 現在設定されているビューポートからスクリーンサイズを取得する。
-//	D3D11_VIEWPORT viewport;
-//	UINT numViewports = 1;
-//	dc->RSGetViewports(&numViewports, &viewport);
-//	float screenWidth = viewport.Width;
-//	float screenHeight = viewport.Height;
-//
-//	// スクリーン座標系からNDC座標系へ変換する。
-//	for (DirectX::XMFLOAT2& p : positions)
-//	{
-//		p.x = 2.0f * p.x / screenWidth - 1.0f;
-//		p.y = 1.0f - 2.0f * p.y / screenHeight;
-//	}
-//
-//	// 頂点バッファの内容の編集を開始する。
-//	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
-//	HRESULT hr = dc->Map(vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
-//	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-//
-//	// 頂点バッファの内容を編集
-//	Vertex* v = static_cast<Vertex*>(mappedSubresource.pData);
-//	for (int i = 0; i < 4; ++i)
-//	{
-//		v[i].position.x = positions[i].x;
-//		v[i].position.y = positions[i].y;
-//		v[i].position.z = dz;
-//
-//		v[i].color.x = r;
-//		v[i].color.y = g;
-//		v[i].color.z = b;
-//		v[i].color.w = a;
-//
-//		v[i].texcoord.x = texcoords[i].x / textureWidth;
-//		v[i].texcoord.y = texcoords[i].y / textureHeight;
-//	}
-//
-//	// 頂点バッファの内容の編集を終了する。
-//	dc->Unmap(vertexBuffer.Get(), 0);
-//
-//	// GPUに描画するためのデータを渡す
-//	UINT stride = sizeof(Vertex);
-//	UINT offset = 0;
-//	dc->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-//	dc->IASetInputLayout(inputLayout.Get());
-//	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-//	dc->VSSetShader(vertexShader.Get(), nullptr, 0);
-//	dc->PSSetShader(pixelShader.Get(), nullptr, 0);
-//	dc->PSSetShaderResources(0, 1, shaderResourceView.GetAddressOf());
-//
-//	// 描画
-//	dc->Draw(4, 0);
-//}
-//
-//// 描画実行（テクスチャ切り抜き指定なし）
-//void Sprite::Render(ID3D11DeviceContext* dc,
-//	float dx, float dy,					// 左上位置
-//	float dz,							// 奥行
-//	float dw, float dh,					// 幅、高さ
-//	float angle,						// 角度
-//	float r, float g, float b, float a	// 色
-//	) const
-//{
-//	Render(dc, dx, dy, dz, dw, dh, 0, 0, textureWidth, textureHeight, angle, r, g, b, a);
-//}
-
 // 描画実行
 void Sprite::Render(ID3D11DeviceContext* dc,
 	float dx, float dy,					// 左上位置
@@ -215,38 +95,17 @@ void Sprite::Render(ID3D11DeviceContext* dc,
 	ID3D11PixelShader* ps
 ) const
 {
-	// 画面に描画するときは-1.0～1.0の範囲内で指定する必要がある。
-	// この空間をNDC空間と呼ぶ
-
 	// 頂点座標
 	DirectX::XMFLOAT2 positions[] = {
-		//DirectX::XMFLOAT2(-5.0f, +5.0f),		// 左上
-		//DirectX::XMFLOAT2(+5.0f, +5.0f),		// 右上
-		//DirectX::XMFLOAT2(-5.0f, -5.0f),		// 左下
-		//DirectX::XMFLOAT2(+5.0f, -5.0f),		// 右下
-
 		DirectX::XMFLOAT2(dx,	   dy),			// 左上
 		DirectX::XMFLOAT2(dx + dw, dy),			// 右上
 		DirectX::XMFLOAT2(dx,	   dy + dh),	// 左下
 		DirectX::XMFLOAT2(dx + dw, dy + dh),	// 右下
 	};
 
-	// 頂点カラー
-	//DirectX::XMFLOAT4 colors[] = {
-		//	DirectX::XMFLOAT4(1,0,0,1),				// 左上
-		//	DirectX::XMFLOAT4(0,1,0,1),				// 右下
-		//	DirectX::XMFLOAT4(0,0,1,1),				// 左下
-		//	DirectX::XMFLOAT4(1,1,1,1),				// 右下
-	//};
-
 	// テクスチャ座標
 	// テクスチャ座標は0.0～1.0の間で表現する
 	DirectX::XMFLOAT2 texcoords[] = {
-		//DirectX::XMFLOAT2(0.0f, 0.0f),			// 左上
-		//DirectX::XMFLOAT2(1.0f, 0.0f),			// 右上
-		//DirectX::XMFLOAT2(0.0f, 1.0f),			// 左下
-		//DirectX::XMFLOAT2(1.0f, 1.0f),			// 右下
-
 		// ピクセル単位で切り抜く画像の領域を指定
 		DirectX::XMFLOAT2(sx,	   sy),				// 左上
 		DirectX::XMFLOAT2(sx + sw, sy),				// 右上
@@ -309,18 +168,10 @@ void Sprite::Render(ID3D11DeviceContext* dc,
 		v[i].position.y = positions[i].y;
 		v[i].position.z = dz;	// 深度値を設定
 
-		//v[i].color.x = colors[i].x;
-		//v[i].color.y = colors[i].y;
-		//v[i].color.z = colors[i].z;
-		//v[i].color.w = colors[i].w;
-
 		v[i].color.x = r;
 		v[i].color.y = g;
 		v[i].color.z = b;
 		v[i].color.w = a;
-
-		//v[i].texcoord.x = texcoords[i].x;
-		//v[i].texcoord.y = texcoords[i].y;
 
 		// ピクセル単位の座標をテクスチャ空間の座標(0.0～1.0)に変換する
 		v[i].texcoord.x = texcoords[i].x / textureWidth;

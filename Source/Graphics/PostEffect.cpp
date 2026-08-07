@@ -4,10 +4,10 @@
 #include "Graphics/Graphics.h"
 #include <map>
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 PostEffect::PostEffect(ID3D11Device* device)
 {
@@ -273,11 +273,6 @@ void PostEffect::Begin(const RenderContext& rc)
 	dc->PSSetConstantBuffers(0, _countof(buffers), buffers);
 	cbPostEffect.oldTime = cbPostEffect.time;
 	cbPostEffect.time = rc.timer;
-	/*if (rc.camera->GetCameraFlash())
-	{
-		isParryFlash = rc.camera->GetCameraFlash();
-		Camera::Instance().SetCameraFlash(false);
-	}*/
 	// 定数バッファ更新
 	dc->UpdateSubresource(constantBuffer.Get(), 0, 0, &cbPostEffect, 0, 0);
 }

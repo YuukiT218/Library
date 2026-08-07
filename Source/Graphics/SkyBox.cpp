@@ -15,7 +15,6 @@ SkyBox::SkyBox(ID3D11Device* device)
 
 	// 空用描画スプライト
 	skyBoxRenderSprite = std::make_unique<Sprite>(device, "Data/SkyBox/dusk_sky/EnvHDR.dds");
-	//skyBoxRenderSprite = std::make_unique<Sprite>(device, "Data/SkyBox/night_sky/EnvHDR.dds");
 
 	// 空描画用シェーダー
 	GpuResourceUtils::LoadVertexShader(
@@ -48,10 +47,6 @@ void SkyBox::Begin(const RenderContext& rc)
 {
 	//	シーン関係の情報
 	SceneConstants scene{};
-	//scene.options.x = static_cast<float>(cursor_position.x);
-	//scene.options.y = static_cast<float>(cursor_position.y);
-	//scene.options.z = timer;
-	//scene.options.w = flag;
 	scene.cameraPosition.x = rc.camera->GetEye().x;
 	scene.cameraPosition.y = rc.camera->GetEye().y;
 	scene.cameraPosition.z = rc.camera->GetEye().z;
@@ -64,18 +59,6 @@ void SkyBox::Begin(const RenderContext& rc)
 	rc.deviceContext->PSSetConstantBuffers(1, 1, sceneConstantBuffer.GetAddressOf());
 
 	rc.deviceContext->PSSetShaderResources(34, 1, specular_pmrem_shader_resource_view.GetAddressOf());
-
-	//// 必要に応じて、スカイボックス用のステート設定や準備処理を行う
-	//rc.deviceContext->IASetInputLayout(skyBoxInputLayout.Get());
-	//rc.deviceContext->VSSetShader(skyBoxVertexShader.Get(), nullptr, 0);
-	//rc.deviceContext->PSSetShader(skyBoxPixelShader.Get(), nullptr, 0);
-
-	//// 深度ステンシル設定の準備（スカイボックスは奥に描画するための設定）
-	//rc.deviceContext->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
-
-	//// ラスタライザーステート設定
-	//rc.deviceContext->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullNode));
-
 }
 
 void SkyBox::Render(const RenderContext& rc)
@@ -110,11 +93,4 @@ void SkyBox::End(const RenderContext& rc)
 	rc.deviceContext->VSSetShader(nullptr, nullptr, 0);
 	rc.deviceContext->PSSetShader(nullptr, nullptr, 0);
 	rc.deviceContext->IASetInputLayout(nullptr);
-
-	//rc.deviceContext->PSSetShaderResources(0, nullptr, nullptr);
-
-	// 必要に応じて、スカイボックス後の状態復元を行う
-	// (例: 深度ステンシル設定やラスタライザーステートのリセット)
-	//rc.context->OMSetDepthStencilState(rc.depthStencilStates[DEPTH_STATE::ZT_ON_ZW_ON].Get(), 0);
-	//rc.context->RSSetState(rc.rasterizerStates[RASTER_STATE::CULL_BACK].Get());
 }

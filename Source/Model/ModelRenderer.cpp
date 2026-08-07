@@ -6,10 +6,10 @@
 #include "Graphics/LambertShader.h"
 #include "Graphics/PBRShader.h"
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 // コンストラクタ
 ModelRenderer::ModelRenderer(ID3D11Device* device)
@@ -93,12 +93,13 @@ void ModelRenderer::GenerateNoiseTexture(ID3D11Device* device)
 }
 
 // 箱描画
-void ModelRenderer::Draw(ShaderId shaderId, std::shared_ptr<Model> model)
+void ModelRenderer::Draw(ShaderId shaderId, std::shared_ptr<Model> model, bool enableDither)
 {
 	DrawInfo& drawInfo = drawInfos.emplace_back();
 	drawInfo.shaderId = shaderId;
 	drawInfo.model = model;
 	drawInfo.hasTeleportEffect = false;
+	drawInfo.enableDither = enableDither;
 }
 
 void ModelRenderer::DrawWithTeleport(ShaderId shaderId, std::shared_ptr<Model> model,
@@ -273,7 +274,8 @@ void ModelRenderer::Render(const RenderContext& rc)
 	auto drawMesh = [&](std::vector<Model::Node> nodes, const ModelResource::Mesh& mesh,
 		Shader* shader, const std::shared_ptr<Model> model,
 		bool hasTeleport, TeleportRenderMode teleportMode, const CbTeleport& teleportData,
-		bool isAfterimage, float afterimageAlpha)
+		bool isAfterimage, float afterimageAlpha,
+		bool enableDither)
 	{
 		// テレポートエフェクト or 残像アルファ設定
 		CbTeleport effectData = teleportData;
@@ -301,6 +303,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 			effectData.afterimageAlpha = 1.0f;
 			effectData.afterimageDarkness = 0.0f;
 		}
+		effectData.enableDither = enableDither ? 1.0f : 0.0f;
 
 		dc->UpdateSubresource(teleportConstantBuffer.Get(), 0, 0, &effectData, 0, 0);
 
@@ -354,9 +357,11 @@ void ModelRenderer::Render(const RenderContext& rc)
 		{
 			// 半透明メッシュ登録
 			if (mesh.material->alphaMode == ModelResource::AlphaMode::Blend ||
-				(mesh.material->baseColor.w > 0.01f && mesh.material->baseColor.w < 0.99f))
+				(mesh.material->baseColor.w > 0.01f && mesh.material->baseColor.w < 0.99f) || 
+				drawInfo.isAfterimage)
 			{
 				TransparencyDrawInfo& transparencyDrawInfo = transparencyDrawInfos.emplace_back();
+				transparencyDrawInfo.model = drawInfo.model;
 				transparencyDrawInfo.nodes = nodes;
 				transparencyDrawInfo.mesh = &mesh;
 				transparencyDrawInfo.shaderId = drawInfo.shaderId;
@@ -379,7 +384,8 @@ void ModelRenderer::Render(const RenderContext& rc)
 			// 描画
 			drawMesh(nodes, mesh, shader, drawInfo.model,
 				drawInfo.hasTeleportEffect, drawInfo.teleportMode, drawInfo.teleportData,
-				drawInfo.isAfterimage, drawInfo.afterimageAlpha);
+				drawInfo.isAfterimage, drawInfo.afterimageAlpha,
+				drawInfo.enableDither);
 		}
 
 		shader->End(rc);
@@ -403,9 +409,10 @@ void ModelRenderer::Render(const RenderContext& rc)
 
 		shader->Begin(rc);
 
-		drawMesh(transparencyDrawInfo.nodes, *transparencyDrawInfo.mesh, shader, nullptr,
+		drawMesh(transparencyDrawInfo.nodes, *transparencyDrawInfo.mesh, shader, transparencyDrawInfo.model,
 			transparencyDrawInfo.hasTeleportEffect, transparencyDrawInfo.teleportMode, transparencyDrawInfo.teleportData,
-			transparencyDrawInfo.isAfterimage, transparencyDrawInfo.afterimageAlpha);
+			transparencyDrawInfo.isAfterimage, transparencyDrawInfo.afterimageAlpha,
+			transparencyDrawInfo.enableDither);
 
 		shader->End(rc);
 	}

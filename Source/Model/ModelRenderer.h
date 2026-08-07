@@ -31,7 +31,7 @@ public:
 	~ModelRenderer() {}
 
 	// 予約描画
-	void Draw(ShaderId shaderId, std::shared_ptr<Model> model);
+	void Draw(ShaderId shaderId, std::shared_ptr<Model> model, bool enableDither = false);
 
 	void DrawWithTeleport(ShaderId shaderId, std::shared_ptr<Model> model,
 		float teleportProgress, float teleportTime,
@@ -79,6 +79,8 @@ private:
 		float afterimageDarkness;
 		float enableDissolve;
 		float enableDistortion;
+		float enableDither;
+		DirectX::XMFLOAT3 teleportDummy;
 	};
 
 	static const int ShadowBufferSize = 4;
@@ -109,11 +111,13 @@ private:
 		DirectX::XMFLOAT4X4 afterimageTransform;
 		float afterimageAlpha = 1.0f;
 		float afterimageDarkness = 0.8f;
+		bool enableDither = false;
 	};
 
 	struct TransparencyDrawInfo
 	{
 		ShaderId				shaderId;
+		std::shared_ptr<Model>  model;
 		std::vector<Model::Node> nodes = {};
 		const ModelResource::Mesh*		mesh;
 		float					distance;
@@ -124,6 +128,7 @@ private:
 		bool isAfterimage = false;
 		float afterimageAlpha = 1.0f;
 		float afterimageDarkness = 0.8f;
+		bool enableDither = false;
 	};
 
 	std::unique_ptr<Shader>					shaders[static_cast<int>(ShaderId::EnumCount)];

@@ -188,14 +188,14 @@
     <ClInclude Include="Source\Stage\Stage.h" />
     <ClInclude Include="Source\Stage\StageMain.h" />
     <ClInclude Include="Source\Stage\StageManager.h" />
-    <ClInclude Include="Source\Scene\SceneResult.h" />
-    <ClInclude Include="Source\Character\Player.h" />
+    <ClInclude Include="Source\Scene\SceneClear.h" />
+    <ClInclude Include="Source\Character\Player\Player.h" />
     <ClInclude Include="Source\Camera\CameraParam.h" />
     <ClInclude Include="Source\Camera\CameraController.h" />
     <ClInclude Include="Source\Character\Weapon\Weapon.h" />
     <ClInclude Include="Source\Character\Weapon\Sword.h" />
     <ClInclude Include="Source\Graphics\SkyBox.h" />
-    <ClInclude Include="Source\Character\PlayerState.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerState.h" />
     <ClInclude Include="Source\Graphics\PBRShader.h" />
     <ClInclude Include="Source\Graphics\ShadowMap.h" />
     <ClInclude Include="Source\Character\Enemy\Enemy.h" />
@@ -317,6 +317,19 @@
     <ClInclude Include="Source\Character\Projectile\Projectile.h" />
     <ClInclude Include="Source\Character\Projectile\ProjectileManager.h" />
     <ClInclude Include="Source\UI\Pause.h" />
+    <ClInclude Include="Source\Scene\SceneGameOver.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerMoveStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerAttackStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerGuardStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerDamageStates.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\AttackActions.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\MoveActions.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\DamageActions.h" />
+    <ClInclude Include="Source\Effect\GPUParticle.h" />
+    <ClInclude Include="Source\Effect\GPUParticleSystem.h" />
+    <ClInclude Include="Source\System\Audio\Audio.h" />
+    <ClInclude Include="Source\System\Audio\AudioResource.h" />
+    <ClInclude Include="Source\System\Audio\AudioSource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\System\Framework.cpp">
@@ -448,10 +461,10 @@
     <ClCompile Include="Source\Stage\StageManager.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Scene\SceneResult.cpp">
+    <ClCompile Include="Source\Scene\SceneClear.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Character\Player.cpp">
+    <ClCompile Include="Source\Character\Player\Player.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Camera\CameraController.cpp">
@@ -466,7 +479,7 @@
     <ClCompile Include="Source\Graphics\SkyBox.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Character\PlayerState.cpp">
+    <ClCompile Include="Source\Character\Player\States\PlayerState.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Source\Graphics\PBRShader.cpp">
@@ -523,6 +536,33 @@
     <ClCompile Include="Source\UI\Pause.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Scene\SceneGameOver.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\Player\States\PlayerMoveStates.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\Player\States\PlayerAttackStates.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\Player\States\PlayerGuardStates.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Character\Player\States\PlayerDamageStates.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Effect\GPUParticleSystem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\Audio\Audio.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\Audio\AudioResource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\System\Audio\AudioSource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\Sprite.hlsli">
@@ -571,6 +611,9 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="Shader\TrailRenderer.hlsli">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shader\GPUParticle.hlsli">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>
@@ -675,6 +718,18 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="Shader\GaugePS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GPUParticleCS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticleVS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticleGS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticlePS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

@@ -2,10 +2,10 @@
 #include "Graphics/Graphics.h"
 #include <execution>
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 // コンストラクタ
 StageMain::StageMain()
@@ -83,20 +83,6 @@ StageMain::StageMain()
 				CollisionMesh::Area& area = collisionMesh.areas.emplace_back();
 				area.boundingBox.Center = DirectX::XMFLOAT3(x + cellSize / 2.0f, 0.0f, z + cellSize / 2.0f);
 				area.boundingBox.Extents = DirectX::XMFLOAT3(cellSize / 2.0f, (volumeMax.y - volumeMin.y) / 2.0f, cellSize / 2.0f);
-
-				//// AABBに所属する三角形を抽出
-				//for (int i = 0; i < collisionMesh.triangles.size(); ++i)
-				//{
-				//	const auto& triangle = collisionMesh.triangles[i];
-				//	DirectX::BoundingBox triangleBox;
-				//	DirectX::BoundingBox::CreateFromPoints(triangleBox, 3, triangle.positions, sizeof(DirectX::XMFLOAT3));
-
-				//	// 三角形がAABBに交差しているか判定
-				//	if (area.boundingBox.Intersects(triangleBox))
-				//	{
-				//		area.triangleIndices.push_back(i);
-				//	}
-				//}
 			}
 		}
 
@@ -127,13 +113,11 @@ StageMain::StageMain()
 
 StageMain::~StageMain()
 {
-	// 今は特にやることはない
+
 }
 
 void StageMain::Update(float elapsedTime)
 {
-
-	// 今は特にやることはない
 
 	DirectX::XMFLOAT4X4 transform;
 	DirectX::XMStoreFloat4x4(&transform, DirectX::XMMatrixIdentity());
@@ -145,7 +129,7 @@ void StageMain::Update(float elapsedTime)
 void StageMain::Render(const RenderContext& rc, ShaderId shaderId)
 {
 	ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
-	modelRenderer->Draw(shaderId, model);
+	modelRenderer->Draw(shaderId, model, true);
 	modelRenderer->Render(rc);
 }
 

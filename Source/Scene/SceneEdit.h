@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Stage/Stage.h"
-#include "Character/player.h"
+#include "Character/Player/Player.h"
 
 #include "Character/Enemy/EnemyBoss.h"
 #include "Scene.h"

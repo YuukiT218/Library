@@ -67,6 +67,8 @@ cbuffer CbShadow : register(b4)
     float shadowBias;
     
     float dummy; //パディング
+
+    float4 cascadeSplits;
 };
 
 cbuffer CbConstants : register(b5)
@@ -112,4 +114,6 @@ cbuffer CbTeleport : register(b9)
     float afterimageDarkness;
     float enableDissolve;
     float enableDistortion;
+    float enableDither;
+    float3 teleportDummy;
 }

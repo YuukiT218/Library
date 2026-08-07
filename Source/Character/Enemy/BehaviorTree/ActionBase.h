@@ -1,11 +1,21 @@
 #pragma once
 
+template <typename ActorType>
+class BehaviorData;
+
 // 行動処理基底クラス
 template <typename ActorType>
 class ActionBase
 {
 public:
-	ActionBase(ActorType* actor) :owner(actor), behaviorData(nullptr) {}
+	ActionBase(ActorType* actor)
+		: owner(actor)
+		, behaviorData(nullptr)
+	{
+	}
+
+	virtual ~ActionBase() = default;
+
 	// 実行情報
 	enum class State
 	{
@@ -19,6 +29,7 @@ public:
 
 	// BehaviorDataを設定
 	void SetBehaviorData(BehaviorData<ActorType>* data) { behaviorData = data; }
+
 protected:
 	ActorType* owner;
 	BehaviorData<ActorType>* behaviorData;

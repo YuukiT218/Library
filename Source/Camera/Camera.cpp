@@ -1,9 +1,9 @@
 #include "Camera.h"
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
 
 // クォータニオンによる回転設定
 void Camera::SetRotation(const DirectX::XMFLOAT4& quaternion)
@@ -122,4 +122,34 @@ bool Camera::IsInViewport(const DirectX::XMFLOAT3& worldPos, float margin) const
     return (ndc.x >= -1.0f + margin && ndc.x <= 1.0f - margin &&
         ndc.y >= -1.0f + margin && ndc.y <= 1.0f - margin &&
         ndc.z >= 0.0f && ndc.z <= 1.0f);
+}
+
+// 視錐台の8つの頂点をワールド座標で取得
+void Camera::GetFrustumCorners(float zNear, float zFar, DirectX::XMFLOAT3* corners) const
+{
+    // 指定されたNear/Farで一時的なプロジェクション行列を作成
+    DirectX::XMMATRIX Proj = DirectX::XMMatrixPerspectiveFovLH(fov, aspect, zNear, zFar);
+    DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&view);
+    DirectX::XMMATRIX ViewProj = DirectX::XMMatrixMultiply(View, Proj);
+    DirectX::XMMATRIX InvViewProj = DirectX::XMMatrixInverse(nullptr, ViewProj);
+
+    // NDC（正規化デバイス座標系）における8つの頂点
+    DirectX::XMVECTOR ndcCorners[8] = {
+        DirectX::XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f), // Near 左下
+        DirectX::XMVectorSet(1.0f, -1.0f, 0.0f, 1.0f), // Near 右下
+        DirectX::XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f), // Near 左上
+        DirectX::XMVectorSet(1.0f,  1.0f, 0.0f, 1.0f), // Near 右上
+        DirectX::XMVectorSet(-1.0f, -1.0f, 1.0f, 1.0f), // Far 左下
+        DirectX::XMVectorSet(1.0f, -1.0f, 1.0f, 1.0f), // Far 右下
+        DirectX::XMVectorSet(-1.0f,  1.0f, 1.0f, 1.0f), // Far 左上
+        DirectX::XMVectorSet(1.0f,  1.0f, 1.0f, 1.0f)  // Far 右上
+    };
+
+    // NDCからワールド空間へ逆変換
+    for (int i = 0; i < 8; ++i)
+    {
+        DirectX::XMVECTOR worldPos = DirectX::XMVector4Transform(ndcCorners[i], InvViewProj);
+        worldPos = DirectX::XMVectorScale(worldPos, 1.0f / DirectX::XMVectorGetW(worldPos));
+        DirectX::XMStoreFloat3(&corners[i], worldPos);
+    }
 }

@@ -3,6 +3,7 @@
 #include "Character/Character.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/Shader.h"
+#include "System/Audio/AudioSource.h"
 
 class Weapon
 {
@@ -98,6 +99,7 @@ protected:
 	std::shared_ptr<Effect> attackHitEffect = nullptr;
 	Effekseer::Handle attackHitEffectHandle;
 
-	/*std::shared_ptr<Effect> parryEffect = nullptr;
-	Effekseer::Handle ParryEffectHandle;*/
+	AudioSource* lightSE = nullptr;
+	AudioSource* mediumSE = nullptr;
+	AudioSource* heavySE = nullptr;
 };

@@ -1,9 +1,10 @@
 ﻿#include "Graphics/Graphics.h"
 #include "SceneManager.h"
+#include "SceneTitle.h"
 #include "SceneLoading.h"
 #include "SceneGame.h"
-#include "Scene/SceneTitle.h"
-#include "SceneResult.h"
+#include "SceneClear.h"
+#include "SceneGameOver.h"
 #include "Camera/CameraParam.h"
 #include "Stage/StageManager.h"
 #include "Stage/StageMain.h"
@@ -14,12 +15,13 @@
 #include "Input/Input.h"
 #include "System/HitStop.h"
 #include <map>
-//#include "BattleUI/DieUI.h"
 
-#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
-#include <crtdbg.h>
-#define new ::new(_NORMAL_BLOCK, __FILE__, __LINE__)
+
+
+#include "System/Audio/Audio.h"
+
 
 //0~255のカラーの値を0~1に変換する処理
 static const DirectX::XMFLOAT4& Color255ToNormalized(const DirectX::XMFLOAT4& color)
@@ -47,8 +49,10 @@ void SceneGame::Initialize()
 	float screenHeight = Graphics::Instance().GetScreenHeight();
 
 	// プレイヤー初期化
-	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Mannequin/SK_Mannequin.gltf", 1.0f);
+ 	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
+	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Rogue/SK_ROGUE_F_02.gltf", 1.0f);
+
+	BGM = Audio::Instance().LoadAudioSource("Data/Sound/BGM/Fight to the Death.wav");
 
 	Camera& camera = Camera::Instance();
 	CameraParam::Instance().SetIsLockOn(false);
@@ -83,21 +87,15 @@ void SceneGame::Initialize()
 
 	skyBox = std::make_unique<SkyBox>(device);
 	posteffect = std::make_unique<PostEffect>(device);
-	//gauge = std::make_unique<Sprite>(device);
-
-	//isEventCamera = false;
 
 	///HPUI初期化
 	BattleUI::Instance().Initialize();
 	Pause::Instance().Initialize();
-	//DieUI::Instance().Initialize();
 
-	// --- 追加: 状態とタイマーの初期化 ---
+	// 状態とタイマーの初期化
 	currentState = GameState::Intro;
 	eventTimer = 0.0f;
 
-	// ホワイトアウト用スプライトの生成 (1x1の白画像を引き伸ばす想定、または専用画像)
-	// ※適当な白画像("Data/Sprite/White.png")を用意するか、シェーダーで白く描画してください
 	whiteOutSprite = std::make_unique<Sprite>(Graphics::Instance().GetDevice(), "Data/Sprite/White.png");
 	whiteOutAlpha = 0.0f;
 
@@ -106,12 +104,12 @@ void SceneGame::Initialize()
 
 void SceneGame::Finalize()
 {
+	Input::Instance().GetGamePad().Vibrate(0.0f, 0.0f);
 	EffectManager::Instance().StopAllEffects();
 	ProjectileManager::Instance().Clear();
+	delete BGM;
 
 	StageManager::Instance().Clear();
-	
-	ShowCursor(true);
 
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
@@ -127,27 +125,9 @@ void SceneGame::Finalize()
 
 void SceneGame::Update(float elapsedTime)
 {
-	// プレイヤーが死んでいるときはPauseに入れなくする
-	if (!player->IsDeathFlag())
-		Pause::Instance().Update(elapsedTime);
-
-	// ポーズ中は他のUpdateを通さない。
-	if (Pause::Instance().GetIsPause())
-	{
-		//ラグの時間
-		lagTimer = 0.3f;
-		return;
-	}
-
-	// ポーズを解除したときに一瞬ラグを持たせる
-	if (lagTimer > 0)
-	{
-		lagTimer -= elapsedTime;
-		return;
-	}
-
 	GamePad& gamePad = Input::Instance().GetGamePad();
 	Mouse& mouse = Input::Instance().GetMouse();
+	BGM->Play(true, 0.4f);
 
 	// --- 状態ごとの分岐 ---
 	switch (currentState)
@@ -164,6 +144,27 @@ void SceneGame::Update(float elapsedTime)
 
 	case GameState::Battle:
 		isWallTransparencyEnabled = true;
+
+		// プレイヤーが死んでいるときはPauseに入れなくする
+		if (!player->IsDeathFlag())
+			Pause::Instance().Update(elapsedTime);
+
+		// ポーズ中は他のUpdateを通さない。
+		if (Pause::Instance().GetIsPause())
+		{
+			//ラグの時間
+			gamePad.Vibrate(0.0f, 0.0f);
+			lagTimer = 0.3f;
+			return;
+		}
+
+		// ポーズを解除したときに一瞬ラグを持たせる
+		if (lagTimer > 0)
+		{
+			lagTimer -= elapsedTime;
+			return;
+		}
+
 		// ヒットストップ更新
 		HitStop::Instance().Update(elapsedTime);
 
@@ -197,9 +198,8 @@ void SceneGame::Update(float elapsedTime)
 			currentState = GameState::Ending;
 			eventTimer = 0.0f;
 			cameraSwitchTimer = 0.0f;
-			// 死亡演出に入った瞬間の初期設定
 		}
-		else if (boss->IsDeathFlag()) // EnemyBossにIsDeathFlag()相当の機能があると仮定
+		else if (boss->IsDeathFlag())
 		{
 			currentState = GameState::Ending;
 			eventTimer = 0.0f;
@@ -218,24 +218,7 @@ void SceneGame::Update(float elapsedTime)
 
 	LightManager& lightManager = LightManager::Instance();
 
-	// ポイントライト設定
-	/*PointLight pointLight;
-	for (int i = 0; i < POINT_MAX; i++)
-	{
-		pointLight.position.x = lightManager.GetPointLight(i).position.x + offsetPosition.x;
-		pointLight.position.y = lightManager.GetPointLight(i).position.y + offsetPosition.y;
-		pointLight.position.z = lightManager.GetPointLight(i).position.z + offsetPosition.z;
-	}
-	pointLight.position.w = attenuation;
-	pointLight.color = pointColor;
-	lightManager.SetPointLight(pointLight, 1);*/
-
 	timer += elapsedTime;
-
-	//player->onExitToTitle = []() {
-	//	//SceneLoading* loadingScene = new SceneLoading(new SceneTitle());
-	//	SceneManager::Instance().ChangeScene(new SceneTitle());
-	//	};
 
 	posteffect->SetUp(elapsedTime);
 }
@@ -279,9 +262,6 @@ void SceneGame::Render(float elapsedTime)
 	rc.targetPosition = DirectX::XMFLOAT3(pPos.x, pPos.y + 1.0f, pPos.z);
 	rc.enableWallTransparency = isWallTransparencyEnabled;
 
-	// MEMO : VS変換にておかしな形に(LVP空間に変換する前は正しい形)
-	//        LVPの値は一見おかしな値に見えなかった
-
 	//シャドウマップ描画
 	shadowMap->Begin(rc, DirectX::XMFLOAT3(0,0,0));
 	{
@@ -311,7 +291,7 @@ void SceneGame::Render(float elapsedTime)
 	skyBox->End(rc);
 
 	// 3Dエフェクト描画
-	EffectManager::Instance().Render(camera.GetView(), camera.GetProjection());
+	EffectManager::Instance().Render(rc);
 
 	//ポストプロセス
 	{
@@ -342,15 +322,24 @@ void SceneGame::Render(float elapsedTime)
 	//プレイヤー体力ゲージ描画処理
 	if (currentState == GameState::Battle)
 	{
-		BattleUI::Instance().Render(elapsedTime);	
+		if (!Pause::Instance().GetIsPause())
+			BattleUI::Instance().Render(elapsedTime);
 
 		Pause::Instance().Render(elapsedTime, dc);
 	}
 
 	if (whiteOutAlpha > 0.0f)
 	{
-		Graphics& graphics = Graphics::Instance();
-		ID3D11DeviceContext* dc = graphics.GetDeviceContext();
+		RenderState* renderState = graphics.GetRenderState();
+
+		// ステート設定
+		FLOAT blendFactor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		UINT sampleMask = 0xFFFFFFFF;
+		dc->OMSetBlendState(renderState->GetBlendState(BlendState::Transparency), blendFactor, sampleMask);
+		dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
+		dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
+		ID3D11SamplerState* samplers[] = { renderState->GetSamplerState(SamplerState::LinearClamp) };
+		dc->PSSetSamplers(0, 1, samplers);
 
 		// 画面全体に引き伸ばして描画
 		// 引数: x, y, z, w, h, angle, r, g, b, a
@@ -479,27 +468,26 @@ void SceneGame::UpdateIntroCamera(float elapsedTime)
 	eventTimer += elapsedTime;
 	Camera& camera = Camera::Instance();
 
-	// 0.0秒～2.0秒: プレイヤーの顔アップ
+	// プレイヤーの顔アップ
 	if (eventTimer < 2.0f)
 	{
-		// 1. 基準となる「胸」の位置
+		// 基準となる「胸」の位置
 		DirectX::XMFLOAT3 baseTarget = player->GetPosition();
-		baseTarget.y += 1.3f; // 顔(1.5f)より少し下げて胸元にする
+		baseTarget.y += 1.3f;
 
-		// 2. カメラの位置決定 (左斜め下かつ至近距離)
+		// カメラの位置決定
 		float playerAngle = player->GetAngle().y;
-		float camAngle = playerAngle + DirectX::XMConvertToRadians(25.0f); // 角度は浅めに
+		float camAngle = playerAngle + DirectX::XMConvertToRadians(25.0f);
 
-		// ★ここを調整: 距離を1.0fまで詰める（以前は2.5f）
 		float dist = 1.0f;
 
 		DirectX::XMFLOAT3 eye = {
 			baseTarget.x + sinf(camAngle) * dist,
-			baseTarget.y - 0.3f, // あおり具合も距離に合わせて微調整
+			baseTarget.y - 0.3f,
 			baseTarget.z + cosf(camAngle) * dist
 		};
 
-		// 3. 注視点をずらす (画面左に配置するため、右を見る)
+		// 注視点をずらす
 		float dx = baseTarget.x - eye.x;
 		float dz = baseTarget.z - eye.z;
 		DirectX::XMFLOAT3 rightVec = { -dz, 0.0f, dx }; // 右ベクトル
@@ -511,29 +499,28 @@ void SceneGame::UpdateIntroCamera(float elapsedTime)
 			rightVec.z /= len;
 		}
 
-		// ★ここを調整: 距離が近いのでオフセット量は控えめにしないと画面外に出る
+		// 距離が近いのでオフセット量は控えめにしないと画面外に出る
 		float offsetAmount = -0.4f;
 
 		DirectX::XMFLOAT3 finalFocus = {
 			baseTarget.x + rightVec.x * offsetAmount,
-			baseTarget.y, // 注視点の高さは胸のまま
+			baseTarget.y,
 			baseTarget.z + rightVec.z * offsetAmount
 		};
 
 		camera.SetLookAt(eye, finalFocus, { 0, 1, 0 });
 	}
-	// 2.0秒～4.0秒: ボス (画面右側・超近接)
 	else if (eventTimer < 4.0f)
 	{
-		// 1. 基準となる「胸」の位置
+		// 基準となる「胸」の位置
 		DirectX::XMFLOAT3 baseTarget = boss->GetPosition();
-		baseTarget.y += 1.6f; // ボスの胸の高さ（モデルに合わせて調整）
+		baseTarget.y += 1.6f;
 
-		// 2. カメラの位置決定 (右斜め下)
+		// カメラの位置決定 (右斜め下)
 		float bossAngle = boss->GetAngle().y;
 		float camAngle = bossAngle - DirectX::XMConvertToRadians(25.0f);
 
-		// ★ここを調整: ボスのサイズに合わせて詰める
+		// ボスのサイズに合わせて詰める
 		float dist = 1.0f;
 
 		DirectX::XMFLOAT3 eye = {
@@ -542,7 +529,7 @@ void SceneGame::UpdateIntroCamera(float elapsedTime)
 			baseTarget.z + cosf(camAngle) * dist
 		};
 
-		// 3. 注視点をずらす (画面右に配置するため、左を見る)
+		// 注視点をずらす (画面右に配置するため、左を見る)
 		float dx = baseTarget.x - eye.x;
 		float dz = baseTarget.z - eye.z;
 		DirectX::XMFLOAT3 rightVec = { -dz, 0.0f, dx };
@@ -553,7 +540,7 @@ void SceneGame::UpdateIntroCamera(float elapsedTime)
 			rightVec.z /= len;
 		}
 
-		// ★ここを調整: 左方向へオフセット
+		// 左方向へオフセット
 		float offsetAmount = 0.4f;
 
 		DirectX::XMFLOAT3 finalFocus = {
@@ -564,16 +551,17 @@ void SceneGame::UpdateIntroCamera(float elapsedTime)
 
 		camera.SetLookAt(eye, finalFocus, { 0, 1, 0 });
 	}
-	// 戦闘開始直前の「通常カメラ」フェーズ (4.0s ~ 5.5s)
+	// 戦闘開始直前の通常カメラフェーズ 
 	// ここでカメラをプレイヤー背面に戻すが、まだ currentState は Intro のまま
 	else if (eventTimer < 5.5f)
 	{
 		SelectedCamera(elapsedTime);
 	}
-	// 4.0秒: 演出終了 -> 戦闘開始
+	// 演出終了 -> 戦闘開始
 	else
 	{
 		currentState = GameState::Battle;
+		CameraParam::Instance().SetIsLockOn(true);
 		boss->SetSearchRange(25.0f);
 	}
 }
@@ -581,15 +569,13 @@ void SceneGame::UpdateIntroCamera(float elapsedTime)
 void SceneGame::UpdateEndingCamera(float elapsedTime, Character* deadCharacter)
 {
 	// ゲーム進行速度を遅くする (スローモーション)
-	float slowScale = 0.1f; // 通常の10%の速度
+	float slowScale = 0.1f;
 	float scaledTime = elapsedTime * slowScale;
 
 	// キャラクター等の更新はスローで行う
-	// ヒットストップの影響を除外したい場合は直接Updateを呼ぶ
 	player->Update(scaledTime);
 	boss->Update(scaledTime);
 	EffectManager::Instance().Update(elapsedTime);
-	// StageManagerなどは背景なので通常速度でも良いが、違和感なければスローに合わせる
 
 	// カメラアングルの切り替え (カメラはリアルタイム elapsedTime で動かす)
 	eventTimer += elapsedTime;      // 全体の経過時間
@@ -635,7 +621,6 @@ void SceneGame::UpdateEndingCamera(float elapsedTime, Character* deadCharacter)
 	{
 		// 4.0秒時点から1.0秒かけてアルファを0->1に
 		whiteOutAlpha = (eventTimer - 4.0f) / 1.0f;
-		if (whiteOutAlpha > 1.0f) whiteOutAlpha = 1.0f;
 	}
 
 	// シーン遷移
@@ -643,6 +628,15 @@ void SceneGame::UpdateEndingCamera(float elapsedTime, Character* deadCharacter)
 	{
 		EffectManager::Instance().StopAllEffects();
 		ProjectileManager::Instance().Clear();
-		SceneManager::Instance().ChangeScene(new SceneResult());
+		if (player->IsDeathFlag())
+		{
+			// ゲームオーバー画面へ
+			SceneManager::Instance().ChangeScene(new SceneGameOver());
+		}
+		else
+		{
+			// クリア画面へ
+			SceneManager::Instance().ChangeScene(new SceneClear());
+		}
 	}
 }

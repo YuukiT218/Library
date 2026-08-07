@@ -3,7 +3,7 @@
 #include "SceneManager.h"
 #include "SceneLoading.h"
 #include "SceneEdit.h"
-#include "SceneResult.h"
+#include "SceneClear.h"
 #include "Camera/CameraParam.h"
 #include "Stage/StageManager.h"
 #include "Stage/StageMain.h"
@@ -41,7 +41,7 @@ void SceneEdit::Initialize()
 
 	// プレイヤー初期化
 	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Mannequin/SK_Mannequin.gltf", 1.0f);
+	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Rogue/SK_ROGUE_F_02.gltf", 1.0f);
 
 	Camera& camera = Camera::Instance();
 
@@ -256,7 +256,7 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 	auto* fb = Graphics::Instance().GetFrameBuffer(FrameBufferId::Scene);
 	void* texID = (void*)fb->GetColorMap();
 
-	// ====== アスペクト比維持計算 ======
+	// アスペクト比維持計算 
 	float fbAspect = static_cast<float>(width) / static_cast<float>(height);
 	float winAspect = availSize.x / availSize.y;
 
@@ -279,7 +279,7 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 		}
 	}
 
-	// ====== 中央配置 ======
+	// 中央配置
 	ImVec2 cursorPos = ImGui::GetCursorScreenPos();
 	ImVec2 offset = {
 		(availSize.x - drawSize.x) * 0.5f,
@@ -287,7 +287,7 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 	};
 	ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + offset.x, cursorPos.y + offset.y));
 
-	// ====== Image描画 ======
+	// Image描画
 	ImGui::Image(texID, drawSize, ImVec2(0, 0), ImVec2(1, 1));
 
 	ImGui::End();
@@ -345,7 +345,7 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 			static float inputReleaseTimer = 0.0f;
 			const float returnDelay = 1.0f;
 
-			// ★一度だけ状態を保存したかどうか
+			// 一度だけ状態を保存したかどうか
 			static bool hasSavedState = false;
 
 			if (hasInput) {
@@ -1002,7 +1002,7 @@ void SceneEdit::DrawAnimationEventsUI(AnimationConfig* config, Model* model, int
 			evt.eventType = static_cast<EventType>(type);
 		}
 
-		// ★ string → char[64] で安全に編集
+		// string → char[64] で安全に編集
 		char buf[64] = {};
 		strncpy_s(buf, sizeof(buf), evt.eventName.c_str(), _TRUNCATE);
 
@@ -1127,10 +1127,10 @@ void SceneEdit::DrawSpeedCurveUI(AnimationConfig* config, float secondsLength, f
 
 	ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-	// === グラフ背景描画 ===
+	// グラフ背景描画
 	DrawAnimationSpeedGraphBackground(draw_list, graphStart, graphEnd, secondsLength, graphWidth, graphHeight, labelMargin);
 
-	// === グラフサイズ変更用ドラッグハンドル ===
+	// グラフサイズ変更用ドラッグハンドル
 	ImVec2 resizeHandleSize = ImVec2(10, 10);
 	ImVec2 resizeHandlePos = ImVec2(
 		graphEnd.x - resizeHandleSize.x,
@@ -1146,7 +1146,7 @@ void SceneEdit::DrawSpeedCurveUI(AnimationConfig* config, float secondsLength, f
 		graphHeight = max(50.0f, graphHeight + delta.y);
 	}
 
-	// === ドラッグハンドルの可視化（小さな三角形） ===
+	// ドラッグハンドルの可視化（小さな三角形）
 	draw_list->AddTriangleFilled(
 		{ resizeHandlePos.x, resizeHandlePos.y + resizeHandleSize.y },
 		{ resizeHandlePos.x + resizeHandleSize.x, resizeHandlePos.y + resizeHandleSize.y },
@@ -1157,7 +1157,7 @@ void SceneEdit::DrawSpeedCurveUI(AnimationConfig* config, float secondsLength, f
 	// グラフの描画後
 	ImVec2 currentCursorPos = ImGui::GetCursorScreenPos();
 
-	// 「グラフの終わった位置」より少し右にカーソルを移動
+	// グラフの終わった位置より少し右にカーソルを移動
 	float spacing = 20.0f; // グラフとの隙間
 	ImVec2 rightUIPos = ImVec2(graphEnd.x + spacing, graphStart.y);  // グラフと同じ高さから始める
 	ImGui::SetCursorScreenPos(rightUIPos);
@@ -1169,10 +1169,10 @@ void SceneEdit::DrawSpeedCurveUI(AnimationConfig* config, float secondsLength, f
 	DrawAttributeHandles(draw_list, config, animationIndex, graphStart, graphEnd, graphWidth, secondsLength);
 	DrawEventHandles(draw_list, config, animationIndex, graphStart, graphEnd, graphWidth, secondsLength);
 
-	// === イベントシーケンサー追加 ===
+	// イベントシーケンサー追加
 	ImGui::Dummy(ImVec2(0, 10)); // 少し余白
 
-	// ---- 右クリック処理 ----
+	// 右クリック処理
 	HandleSpeedCurveRightClick(config, graphStart, graphEnd, graphWidth, graphHeight, selectedKeyIndex);
 
 	// 現在のスピードを反映
@@ -1243,7 +1243,7 @@ void SceneEdit::HandleSpeedCurveRightClick(AnimationConfig* config, ImVec2 graph
 }
 
 // ========================================
-// イベントシーケンサーのメインウィンドウ（修正版）
+// イベントシーケンサーのメインウィンドウ
 // ========================================
 void SceneEdit::DrawEventSequencerWindow(float elapsedTime)
 {
@@ -1326,7 +1326,7 @@ void SceneEdit::DrawEventSequencerWindow(float elapsedTime)
 
 
 // ========================================
-// タイムライン描画（修正版）
+// タイムライン描画
 // ========================================
 void SceneEdit::DrawSequencerTimeline(AnimationConfig* config, float secondsLength, float& animationSeconds, Model* model, int& selectedEventIndex, int& currentFrame)
 {
@@ -1744,7 +1744,7 @@ void SceneEdit::DrawEventEditPanel(AnimationConfig* config, int selectedEventInd
 }
 
 // ========================================
-// Attributeリストセクション（新規）
+// Attributeリストセクション
 // ========================================
 void SceneEdit::DrawAttributeListSection(AnimationConfig* config, int& selectedAttributeIndex)
 {
@@ -1973,7 +1973,7 @@ void SceneEdit::DrawCameraKeyframePoints(AnimationConfig* config, ImDrawList* dr
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
 			selectedKeyIndex = static_cast<int>(i);
 
-			// ?? キーをカメラに反映
+			// キーをカメラに反映
 			cameraController->SetRange(kf.range);
 			cameraController->SetOffsetTarget(kf.targetOffset.value);
 
@@ -1982,7 +1982,7 @@ void SceneEdit::DrawCameraKeyframePoints(AnimationConfig* config, ImDrawList* dr
 			cameraController->SetAngle(angle);
 		}
 
-		// ?? 色分け（選択中なら強調）
+		// 色分け（選択中なら強調）
 		ImU32 color = (selectedKeyIndex == static_cast<int>(i))
 			? IM_COL32(150, 255, 255, 255)  // 明るいシアン
 			: IM_COL32(100, 255, 255, 255); // 通常のシアン

@@ -3,6 +3,8 @@
 #include <DirectXMath.h>
 #include <Effekseer.h>
 #include <EffekseerRendererDX11.h>
+#include "GPUParticleSystem.h"
+#include <memory>
 
 // エフェクトマネージャー
 class EffectManager
@@ -29,9 +31,13 @@ public:
 	void Update(float elapsedTime);
 
 	// 描画処理
-	void Render(const DirectX::XMFLOAT4X4& view, const DirectX::XMFLOAT4X4& projection);
+	void Render(const RenderContext& rc);
 
 	void StopAllEffects();
+
+	// パーティクル発生 
+	void EmitGpuParticle(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& velocity,
+		const DirectX::XMFLOAT4& color, float size, float lifeTime, UINT behacviorType);
 
 	// Effeckeerマネージャーの取得
 	Effekseer::ManagerRef GetEffekseerManager() { return effekseerManager; }
@@ -39,4 +45,6 @@ public:
 private:
 	Effekseer::ManagerRef effekseerManager;
 	EffekseerRenderer::RendererRef effekseerRenderer;
+	std::unique_ptr<GpuParticleSystem> ambientParticles;
+	std::unique_ptr<GpuParticleSystem> actionParticles;
 };

@@ -1,17 +1,17 @@
 ﻿#include "BattleUI.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/GpuResourceUtils.h"
-#include "Character/Player.h"
+#include "Character/Player/Player.h"
 #include "Character/Enemy/EnemyBoss.h"
 #include "Camera/CameraParam.h"
-#include <cmath> // std::fmod用
+#include <cmath>
 
 void BattleUI::Initialize()
 {
     ID3D11Device* device = Graphics::Instance().GetDevice();
 
     // ---------------------------------------------------
-    // 1. スプライト読み込み
+    //  スプライト読み込み
     // ---------------------------------------------------
     lockonpoint = std::make_unique<Sprite>(device, "Data/Sprite/Lockon.png");
 
@@ -27,11 +27,18 @@ void BattleUI::Initialize()
     spriteBossStock_Back = std::make_unique<Sprite>(device, "Data/Sprite/HPStockGauge.png");
     spriteBossStock_Fill = std::make_unique<Sprite>(device, "Data/Sprite/HPStockBar.png");
 
+    // 操作説明
     padInstructionUI = std::make_unique<Sprite>(device, "Data/Sprite/PadInst.png");
     keyMouInstructionUI = std::make_unique<Sprite>(device, "Data/Sprite/KeyMouInst.png");
 
+    // カウンターと打ち上げ攻撃が可能な状態を示す
+    counter = std::make_unique<Sprite>(device, "Data/Sprite/Counter.png");
+    counterPC = std::make_unique<Sprite>(device, "Data/Sprite/CounterPC.png");
+    launcher = std::make_unique<Sprite>(device, "Data/Sprite/Launcher.png");
+    launcherPC = std::make_unique<Sprite>(device, "Data/Sprite/LauncherPC.png");
+
     // ---------------------------------------------------
-    // 2. シェーダーリソース作成
+    //  シェーダーリソース作成
     // ---------------------------------------------------
     // 定数バッファ作成
     D3D11_BUFFER_DESC bd = {};
@@ -42,12 +49,12 @@ void BattleUI::Initialize()
     device->CreateBuffer(&bd, nullptr, gaugeConstantBuffer.GetAddressOf());
 
     // カスタムピクセルシェーダー読み込み
-    // ※事前に GaugePS.hlsl をコンパイルして .cso にしておく必要があります
     GpuResourceUtils::LoadPixelShader(device, "Data/Shader/GaugePS.cso", gaugePixelShader.GetAddressOf());
 }
 
 void BattleUI::Update(float elapsedTime)
 {
+    isController = Input::Instance().GetIsLastGamePad();
     // ロックオン状態の更新
     lockonEnemy = CameraParam::Instance().GetLockOnEnemy();
 
@@ -112,7 +119,7 @@ void BattleUI::Render(float elapsedTime)
     dc->PSSetSamplers(0, 1, samplers);
 
     // =================================================================
-    // 1. プレイヤーHPゲージ (円形・マスク処理)
+    // プレイヤーHPゲージ (円形・マスク処理)
     // =================================================================
     Player& player = Player::Instance();
     {
@@ -127,10 +134,10 @@ void BattleUI::Render(float elapsedTime)
         float w = spritePlayerHP_Back->GetTextureWidth() * playerGaugeScale;
         float h = spritePlayerHP_Back->GetTextureHeight() * playerGaugeScale;
 
-        // (1) 背景
+        // 背景
         spritePlayerHP_Back->Render(dc, px, py, 0, w, h, 0, 1, 1, 1, 1.0f);
 
-        // (2) 緑バー (カスタムシェーダー使用)
+        // 緑バー
         if (currentHP > 0)
         {
             GaugeConstants cb;
@@ -142,7 +149,6 @@ void BattleUI::Render(float elapsedTime)
             w = spritePlayerHP_Fill->GetTextureWidth() * playerGaugeScale;
             h = spritePlayerHP_Fill->GetTextureHeight() * playerGaugeScale;
 
-            // Sprite.hに追加したGetSRV()を使用
             ID3D11ShaderResourceView* maskSRV = spritePlayerHP_Mask->GetSRV();
             dc->PSSetShaderResources(1, 1, &maskSRV);
 
@@ -158,7 +164,7 @@ void BattleUI::Render(float elapsedTime)
     }
 
     // =================================================================
-    // 2. ボスHPゲージ (ストック制)
+    // ボスHPゲージ (ストック制)
     // =================================================================
     EnemyBoss& boss = EnemyBoss::Instance();
     if (boss.GetHealth() > 0)
@@ -188,7 +194,6 @@ void BattleUI::Render(float elapsedTime)
             float sh = spriteBossStock_Back->GetTextureHeight() * bossStockScale;
             spriteBossStock_Back->Render(dc, sx, sy, 0, sw, sh, 0, 1, 1, 1, 1.0f);
 
-            // 2. 中身は「左側の emptyCount 個」をスキップして描画
             // i=0(一番左) < emptyCount なら描画しない
             if (i >= emptyCount)
             {
@@ -198,7 +203,7 @@ void BattleUI::Render(float elapsedTime)
             }
         }
 
-        // B. メインHPバー
+        // メインHPバー
         float bx = bossGaugePos.x;
         float by = bossGaugePos.y;
         float bw = spriteBossHP_Back->GetTextureWidth() * bossGaugeScale;
@@ -224,10 +229,47 @@ void BattleUI::Render(float elapsedTime)
     }
 
     // =================================================================
-    // 3. ロックオンカーソル
+    //  操作説明UI
+    // =================================================================
+    {
+        if (isController)
+            padInstructionUI->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+        else
+            keyMouInstructionUI->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+    }
+
+    // =================================================================
+    // アクションUI (Launcher / Counter)
+    // =================================================================
+    {
+        // Launcher描画 (地上コンボ1段目 or 2段目の間)
+        PlayerStateId state = player.GetCurrentStateId();
+        if (player.IsGround() && (state == PlayerStateId::Combo1 || state == PlayerStateId::Combo2))
+        {
+            // 画面全体に描画
+            if (isController)
+                launcher->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+            else
+                launcherPC->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+        }
+
+        // Counter描画 (ガードカウンター待機状態)
+        if (player.GetPlayerIsCounter())
+        {
+            if (isController)
+                counter->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+            else
+                counterPC->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+        }
+    }
+
+    // =================================================================
+    // ロックオンカーソル
     // =================================================================
     if (CameraParam::Instance().GetIsLockOn())
     {
+        lockonEnemy = CameraParam::Instance().GetLockOnEnemy();
+
         if (lockonEnemy)
         {
             // 敵の位置取得 (Updateで更新されたscaleを使用)
@@ -249,11 +291,6 @@ void BattleUI::Render(float elapsedTime)
             // 座標変換
             DirectX::XMFLOAT2 screenPos = ConvertWorldToScreen(targetPos, view, proj, sw, sh);
 
-            // 画面内なら描画 (ZチェックなどはConvertWorldToScreen内や射影変換の結果で判断すべきですが、
-            // ここでは簡易的に元のロジックに近い形で描画します。ConvertWorldToScreenはZを返さないため
-            // 厳密にはZチェックが必要ならConvertWorldToScreenの戻り値をVector3にするか、ここで再度Projectする)
-
-            // 念のためZチェック用にProject
             DirectX::XMVECTOR vPos = DirectX::XMLoadFloat3(&targetPos);
             DirectX::XMVECTOR vScreen = DirectX::XMVector3Project(vPos, 0, 0, sw, sh, 0, 1, proj, view, DirectX::XMMatrixIdentity());
             DirectX::XMFLOAT3 vScreen3;
