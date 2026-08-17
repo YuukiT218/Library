@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <DirectXMath.h>
 #include <Effekseer.h>
 #include <memory>
@@ -11,42 +11,47 @@ enum class ProjectileShape
     Cylinder
 };
 
-// “®‚«‚Ìƒ^ƒCƒv
+// å‹•ãã®ã‚¿ã‚¤ãƒ—
 enum class MovementType
 {
-	Linear,        // ’¼i
-    Stationary,    // ’â~
-    Spiral         // ‰ñ“]ŠgU
+	Linear,        // ç›´é€²
+    Stationary,    // åœæ­¢
+    Spiral         // å›è»¢æ‹¡æ•£
 };
 
-// ”­Ë•¨‚Ìİ’èî•ñ
+// ç™ºå°„ç‰©ã®è¨­å®šæƒ…å ±
 struct ProjectileInfo
 {
-    // Šî–{İ’è
-    const char* effectPath;             // ƒGƒtƒFƒNƒgƒtƒ@ƒCƒ‹‚ÌƒpƒX
-    float speed = 10.0f;                // ‘¬“x
-    float lifeTime = 2.0f;              // ¶‘¶ŠÔ
-    float scale = 1.0f;                 // ƒGƒtƒFƒNƒg‚ÌƒXƒP[ƒ‹
-    int damage = 10;                    // ƒ_ƒ[ƒW—Ê
+    // åŸºæœ¬è¨­å®š
+    const char* effectPath;             // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹
+    float speed = 10.0f;                // é€Ÿåº¦
+    float lifeTime = 2.0f;              // ç”Ÿå­˜æ™‚é–“
+    float scale = 1.0f;                 // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ã‚¹ã‚±ãƒ¼ãƒ«
+    int damage = 10;                    // ãƒ€ãƒ¡ãƒ¼ã‚¸é‡
     float invincibleTime = 0.5f;
 
-    // “–‚½‚è”»’èİ’è
-    ProjectileShape shape = ProjectileShape::Sphere; // “–‚½‚è”»’è‚ÌŒ`ó 
-    float radius = 0.5f;                             // “–‚½‚è”»’è”¼Œa
-    float height = 1.0f;                             // ‚‚³(‰~’Œ‚Ì‚İg—p)
+    // å½“ãŸã‚Šåˆ¤å®šè¨­å®š
+    ProjectileShape shape = ProjectileShape::Sphere; // å½“ãŸã‚Šåˆ¤å®šã®å½¢çŠ¶ 
+    float radius = 0.5f;                             // å½“ãŸã‚Šåˆ¤å®šåŠå¾„
+    float height = 1.0f;                             // é«˜ã•(å††æŸ±ã®ã¿ä½¿ç”¨)
 
-    // “®ìƒpƒ‰ƒ[ƒ^[
-    DirectX::XMFLOAT3 spawnPosition = { 0,0,0 }; // oŒ»ˆÊ’u
-    DirectX::XMFLOAT3 direction = { 0,0,1 };     // is•ûŒüi³‹K‰»ƒxƒNƒgƒ‹j
-    Character* owner = nullptr;                         // ”­Ë‚µ‚½ƒLƒƒƒ‰ƒNƒ^[
+    // å‹•ä½œãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼
+    DirectX::XMFLOAT3 spawnPosition = { 0,0,0 }; // å‡ºç¾ä½ç½®
+    DirectX::XMFLOAT3 direction = { 0,0,1 };     // é€²è¡Œæ–¹å‘ï¼ˆæ­£è¦åŒ–ãƒ™ã‚¯ãƒˆãƒ«ï¼‰
+    Character* owner = nullptr;                         // ç™ºå°„ã—ãŸã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼
     MovementType moveType = MovementType::Linear;
 
-    // Spiral—pƒpƒ‰ƒ[ƒ^[
-    DirectX::XMFLOAT3 centerPosition = { 0,0,0 }; // ‰ñ“]’†S
-    float currentAngle = 0.0f;                           // Œ»İ‚ÌŠp“x(ƒ‰ƒWƒAƒ“)
-    float angularSpeed = 0.0f;                           // ‰ñ“]‘¬“x
-    float radialSpeed = 0.0f;                            // ŠO‘¤‚ÉL‚ª‚é‘¬“x
-    float currentRadius = 0.0f;                          // Œ»İ‚Ì”¼Œa
+    // ç™ºå°„ç‰©ã«è¿½å¾“ã•ã›ã‚‹ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆ
+    // rgbãŒå…‰ã®è‰²ã€wãŒæ˜ã‚‹ã•ã€‚ç¯„å›²ã‹æ˜ã‚‹ã•ãŒ0ãªã‚‰å…‰ã‚‰ã›ãªã„
+    DirectX::XMFLOAT4 pointLightColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+    float pointLightRange = 0.0f;
+
+    // Spiralç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼
+    DirectX::XMFLOAT3 centerPosition = { 0,0,0 }; // å›è»¢ä¸­å¿ƒ
+    float currentAngle = 0.0f;                           // ç¾åœ¨ã®è§’åº¦(ãƒ©ã‚¸ã‚¢ãƒ³)
+    float angularSpeed = 0.0f;                           // å›è»¢é€Ÿåº¦
+    float radialSpeed = 0.0f;                            // å¤–å´ã«åºƒãŒã‚‹é€Ÿåº¦
+    float currentRadius = 0.0f;                          // ç¾åœ¨ã®åŠå¾„
 };
 
 class Projectile
@@ -55,43 +60,53 @@ public:
     Projectile(const ProjectileInfo& info, std::shared_ptr<Effect> effectResource);
     ~Projectile();
 
-    // XVˆ— (false‚ğ•Ô‚·‚ÆÁ–Å)
+    // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ãƒãƒ³ãƒ‰ãƒ«ã¨ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã‚’æ‰€æœ‰ã—ã¦ã„ã‚‹ãŸã‚ã‚³ãƒ”ãƒ¼ã‚’ç¦æ­¢ã™ã‚‹
+    Projectile(const Projectile&) = delete;
+    Projectile& operator=(const Projectile&) = delete;
+
+    // æ›´æ–°å‡¦ç† (falseã‚’è¿”ã™ã¨æ¶ˆæ»…)
     bool Update(float elapsedTime);
 
-    // “–‚½‚è”»’èˆ—
+    // å½“ãŸã‚Šåˆ¤å®šå‡¦ç†
     bool OnHit(Character* target);
 
-    // “–‚½‚è”»’è•`‰æ
+    // å½“ãŸã‚Šåˆ¤å®šæç”»
     void DrawDebugPrimitive();
 
-    // w’èÀ•W‚ÉŒü‚©‚Á‚Ä”­Ë (ƒxƒNƒgƒ‹ŒvZ‚ğ‚±‚±‚Ås‚¤)
+    // æŒ‡å®šåº§æ¨™ã«å‘ã‹ã£ã¦ç™ºå°„ (ãƒ™ã‚¯ãƒˆãƒ«è¨ˆç®—ã‚’ã“ã“ã§è¡Œã†)
     void FireAt(const DirectX::XMFLOAT3& targetPos, float newSpeed, bool bakeY);
 
-    // —†ùŠgUƒ‚[ƒh‚ÖØ‚è‘Ö‚¦
+    // èºæ—‹æ‹¡æ•£ãƒ¢ãƒ¼ãƒ‰ã¸åˆ‡ã‚Šæ›¿ãˆ
     void StartSpiral(float angularSpd, float radialSpd);
 
-    // ¶‘¶Šm”F—p
+    // ç”Ÿå­˜ç¢ºèªç”¨
     bool IsActive() const { return ageTimer < info.lifeTime; }
 
-    // À•W‚ğ‹­§“I‚Éİ’è‚·‚éi’Ç]ˆ——pj
+    // åº§æ¨™ã‚’å¼·åˆ¶çš„ã«è¨­å®šã™ã‚‹ï¼ˆè¿½å¾“å‡¦ç†ç”¨ï¼‰
     void SetPosition(const DirectX::XMFLOAT3& pos) { position = pos; }
 
     // 
     const ProjectileInfo& GetInfo() const { return info; }
 private:
     ProjectileInfo info;
-    DirectX::XMFLOAT3 position;     // Œ»İˆÊ’u
-    DirectX::XMFLOAT3 velocity;     // ‘¬“xƒxƒNƒgƒ‹
-    DirectX::XMFLOAT3 rotation;     // Œ»İ‚Ì‰ñ“]iƒ‰ƒWƒAƒ“j
-    float ageTimer = 0.0f;          // Œo‰ßŠÔ
+    DirectX::XMFLOAT3 position;     // ç¾åœ¨ä½ç½®
+    DirectX::XMFLOAT3 velocity;     // é€Ÿåº¦ãƒ™ã‚¯ãƒˆãƒ«
+    DirectX::XMFLOAT3 rotation;     // ç¾åœ¨ã®å›è»¢ï¼ˆãƒ©ã‚¸ã‚¢ãƒ³ï¼‰
+    float ageTimer = 0.0f;          // çµŒéæ™‚é–“
 
-    // ƒGƒtƒFƒNƒgŠÖ˜A
-    std::shared_ptr<Effect> effect; // ƒGƒtƒFƒNƒgƒŠƒ\[ƒX
-    Effekseer::Handle effectHandle = -1; // Ä¶ƒnƒ“ƒhƒ‹
+    // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆé–¢é€£
+    std::shared_ptr<Effect> effect; // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãƒªã‚½ãƒ¼ã‚¹
+    Effekseer::Handle effectHandle = -1; // å†ç”Ÿãƒãƒ³ãƒ‰ãƒ«
 
-    // “à•”ŠÖ”F•ûŒüƒxƒNƒgƒ‹‚©‚ç‰ñ“]Šp“x‚ğŒvZ
+    // ç¢ºä¿ã—ãŸãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã®ç•ªå·ï¼ˆ-1ãªã‚‰æœªä½¿ç”¨ï¼‰
+    int pointLightIndex = -1;
+
+    // ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã®ä½ç½®ãƒ»æ˜ã‚‹ã•ã‚’æ›´æ–°ã™ã‚‹
+    void UpdatePointLight();
+
+    // å†…éƒ¨é–¢æ•°ï¼šæ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‹ã‚‰å›è»¢è§’åº¦ã‚’è¨ˆç®—
     void CalculateRotationFromVelocity(bool bakeY);
 
-    // —†ùˆÚ“®‚ÌXVˆ—
+    // èºæ—‹ç§»å‹•ã®æ›´æ–°å‡¦ç†
     void UpdateSpiral(float elapsedTime);
 };

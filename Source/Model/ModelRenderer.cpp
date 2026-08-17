@@ -1,4 +1,4 @@
-#include <algorithm>
+ï»¿#include <algorithm>
 #include "System/Misc.h"
 #include "Graphics/GpuResourceUtils.h"
 #include "ModelRenderer.h"
@@ -11,33 +11,33 @@
 
 
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 ModelRenderer::ModelRenderer(ID3D11Device* device)
 {
-	// ƒV[ƒ“—p’è”ƒoƒbƒtƒ@
+	// ã‚·ãƒ¼ãƒ³ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 	GpuResourceUtils::CreateConstantBuffer(
 		device,
 		sizeof(CbScene),
 		sceneConstantBuffer.GetAddressOf());
 
-	// ƒXƒPƒ‹ƒgƒ“—p’è”ƒoƒbƒtƒ@
+	// ã‚¹ã‚±ãƒ«ãƒˆãƒ³ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 	GpuResourceUtils::CreateConstantBuffer(
 		device,
 		sizeof(CbSkeleton),
 		skeletonConstantBuffer.GetAddressOf());
 
-	// ƒeƒŒƒ|[ƒg—p’è”ƒoƒbƒtƒ@
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 	GpuResourceUtils::CreateConstantBuffer(
 		device,
 		sizeof(CbTeleport),
 		teleportConstantBuffer.GetAddressOf());
 
-	// ƒVƒF[ƒ_[¶¬
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
 	shaders[static_cast<int>(ShaderId::Basic)] = std::make_unique<BasicShader>(device);
 	shaders[static_cast<int>(ShaderId::Lambert)] = std::make_unique<LambertShader>(device);
 	shaders[static_cast<int>(ShaderId::PBR)] = std::make_unique<PBRShader>(device);
 
-	// ƒmƒCƒYƒeƒNƒXƒ`ƒƒ¶¬
+	// ãƒã‚¤ã‚ºãƒ†ã‚¯ã‚¹ãƒãƒ£ç”Ÿæˆ
 	GenerateNoiseTexture(device);
 }
 
@@ -47,18 +47,18 @@ void ModelRenderer::GenerateNoiseTexture(ID3D11Device* device)
 	const int height = 256;
 	std::vector<uint8_t> noiseData(width * height);
 
-	// ƒVƒ“ƒvƒ‹‚Èƒ‰ƒ“ƒ_ƒ€ƒmƒCƒY¶¬
-	srand(0); // ŒÅ’èƒV[ƒhi“¯‚¶ƒpƒ^[ƒ“‚ğ¶¬j
+	// ã‚·ãƒ³ãƒ—ãƒ«ãªãƒ©ãƒ³ãƒ€ãƒ ãƒã‚¤ã‚ºç”Ÿæˆ
+	srand(0); // å›ºå®šã‚·ãƒ¼ãƒ‰ï¼ˆåŒã˜ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ç”Ÿæˆï¼‰
 	for (int y = 0; y < height; ++y)
 	{
 		for (int x = 0; x < width; ++x)
 		{
-			// ‚æ‚èŠŠ‚ç‚©‚ÈƒmƒCƒYƒpƒ^[ƒ“
+			// ã‚ˆã‚Šæ»‘ã‚‰ã‹ãªãƒã‚¤ã‚ºãƒ‘ã‚¿ãƒ¼ãƒ³
 			int index = y * width + x;
 			float fx = static_cast<float>(x) / width;
 			float fy = static_cast<float>(y) / height;
 
-			// •¡”‚Ìü”g”‚ğd‚Ë‚é
+			// è¤‡æ•°ã®å‘¨æ³¢æ•°ã‚’é‡ã­ã‚‹
 			float noise = 0.0f;
 			noise += (rand() % 256) / 255.0f * 0.5f;
 			noise += sin(fx * 6.28f * 4.0f) * 0.25f + 0.25f;
@@ -68,7 +68,7 @@ void ModelRenderer::GenerateNoiseTexture(ID3D11Device* device)
 		}
 	}
 
-	// ƒeƒNƒXƒ`ƒƒì¬
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£ä½œæˆ
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = width;
 	desc.Height = height;
@@ -87,12 +87,12 @@ void ModelRenderer::GenerateNoiseTexture(ID3D11Device* device)
 	HRESULT hr = device->CreateTexture2D(&desc, &initData, texture.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	// ShaderResourceViewì¬
+	// ShaderResourceViewä½œæˆ
 	hr = device->CreateShaderResourceView(texture.Get(), nullptr, noiseTextureSRV.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 }
 
-// ” •`‰æ
+// ç®±æç”»
 void ModelRenderer::Draw(ShaderId shaderId, std::shared_ptr<Model> model, bool enableDither)
 {
 	DrawInfo& drawInfo = drawInfos.emplace_back();
@@ -112,7 +112,7 @@ void ModelRenderer::DrawWithTeleport(ShaderId shaderId, std::shared_ptr<Model> m
 	drawInfo.hasTeleportEffect = true;
 	drawInfo.teleportMode = mode;
 
-	// ƒeƒŒƒ|[ƒgƒf[ƒ^‚ğİ’è
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆãƒ‡ãƒ¼ã‚¿ã‚’è¨­å®š
 	drawInfo.teleportData.teleportProgress = teleportProgress;
 	drawInfo.teleportData.teleportTime = teleportTime;
 	drawInfo.teleportData.dissolveEdgeWidth = 0.1f;
@@ -131,7 +131,7 @@ void ModelRenderer::DrawWithTeleport(ShaderId shaderId, std::shared_ptr<Model> m
 	case TeleportRenderMode::FadeOnly:
 		drawInfo.teleportData.enableDissolve = 0.0f;
 		drawInfo.teleportData.enableDistortion = 0.0f;
-		// ƒAƒ‹ƒtƒ@’l‚¾‚¯İ’è
+		// ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã ã‘è¨­å®š
 		drawInfo.teleportData.afterimageAlpha = 1.0f - teleportProgress;
 		break;
 
@@ -151,7 +151,7 @@ void ModelRenderer::DrawWithTeleport(ShaderId shaderId, std::shared_ptr<Model> m
 void ModelRenderer::DrawAfterimage(ShaderId shaderId, std::shared_ptr<Model> model,
 	const std::vector<Model::Node>& nodes,
 	const DirectX::XMFLOAT4X4& transform,
-	float alpha, float darkness)
+	float alpha, float darkness, const DirectX::XMFLOAT4& color)
 {
 	DrawInfo& drawInfo = drawInfos.emplace_back();
 	drawInfo.shaderId = shaderId;
@@ -161,8 +161,9 @@ void ModelRenderer::DrawAfterimage(ShaderId shaderId, std::shared_ptr<Model> mod
 	drawInfo.afterimageNodes = nodes;
 	drawInfo.afterimageTransform = transform;
 	drawInfo.afterimageAlpha = alpha;
+	drawInfo.afterimageColor = color;
 
-	// ƒeƒŒƒ|[ƒgƒf[ƒ^‚Í‹ó‚Å‰Šú‰»
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆãƒ‡ãƒ¼ã‚¿ã¯ç©ºã§åˆæœŸåŒ–
 	drawInfo.teleportData = {};
 	drawInfo.teleportData.teleportProgress = 0.0f;
 	drawInfo.teleportData.teleportTime = 0.0f;
@@ -172,6 +173,7 @@ void ModelRenderer::DrawAfterimage(ShaderId shaderId, std::shared_ptr<Model> mod
 	drawInfo.teleportData.teleportCenterY = 0.0f;
 	drawInfo.teleportData.afterimageAlpha = alpha;
 	drawInfo.teleportData.afterimageDarkness = darkness;
+	drawInfo.teleportData.afterimageColor = color;
 	drawInfo.teleportData.enableDissolve = 0.0f;
 	drawInfo.teleportData.enableDistortion = 0.0f;
 }
@@ -184,7 +186,7 @@ void ModelRenderer::DrawWithAlpha(ShaderId shaderId, std::shared_ptr<Model> mode
 	drawInfo.hasTeleportEffect = false;
 	drawInfo.isAfterimage = false;
 
-	// ƒAƒ‹ƒtƒ@’l‚¾‚¯İ’è
+	// ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã ã‘è¨­å®š
 	drawInfo.teleportData = {};
 	drawInfo.teleportData.teleportProgress = 0.0f;
 	drawInfo.teleportData.teleportTime = 0.0f;
@@ -192,18 +194,18 @@ void ModelRenderer::DrawWithAlpha(ShaderId shaderId, std::shared_ptr<Model> mode
 	drawInfo.teleportData.distortionIntensity = 0.0f;
 	drawInfo.teleportData.dissolveEdgeColor = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	drawInfo.teleportData.teleportCenterY = 0.0f;
-	drawInfo.teleportData.afterimageAlpha = alpha;        // ƒAƒ‹ƒtƒ@’l‚ğİ’è
-	drawInfo.teleportData.afterimageDarkness = 0.0f;      // ˆÃ‚­‚µ‚È‚¢
+	drawInfo.teleportData.afterimageAlpha = alpha;        // ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã‚’è¨­å®š
+	drawInfo.teleportData.afterimageDarkness = 0.0f;      // æš—ãã—ãªã„
 	drawInfo.teleportData.enableDissolve = 0.0f;
 	drawInfo.teleportData.enableDistortion = 0.0f;
 }
 
-// •`‰æÀs
+// æç”»å®Ÿè¡Œ
 void ModelRenderer::Render(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	// ƒV[ƒ“—p’è”ƒoƒbƒtƒ@XV
+	// ã‚·ãƒ¼ãƒ³ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡æ›´æ–°
 	{
 		static LightManager defaultLightManager;
 		const LightManager* lightManager = rc.lightManager ? rc.lightManager : &defaultLightManager;
@@ -237,7 +239,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 		dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, 0, &cbScene, 0, 0);
 	}
 
-	// ’è”ƒoƒbƒtƒ@İ’è
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®š
 	ID3D11Buffer* vsConstantBuffers[] =
 	{
 		skeletonConstantBuffer.Get(),
@@ -254,7 +256,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
 	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
 
-	// ƒTƒ“ƒvƒ‰ƒXƒe[ƒgİ’è
+	// ã‚µãƒ³ãƒ—ãƒ©ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	ID3D11SamplerState* samplerStates[] =
 	{
 		rc.renderState->GetSamplerState(SamplerState::LinearWrap),
@@ -263,34 +265,34 @@ void ModelRenderer::Render(const RenderContext& rc)
 	};
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
 
-	// ƒmƒCƒYƒeƒNƒXƒ`ƒƒ‚ğt36‚ÉƒoƒCƒ“ƒh
+	// ãƒã‚¤ã‚ºãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’t36ã«ãƒã‚¤ãƒ³ãƒ‰
 	dc->PSSetShaderResources(36, 1, noiseTextureSRV.GetAddressOf());
 
-	// ƒŒƒ“ƒ_[ƒXƒe[ƒgİ’è
+	// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
-	// ƒƒbƒVƒ…•`‰æŠÖ”
+	// ãƒ¡ãƒƒã‚·ãƒ¥æç”»é–¢æ•°
 	auto drawMesh = [&](std::vector<Model::Node> nodes, const ModelResource::Mesh& mesh,
 		Shader* shader, const std::shared_ptr<Model> model,
 		bool hasTeleport, TeleportRenderMode teleportMode, const CbTeleport& teleportData,
-		bool isAfterimage, float afterimageAlpha,
+		bool isAfterimage, float afterimageAlpha, const DirectX::XMFLOAT4& afterimageColor,
 		bool enableDither)
 	{
-		// ƒeƒŒƒ|[ƒgƒGƒtƒFƒNƒg or c‘œƒAƒ‹ƒtƒ@İ’è
+		// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆ or æ®‹åƒã‚¢ãƒ«ãƒ•ã‚¡è¨­å®š
 		CbTeleport effectData = teleportData;
 
 		if (isAfterimage)
 		{
-			// c‘œ‚Ìê‡‚ÍƒGƒtƒFƒNƒg‚È‚µAƒAƒ‹ƒtƒ@‚Ì‚İİ’è
+			// æ®‹åƒã®å ´åˆã¯ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãªã—ã€ã‚¢ãƒ«ãƒ•ã‚¡ã®ã¿è¨­å®š
 			effectData.teleportProgress = 0.0f;
 			effectData.teleportTime = 0.0f;
 			effectData.dissolveEdgeWidth = 0.0f;
 			effectData.distortionIntensity = 0.0f;
 			effectData.dissolveEdgeColor = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 			effectData.teleportCenterY = 0.0f;
-			effectData.afterimageAlpha = afterimageAlpha;  // ƒAƒ‹ƒtƒ@’l‚ğİ’è
-			effectData.afterimageDarkness = 0.8f;
+			effectData.afterimageAlpha = afterimageAlpha;  // ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã‚’è¨­å®š
+			effectData.afterimageColor = afterimageColor;
 			effectData.enableDissolve = 0.0f;
 			effectData.enableDistortion = 0.0f;
 		}
@@ -302,19 +304,20 @@ void ModelRenderer::Render(const RenderContext& rc)
 		{
 			effectData.afterimageAlpha = 1.0f;
 			effectData.afterimageDarkness = 0.0f;
+			effectData.afterimageColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		}
 		effectData.enableDither = enableDither ? 1.0f : 0.0f;
 
 		dc->UpdateSubresource(teleportConstantBuffer.Get(), 0, 0, &effectData, 0, 0);
 
-		// ’¸“_ƒoƒbƒtƒ@İ’è
+		// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡è¨­å®š
 		UINT stride = sizeof(ModelResource::Vertex);
 		UINT offset = 0;
 		dc->IASetVertexBuffers(0, 1, mesh.vertexBuffer.GetAddressOf(), &stride, &offset);
 		dc->IASetIndexBuffer(mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 		dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		// ƒXƒPƒ‹ƒgƒ“—p’è”ƒoƒbƒtƒ@XV
+		// ã‚¹ã‚±ãƒ«ãƒˆãƒ³ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡æ›´æ–°
 		CbSkeleton cbSkeleton{};
 		if (mesh.bones.size() > 0)
 		{
@@ -333,20 +336,20 @@ void ModelRenderer::Render(const RenderContext& rc)
 		}
 		dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
 
-		// XV
+		// æ›´æ–°
 		shader->Update(rc, mesh, model);
 
-		// •`‰æ
+		// æç”»
 		dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
 	};
 
 	DirectX::XMVECTOR CameraPosition = DirectX::XMLoadFloat3(&rc.camera->GetEye());
 	DirectX::XMVECTOR CameraFront = DirectX::XMLoadFloat3(&rc.camera->GetFront());
 
-	// ƒuƒŒƒ“ƒhƒXƒe[ƒgİ’è
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Opaque), nullptr, 0xFFFFFFFF);
 
-	// •s“§–¾•`‰æˆ—
+	// ä¸é€æ˜æç”»å‡¦ç†
 	for (DrawInfo& drawInfo : drawInfos)
 	{
 		Shader* shader = shaders[static_cast<int>(drawInfo.shaderId)].get();
@@ -355,7 +358,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 		auto& nodes = drawInfo.isAfterimage ? drawInfo.afterimageNodes : drawInfo.model->GetNodes();
 		for (const ModelResource::Mesh& mesh : drawInfo.model->GetResource()->GetMeshes())
 		{
-			// ”¼“§–¾ƒƒbƒVƒ…“o˜^
+			// åŠé€æ˜ãƒ¡ãƒƒã‚·ãƒ¥ç™»éŒ²
 			if (mesh.material->alphaMode == ModelResource::AlphaMode::Blend ||
 				(mesh.material->baseColor.w > 0.01f && mesh.material->baseColor.w < 0.99f) || 
 				drawInfo.isAfterimage)
@@ -369,7 +372,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 				transparencyDrawInfo.teleportData = drawInfo.teleportData;
 				transparencyDrawInfo.isAfterimage = drawInfo.isAfterimage;
 				transparencyDrawInfo.afterimageAlpha = drawInfo.afterimageAlpha;
-				// ƒJƒƒ‰‚Æ‚Ì‹——£‚ğZo
+				// ã‚«ãƒ¡ãƒ©ã¨ã®è·é›¢ã‚’ç®—å‡º
 				DirectX::XMVECTOR Position = DirectX::XMVectorSet(
 					nodes[mesh.nodeIndex].worldTransform._41,
 					nodes[mesh.nodeIndex].worldTransform._42,
@@ -381,10 +384,10 @@ void ModelRenderer::Render(const RenderContext& rc)
 				continue;
 			}
 
-			// •`‰æ
+			// æç”»
 			drawMesh(nodes, mesh, shader, drawInfo.model,
 				drawInfo.hasTeleportEffect, drawInfo.teleportMode, drawInfo.teleportData,
-				drawInfo.isAfterimage, drawInfo.afterimageAlpha,
+				drawInfo.isAfterimage, drawInfo.afterimageAlpha, drawInfo.afterimageColor,
 				drawInfo.enableDither);
 		}
 
@@ -392,17 +395,17 @@ void ModelRenderer::Render(const RenderContext& rc)
 	}
 	drawInfos.clear();
 
-	// ƒuƒŒƒ“ƒhƒXƒe[ƒgİ’è
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®š
 	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), nullptr, 0xFFFFFFFF);
 
-	// ƒJƒƒ‰‚©‚ç‰“‚¢‡‚Éƒ\[ƒg
+	// ã‚«ãƒ¡ãƒ©ã‹ã‚‰é ã„é †ã«ã‚½ãƒ¼ãƒˆ
 	std::sort(transparencyDrawInfos.begin(), transparencyDrawInfos.end(),
 		[](const TransparencyDrawInfo& lhs, const TransparencyDrawInfo& rhs)
 		{
 			return lhs.distance > rhs.distance;
 		});
 
-	// ”¼“§–¾•`‰æˆ—
+	// åŠé€æ˜æç”»å‡¦ç†
 	for (const TransparencyDrawInfo& transparencyDrawInfo : transparencyDrawInfos)
 	{
 		Shader* shader = shaders[static_cast<int>(transparencyDrawInfo.shaderId)].get();
@@ -412,23 +415,24 @@ void ModelRenderer::Render(const RenderContext& rc)
 		drawMesh(transparencyDrawInfo.nodes, *transparencyDrawInfo.mesh, shader, transparencyDrawInfo.model,
 			transparencyDrawInfo.hasTeleportEffect, transparencyDrawInfo.teleportMode, transparencyDrawInfo.teleportData,
 			transparencyDrawInfo.isAfterimage, transparencyDrawInfo.afterimageAlpha,
+			transparencyDrawInfo.teleportData.afterimageColor,
 			transparencyDrawInfo.enableDither);
 
 		shader->End(rc);
 	}
 	transparencyDrawInfos.clear();
 
-	// ’è”ƒoƒbƒtƒ@İ’è‰ğœ
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®šè§£é™¤
 	for (ID3D11Buffer*& vsConstantBuffer : vsConstantBuffers) { vsConstantBuffer = nullptr; }
 	for (ID3D11Buffer*& psConstantBuffer : psConstantBuffers) { psConstantBuffer = nullptr; }
 	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
 	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
 
-	// ƒTƒ“ƒvƒ‰ƒXƒe[ƒgİ’è‰ğœ
+	// ã‚µãƒ³ãƒ—ãƒ©ã‚¹ãƒ†ãƒ¼ãƒˆè¨­å®šè§£é™¤
 	for (ID3D11SamplerState*& samplerState : samplerStates) { samplerState = nullptr; }
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
 
-	// ƒmƒCƒYƒeƒNƒXƒ`ƒƒ‰ğœ
+	// ãƒã‚¤ã‚ºãƒ†ã‚¯ã‚¹ãƒãƒ£è§£é™¤
 	ID3D11ShaderResourceView* nullSRV = nullptr;
 	dc->PSSetShaderResources(36, 1, &nullSRV);
 }

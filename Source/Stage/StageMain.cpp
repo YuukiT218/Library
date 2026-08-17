@@ -232,5 +232,5 @@ void StageMain::Debug(const RenderContext& rc)
 
 void StageMain::DebugImGui()
 {
-	model->DebugGui(u8"メインステージ");
+	model->DebugGUI(u8"メインステージ");
 }

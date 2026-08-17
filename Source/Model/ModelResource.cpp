@@ -1,4 +1,4 @@
-#include <filesystem>
+ï»¿#include <filesystem>
 #include "Graphics/GpuResourceUtils.h"
 #include "GLTFImporter.h"
 #include <stdlib.h>
@@ -195,39 +195,39 @@ void ModelResource::Load(ID3D11Device* device, const char* filename, float sampl
 
 	std::filesystem::path extension = filepath.extension();
 
-	// “Æ©Œ`®‚Ìƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚Ì‘¶İŠm”F
+	// ç‹¬è‡ªå½¢å¼ã®ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã®å­˜åœ¨ç¢ºèª
 	filepath.replace_extension(".cereal");
 	if (std::filesystem::exists(filepath))
 	{
-		// “Æ©Œ`®‚Ìƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
+		// ç‹¬è‡ªå½¢å¼ã®ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿
 		Deserialize(filepath.string().c_str());
 
 	}
 	else if (extension == ".gltf" || extension == ".glb")
 	{
-		// ”Ä—pƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
+		// æ±ç”¨ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿
 		GLTFImporter importer(filename);
 
-		// ƒ}ƒeƒŠƒAƒ‹ƒf[ƒ^“Ç‚İæ‚è
+		// ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ‡ãƒ¼ã‚¿èª­ã¿å–ã‚Š
 		importer.LoadMaterials(materials, device);
 
-		// ƒm[ƒhƒf[ƒ^“Ç‚İæ‚è
+		// ãƒãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿èª­ã¿å–ã‚Š
 		importer.LoadNodes(nodes);
 
-		// ƒƒbƒVƒ…ƒf[ƒ^“Ç‚İæ‚è
+		// ãƒ¡ãƒƒã‚·ãƒ¥ãƒ‡ãƒ¼ã‚¿èª­ã¿å–ã‚Š
 		importer.LoadMeshes(meshes, nodes);
 
-		// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^“Ç‚İæ‚è
+		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿èª­ã¿å–ã‚Š
 		importer.LoadAnimations(animations, nodes, sampleRate);
 
-		// “Æ©Œ`®‚Ìƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚ğ•Û‘¶
+		// ç‹¬è‡ªå½¢å¼ã®ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿å­˜
 		Serialize(filepath.string().c_str());
 	}
 
 	BuildModel(device, filename, dirpath);
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“’Ç‰Á“Ç‚İ‚İ
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¿½åŠ èª­ã¿è¾¼ã¿
 void ModelResource::AppendAnimations(const char* filename)
 {
 	std::filesystem::path filepath(filename);
@@ -236,10 +236,10 @@ void ModelResource::AppendAnimations(const char* filename)
 	if (filepath.extension() == ".gltf" ||
 		filepath.extension() == ".glb")
 	{
-		// ”Ä—pƒ‚ƒfƒ‹ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
+		// æ±ç”¨ãƒ¢ãƒ‡ãƒ«ãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿
 		GLTFImporter importer(filename);
 
-		// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^“Ç‚İæ‚è
+		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿èª­ã¿å–ã‚Š
 		importer.LoadAnimations(animations, nodes);
 	}
 	else
@@ -248,7 +248,7 @@ void ModelResource::AppendAnimations(const char* filename)
 	}
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“ƒCƒ“ƒfƒbƒNƒXæ“¾
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 int ModelResource::GetAnimationIndex(const char* name) const
 {
 	for (size_t animationIndex = 0; animationIndex < animations.size(); ++animationIndex)
@@ -261,7 +261,7 @@ int ModelResource::GetAnimationIndex(const char* name) const
 	return -1;
 }
 
-// ƒm[ƒhƒCƒ“ƒfƒbƒNƒXæ“¾
+// ãƒãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 int ModelResource::GetNodeIndex(const char* name) const
 {
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
@@ -274,16 +274,16 @@ int ModelResource::GetNodeIndex(const char* name) const
 	return -1;
 }
 
-// ƒ‚ƒfƒ‹ƒZƒbƒgƒAƒbƒv
+// ãƒ¢ãƒ‡ãƒ«ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::filesystem::path dirpath)
 {
-	// ƒm[ƒh\’z
+	// ãƒãƒ¼ãƒ‰æ§‹ç¯‰
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
 	{
 		Node& node = nodes.at(nodeIndex);
 
-		// eqŠÖŒW‚ğ\’z
-		// eƒCƒ“ƒfƒbƒNƒXƒf[ƒ^‚©‚çQÆ‚µ‚â‚·‚¢‚æ‚¤‚Éƒ|ƒCƒ“ƒ^‚ğİ’è‚·‚é
+		// è¦ªå­é–¢ä¿‚ã‚’æ§‹ç¯‰
+		// è¦ªã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰å‚ç…§ã—ã‚„ã™ã„ã‚ˆã†ã«ãƒã‚¤ãƒ³ã‚¿ã‚’è¨­å®šã™ã‚‹
 		node.parent = node.parentIndex >= 0 ? &nodes.at(node.parentIndex) : nullptr;
 		if (node.parent != nullptr)
 		{
@@ -291,21 +291,21 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 		}
 	}
 
-	// ƒ}ƒeƒŠƒAƒ‹\’z
+	// ãƒãƒ†ãƒªã‚¢ãƒ«æ§‹ç¯‰
 	for (Material& material : materials)
 	{
 		if (material.baseMap == nullptr)
 		{
 			if (material.baseTextureFileName.empty())
 			{
-				// ƒ_ƒ~[ƒeƒNƒXƒ`ƒƒì¬
+				// ãƒ€ãƒŸãƒ¼ãƒ†ã‚¯ã‚¹ãƒãƒ£ä½œæˆ
 				HRESULT hr = GpuResourceUtils::CreateDummyTexture(device, 0xFFFFFFFF,
 					material.baseMap.GetAddressOf());
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 			}
 			else
 			{
-				// ƒx[ƒXƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+				// ãƒ™ãƒ¼ã‚¹ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 				std::filesystem::path diffuseTexturePath(dirpath / material.baseTextureFileName);
 				HRESULT hr = GpuResourceUtils::LoadTexture(device, diffuseTexturePath.string().c_str(),
 					material.baseMap.GetAddressOf());
@@ -317,14 +317,14 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 		{
 			if (material.normalTextureFileName.empty())
 			{
-				// –@üƒ_ƒ~[ƒeƒNƒXƒ`ƒƒì¬
+				// æ³•ç·šãƒ€ãƒŸãƒ¼ãƒ†ã‚¯ã‚¹ãƒãƒ£ä½œæˆ
 				HRESULT hr = GpuResourceUtils::CreateDummyTexture(device, 0xFFFF7F7F,
 					material.normalMap.GetAddressOf());
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 			}
 			else
 			{
-				// –@üƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+				// æ³•ç·šãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 				std::filesystem::path texturePath(dirpath / material.normalTextureFileName);
 				HRESULT hr = GpuResourceUtils::LoadTexture(device, texturePath.string().c_str(),
 					material.normalMap.GetAddressOf());
@@ -336,14 +336,14 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 		{
 			if (material.emissiveTextureFileName.empty())
 			{
-				// –@üƒ_ƒ~[ƒeƒNƒXƒ`ƒƒì¬
+				// æ³•ç·šãƒ€ãƒŸãƒ¼ãƒ†ã‚¯ã‚¹ãƒãƒ£ä½œæˆ
 				HRESULT hr = GpuResourceUtils::CreateDummyTexture(device, 0xFFFF7F7F,
 					material.emissiveMap.GetAddressOf());
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 			}
 			else
 			{
-				// –@üƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+				// æ³•ç·šãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 				std::filesystem::path texturePath(dirpath / material.emissiveTextureFileName);
 				HRESULT hr = GpuResourceUtils::LoadTexture(device, texturePath.string().c_str(),
 					material.emissiveMap.GetAddressOf());
@@ -355,14 +355,14 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 		{
 			if (material.metalnessRoughnessTextureFileName.empty())
 			{
-				// –@üƒ_ƒ~[ƒeƒNƒXƒ`ƒƒì¬
+				// æ³•ç·šãƒ€ãƒŸãƒ¼ãƒ†ã‚¯ã‚¹ãƒãƒ£ä½œæˆ
 				HRESULT hr = GpuResourceUtils::CreateDummyTexture(device, 0xFFFF7F7F,
 					material.metalnessRoughnessMap.GetAddressOf());
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 			}
 			else
 			{
-				// –@üƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+				// æ³•ç·šãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 				std::filesystem::path texturePath(dirpath / material.metalnessRoughnessTextureFileName);
 				HRESULT hr = GpuResourceUtils::LoadTexture(device, texturePath.string().c_str(),
 					material.metalnessRoughnessMap.GetAddressOf());
@@ -374,14 +374,14 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 		{
 			if (material.occlusionTextureFileName.empty())
 			{
-				// –@üƒ_ƒ~[ƒeƒNƒXƒ`ƒƒì¬
+				// æ³•ç·šãƒ€ãƒŸãƒ¼ãƒ†ã‚¯ã‚¹ãƒãƒ£ä½œæˆ
 				HRESULT hr = GpuResourceUtils::CreateDummyTexture(device, 0xFFFF7F7F,
 					material.occlusionMap.GetAddressOf());
 				_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 			}
 			else
 			{
-				// –@üƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+				// æ³•ç·šãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 				std::filesystem::path texturePath(dirpath / material.occlusionTextureFileName);
 				HRESULT hr = GpuResourceUtils::LoadTexture(device, texturePath.string().c_str(),
 					material.occlusionMap.GetAddressOf());
@@ -390,16 +390,16 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 		}
 	}
 
-	// ƒƒbƒVƒ…\’z
+	// ãƒ¡ãƒƒã‚·ãƒ¥æ§‹ç¯‰
 	for (Mesh& mesh : meshes)
 	{
-		// QÆƒ}ƒeƒŠƒAƒ‹İ’è
+		// å‚ç…§ãƒãƒ†ãƒªã‚¢ãƒ«è¨­å®š
 		mesh.material = &materials.at(mesh.materialIndex);
 
-		// QÆƒm[ƒhİ’è
+		// å‚ç…§ãƒãƒ¼ãƒ‰è¨­å®š
 		mesh.node = &nodes.at(mesh.nodeIndex);
 
-		// ’¸“_ƒoƒbƒtƒ@
+		// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡
 		{
 			D3D11_BUFFER_DESC bufferDesc = {};
 			D3D11_SUBRESOURCE_DATA subresourceData = {};
@@ -418,7 +418,7 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 
-		// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@
+		// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡
 		{
 			D3D11_BUFFER_DESC bufferDesc = {};
 			D3D11_SUBRESOURCE_DATA subresourceData = {};
@@ -436,16 +436,16 @@ void ModelResource::BuildModel(ID3D11Device* device, const char* dirname, std::f
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
 
-		// ƒ{[ƒ“\’z
+		// ãƒœãƒ¼ãƒ³æ§‹ç¯‰
 		for (Bone& bone : mesh.bones)
 		{
-			// QÆƒm[ƒhİ’è
+			// å‚ç…§ãƒãƒ¼ãƒ‰è¨­å®š
 			bone.node = &nodes.at(bone.nodeIndex);
 		}
 	}
 }
 
-// ƒVƒŠƒAƒ‰ƒCƒY
+// ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º
 void ModelResource::Serialize(const char* filename)
 {
 	std::ofstream ostream(filename, std::ios::binary);
@@ -455,7 +455,7 @@ void ModelResource::Serialize(const char* filename)
 
 		try
 		{
-			// ƒf[ƒ^•Û‘¶ˆ—
+			// ãƒ‡ãƒ¼ã‚¿ä¿å­˜å‡¦ç†
 			archive(
 				CEREAL_NVP(nodes),
 				CEREAL_NVP(materials),
@@ -470,7 +470,7 @@ void ModelResource::Serialize(const char* filename)
 	}
 }
 
-// ƒfƒVƒŠƒAƒ‰ƒCƒY
+// ãƒ‡ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º
 void ModelResource::Deserialize(const char* filename)
 {
 	std::ifstream istream(filename, std::ios::binary);
@@ -480,7 +480,7 @@ void ModelResource::Deserialize(const char* filename)
 
 		try
 		{
-			// ƒf[ƒ^“Ç‚İ‚İˆ—
+			// ãƒ‡ãƒ¼ã‚¿èª­ã¿è¾¼ã¿å‡¦ç†
 			archive(
 				CEREAL_NVP(nodes),
 				CEREAL_NVP(materials),

@@ -53,7 +53,7 @@ public:
     DirectX::XMFLOAT3 GetAngle() const { return angle; }
 
     // ImGuiでのデバッグ用UI描画
-    void DrawDebugGui();
+    void DrawDebugGUI();
 
 private:
     // ターゲットの中心位置（注視点の基準）

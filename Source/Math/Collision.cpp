@@ -62,7 +62,7 @@ bool Collision::IntersectWeightSphereVsWeightSphere(
         length = (std::max)(length, 0.0001f);
 
         // 単位ベクトル化
-        Vec = DirectX::XMVectorScale(Vec, 1.0 / length);
+        Vec = DirectX::XMVectorScale(Vec, 1.0f / length);
 
         // めり込み量を求める
         float diff = range - length;

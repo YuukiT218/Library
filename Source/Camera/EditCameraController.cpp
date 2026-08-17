@@ -147,7 +147,7 @@ DirectX::XMFLOAT3 EditCameraController::GetEyePosition() const
     return eye;
 }
 
-void EditCameraController::DrawDebugGui()
+void EditCameraController::DrawDebugGUI()
 {
     if (ImGui::Begin("Edit Camera Controller"))
     {

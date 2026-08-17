@@ -158,12 +158,21 @@ void PlayerDamageState::Enter()
     currentDamageType = GetCurrentDamageType();
     step = 0;
 
+    // 先行入力をリセット（前回の被弾時のキャンセル入力を持ち越さない）
+    nextShiftReady = false;
+    nextInput = InputActionType::None;
+
     GamePad& gamepad = Input::Instance().GetGamePad();
 }
 
 // 更新処理
 void PlayerDamageState::Update(float elapsedTime)
 {
+    float frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
+    int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
+
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+
     GamePad& gamepad = Input::Instance().GetGamePad();
 
     switch (step)
@@ -181,31 +190,35 @@ void PlayerDamageState::Update(float elapsedTime)
         {
             player->SetGravity(-0.3f);
             step = 0;
-
-            // 先行入力チェック
-            if (InputAction() == InputActionType::LightAttack)
-            {
-                ChangeState(PlayerStateId::Combo1);
-                return;
-            }
-            else if (InputAction() == InputActionType::HeavyAttack)
-            {
-                ChangeState(PlayerStateId::Heavy1);
-                return;
-            }
-            else if (InputAction() == InputActionType::Dodge)
-            {
-                ChangeState(PlayerStateId::Dodge);
-                return;
-            }
-            else if (InputAction() == InputActionType::Guard)
-            {
-                ChangeState(PlayerStateId::GuardIdle);
-                return;
-            }
-
             ChangeState(PlayerStateId::Idle);
             return;
+        }
+
+        if ((currentDamageType == DamageType::Normal || currentDamageType == DamageType::Light) &&
+            player->IsGround() && InputAction() == InputActionType::Dodge)
+        {
+            if (frame >= config->advanceInputStartFrame && frame <= config->advanceInputEndFrame)
+            {
+                nextShiftReady = true;
+                nextInput = InputAction();
+            }
+        }
+
+        if (nextShiftReady)
+        {
+            if (frame >= config->advanceInputStartFrame)
+            {
+                step = 0;
+                player->SetGravity(-0.3f);
+                nextShiftReady = false;
+                if (nextInput == InputActionType::Dodge)
+                {
+                    nextInput = InputActionType::None;
+                    ChangeState(PlayerStateId::Dodge);
+                    return;
+                }
+                nextInput = InputActionType::None;
+            }
         }
 
         // Heavyダメージで地上着地した場合、起き上がりへ
@@ -308,10 +321,6 @@ void PlayerDamageState::Update(float elapsedTime)
             {
                 ChangeState(PlayerStateId::Combo1);
             }
-            else if (InputAction() == InputActionType::HeavyAttack)
-            {
-                ChangeState(PlayerStateId::Heavy1);
-            }
             else if (InputAction() == InputActionType::Dodge)
             {
                 ChangeState(PlayerStateId::Dodge);
@@ -331,6 +340,32 @@ void PlayerDamageState::Update(float elapsedTime)
             else
             {
                 ChangeState(PlayerStateId::Idle);
+            }
+        }
+
+        if (InputAction() == InputActionType::Dodge)
+        {
+            if (frame >= config->advanceInputStartFrame && frame <= config->advanceInputEndFrame)
+            {
+                nextShiftReady = true;
+                nextInput = InputAction();
+            }
+        }
+
+        if (nextShiftReady)
+        {
+            if (frame >= config->advanceInputStartFrame)
+            {
+                step = 0;
+                player->SetGravity(-0.3f);
+                nextShiftReady = false;
+                if (nextInput == InputActionType::Dodge)
+                {
+                    nextInput = InputActionType::None;
+                    ChangeState(PlayerStateId::Dodge);
+                    return;
+                }
+                nextInput = InputActionType::None;
             }
         }
         break;
@@ -353,6 +388,9 @@ void PlayerDamageState::Update(float elapsedTime)
         player->SetGravity(-0.3f);
         player->SetVerticalVelocity(0.0f);
         step = 0;
+        // 新しい被弾で仕切り直すので、溜まっていた先行入力は破棄する
+        nextShiftReady = false;
+        nextInput = InputActionType::None;
         currentDamageType = GetCurrentDamageType();
         HandleDamageStart(currentDamageType, elapsedTime);
         step = 1;
@@ -364,6 +402,10 @@ void PlayerDamageState::Exit()
 {
     player->SetGravity(-0.3f);
     step = 0;
+
+    // 先行入力をリセット
+    nextShiftReady = false;
+    nextInput = InputActionType::None;
 
     GamePad& gamepad = Input::Instance().GetGamePad();
     gamepad.Vibrate(0.0f, 0.0f);

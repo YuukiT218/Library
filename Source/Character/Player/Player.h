@@ -70,17 +70,11 @@ public:
 	// 回転速度取得
 	float GetTurnSpeed() const { return turnSpeed; }
 
-	//最大体力取得
-	float GetMaxHealth() const { return maxHealth; }
-
-	//体力取得
-	float GetHealth() const { return health; }
-
 	// ロックオンしている敵を取得
-	Enemy* GetLockOnEnemy() { return LockOnEnemy; }
+	Enemy* GetLockOnEnemy() { return lockOnEnemy; }
 
 	// ロックオン
-	void SetLockOnCamera(Enemy* enemy) { LockOnEnemy = enemy; }
+	void SetLockOnCamera(Enemy* enemy) { lockOnEnemy = enemy; }
 
 	// プレイヤーの回避状態取得
 	bool GetPlayerIsRolling() { return isRolling; }
@@ -323,7 +317,7 @@ private:
 	bool isTurnCompleted = false;
 	float turnCompletedThreshold = DirectX::XMConvertToRadians(3.0f);  // 3度以内なら完了とみなす
 
-	Enemy* LockOnEnemy = nullptr;
+	Enemy* lockOnEnemy = nullptr;
 
 	// アニメーション変数
 	PlayerStateId currentStateID = PlayerStateId::EnumCount;

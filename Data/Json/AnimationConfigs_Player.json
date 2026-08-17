@@ -2428,10 +2428,31 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 2.1670000553131104,
+            "advanceInputStartFrame": 0.5,
             "animationIndex": 61,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 2.1666667461395264,
+                    "flag": "Invincible",
+                    "startTime": 0.0
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "Player",
             "events": [],
@@ -2730,10 +2751,31 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 0.8169999718666077,
+            "advanceInputStartFrame": 0.25,
             "animationIndex": 71,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.009999999776482582,
+                    "flag": "Invincible",
+                    "startTime": 0.0
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "Player",
             "events": [],
@@ -2881,10 +2923,31 @@
             ]
         },
         {
-            "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputEndFrame": 1.0,
+            "advanceInputStartFrame": 0.25,
             "animationIndex": 76,
-            "attributes": [],
+            "attributes": [
+                {
+                    "attackParam": {
+                        "attackDamage": 1,
+                        "attackHitStopSpeed": 0.10000000149011612,
+                        "attackHitStopTime": 1.0,
+                        "attackLeftVibrate": 1.0,
+                        "attackRightVibrate": 1.0,
+                        "forwardFrame": 0.0,
+                        "forwardPower": 0.0,
+                        "forwarded": false,
+                        "invisibleTime": 0.5,
+                        "knockbackType": "None",
+                        "moveRate": 1.0,
+                        "revengeValue": 1,
+                        "turnRate": 1.0
+                    },
+                    "endTime": 0.009999999776482582,
+                    "flag": "Invincible",
+                    "startTime": 0.0
+                }
+            ],
             "cameraKeyframes": [],
             "characterName": "Player",
             "events": [],

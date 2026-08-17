@@ -1,14 +1,14 @@
-#include "System/Misc.h"
+ï»¿#include "System/Misc.h"
 #include "GpuResourceUtils.h"
 #include "BasicShader.h"
 
 BasicShader::BasicShader(ID3D11Device* device)
 {
-	//// “ü—ÍƒŒƒCƒAƒEƒg
+	//// å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
 	//D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
 	//{
-	//	// ƒ{[ƒ“‰e‹¿ƒf[ƒ^‚ğ’Ç‰Á
-	//	// ¦•À‚Ñ‡‚ğVertex\‘¢‘Ì‚Ì—v‘f‚Æ“¯‚¶‚É‚·‚é
+	//	// ãƒœãƒ¼ãƒ³å½±éŸ¿ãƒ‡ãƒ¼ã‚¿ã‚’è¿½åŠ 
+	//	// â€»ä¸¦ã³é †ã‚’Vertexæ§‹é€ ä½“ã®è¦ç´ ã¨åŒã˜ã«ã™ã‚‹
 	//	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	//	{ "BONE_WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	//	{ "BONE_INDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -17,7 +17,7 @@ BasicShader::BasicShader(ID3D11Device* device)
 	//	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	//};
 
-	//// ’¸“_ƒVƒF[ƒ_[
+	//// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	//GpuResourceUtils::LoadVertexShader(
 	//	device,
 	//	"Data/Shader/BasicVS.cso",
@@ -25,7 +25,7 @@ BasicShader::BasicShader(ID3D11Device* device)
 	//	_countof(inputElementDesc),
 	//	inputLayout.GetAddressOf(),
 	//	vertexShader.GetAddressOf());
-	// ’¸“_ƒVƒF[ƒ_[
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	GpuResourceUtils::LoadVertexShader(
 		device,
 		"Data/Shader/BasicVS.cso",
@@ -34,30 +34,30 @@ BasicShader::BasicShader(ID3D11Device* device)
 		inputLayout.GetAddressOf(),
 		vertexShader.GetAddressOf());
 
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	GpuResourceUtils::LoadPixelShader(
 		device,
 		"Data/Shader/BasicPS.cso",
 		pixelShader.GetAddressOf());
 
-	// ƒƒbƒVƒ…—p’è”ƒoƒbƒtƒ@
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 	GpuResourceUtils::CreateConstantBuffer(
 		device,
 		sizeof(CbMesh),
 		meshConstantBuffer.GetAddressOf());
 }
 
-// ŠJnˆ—
+// é–‹å§‹å‡¦ç†
 void BasicShader::Begin(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	// ƒVƒF[ƒ_[İ’è
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼è¨­å®š
 	dc->IASetInputLayout(inputLayout.Get());
 	dc->VSSetShader(vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(pixelShader.Get(), nullptr, 0);
 
-	// ’è”ƒoƒbƒtƒ@İ’è
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®š
 	ID3D11Buffer* cbs[] =
 	{
 		meshConstantBuffer.Get(),
@@ -66,17 +66,17 @@ void BasicShader::Begin(const RenderContext& rc)
 	dc->PSSetConstantBuffers(0, _countof(cbs), cbs);
 }
 
-// XVˆ—
+// æ›´æ–°å‡¦ç†
 void BasicShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh, const std::shared_ptr<Model> model)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 
-	// ƒƒbƒVƒ…—p’è”ƒoƒbƒtƒ@XV
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡æ›´æ–°
 	CbMesh cbMesh{};
 	cbMesh.materialColor = mesh.material->baseColor;
 	dc->UpdateSubresource(meshConstantBuffer.Get(), 0, 0, &cbMesh, 0, 0);
-	// ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[İ’è
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼è¨­å®š
 	ID3D11ShaderResourceView* srvs[] =
 	{
 		mesh.material->baseMap.Get(),
@@ -84,21 +84,21 @@ void BasicShader::Update(const RenderContext& rc, const ModelResource::Mesh& mes
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }
 
-// •`‰æI—¹
+// æç”»çµ‚äº†
 void BasicShader::End(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	// ƒVƒF[ƒ_[İ’è‰ğœ
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼è¨­å®šè§£é™¤
 	dc->VSSetShader(nullptr, nullptr, 0);
 	dc->PSSetShader(nullptr, nullptr, 0);
 	dc->IASetInputLayout(nullptr);
 
-	// ’è”ƒoƒbƒtƒ@İ’è‰ğœ
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡è¨­å®šè§£é™¤
 	ID3D11Buffer* cbs[] = { nullptr };
 	dc->PSSetConstantBuffers(1, _countof(cbs), cbs);
 
-	// ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[İ’è‰ğœ
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼è¨­å®šè§£é™¤
 	ID3D11ShaderResourceView* srvs[] = { nullptr };
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 }

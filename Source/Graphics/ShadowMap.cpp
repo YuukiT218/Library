@@ -2,6 +2,18 @@
 #include "GpuResourceUtils.h"
 #include "RenderContext.h"
 #include "ShadowMap.h"
+#include "Camera/Camera.h"
+
+#include <algorithm>
+
+namespace
+{
+	// ライト方向が真上・真下に近いときにLookAtが破綻しないよう上方向を切り替える閾値
+	constexpr float UP_VECTOR_SWITCH_THRESHOLD = 0.99f;
+
+	// 境界球の半径を量子化する単位（カメラの微小な動きで影が揺れるのを防ぐ）
+	constexpr float RADIUS_QUANTIZE_STEP = 16.0f;
+}
 
 // コンストラクタ
 ShadowMap::ShadowMap(ID3D11Device* device)
@@ -39,12 +51,12 @@ ShadowMap::ShadowMap(ID3D11Device* device)
 
 	// 深度ステンシルビュー＆シェーダーリソースビューの作成
 	{
-		// テクスチャ作成
+		// カスケード分をまとめた1枚のテクスチャ配列として作成する
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
 		texture2dDesc.Width = textureSize;
 		texture2dDesc.Height = textureSize;
 		texture2dDesc.MipLevels = 1;
-		texture2dDesc.ArraySize = 1;
+		texture2dDesc.ArraySize = CASCADE_COUNT;
 		texture2dDesc.Format = DXGI_FORMAT_R32_TYPELESS;
 		texture2dDesc.SampleDesc.Count = 1;
 		texture2dDesc.SampleDesc.Quality = 0;
@@ -55,41 +67,45 @@ ShadowMap::ShadowMap(ID3D11Device* device)
 		texture2dDesc.CPUAccessFlags = 0;
 		texture2dDesc.MiscFlags = 0;
 
-		for (int index = 0; index < ShadowBuffer; ++index)
-		{
-			//テクスチャ作成
-			Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
-			HRESULT hr = device->CreateTexture2D(&texture2dDesc, nullptr, texture2d.GetAddressOf());
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
+		HRESULT hr = device->CreateTexture2D(&texture2dDesc, nullptr, texture2d.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-			// 深度ステンシルビューの作成
+		// スライスごとに深度ステンシルビューを作成する
+		for (int index = 0; index < CASCADE_COUNT; ++index)
+		{
 			D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc{};
 			depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
-			depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-			depthStencilViewDesc.Texture2D.MipSlice = 0;
+			depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+			depthStencilViewDesc.Texture2DArray.MipSlice = 0;
+			depthStencilViewDesc.Texture2DArray.FirstArraySlice = index;
+			depthStencilViewDesc.Texture2DArray.ArraySize = 1;
 			hr = device->CreateDepthStencilView(texture2d.Get(), &depthStencilViewDesc, depthStencilView[index].GetAddressOf());
 			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
-
-			// シェーダーリソースビューの作成
-			D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc{};
-			shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
-			shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-			shaderResourceViewDesc.Texture2D.MipLevels = 1;
-			hr = device->CreateShaderResourceView(texture2d.Get(), &shaderResourceViewDesc, shaderResourceView[index].GetAddressOf());
-			_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 		}
+
+		// シェーダーリソースビューは配列全体を参照する
+		D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc{};
+		shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
+		shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+		shaderResourceViewDesc.Texture2DArray.MostDetailedMip = 0;
+		shaderResourceViewDesc.Texture2DArray.MipLevels = 1;
+		shaderResourceViewDesc.Texture2DArray.FirstArraySlice = 0;
+		shaderResourceViewDesc.Texture2DArray.ArraySize = CASCADE_COUNT;
+		hr = device->CreateShaderResourceView(texture2d.Get(), &shaderResourceViewDesc, shaderResourceView.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
 	// サンプラステート
 	{
+		// シェーダー側で深度値を直接読んで比較するため、比較用ではなく通常のサンプラにする
 		D3D11_SAMPLER_DESC desc{};
 		desc.MipLODBias = 0.0f;
 		desc.MaxAnisotropy = 1;
-		desc.ComparisonFunc = D3D11_COMPARISON_LESS;
+		desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 		desc.MinLOD = 0;
-		desc.MaxLOD = 0;
-		// シャドウマップから深度値を取り出す際、範囲外(0.0～1.0以外)の場合はFloatの最大値になるようにする
+		desc.MaxLOD = D3D11_FLOAT32_MAX;
+		// シャドウマップの範囲外を参照した場合は影にならないよう最大深度を返す
 		desc.BorderColor[0] = D3D11_FLOAT32_MAX;
 		desc.BorderColor[1] = D3D11_FLOAT32_MAX;
 		desc.BorderColor[2] = D3D11_FLOAT32_MAX;
@@ -97,11 +113,94 @@ ShadowMap::ShadowMap(ID3D11Device* device)
 		desc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 		desc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 		desc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-		// 比較用のサンプラステートを指定
-		desc.Filter = D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_MIP_POINT;
+		desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 		HRESULT hr = device->CreateSamplerState(&desc, samplerState.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
+}
+
+// カメラの視錐台から各カスケードのライト行列を求める
+void ShadowMap::UpdateCascades(const RenderContext& rc)
+{
+	const Camera* camera = rc.camera;
+
+	// 光源から見た向き
+	const DirectionalLight& directionalLight = rc.lightManager->GetDirectionalLight();
+	DirectX::XMFLOAT3 dir = { directionalLight.direction.x, directionalLight.direction.y, directionalLight.direction.z };
+	DirectX::XMVECTOR LightDirection = DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&dir));
+
+	// ライトが真上・真下を向いていると上方向が定まらないので切り替える
+	float verticality = fabsf(DirectX::XMVectorGetY(LightDirection));
+	DirectX::XMVECTOR Up = (verticality > UP_VECTOR_SWITCH_THRESHOLD)
+		? DirectX::XMVectorSet(0, 0, 1, 0)
+		: DirectX::XMVectorSet(0, 1, 0, 0);
+
+	float nearZ = camera->GetNearZ();
+	float farZ = (std::min)(camera->GetFarZ(), shadowDistance);
+
+	// 分割位置を対数分割と均等分割の混合で求める
+	// 手前ほど細かく分割されるので、近くの影ほど解像度が高くなる
+	float splitDistances[CASCADE_COUNT + 1];
+	splitDistances[0] = nearZ;
+	for (int i = 1; i <= CASCADE_COUNT; ++i)
+	{
+		float ratio = static_cast<float>(i) / CASCADE_COUNT;
+		float logSplit = nearZ * powf(farZ / nearZ, ratio);
+		float uniformSplit = nearZ + (farZ - nearZ) * ratio;
+		splitDistances[i] = splitLambda * logSplit + (1.0f - splitLambda) * uniformSplit;
+	}
+
+	for (int i = 0; i < CASCADE_COUNT; ++i)
+	{
+		// この段が担当する視錐台の8頂点
+		DirectX::XMFLOAT3 corners[8];
+		camera->GetFrustumCorners(splitDistances[i], splitDistances[i + 1], corners);
+
+		// 視錐台を包む境界球を求める
+		// 球で覆うとカメラが回転しても大きさが変わらないため、影のちらつきを防げる
+		DirectX::XMVECTOR Center = DirectX::XMVectorZero();
+		for (const DirectX::XMFLOAT3& corner : corners)
+		{
+			Center = DirectX::XMVectorAdd(Center, DirectX::XMLoadFloat3(&corner));
+		}
+		Center = DirectX::XMVectorScale(Center, 1.0f / _countof(corners));
+
+		float radius = 0.0f;
+		for (const DirectX::XMFLOAT3& corner : corners)
+		{
+			DirectX::XMVECTOR Diff = DirectX::XMVectorSubtract(DirectX::XMLoadFloat3(&corner), Center);
+			radius = (std::max)(radius, DirectX::XMVectorGetX(DirectX::XMVector3Length(Diff)));
+		}
+		// 半径を量子化して、微小な変化で影が揺れないようにする
+		radius = ceilf(radius * RADIUS_QUANTIZE_STEP) / RADIUS_QUANTIZE_STEP;
+
+		// 光源を球の外側に置き、球全体を見下ろすビュー行列を作る
+		DirectX::XMVECTOR Eye = DirectX::XMVectorAdd(Center, DirectX::XMVectorScale(LightDirection, radius + casterMargin));
+		DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(Eye, Center, Up);
+
+		// 影がテクセル単位で動くようにスナップする
+		// これをしないとカメラが少し動くだけで影の縁がちらつく
+		DirectX::XMVECTOR CenterLightSpace = DirectX::XMVector3TransformCoord(Center, View);
+		float texelSize = (radius * 2.0f) / textureSize;
+		float snapOffsetX = floorf(DirectX::XMVectorGetX(CenterLightSpace) / texelSize) * texelSize - DirectX::XMVectorGetX(CenterLightSpace);
+		float snapOffsetY = floorf(DirectX::XMVectorGetY(CenterLightSpace) / texelSize) * texelSize - DirectX::XMVectorGetY(CenterLightSpace);
+		View = DirectX::XMMatrixMultiply(View, DirectX::XMMatrixTranslation(snapOffsetX, snapOffsetY, 0.0f));
+
+		// 平行投影。視錐台より手前の影の落とし主も含めるため奥行きに余白を取る
+		DirectX::XMMATRIX Projection = DirectX::XMMatrixOrthographicLH(
+			radius * 2.0f, radius * 2.0f, 0.0f, radius * 2.0f + casterMargin);
+
+		DirectX::XMStoreFloat4x4(&cascadeLightViewProjection[i], DirectX::XMMatrixMultiply(View, Projection));
+
+		// シェーダー側で法線オフセットをテクセル基準で計算するために記録しておく
+		(&cascadeTexelWorldSize.x)[i] = texelSize;
+	}
+
+	// 各カスケードの終端距離をシェーダーへ渡すためにまとめる
+	cascadeSplits.x = splitDistances[1];
+	cascadeSplits.y = splitDistances[2];
+	cascadeSplits.z = splitDistances[3];
+	cascadeSplits.w = splitDistances[4];
 }
 
 // 開始処理
@@ -114,6 +213,7 @@ void ShadowMap::Begin(const RenderContext& rc, const DirectX::XMFLOAT3& position
 	dc->RSGetViewports(&numViewports, &cacheViewport);
 	dc->OMGetRenderTargets(1, cachedRenderTargetView.ReleaseAndGetAddressOf(), cachedDepthStencilView.ReleaseAndGetAddressOf());
 
+	// シャドウマップをシェーダーリソースから外しておく
 	ID3D11ShaderResourceView* clear_shader_resource_view[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
 	dc->VSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
 	dc->HSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
@@ -122,12 +222,15 @@ void ShadowMap::Begin(const RenderContext& rc, const DirectX::XMFLOAT3& position
 	dc->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
 	dc->CSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
 
-	// レンダーターゲット＆深度ステンシル設定
-	// 深度ステンシルビューだけ設定
+	// カスケードごとのライト行列を計算する
+	UpdateCascades(rc);
+
+	// すべてのカスケードの深度をクリアしておく
+	for (int i = 0; i < CASCADE_COUNT; ++i)
 	{
-		dc->OMSetRenderTargets(0, nullptr, depthStencilView[0].Get());
-		dc->ClearDepthStencilView(depthStencilView[0].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+		dc->ClearDepthStencilView(depthStencilView[i].Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	}
+
 	// ビューポート設定
 	D3D11_VIEWPORT viewport;
 	viewport.TopLeftX = 0;
@@ -157,31 +260,19 @@ void ShadowMap::Begin(const RenderContext& rc, const DirectX::XMFLOAT3& position
 		sceneConstantBuffer.Get(),
 	};
 	dc->VSSetConstantBuffers(6, _countof(constantBuffers), constantBuffers);
-
-	// ライトビュープロジェクション行列を作成
-	// 光源から見たビュー行列を作成
-	const DirectionalLight& directionalLight = rc.lightManager->GetDirectionalLight();
-	DirectX::XMFLOAT3 dir = { directionalLight.direction.x, directionalLight.direction.y, directionalLight.direction.z };
-	DirectX::XMVECTOR LightDirection = DirectX::XMLoadFloat3(&dir);
-	LightDirection = DirectX::XMVector3Normalize(LightDirection);
-	DirectX::XMVECTOR Up = DirectX::XMVectorSet(0, 1, 0, 0);
-	DirectX::XMVECTOR Focus = DirectX::XMLoadFloat3(&position);
-	DirectX::XMVECTOR Eye = DirectX::XMVectorAdd(Focus, DirectX::XMVectorScale(LightDirection, 100.0f));
-	DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(Eye, Focus, Up);
-	// プロジェクション行列は平行投影で作成
-	DirectX::XMMATRIX Projection = DirectX::XMMatrixOrthographicLH(drawRect, drawRect, 0.1f, 2000.0f);
-	DirectX::XMMATRIX ViewProjection = DirectX::XMMatrixMultiply(View, Projection);
-	DirectX::XMStoreFloat4x4(&lightViewProjection, ViewProjection);
-
-
-	// シーン用定数バッファ
-	CbScene cbScene;
-	cbScene.lightViewProjection = lightViewProjection;
-	dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, 0, &cbScene, 0, 0);
 }
 
-// 描画実行
+// 影を落とすモデルを登録する
 void ShadowMap::Draw(const RenderContext& rc, const Model* model)
+{
+	if (model == nullptr) return;
+
+	// カスケードごとに描き直す必要があるため、ここでは溜めておく
+	modelList.emplace_back(model);
+}
+
+// 登録済みモデルを1枚のシャドウマップへ描画する
+void ShadowMap::DrawModel(const RenderContext& rc, const Model* model)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
@@ -212,7 +303,7 @@ void ShadowMap::Draw(const RenderContext& rc, const Model* model)
 		{
 			cbSkeleton.boneTransforms[0] = model->GetNodes()[mesh.nodeIndex].worldTransform;
 		}
-		rc.deviceContext->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
+		dc->UpdateSubresource(skeletonConstantBuffer.Get(), 0, 0, &cbSkeleton, 0, 0);
 
 		// 描画
 		dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
@@ -224,7 +315,22 @@ void ShadowMap::End(const RenderContext& rc)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	if (modelList.size() > 0) modelList.clear();
+	// カスケードごとに、登録されたモデルをすべて描画する
+	for (int i = 0; i < CASCADE_COUNT; ++i)
+	{
+		dc->OMSetRenderTargets(0, nullptr, depthStencilView[i].Get());
+
+		CbScene cbScene;
+		cbScene.lightViewProjection = cascadeLightViewProjection[i];
+		dc->UpdateSubresource(sceneConstantBuffer.Get(), 0, 0, &cbScene, 0, 0);
+
+		for (const Model* model : modelList)
+		{
+			DrawModel(rc, model);
+		}
+	}
+
+	modelList.clear();
 
 	// レンダーターゲットを元の状態に戻す
 	dc->OMSetRenderTargets(0, nullptr, nullptr);
@@ -237,24 +343,20 @@ void ShadowMap::DrawDebugGUI()
 {
 	if (ImGui::CollapsingHeader("ShadowMap", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImVec2 availableSize = ImGui::GetContentRegionAvail();
+		ImGui::Checkbox("CascadeDebugView", &cascadeDebugView);
 
-		{
-			// 画像のアスペクト比（例: 256x144）
-			float aspectRatio = 256.0f / 144.0f;
-			if (availableSize.x / availableSize.y > aspectRatio) {
-				availableSize.x = availableSize.y * aspectRatio; // 高さに合わせて幅を調整
-			}
-			else {
-				availableSize.y = availableSize.x / aspectRatio; // 幅に合わせて高さを調整
-			}
-
-			ImGui::Image(shaderResourceView[0].Get(), availableSize);
-		}
 		ImGui::ColorEdit4("ShadowColor", &shadowColor.x);
+		ImGui::DragFloat("Attenuation", &shadowAttenuation, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("Bias", &shadowBias, 0.0001f, 0.0f, 0.05f, "%.4f");
+		ImGui::DragFloat("NormalOffset(texel)", &shadowNormalOffset, 0.1f, 0.0f, 16.0f, "%.2f");
+		ImGui::DragFloat("IndirectShadow", &indirectShadowStrength, 0.01f, 0.0f, 1.0f);
 
-		ImGui::DragFloat("DrawRect", &drawRect, 1.0f, 1.0f, 1000.0f);
-		ImGui::DragFloat("Attenuation", &shadowAttenuation, 0.1f);
-		ImGui::DragFloat("Bias", &shadowBias, 0.0001f, 0.0f, 0.1f);
+		ImGui::Separator();
+		ImGui::DragFloat("ShadowDistance", &shadowDistance, 1.0f, 10.0f, 1000.0f);
+		ImGui::DragFloat("SplitLambda", &splitLambda, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("CasterMargin", &casterMargin, 1.0f, 0.0f, 500.0f);
+
+		ImGui::Text("Splits: %.1f / %.1f / %.1f / %.1f",
+			cascadeSplits.x, cascadeSplits.y, cascadeSplits.z, cascadeSplits.w);
 	}
 }

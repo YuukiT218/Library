@@ -1,29 +1,29 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Scene.h"
 #include "Sprite/Sprite.h"
 #include "System/Audio/AudioSource.h"
 
-// ƒ^ƒCƒgƒ‹ƒV[ƒ“
+// ã‚¿ã‚¤ãƒˆãƒ«ã‚·ãƒ¼ãƒ³
 class SceneTitle : public Scene
 {
 public:
 	SceneTitle() {}
 	~SceneTitle() override {}
 
-	// ‰Šú‰»
+	// åˆæœŸåŒ–
 	void Initialize() override;
 
-	// I—¹‰»
+	// çµ‚äº†åŒ–
 	void Finalize() override;
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	void Update(float elapsedTime) override;
 
-	// •`‰æˆ—
+	// æç”»å‡¦ç†
 	void Render(float elapsedTime) override;
 
-	// ƒfƒoƒbƒO—pGUI•`‰æ
+	// ãƒ‡ãƒãƒƒã‚°ç”¨GUIæç”»
 	void DrawDebugGUI();
 
 	struct EasingData
@@ -75,8 +75,8 @@ private:
 
 	float amount = 0;
 
-	float NameAlpha = 0.f;
-	float AnyAlpha = 0.f;
+	float nameAlpha = 0.f;
+	float anyAlpha = 0.f;
 
 	float alphaTime = 0.f;
 	float alphaSpeed = 5.0f;

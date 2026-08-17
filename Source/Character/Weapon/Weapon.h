@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Character/Character.h"
 #include "Graphics/Graphics.h"
@@ -9,45 +9,57 @@ class Weapon
 {
 public:
 	Weapon() {}
-	virtual ~Weapon() {}
+	virtual ~Weapon();
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	virtual void Update(float elapsedTime) {}
 
-	// •`‰æˆ—
+	// æç”»å‡¦ç†
 	virtual void Render(const RenderContext& rc, ShaderId shaderId) {}
 
-	// ƒ‚ƒfƒ‹—pƒQƒbƒ^[
+	// ãƒ¢ãƒ‡ãƒ«ç”¨ã‚²ãƒƒã‚¿ãƒ¼
 	std::shared_ptr<Model> GetModel() const { return model; }
 
-	// ƒAƒ^ƒbƒ`
+	// ã‚¢ã‚¿ãƒƒãƒ
 	void Attach(std::string nodeName, Model* character);
 
-	// ƒgƒŒƒCƒ‹—pƒAƒbƒvƒf[ƒg
+	// ãƒˆãƒ¬ã‚¤ãƒ«ç”¨ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆ
 	void TrailUpdate(float elapsedTime);
 
-	// ƒm[ƒh‚ÆƒGƒlƒ~[‚ÌÕ“Ëˆ—
-	void CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
+	// ãƒãƒ¼ãƒ‰ã¨ã‚¨ãƒãƒŸãƒ¼ã®è¡çªå‡¦ç†
+	void CollisionNodeVsEnemies(float nodeRadius, int attackDamage, float invincibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
 	void CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config, AnimationAttribute* activeAttribute, Character* character);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌUŒ‚“–‚½‚è”»’è‚ğ‚Â‚¯‚é
-	void AttackAnimationCollision(Model* character, float animTimeMin, float animTimeMax, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®æ”»æ’ƒå½“ãŸã‚Šåˆ¤å®šã‚’ã¤ã‘ã‚‹
+	void AttackAnimationCollision(Model* character, float animTimeMin, float animTimeMax, int attackDamage, float invincibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed);
 	void AttackAnimationCollision(Model* model, AnimationConfig* config, Character* character);
 
-	// ƒeƒŒƒ|[ƒgƒGƒtƒFƒNƒgİ’è
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆè¨­å®š
 	void SetTeleportEffect(bool enable, float progress, float time);
 	void ClearTeleportEffect();
 	bool HasTeleportEffect() const { return hasTeleportEffect; }
 	float GetTeleportProgress() const { return teleportProgress; }
 	float GetTeleportTime() const { return teleportTime; }
 	void ResetAttackState();
+public:
+	// åˆƒã«æ²¿ã£ã¦ä¸¦ã¹ã‚‹å½“ãŸã‚Šåˆ¤å®šçƒã®æ•°
+	static constexpr int HIT_SPHERE_COUNT = 5;
+
 protected:
-	//ƒgƒŒƒCƒ‹‚Ì•`‰æ
+	//ãƒˆãƒ¬ã‚¤ãƒ«ã®æç”»
 	void TrailRender(const RenderContext& rc);
 
+	//ãƒˆãƒ¬ã‚¤ãƒ«ç”¨ãƒ‡ãƒãƒƒã‚°ImGUI
+	void DrawDebugTrailGUI();
 
-	//ƒgƒŒƒCƒ‹—pƒfƒoƒbƒOImGUI
-	void DrawDebugTrailGui();
+	// åˆƒã«æ²¿ã£ãŸå½“ãŸã‚Šåˆ¤å®šçƒã®åˆæœŸé…ç½®ï¼ˆæ´¾ç”Ÿã‚¯ãƒ©ã‚¹å…±é€šï¼‰
+	void SetupBladeHitSpheres(float sphereRadius);
+
+	// ãƒ’ãƒƒãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆã¨æ‰“æ’ƒéŸ³ã®èª­ã¿è¾¼ã¿ï¼ˆæ´¾ç”Ÿã‚¯ãƒ©ã‚¹å…±é€šï¼‰
+	void LoadCommonResources();
+
+	// æ­¦å™¨å…±é€šã®ãƒ‡ãƒãƒƒã‚°GUIï¼ˆä½ç½®ãƒ»å›è»¢ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ãƒ»å½“ãŸã‚Šåˆ¤å®šçƒï¼‰
+	void DrawCommonDebugGUI();
 
 protected:
 	DirectX::XMFLOAT3 position = { 0, 0, 0 };
@@ -55,43 +67,42 @@ protected:
 	DirectX::XMFLOAT3 scale = { 1, 1, 1 };
 	DirectX::XMFLOAT4X4 transform = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 	std::shared_ptr<Model> model;
-	DirectX::XMFLOAT3 weaponHitOffset[5];
-	DirectX::XMFLOAT3 weaponHitPosition[5];
-	Model::EmissiveColors colors;//”­ŒõF
+	DirectX::XMFLOAT3 weaponHitOffset[HIT_SPHERE_COUNT];
+	DirectX::XMFLOAT3 weaponHitPosition[HIT_SPHERE_COUNT];
+	Model::EmissiveColors colors;//ç™ºå…‰è‰²
 
-	// ƒeƒŒƒ|[ƒgƒGƒtƒFƒNƒg—p
+	// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”¨
 	bool hasTeleportEffect = false;
 	float teleportProgress = 0.0f;
 	float teleportTime = 0.0f;
 
-	// •ŠíƒgƒŒƒCƒ‹ŠÖŒW
-	static const int MAX_POLYGON = 6 * 2;//‰½ƒtƒŒ[ƒ€•¶‚ğ•Û‘¶‚µ‚Ä•`‚­‚©
-	DirectX::XMFLOAT3					trailPositions[2][MAX_POLYGON];//ƒgƒŒƒCƒ‹—p’¸“_ƒ|ƒWƒVƒ‡ƒ“
-	DirectX::XMFLOAT3					trailoffset[2] =	//ƒgƒŒƒCƒ‹•â³—p [0]ª–{ [1]æ’[
+	// æ­¦å™¨ãƒˆãƒ¬ã‚¤ãƒ«é–¢ä¿‚
+	static const int MAX_POLYGON = 6 * 2;//ä½•ãƒ•ãƒ¬ãƒ¼ãƒ æ–‡ã‚’ä¿å­˜ã—ã¦æãã‹
+	DirectX::XMFLOAT3					trailPositions[2][MAX_POLYGON];//ãƒˆãƒ¬ã‚¤ãƒ«ç”¨é ‚ç‚¹ãƒã‚¸ã‚·ãƒ§ãƒ³
+	DirectX::XMFLOAT3					trailOffset[2] =	//ãƒˆãƒ¬ã‚¤ãƒ«è£œæ­£ç”¨ [0]æ ¹æœ¬ [1]å…ˆç«¯
 	{
 		{0.0f, 0.0f, 0.5f},
 		{0.0f, 0.0f, 1.5f},
 	};
-	DirectX::XMFLOAT4 TipBegin = {};//Œ•ü•ÓF
-	DirectX::XMFLOAT4 TipEnd = {};//Á–Å‚·‚éƒgƒŒƒCƒ‹‚ÌF
-	DirectX::XMFLOAT4 RootBegin = {};//Œ•ü•ÓF
-	DirectX::XMFLOAT4 RootEnd = {};//Á–Å‚·‚éƒgƒŒƒCƒ‹‚ÌF
+	DirectX::XMFLOAT4 tipBegin = {};//å‰£å‘¨è¾ºè‰²
+	DirectX::XMFLOAT4 tipEnd = {};//æ¶ˆæ»…ã™ã‚‹ãƒˆãƒ¬ã‚¤ãƒ«ã®è‰²
+	DirectX::XMFLOAT4 rootBegin = {};//å‰£å‘¨è¾ºè‰²
+	DirectX::XMFLOAT4 rootEnd = {};//æ¶ˆæ»…ã™ã‚‹ãƒˆãƒ¬ã‚¤ãƒ«ã®è‰²
 
-	float Colorscale{};//æ’[‚ÌF‚ğ”Z‚­‚·‚é‚½‚ßBegin‚É‚Ì‚İ‚˜
+	float colorScale{};//å…ˆç«¯ã®è‰²ã‚’æ¿ƒãã™ã‚‹ãŸã‚Beginã«ã®ã¿ï½˜
 
-	float dissolve{};//ƒfƒBƒ]ƒ‹ƒu
+	float dissolve{};//ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–
 
 	DirectX::XMFLOAT4 pointColor{};
 	float attenuation{};
 
-	bool IsAttack{};//ƒgƒŒƒCƒ‹‚Ì•`‰æ‚ğ”»’è
+	bool isAttack{};//ãƒˆãƒ¬ã‚¤ãƒ«ã®æç”»ã‚’åˆ¤å®š
 
-	bool IsParry = false;
-	float ParryTime = 0.0f;
-#define MAXPARRYTIME 0.4f
-	float MaxParryTime = 0.0f;
-	float MaxCollTime = 0.5f;//ƒN[ƒ‹ƒ^ƒCƒ€
-	float collTime;
+	bool isParry = false;
+	float parryTime = 0.0f;
+	float maxParryTime = 0.0f;
+	float maxCoolTime = 0.5f;//ã‚¯ãƒ¼ãƒ«ã‚¿ã‚¤ãƒ 
+	float coolTime = 0.0f;
 
 	int hitSphereIndex = -1;
 	float hitSphereRadius = 0.1f;

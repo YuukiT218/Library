@@ -40,7 +40,8 @@ public:
 	void DrawAfterimage(ShaderId shaderId, std::shared_ptr<Model> model,
 		const std::vector<Model::Node>& nodes,
 		const DirectX::XMFLOAT4X4& transform,
-		float alpha, float darkness = 0.8f);
+		float alpha, float darkness = 0.8f,
+		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 
 	void DrawWithAlpha(ShaderId shaderId, std::shared_ptr<Model> model, float alpha);
 
@@ -81,21 +82,9 @@ private:
 		float enableDistortion;
 		float enableDither;
 		DirectX::XMFLOAT3 teleportDummy;
-	};
 
-	static const int ShadowBufferSize = 4;
-	struct CbShadow
-	{
-		DirectX::XMFLOAT4X4 CascadeLightViewProjection[ShadowBufferSize];
-		DirectX::XMFLOAT4 CascadeShadowBias;
-
-		DirectX::XMFLOAT4 cascadeFlags; // DisplayCascadeArea, IsCascade を float にし、余りを使う
-
-		DirectX::XMFLOAT4 shadowColor;
-		float shadowTexelSize;
-		float shadowAttenuation;
-		float shadowBias;
-		float dummy;
+		// 残像の色味(rgb)と明るさ(a)
+		DirectX::XMFLOAT4 afterimageColor;
 	};
 
 	struct DrawInfo
@@ -111,6 +100,7 @@ private:
 		DirectX::XMFLOAT4X4 afterimageTransform;
 		float afterimageAlpha = 1.0f;
 		float afterimageDarkness = 0.8f;
+		DirectX::XMFLOAT4 afterimageColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 		bool enableDither = false;
 	};
 

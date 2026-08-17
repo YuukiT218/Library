@@ -92,6 +92,9 @@ ProjectileInfo ProjectileManager::GetSlashWaveInfo()
     info.scale = 0.5f;
     info.damage = 3;
     info.invincibleTime = 0.25f;
+    // 薄い緑のポイントライトを追従させる
+    info.pointLightColor = { 0.55f, 1.0f, 0.65f, 0.25f };
+    info.pointLightRange = 5.0f;
     return info;
 }
 
@@ -107,5 +110,8 @@ ProjectileInfo ProjectileManager::GetLightPillarInfo()
     info.damage = 5;
     info.invincibleTime = 0.5f;
     info.shape = ProjectileShape::Cylinder;
+    // 薄い黄色のポイントライトを追従させる
+    info.pointLightColor = { 1.0f, 0.97f, 0.6f, 0.3f };
+    info.pointLightRange = 7.0f;
     return info;
 }

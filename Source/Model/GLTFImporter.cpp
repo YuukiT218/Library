@@ -1,4 +1,4 @@
-#include <fstream>
+ï»¿#include <fstream>
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -18,17 +18,17 @@ bool LoadImageData(tinygltf::Image*, const int, std::string*,
 	return true;
 }
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 GLTFImporter::GLTFImporter(const char* filename)
 	: filepath(filename) 
 {
-	// Šg’£qæ“¾
+	// æ‹¡å¼µå­å–å¾—
 	std::string extension = filepath.extension().string();
-	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);	// ¬•¶š‰»
+	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);	// å°æ–‡å­—åŒ–
 
 	tinygltf::TinyGLTF gltf;
 
-	// Ÿè‚ÉƒCƒ[ƒW‚ğ“Ç‚İ‚Ü‚È‚¢‚æ‚¤‚É‚·‚é
+	// å‹æ‰‹ã«ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚’èª­ã¿è¾¼ã¾ãªã„ã‚ˆã†ã«ã™ã‚‹
 	gltf.SetImageLoader(LoadImageData, this);
 
 	std::string error, warning;
@@ -54,7 +54,7 @@ GLTFImporter::GLTFImporter(const char* filename)
 	}
 }
 
-// ƒm[ƒhƒf[ƒ^‚ğ“Ç‚İ‚İ
+// ãƒãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
 void GLTFImporter::LoadNodes(NodeList& nodes)
 {
 	ModelResource::Node& node = nodes.emplace_back();
@@ -66,7 +66,7 @@ void GLTFImporter::LoadNodes(NodeList& nodes)
 		const tinygltf::Node& gltfNode = gltfModel.nodes.at(gltfNodeIndex);
 		ModelResource::Node& node = nodes.at(gltfNodeIndex);
 
-		// ƒf[ƒ^æ“¾
+		// ãƒ‡ãƒ¼ã‚¿å–å¾—
 		node.name = gltfNode.name;
 		
 		for (int gltfChildNodeIndex : gltfNode.children)
@@ -100,12 +100,12 @@ void GLTFImporter::LoadNodes(NodeList& nodes)
 				node.position = gltfVector3ToXMFLOAT3(gltfNode.translation);
 			}
 		}
-		// À•WŒn•ÏŠ·
+		// åº§æ¨™ç³»å¤‰æ›
 		ConvertNodeAxisSystem(node);
 	}
 }
 
-// ƒƒbƒVƒ…ƒf[ƒ^‚ğ“Ç‚İ‚İ
+// ãƒ¡ãƒƒã‚·ãƒ¥ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
 void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 {
 	for (int gltfNodeIndex = 0; gltfNodeIndex < gltfModel.nodes.size(); ++gltfNodeIndex)
@@ -121,7 +121,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 			mesh.nodeIndex = gltfNodeIndex;
 			mesh.materialIndex = gltfPrimitive.material;
 
-			// ƒ{[ƒ“
+			// ãƒœãƒ¼ãƒ³
 			if (gltfNode.skin >= 0)
 			{
 				const tinygltf::Skin& gltfSkin = gltfModel.skins.at(gltfNode.skin);
@@ -137,7 +137,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 			}
 
-			// ƒCƒ“ƒfƒbƒNƒXƒoƒbƒtƒ@
+			// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ãƒãƒƒãƒ•ã‚¡
 			{
 				const tinygltf::Accessor& gltfAccessor = gltfModel.accessors.at(gltfPrimitive.indices);
 				const tinygltf::BufferView& gltfBufferView = gltfModel.bufferViews.at(gltfAccessor.bufferView);
@@ -165,7 +165,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 			}
 
-			// ’¸“_ƒoƒbƒtƒ@—ÌˆæŠm•Û
+			// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡é ˜åŸŸç¢ºä¿
 			{
 				std::map<std::string, int>::const_iterator gltfAttribute = gltfPrimitive.attributes.find("POSITION");
 				_ASSERT_EXPR(gltfAttribute != gltfPrimitive.attributes.end(), "");
@@ -173,7 +173,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				mesh.vertices.resize(gltfAccessor.count);
 			}
 
-			// ’¸“_ƒoƒbƒtƒ@
+			// é ‚ç‚¹ãƒãƒƒãƒ•ã‚¡
 			for (std::map<std::string, int>::const_reference gltfAttribute : gltfPrimitive.attributes)
 			{
 				const tinygltf::Accessor& gltfAccessor = gltfModel.accessors.at(gltfAttribute.second);
@@ -357,7 +357,7 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				}
 			}
 
-			// ƒ^ƒ“ƒWƒFƒ“ƒg‚ª‚È‚©‚Á‚½ê‡‚Í©—Í‚ÅŒvZ
+			// ã‚¿ãƒ³ã‚¸ã‚§ãƒ³ãƒˆãŒãªã‹ã£ãŸå ´åˆã¯è‡ªåŠ›ã§è¨ˆç®—
 			if (gltfPrimitive.attributes.find("TANGENT") == gltfPrimitive.attributes.end() &&
 				gltfPrimitive.attributes.find("POSITION") != gltfPrimitive.attributes.end() &&
 				gltfPrimitive.attributes.find("TEXCOORD_0") != gltfPrimitive.attributes.end())
@@ -365,17 +365,17 @@ void GLTFImporter::LoadMeshes(MeshList& meshes, const NodeList& nodes)
 				ComputeTangents(mesh.vertices, mesh.indices);
 			}
 
-			// À•WŒn•ÏŠ·
+			// åº§æ¨™ç³»å¤‰æ›
 			ConvertMeshAxisSystem(mesh);
 		}
 	}
 
 }
 
-// ƒ}ƒeƒŠƒAƒ‹ƒf[ƒ^‚ğ“Ç‚İ‚İ
+// ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
 void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 {
-	// ƒfƒBƒŒƒNƒgƒŠƒpƒXæ“¾
+	// ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãƒ‘ã‚¹å–å¾—
 	std::filesystem::path dirpath(filepath.parent_path());
 
 	for (const tinygltf::Material& gltfMaterial : gltfModel.materials)
@@ -456,24 +456,24 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 				}
 				else
 				{
-					// ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹ƒpƒXì¬
+					// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ä½œæˆ
 					std::filesystem::path textureFilePath(gltfImage.uri);
 					if (textureFilePath == "")
 					{
-						// ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹–¼‚ª‚È‚©‚Á‚½ê‡‚Íƒ}ƒeƒŠƒAƒ‹–¼‚ÆƒeƒNƒXƒ`ƒƒƒ^ƒCƒv‚©‚çì¬
+						// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«åãŒãªã‹ã£ãŸå ´åˆã¯ãƒãƒ†ãƒªã‚¢ãƒ«åã¨ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚¿ã‚¤ãƒ—ã‹ã‚‰ä½œæˆ
 						std::string extension(std::filesystem::path(gltfImage.mimeType).filename().string());
 						textureFilePath = material.name + "_" + textureType + "." + extension;
 					}
 					textureFilePath = "Textures" / textureFilePath.filename();
 
-					// –„‚ß‚İƒeƒNƒXƒ`ƒƒ‚ğo—Í‚·‚éƒfƒBƒŒƒNƒgƒŠ‚ğŠm”F
+					// åŸ‹ã‚è¾¼ã¿ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’å‡ºåŠ›ã™ã‚‹ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ç¢ºèª
 					std::filesystem::path outputDirPath(dirpath / textureFilePath.parent_path());
 					if (!std::filesystem::exists(outputDirPath))
 					{
-						// ‚È‚©‚Á‚½‚çƒfƒBƒŒƒNƒgƒŠì¬
+						// ãªã‹ã£ãŸã‚‰ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªä½œæˆ
 						std::filesystem::create_directories(outputDirPath);
 					}
-					// o—ÍƒfƒBƒŒƒNƒgƒŠ‚É‰æ‘œƒtƒ@ƒCƒ‹‚ğ•Û‘¶
+					// å‡ºåŠ›ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã«ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä¿å­˜
 					std::filesystem::path outputFilePath(dirpath / textureFilePath);
 					if (!std::filesystem::exists(outputFilePath))
 					{
@@ -488,7 +488,7 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 						}
 						else
 						{
-							// ƒŠƒjƒA‚È‰æ‘œƒf[ƒ^‚Í.png‚Åo—Í
+							// ãƒªãƒ‹ã‚¢ãªç”»åƒãƒ‡ãƒ¼ã‚¿ã¯.pngã§å‡ºåŠ›
 							textureFilePath = textureFilePath.replace_extension(".png");
 							stbi_write_png(
 								outputFilePath.string().c_str(),
@@ -498,7 +498,7 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 								gltfImage.image.data(), 0);
 						}
 					}
-					// ƒeƒNƒXƒ`ƒƒƒtƒ@ƒCƒ‹ƒpƒX‚ğŠi”[
+					// ãƒ†ã‚¯ã‚¹ãƒãƒ£ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ã‚¹ã‚’æ ¼ç´
 					textureFilename = textureFilePath.string();
 				}
 			}
@@ -515,7 +515,7 @@ void GLTFImporter::LoadMaterials(MaterialList& materials, ID3D11Device* device)
 	}
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚ğ“Ç‚İ‚İ
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
 void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nodes, float sampleRate)
 {
 	DirectX::XMVECTOR Epsilon = DirectX::XMVectorReplicate(0.00001f);
@@ -531,7 +531,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 		float maxTime = 0;
 		for (const tinygltf::AnimationChannel& gltfAnimationChannel : gltfAnimation.channels)
 		{
-			// ƒm[ƒhƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚ğ“Ç‚İæ‚èŠJn
+			// ãƒãƒ¼ãƒ‰ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿å–ã‚Šé–‹å§‹
 			ModelResource::NodeAnim& nodeAnim = animation.nodeAnims.at(gltfAnimationChannel.target_node);
 			const tinygltf::AnimationSampler& gltfAnimationSampler = gltfAnimation.samplers.at(gltfAnimationChannel.sampler);
 			const tinygltf::Accessor& gltfInputAccessor = gltfModel.accessors.at(gltfAnimationSampler.input);
@@ -545,7 +545,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 
 			if (gltfAnimationChannel.target_path == "scale")
 			{
-				// ƒL[ƒtƒŒ[ƒ€ƒf[ƒ^æ“¾
+				// ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ‡ãƒ¼ã‚¿å–å¾—
 				const DirectX::XMFLOAT3* gltfKeyframeValues = reinterpret_cast<const DirectX::XMFLOAT3*>(gltfModel.buffers.at(gltfOutputBufferView.buffer).data.data() + gltfOutputBufferView.byteOffset + gltfOutputAccessor.byteOffset);
 				for (int i = 0; i < gltfInputAccessor.count; ++i)
 				{
@@ -553,7 +553,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 					keyframe.seconds = gltfKeyframeTimes[i];
 					keyframe.value = gltfKeyframeValues[i];
 				}
-				// ƒL[ƒtƒŒ[ƒ€‚Ì’l‚ª‘S‚Ä“¯‚¶‚È‚çÅ‰‚ÌƒL[ƒtƒŒ[ƒ€ˆÈŠOÈ‚­
+				// ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å€¤ãŒå…¨ã¦åŒã˜ãªã‚‰æœ€åˆã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ä»¥å¤–çœã
 				bool result = true;
 				DirectX::XMVECTOR A = DirectX::XMLoadFloat3(&nodeAnim.scaleKeyframes.at(0).value);
 				for (size_t i = 1; i < nodeAnim.scaleKeyframes.size(); ++i)
@@ -572,12 +572,12 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 			}
 			else if (gltfAnimationChannel.target_path == "rotation")
 			{
-				// ƒL[ƒtƒŒ[ƒ€ƒf[ƒ^æ“¾
+				// ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ‡ãƒ¼ã‚¿å–å¾—
 				const DirectX::XMFLOAT4* gltfKeyframeValues = reinterpret_cast<const DirectX::XMFLOAT4*>(gltfModel.buffers.at(gltfOutputBufferView.buffer).data.data() + gltfOutputBufferView.byteOffset + gltfOutputAccessor.byteOffset);
 				for (int i = 0; i < gltfInputAccessor.count; ++i)
 				{
-					// ‚È‚º‚©Unity‚Åo—Í‚µ‚½ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚É‚ÍƒSƒ~‚Æv‚í‚ê‚éƒL[ƒtƒŒ[ƒ€‚ª‘¶İ‚µ‚Ä‚¢‚éê‡‚ª‚ ‚éB
-					// ¬”“_‚ª‘¶İ‚·‚éƒtƒŒ[ƒ€iŠÔj‚ªƒSƒ~ƒf[ƒ^‚Á‚Û‚¢‚Ì‚ÅœŠO‚·‚éB
+					// ãªãœã‹Unityã§å‡ºåŠ›ã—ãŸã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã«ã¯ã‚´ãƒŸã¨æ€ã‚ã‚Œã‚‹ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãŒå­˜åœ¨ã—ã¦ã„ã‚‹å ´åˆãŒã‚ã‚‹ã€‚
+					// å°æ•°ç‚¹ãŒå­˜åœ¨ã™ã‚‹ãƒ•ãƒ¬ãƒ¼ãƒ ï¼ˆæ™‚é–“ï¼‰ãŒã‚´ãƒŸãƒ‡ãƒ¼ã‚¿ã£ã½ã„ã®ã§é™¤å¤–ã™ã‚‹ã€‚
 					float frame = gltfKeyframeTimes[i] * sampleRate;
 					if (fabs(std::round(frame) - frame) > 0.001) continue;
 
@@ -586,7 +586,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 					keyframe.value = gltfKeyframeValues[i];
 				}
 
-				// ƒL[ƒtƒŒ[ƒ€‚Ì’l‚ª‘S‚Ä“¯‚¶‚È‚çÅ‰‚ÌƒL[ƒtƒŒ[ƒ€ˆÈŠOÈ‚­
+				// ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å€¤ãŒå…¨ã¦åŒã˜ãªã‚‰æœ€åˆã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ä»¥å¤–çœã
 				bool result = true;
 				DirectX::XMVECTOR A = DirectX::XMLoadFloat4(&nodeAnim.rotationKeyframes.at(0).value);
 				for (size_t i = 1; i < nodeAnim.rotationKeyframes.size(); ++i)
@@ -605,7 +605,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 			}
 			else if (gltfAnimationChannel.target_path == "translation")
 			{
-				// ƒL[ƒtƒŒ[ƒ€ƒf[ƒ^æ“¾
+				// ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ‡ãƒ¼ã‚¿å–å¾—
 				const DirectX::XMFLOAT3* gltfKeyframeValues = reinterpret_cast<const DirectX::XMFLOAT3*>(gltfModel.buffers.at(gltfOutputBufferView.buffer).data.data() + gltfOutputBufferView.byteOffset + gltfOutputAccessor.byteOffset);
 				for (int i = 0; i < gltfInputAccessor.count; ++i)
 				{
@@ -614,7 +614,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 					keyframe.value = gltfKeyframeValues[i];
 				}
 
-				// ƒL[ƒtƒŒ[ƒ€‚Ì’l‚ª‘S‚Ä“¯‚¶‚È‚çÅ‰‚ÌƒL[ƒtƒŒ[ƒ€ˆÈŠOÈ‚­
+				// ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å€¤ãŒå…¨ã¦åŒã˜ãªã‚‰æœ€åˆã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ä»¥å¤–çœã
 				bool result = true;
 				DirectX::XMVECTOR A = DirectX::XMLoadFloat3(&nodeAnim.positionKeyframes.at(0).value);
 				for (size_t i = 1; i < nodeAnim.positionKeyframes.size(); ++i)
@@ -633,7 +633,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 			}
 		}
 
-		// æ“ªƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚ª0‚¶‚á‚È‚¢ê‡‚ª‚ ‚é‚Ì‚Å’²®‚·‚é
+		// å…ˆé ­ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ãŒ0ã˜ã‚ƒãªã„å ´åˆãŒã‚ã‚‹ã®ã§èª¿æ•´ã™ã‚‹
 		for (ModelResource::NodeAnim& nodeAnim : animation.nodeAnims)
 		{
 			for (ModelResource::VectorKeyframe& keyframe : nodeAnim.positionKeyframes)
@@ -649,18 +649,18 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 				keyframe.seconds -= minTime;
 			}
 		}
-		// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶ŠÔ
+		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿæ™‚é–“
 		animation.secondsLength = maxTime - minTime;
 
-		// À•WŒn•ÏŠ·
+		// åº§æ¨™ç³»å¤‰æ›
 		ConvertAnimationAxisSystem(animation);
 
-		// ƒAƒjƒ[ƒVƒ‡ƒ“‚ª‚È‚©‚Á‚½ƒm[ƒh‚É‘Î‚µ‚Ä‰Šúp¨‚ÌƒL[ƒtƒŒ[ƒ€‚ğ’Ç‰Á‚·‚é
+		// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãŒãªã‹ã£ãŸãƒãƒ¼ãƒ‰ã«å¯¾ã—ã¦åˆæœŸå§¿å‹¢ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’è¿½åŠ ã™ã‚‹
 		for (size_t nodeIndex = 0; nodeIndex < animation.nodeAnims.size(); ++nodeIndex)
 		{
 			const ModelResource::Node& node = nodes.at(nodeIndex);
 			ModelResource::NodeAnim& nodeAnim = animation.nodeAnims.at(nodeIndex);
-			// ˆÚ“®
+			// ç§»å‹•
 			if (nodeAnim.positionKeyframes.size() == 0)
 			{
 				ModelResource::VectorKeyframe& keyframe = nodeAnim.positionKeyframes.emplace_back();
@@ -673,7 +673,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 				keyframe.seconds = animation.secondsLength;
 				keyframe.value = nodeAnim.positionKeyframes.at(0).value;
 			}
-			// ‰ñ“]
+			// å›è»¢
 			if (nodeAnim.rotationKeyframes.size() == 0)
 			{
 				ModelResource::QuaternionKeyframe& keyframe = nodeAnim.rotationKeyframes.emplace_back();
@@ -686,7 +686,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 				keyframe.seconds = animation.secondsLength;
 				keyframe.value = nodeAnim.rotationKeyframes.at(0).value;
 			}
-			// ƒXƒP[ƒ‹
+			// ã‚¹ã‚±ãƒ¼ãƒ«
 			if (nodeAnim.scaleKeyframes.size() == 0)
 			{
 				ModelResource::VectorKeyframe& keyframe = nodeAnim.scaleKeyframes.emplace_back();
@@ -703,7 +703,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 	}
 }
 
-// gltfVector3 ¨ XMFLOAT3
+// gltfVector3 â†’ XMFLOAT3
 DirectX::XMFLOAT3 GLTFImporter::gltfVector3ToXMFLOAT3(const std::vector<double>& gltfValue)
 {
 	return DirectX::XMFLOAT3(
@@ -713,7 +713,7 @@ DirectX::XMFLOAT3 GLTFImporter::gltfVector3ToXMFLOAT3(const std::vector<double>&
 	);
 }
 
-// gltfQuaternion ¨ XMFLOAT4
+// gltfQuaternion â†’ XMFLOAT4
 DirectX::XMFLOAT4 GLTFImporter::gltfQuaternionToXMFLOAT4(const std::vector<double>& gltfValue)
 {
 	return DirectX::XMFLOAT4(
@@ -724,7 +724,7 @@ DirectX::XMFLOAT4 GLTFImporter::gltfQuaternionToXMFLOAT4(const std::vector<doubl
 	);
 }
 
-// gltfMatrix ¨ XMFLOAT4X4
+// gltfMatrix â†’ XMFLOAT4X4
 DirectX::XMFLOAT4X4 GLTFImporter::gltfMatrixToXMFLOAT4X4(const std::vector<double>& gltfValue)
 {
 	return DirectX::XMFLOAT4X4(
@@ -747,7 +747,7 @@ DirectX::XMFLOAT4X4 GLTFImporter::gltfMatrixToXMFLOAT4X4(const std::vector<doubl
 	);
 }
 
-// À•WŒn•ÏŠ·
+// åº§æ¨™ç³»å¤‰æ›
 void GLTFImporter::ConvertPositionAxisSystem(DirectX::XMFLOAT3& v)
 {
 	v.x = -v.x;
@@ -817,7 +817,7 @@ void GLTFImporter::ConvertAnimationAxisSystem(ModelResource::Animation& animatio
 	}
 }
 
-// ƒ^ƒ“ƒWƒFƒ“ƒgŒvZ
+// ã‚¿ãƒ³ã‚¸ã‚§ãƒ³ãƒˆè¨ˆç®—
 void GLTFImporter::ComputeTangents(std::vector<ModelResource::Vertex>& vertices, const std::vector<uint32_t>& indices)
 {
 	size_t vertexCount = vertices.size();

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@
 
 using json = nlohmann::json;
 
-// ƒ‰ƒbƒp[\‘¢‘Ì
+// ãƒ©ãƒƒãƒ‘ãƒ¼æ§‹é€ ä½“
 struct Float3 {
 	DirectX::XMFLOAT3 value;
 
@@ -31,7 +31,7 @@ struct Float3 {
 	const float& z() const { return value.z; }
 };
 
-// JSON•ÏŠ·
+// JSONå¤‰æ›
 inline void to_json(json& j, const Float3& v) {
 	j = json::array({ v.value.x, v.value.y, v.value.z });
 }
@@ -55,9 +55,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(CameraKeyframe, time, range, eyeOffset, targe
 enum class EventType {
 	Camera,
 	Effect,
-	// •K—v‚É‰‚¶‚Ä’Ç‰Á
+	// å¿…è¦ã«å¿œã˜ã¦è¿½åŠ 
 };
-// •ÏŠ·—pƒ}ƒbƒv
+// å¤‰æ›ç”¨ãƒãƒƒãƒ—
 NLOHMANN_JSON_SERIALIZE_ENUM(EventType, {
 	{EventType::Camera, "Camera"},
 	{EventType::Effect, "Effect"}
@@ -72,7 +72,7 @@ enum class AnimationFlag
 	SuperArmor
 };
 
-// enum <-> string •ÏŠ·‚Ì‚½‚ß‚Ì’è‹`
+// enum <-> string å¤‰æ›ã®ãŸã‚ã®å®šç¾©
 NLOHMANN_JSON_SERIALIZE_ENUM(AnimationFlag, {
 	{AnimationFlag::None, "None"},
 	{AnimationFlag::Attack, "Attack"},
@@ -82,9 +82,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(AnimationFlag, {
 	})
 
 	struct Keyframe {
-	float time;       // 0.0`1.0
-	float value;      // 0.0`3.0
-	float handleOffsetX = 0.05f;  // ƒnƒ“ƒhƒ‹‚ÌƒIƒtƒZƒbƒgi©“®j
+	float time;       // 0.0ï½1.0
+	float value;      // 0.0ï½3.0
+	float handleOffsetX = 0.05f;  // ãƒãƒ³ãƒ‰ãƒ«ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆï¼ˆè‡ªå‹•ï¼‰
 	float handleOffsetY = 0.0f;
 	float inTangent;
 	float outTangent;
@@ -100,7 +100,7 @@ enum class KnockbackType
 	KnockDown
 };
 
-// enum <-> string •ÏŠ·‚Ì‚½‚ß‚Ì’è‹`
+// enum <-> string å¤‰æ›ã®ãŸã‚ã®å®šç¾©
 NLOHMANN_JSON_SERIALIZE_ENUM(KnockbackType, {
 	{KnockbackType::None, "None"},
 	{KnockbackType::Light, "Light"},
@@ -111,32 +111,32 @@ NLOHMANN_JSON_SERIALIZE_ENUM(KnockbackType, {
 
 struct AttackAnimParam
 {
-	// “G‚Æ‚Ì‹——£‚ÌˆÚ“®’l‚Æ‰ñ“]’l
+	// æ•µã¨ã®è·é›¢ã®ç§»å‹•å€¤ã¨å›è»¢å€¤
 	float moveRate = 1.0f;
 	float turnRate = 1.0f;
 
-	//“G‚Æ‚Ì‹——£‚É‰‚¶‚ÄˆÚ“®’l‚ğ’²®
+	//æ•µã¨ã®è·é›¢ã«å¿œã˜ã¦ç§»å‹•å€¤ã‚’èª¿æ•´
 	float forwardPower = 0.0f;
 	float forwardFrame = 0.0f;
 	bool forwarded = false;
 
-	// UŒ‚”»’è•K—v•Ï”
-	int   attackDamage = 1.0f;
+	// æ”»æ’ƒåˆ¤å®šå¿…è¦å¤‰æ•°
+	int   attackDamage = 1;
 	float invisibleTime = 0.5f;
 
-	// ƒRƒ“ƒgƒ[ƒ‰[‚ÌU“®•Ï”
+	// ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã®æŒ¯å‹•å¤‰æ•°
 	float attackLeftVibrate = 1.0f;
 	float attackRightVibrate = 1.0f;
 
-	// UŒ‚ƒqƒbƒgƒXƒgƒbƒv•Ï”
+	// æ”»æ’ƒæ™‚ãƒ’ãƒƒãƒˆã‚¹ãƒˆãƒƒãƒ—å¤‰æ•°
 	float attackHitStopTime = 1.0f;
 	float attackHitStopSpeed = 0.1f;
 
-	// ƒmƒbƒNƒoƒbƒN‚Ìí—Ş
+	// ãƒãƒƒã‚¯ãƒãƒƒã‚¯ã®ç¨®é¡
 	KnockbackType knockbackType = KnockbackType::None;
 
-	// ƒŠƒxƒ“ƒW’l’~Ï—Ê
-	int revengeValue = 1.0f;
+	// ãƒªãƒ™ãƒ³ã‚¸å€¤è“„ç©é‡
+	int revengeValue = 1;
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
 	moveRate, turnRate,
@@ -148,13 +148,13 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
 
 struct AnimationAttribute
 {
-	AnimationFlag flag;  // ‘®«‚Ìí—ŞiUŒ‚A–³“GAƒpƒŠƒB‚È‚Çj
-	float startTime;     // ŠJnŠÔi•bj
-	float endTime;       // I—¹ŠÔi•bj
+	AnimationFlag flag;  // å±æ€§ã®ç¨®é¡ï¼ˆæ”»æ’ƒã€ç„¡æ•µã€ãƒ‘ãƒªã‚£ãªã©ï¼‰
+	float startTime;     // é–‹å§‹æ™‚é–“ï¼ˆç§’ï¼‰
+	float endTime;       // çµ‚äº†æ™‚é–“ï¼ˆç§’ï¼‰
 
 	AttackAnimParam attackParam;
 
-	// ”CˆÓFw’èŠÔ‚É‚±‚Ì‘®«‚ª—LŒø‚©‚Ç‚¤‚©
+	// ä»»æ„ï¼šæŒ‡å®šæ™‚é–“ã«ã“ã®å±æ€§ãŒæœ‰åŠ¹ã‹ã©ã†ã‹
 	bool IsActive(float currentTime) const
 	{
 		return currentTime >= startTime && currentTime <= endTime;
@@ -166,8 +166,8 @@ struct AnimationEvent
 {
 	float timeInSeconds;
 	float timeOutSeconds;
-	EventType eventType; //ƒJƒƒ‰‚âƒGƒtƒFƒNƒg‚È‚Ç
-	std::string eventName; //EventCamera1‚È‚ÇƒCƒxƒ“ƒgƒ^ƒCƒv‚Ì’†‚Å‰½‚ğ‚·‚é‚©‚ğ”»•Ê
+	EventType eventType; //ã‚«ãƒ¡ãƒ©ã‚„ã‚¨ãƒ•ã‚§ã‚¯ãƒˆãªã©
+	std::string eventName; //EventCamera1ãªã©ã‚¤ãƒ™ãƒ³ãƒˆã‚¿ã‚¤ãƒ—ã®ä¸­ã§ä½•ã‚’ã™ã‚‹ã‹ã‚’åˆ¤åˆ¥
 
 	bool IsActive(float currentTime) const
 	{
@@ -185,8 +185,8 @@ struct AnimationConfig
 	std::vector<AnimationAttribute> attributes;
 	std::vector<CameraKeyframe> cameraKeyframes;
 
-	float advanceInputStartFrame = 0.0f;	//æs“ü—Íó•tŠJnƒtƒŒ[ƒ€
-	float advanceInputEndFrame = 0.0f;		//æsI—¹ó•tI—¹ƒtƒŒ[ƒ€
+	float advanceInputStartFrame = 0.0f;	//å…ˆè¡Œå…¥åŠ›å—ä»˜é–‹å§‹ãƒ•ãƒ¬ãƒ¼ãƒ 
+	float advanceInputEndFrame = 0.0f;		//å…ˆè¡Œçµ‚äº†å—ä»˜çµ‚äº†ãƒ•ãƒ¬ãƒ¼ãƒ 
 };
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AnimationConfig,
 	characterName,
@@ -232,20 +232,20 @@ public:
 		DirectX::XMFLOAT4	rotation = { 0, 0, 0, 1 };
 		DirectX::XMFLOAT3	scale = { 1, 1, 1 };
 	};
-	std::vector<NodePose> nodePose; // ƒm[ƒhƒ|[ƒYƒLƒƒƒbƒVƒ…
+	std::vector<NodePose> nodePose; // ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºã‚­ãƒ£ãƒƒã‚·ãƒ¥
 
 	struct  EmissiveColors
 	{
-		float emissiveFactor = 1.0f;//”­Œõ“x
-		DirectX::XMFLOAT4 adjustColor{ 1.0f,1.0f,1.0f,1.0f };//F‚Ì’²®
+		float emissiveFactor = 1.0f;//ç™ºå…‰åº¦
+		DirectX::XMFLOAT4 adjustColor{ 1.0f,1.0f,1.0f,1.0f };//è‰²ã®èª¿æ•´
 	};
 
 	struct  DissolveConstants
 	{
-		float emissivedissolve = -0.1f;//ƒGƒ~ƒbƒVƒuƒeƒNƒXƒ`ƒƒ—pƒfƒBƒ]ƒ‹ƒu
-		float dissolve = -0.1f;	//ƒfƒBƒ]ƒ‹ƒu
-		float alphaFactor = 1.0f;//ƒAƒ‹ƒtƒ@’l’²®
-		DirectX::XMFLOAT4 OverwriteColor = { 1.0f,1.0f,1.0f,1.0f };//ƒ‚ƒfƒ‹‚ÌF‚ğ•Ï‰»
+		float emissivedissolve = -0.1f;//ã‚¨ãƒŸãƒƒã‚·ãƒ–ãƒ†ã‚¯ã‚¹ãƒãƒ£ç”¨ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–
+		float dissolve = -0.1f;	//ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–
+		float alphaFactor = 1.0f;//ã‚¢ãƒ«ãƒ•ã‚¡å€¤èª¿æ•´
+		DirectX::XMFLOAT4 OverwriteColor = { 1.0f,1.0f,1.0f,1.0f };//ãƒ¢ãƒ‡ãƒ«ã®è‰²ã‚’å¤‰åŒ–
 	};
 
 	struct RimLightConstants
@@ -258,117 +258,126 @@ public:
 
 	void DrawGui();
 
-	// ƒm[ƒhƒf[ƒ^æ“¾
+	// ãƒãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿å–å¾—
 	const std::vector<Node>& GetNodes() const { return nodes; }
 	std::vector<Node>& GetNodes() { return nodes; }
 
-	// ƒ‹[ƒgƒm[ƒhæ“¾
+	// ãƒ«ãƒ¼ãƒˆãƒãƒ¼ãƒ‰å–å¾—
 	Node* GetRootNode() { return nodes.data(); }
 
-	// ƒm[ƒhŒŸõ
+	// ãƒãƒ¼ãƒ‰æ¤œç´¢
 	Node* FindNode(const char* name);
 
-	// ƒgƒ‰ƒ“ƒXƒtƒH[ƒ€XVˆ—
+	// ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ æ›´æ–°å‡¦ç†
 	void UpdateTransform(const DirectX::XMFLOAT4X4& worldTransform);
 
-	// ˆÚ“®’læ“¾
+	// ç§»å‹•å€¤å–å¾—
 	const DirectX::XMFLOAT3& GetMove() const { return move; }
 	void ClearMove() { move = { 0, 0, 0 }; }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿ
 	void PlayAnimation(int index, bool loop, float blendSeconds = 0);
 
-	// ƒ‹[ƒgƒ‚[ƒVƒ‡ƒ“Ä¶
+	// ãƒ«ãƒ¼ãƒˆãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿ
 	void PlayRootMotion(int index, bool loop, bool bakeY, float blendSeconds = 0, const char* rootName = nullptr);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶’†‚©
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿä¸­ã‹
 	bool IsPlayAnimation() const;
 
-	// ƒ‹[ƒgƒ‚[ƒVƒ‡ƒ“Ä¶’†‚©
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚’æ‰“ã¡åˆ‡ã£ã¦å†ç”Ÿä¸­ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å§¿å‹¢ã‚’å³åº§ã«é©ç”¨ã™ã‚‹
+	// (ç”Ÿæˆç›´å¾Œãªã©ãƒ–ãƒ¬ãƒ³ãƒ‰å…ƒãŒãƒã‚¤ãƒ³ãƒ‰ãƒãƒ¼ã‚ºã«ãªã£ã¦ã„ã‚‹å ´åˆã«ä½¿ç”¨ã™ã‚‹)
+	void CancelAnimationBlend()
+	{
+		animationBlending = false;
+		currentAnimationBlendSeconds = 0.0f;
+		animationBlendSecondsLength = -1.0f;
+	}
+
+	// ãƒ«ãƒ¼ãƒˆãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿä¸­ã‹
 	bool IsPlayRootMotion() const { return isRootMotion; }
 
-	// Œ»İ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“Ä¶ŠÔæ“¾
+	// ç¾åœ¨ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿæ™‚é–“å–å¾—
 	float GetCurrentAnimationSeconds() const { return currentAnimationSeconds; }
 	void SetCurrentAnimationSeconds(float seconds) { currentAnimationSeconds = seconds; }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒCƒ“ƒfƒbƒNƒXæ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 	int GetAnimationIndex(const char* name) const;
 	int GetCurrentAnimationIndex() { return currentAnimationIndex; }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“–¼æ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³åå–å¾—
 	const char* GetAnimationName(int animationIndex) const;
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶ŠÔæ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿæ™‚é–“å–å¾—
 	float GetAnimationLength(int animationIndex) const;
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒXƒs[ƒhİ’è
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¹ãƒ”ãƒ¼ãƒ‰è¨­å®š
 	void SetAnimationSpeed(float animationSpeed) { this->animationSpeed = animationSpeed; }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“XVˆ—
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ›´æ–°å‡¦ç†
 	void UpdateAnimation(float elapsedTime, Character* character);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ŒvZˆ—
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨ˆç®—å‡¦ç†
 	void ComputeAnimation(float elapsedTime);
 	void ComputeRootAnimation(float elapsedTime, Character* character);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ˆê’â~AÄŠJ
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ä¸€æ™‚åœæ­¢ã€å†é–‹
 	void PauseAnimation(bool animationPause) { this->animationPause = animationPause; }
 
-	// ƒuƒŒƒ“ƒfƒBƒ“ƒOŒvZˆ—
+	// ãƒ–ãƒ¬ãƒ³ãƒ‡ã‚£ãƒ³ã‚°è¨ˆç®—å‡¦ç†
 	void ComputeBlending(float elapsedTime);
 
-	// ƒŠƒ\[ƒXæ“¾
+	// ãƒªã‚½ãƒ¼ã‚¹å–å¾—
 	const ModelResource* GetResource() const { return resource.get(); }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ŒvZ
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨ˆç®—
 	void ComputeAnimation(int animationIndex, int nodeIndex, float time, NodePose& nodePose) const;
 	void ComputeAnimation(int animationIndex, float time, std::vector<NodePose>& nodePoses) const;
 
-	// ƒm[ƒhƒ|[ƒYİ’è
+	// ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºè¨­å®š
 	void SetNodePoses(const std::vector<NodePose>& nodePoses);
 
-	// ƒm[ƒhƒ|[ƒYæ“¾
+	// ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºå–å¾—
 	void GetNodePoses(std::vector<NodePose>& nodePoses) const;
 
-	//‹à‘®¿Š´•â³’læ“¾
+	//é‡‘å±è³ªæ„Ÿè£œæ­£å€¤å–å¾—
 	void SetAdMetalness(const float metalness) { adjustMetalness = metalness; }
-	//¿Š´‘e‚³•â³’læ“¾
+	//è³ªæ„Ÿç²—ã•è£œæ­£å€¤å–å¾—
 	void SetAdRoughness(const float roughness) { adjustRoughness = roughness; }
 
-	//‹à‘®¿Š´•â³’læ“¾
+	//é‡‘å±è³ªæ„Ÿè£œæ­£å€¤å–å¾—
 	float GetAdMetalness() const { return adjustMetalness; }
-	//¿Š´‘e‚³•â³’læ“¾
+	//è³ªæ„Ÿç²—ã•è£œæ­£å€¤å–å¾—
 	float GetAdRoughness() const { return adjustRoughness;; }
 
-	//ƒfƒBƒ]ƒ‹ƒu
+	//ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–
 	void SetEmissiveDissolve(const float emidissolve) { this->dissolveConstants.emissivedissolve = emidissolve; }
 	void SetEmissiveConstants(const DissolveConstants dissolveConstants) { this->dissolveConstants = dissolveConstants; }
 	DissolveConstants GetEmissiveConstants() const { return dissolveConstants; }
 
-	//ƒGƒ~ƒbƒVƒuFİ’è
+	//ã‚¨ãƒŸãƒƒã‚·ãƒ–è‰²è¨­å®š
 	void SetEmissiveColors(const EmissiveColors colors) { emissive = colors; }
 
-	//ƒGƒ~ƒbƒVƒuFæ“¾
+	//ã‚¨ãƒŸãƒƒã‚·ãƒ–è‰²å–å¾—
 	EmissiveColors GetEmissiveColors() const { return emissive; }
 
-	//¿Š´’²®—pImGui
-	void DebugGui(const char* name);
+	//è³ªæ„Ÿèª¿æ•´ç”¨ImGui
+	void DebugGUI(const char* name);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“İ’è‚Ì•Û‘¶
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨­å®šã®ä¿å­˜
 	void SetAnimationConfig(const AnimationConfig& config)
 	{
-		// ˆê’v‚·‚é‚à‚Ì‚ª‚ ‚ê‚Îã‘‚«
+		// ä¸€è‡´ã™ã‚‹ã‚‚ã®ãŒã‚ã‚Œã°ä¸Šæ›¸ã
 		for (auto& existing : animationConfigs) {
 			if (existing.characterName == config.characterName && existing.animationIndex == config.animationIndex) {
 				existing = config;
 				return;
 			}
 		}
-		// ‚È‚¯‚ê‚Î’Ç‰Á
+		// ãªã‘ã‚Œã°è¿½åŠ 
 		animationConfigs.push_back(config);
 	}
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“İ’èæ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨­å®šå–å¾—
 	AnimationConfig* GetAnimationConfig(const std::string& characterName, int animationIndex)
 	{
 		for (auto& config : animationConfigs)
@@ -379,13 +388,13 @@ public:
 			}
 		}
 
-		// Œ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡AV‚µ‚¢AnimationConfig‚ğ’Ç‰Á‚µ‚Ä•Ô‚·
+		// è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆã€æ–°ã—ã„AnimationConfigã‚’è¿½åŠ ã—ã¦è¿”ã™
 		AnimationConfig defaultConfig;
 		defaultConfig.characterName = characterName;
 		defaultConfig.animationIndex = animationIndex;
 		defaultConfig.speedCurve = { { 0.0f, 1.0f }, { 1.0f, 1.0f } };
 		defaultConfig.events = {};
-		defaultConfig.attributes = {};  // ‹ó‚Ì”z—ñ
+		defaultConfig.attributes = {};  // ç©ºã®é…åˆ—
 		defaultConfig.cameraKeyframes = {};
 
 		animationConfigs.push_back(defaultConfig);
@@ -398,50 +407,50 @@ public:
 		if (curve.empty())
 			return 1.0f;
 
-		// ’[’[‚Í’è’lƒNƒƒbƒv
+		// ç«¯ç«¯ã¯å®šå€¤ã‚¯ãƒ­ãƒƒãƒ—
 		if (t <= curve.front().time)  return curve.front().value;
 		if (t >= curve.back().time)   return curve.back().value;
 
-		// ŠY“–‹æŠÔ‚ğ’T‚·
+		// è©²å½“åŒºé–“ã‚’æ¢ã™
 		for (size_t i = 0; i + 1 < curve.size(); ++i)
 		{
 			const auto& k0 = curve[i];
 			const auto& k1 = curve[i + 1];
 			if (t < k0.time || t > k1.time) continue;
 
-			// ³‹K‰»ƒpƒ‰ƒ[ƒ^
+			// æ­£è¦åŒ–ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 			float dt = k1.time - k0.time;
 			float u = (t - k0.time) / dt;
 
-			// Hermite Šî’ê
+			// Hermite åŸºåº•
 			float u2 = u * u, u3 = u2 * u;
 			float h00 = 2 * u3 - 3 * u2 + 1;
 			float h10 = u3 - 2 * u2 + u;
 			float h01 = -2 * u3 + 3 * u2;
 			float h11 = u3 - u2;
 
-			// ƒ^ƒ“ƒWƒFƒ“ƒg‚ğƒXƒP[ƒŠƒ“ƒOiŠÔƒXƒP[ƒ‹•ª‚ğ‚©‚¯‚éj
+			// ã‚¿ãƒ³ã‚¸ã‚§ãƒ³ãƒˆã‚’ã‚¹ã‚±ãƒ¼ãƒªãƒ³ã‚°ï¼ˆæ™‚é–“ã‚¹ã‚±ãƒ¼ãƒ«åˆ†ã‚’ã‹ã‘ã‚‹ï¼‰
 			float m0 = k0.outTangent * dt;
 			float m1 = k1.inTangent * dt;
 
-			// •âŠÔ’l‚ğ•Ô‚·
+			// è£œé–“å€¤ã‚’è¿”ã™
 			return h00 * k0.value
 				+ h10 * m0
 				+ h01 * k1.value
 				+ h11 * m1;
 		}
 
-		// –œˆêŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚ç
+		// ä¸‡ä¸€è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰
 		return 1.0f;
 	}
 
 private:
-	//model–‚Ì¿Š´•â³’l
-	float adjustMetalness = 0; //  ‹à‘®¿’²®
-	float adjustRoughness = 0; //  ‘e‚³’²®
-	//model–‚Ì”­Œõ•â³’l
+	//modeläº‹ã®è³ªæ„Ÿè£œæ­£å€¤
+	float adjustMetalness = 0; //  é‡‘å±è³ªèª¿æ•´
+	float adjustRoughness = 0; //  ç²—ã•èª¿æ•´
+	//modeläº‹ã®ç™ºå…‰è£œæ­£å€¤
 	EmissiveColors emissive;
-	//ƒfƒBƒ]ƒ‹ƒu
+	//ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–
 	DissolveConstants dissolveConstants;
 	
 	int currentAnimationIndex = -1;
@@ -468,7 +477,7 @@ private:
 	std::shared_ptr<ModelResource> resource;
 	std::vector<Node>		nodes;
 	std::vector<NodePose> nodePoses;
-	std::vector<std::string>	nodeNames; // ƒm[ƒh–¼ƒLƒƒƒbƒVƒ…
+	std::vector<std::string>	nodeNames; // ãƒãƒ¼ãƒ‰åã‚­ãƒ£ãƒƒã‚·ãƒ¥
 	NodePose beginPose, oldPose, newPose;
 	NodePose endPose;
 	std::vector<AnimationConfig> animationConfigs;

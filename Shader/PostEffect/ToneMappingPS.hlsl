@@ -15,7 +15,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     // ブラー画像との補間 (0.4で重み付け)
     float4 color = lerp(original, blur, 0.4f);
     
-    float tc = pin.texcoord;
+    float tc = pin.texcoord.x;
 
     // ビネット効果の適用
     tc -= 0.5f;

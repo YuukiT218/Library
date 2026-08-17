@@ -1,217 +1,197 @@
-#include "Character.h"
+ï»¿#include "Character.h"
 #include "Stage/StageManager.h"
 #include <Math/Mathf.h>
 
-
 #include <stdlib.h>
 
+namespace
+{
+    // 1ç§’ã‚ãŸã‚Šã®åŸºæº–ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ï¼ˆé€ŸåŠ›è¨ˆç®—ã‚’ãƒ•ãƒ¬ãƒ¼ãƒ åŸºæº–ã«æƒãˆã‚‹ãŸã‚ã®ä¿‚æ•°ï¼‰
+    constexpr float REFERENCE_FPS = 60.0f;
 
+    // æ¥åœ°åˆ¤å®šãƒ¬ã‚¤ã®å§‹ç‚¹ã‚’è¶³å…ƒã‹ã‚‰ã©ã‚Œã ã‘æŒã¡ä¸Šã’ã‚‹ã‹
+    // â€»å®Œå…¨ã«è¶³å…ƒã‹ã‚‰å§‹ã‚ã‚‹ã¨åºŠãƒãƒªã‚´ãƒ³ã¨é‡ãªã£ã¦åˆ¤å®šãŒã™ã‚ŠæŠœã‘ã‚‹ãŸã‚
+    constexpr float GROUND_RAY_START_OFFSET = 0.5f;
 
-// s—ñXVˆ—
+    // æ¥åœ°åˆ¤å®šãƒ¬ã‚¤ã‚’ã©ã‚Œã ã‘ä¸‹æ–¹å‘ã«ä¼¸ã°ã™ã‹ï¼ˆã“ã‚Œã‚ˆã‚Šé›¢ã‚Œã¦ã„ã‚Œã°ç„¡é™é æ‰±ã„ï¼‰
+    constexpr float GROUND_RAY_LENGTH = 10.0f;
+
+    // åœ°é¢ã®å‚¾ãã«è¿½å¾“ã™ã‚‹éš›ã®ç·šå½¢è£œå®Œä¿‚æ•°
+    constexpr float SLOPE_ROTATION_LERP_RATE = 0.1f;
+
+    // æ—‹å›å‡¦ç†ã§ã‚¼ãƒ­ãƒ™ã‚¯ãƒˆãƒ«ã¨ã¿ãªã™é–¾å€¤
+    constexpr float TURN_INPUT_EPSILON = 0.001f;
+
+    // å£ãšã‚Šå¾Œã®ä½ç½®ã‚’å£ã‹ã‚‰ã‚ãšã‹ã«é›¢ã™ãŸã‚ã®è£œæ­£é‡
+    constexpr float WALL_SLIDE_PUSH_OUT = 0.01f;
+
+    // ãƒ‡ãƒãƒƒã‚°è¡¨ç¤ºç”¨ã®çƒã®åŠå¾„
+    constexpr float DEBUG_SPHERE_RADIUS = 0.05f;
+
+    // ãƒ‡ãƒãƒƒã‚°ç”¨ã®å‰æ–¹å‘ãƒ¬ã‚¤ã®é•·ã•
+    constexpr float DEBUG_FORWARD_RAY_LENGTH = 5.0f;
+
+    // ãƒ‡ãƒãƒƒã‚°ç”¨ã®ãƒ’ãƒƒãƒˆä½ç½®è¡¨ç¤ºçƒã®åŠå¾„
+    constexpr float DEBUG_HIT_SPHERE_RADIUS = 0.1f;
+
+    // 1å›è»¢ã‚’è¡¨ã™è§’åº¦
+    constexpr float FULL_TURN_RADIAN = DirectX::XM_2PI;
+
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿé€Ÿåº¦ã®åˆæœŸå€¤
+    constexpr float DEFAULT_ANIM_SPEED = 1.0f;
+
+    // ã‚¹ã‚±ãƒ¼ãƒ«ãƒ»å›è»¢ãƒ»å¹³è¡Œç§»å‹•ã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’çµ„ã¿ç«‹ã¦ã‚‹
+    // å›è»¢ã¯Y(ãƒ¨ãƒ¼)â†’X(ãƒ”ãƒƒãƒ)â†’Z(ãƒ­ãƒ¼ãƒ«)ã®é †ã§åˆæˆã™ã‚‹
+    DirectX::XMMATRIX ComposeWorldMatrix(const DirectX::XMFLOAT3& scale, const DirectX::XMFLOAT3& angle, const DirectX::XMFLOAT3& position)
+    {
+        DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+        DirectX::XMMATRIX X = DirectX::XMMatrixRotationX(angle.x);
+        DirectX::XMMATRIX Y = DirectX::XMMatrixRotationY(angle.y);
+        DirectX::XMMATRIX Z = DirectX::XMMatrixRotationZ(angle.z);
+        DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+
+        return S * (Y * X * Z) * T;
+    }
+}
+
+// è¡Œåˆ—æ›´æ–°å‡¦ç†
 void Character::UpdateTransform()
 {
-    // ƒXƒP[ƒ‹s—ñ‚ğì¬
-    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
-
-    // ‰ñ“]s—ñ‚ğì¬
-    DirectX::XMMATRIX X = DirectX::XMMatrixRotationX(angle.x);
-    DirectX::XMMATRIX Y = DirectX::XMMatrixRotationY(angle.y);
-    DirectX::XMMATRIX Z = DirectX::XMMatrixRotationZ(angle.z);
-    DirectX::XMMATRIX R = Y * X * Z;
-
-    // ˆÊ’us—ñ‚ğì¬
-    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
-
-    // 3‚Â‚Ìs—ñ‚ğ‘g‚İ‡‚í‚¹Aƒ[ƒ‹ƒhs—ñ‚ğì¬
-    DirectX::XMMATRIX W = S * R * T;
-
-    // ŒvZ‚µ‚½ƒ[ƒ‹ƒhs—ñ‚ğæ‚èo‚·
-    DirectX::XMStoreFloat4x4(&transform, W);
+    UpdateTransform(scale, angle, position, &transform);
 }
 
-// s—ñXVˆ—
+// è¡Œåˆ—æ›´æ–°å‡¦ç†
 void Character::UpdateTransform(DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 angle, DirectX::XMFLOAT3 position, DirectX::XMFLOAT4X4* transform)
 {
-    // ƒXƒP[ƒ‹s—ñ‚ğì¬
-    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
-
-    // ‰ñ“]s—ñ‚ğì¬
-    DirectX::XMMATRIX X = DirectX::XMMatrixRotationX(angle.x);
-    DirectX::XMMATRIX Y = DirectX::XMMatrixRotationY(angle.y);
-    DirectX::XMMATRIX Z = DirectX::XMMatrixRotationZ(angle.z);
-    DirectX::XMMATRIX R = Y * X * Z;
-
-    // ˆÊ’us—ñ‚ğì¬
-    DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
-
-    // 3‚Â‚Ìs—ñ‚ğ‘g‚İ‡‚í‚¹Aƒ[ƒ‹ƒhs—ñ‚ğì¬
-    DirectX::XMMATRIX W = S * R * T;
-
-    // ŒvZ‚µ‚½ƒ[ƒ‹ƒhs—ñ‚ğæ‚èo‚·
-    DirectX::XMStoreFloat4x4(transform, W);
+    DirectX::XMStoreFloat4x4(transform, ComposeWorldMatrix(scale, angle, position));
 }
 
-// “ü—Í’l‚©‚çƒ[ƒ‹ƒhƒxƒNƒgƒ‹‚ğæ“¾
+// å…¥åŠ›å€¤ã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—
 DirectX::XMFLOAT3 Character::ComputeWorldVec(const Camera& camera, float axisX, float axisY) const
 {
-    // ƒJƒƒ‰•ûŒü‚ÆƒXƒeƒbƒBƒN‚Ì“ü—Í’l‚É‚æ‚Á‚Äis•ûŒü‚ğŒvZ‚·‚é
+    // ã‚«ãƒ¡ãƒ©æ–¹å‘ã¨ã‚¹ãƒ†ãƒƒã‚£ã‚¯ã®å…¥åŠ›å€¤ã«ã‚ˆã£ã¦é€²è¡Œæ–¹å‘ã‚’è¨ˆç®—ã™ã‚‹
     const DirectX::XMFLOAT3& cameraRight = camera.GetRight();
     const DirectX::XMFLOAT3& cameraFront = camera.GetFront();
 
-    // ˆÚ“®ƒxƒNƒgƒ‹‚ÍXZ•½–Ê‚É…•½‚ÈƒxƒNƒgƒ‹‚É‚È‚é‚æ‚¤‚É‚·‚é
+    // ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«ã¯XZå¹³é¢ã«æ°´å¹³ãªãƒ™ã‚¯ãƒˆãƒ«ã«ãªã‚‹ã‚ˆã†ã«ã™ã‚‹
 
-    // ƒJƒƒ‰‰E•ûŒüƒxƒNƒgƒ‹‚ğXZ’PˆÊƒxƒNƒgƒ‹‚É•ÏŠ·
+    // ã‚«ãƒ¡ãƒ©å³æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’XZå˜ä½ãƒ™ã‚¯ãƒˆãƒ«ã«å¤‰æ›
     float cameraRightX = cameraRight.x;
     float cameraRightZ = cameraRight.z;
     float cameraRightLength = sqrtf(cameraRightX * cameraRightX + cameraRightZ * cameraRightZ);
     if (cameraRightLength > 0.0f)
     {
-        // ’PˆÊƒxƒNƒgƒ‹‰»
+        // å˜ä½ãƒ™ã‚¯ãƒˆãƒ«åŒ–
         cameraRightX /= cameraRightLength;
         cameraRightZ /= cameraRightLength;
     }
 
-    // ƒJƒƒ‰‘O•ûŒüƒxƒNƒgƒ‹‚ğXZ’PˆÊƒxƒNƒgƒ‹‚É•ÏŠ·
+    // ã‚«ãƒ¡ãƒ©å‰æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’XZå˜ä½ãƒ™ã‚¯ãƒˆãƒ«ã«å¤‰æ›
     float cameraFrontX = cameraFront.x;
     float cameraFrontZ = cameraFront.z;
     float cameraFrontLength = sqrtf(cameraFrontX * cameraFrontX + cameraFrontZ * cameraFrontZ);
     if (cameraFrontLength > 0.0f)
     {
-        // ’PˆÊƒxƒNƒgƒ‹‰»
+        // å˜ä½ãƒ™ã‚¯ãƒˆãƒ«åŒ–
         cameraFrontX /= cameraFrontLength;
         cameraFrontZ /= cameraFrontLength;
     }
 
-    // ƒXƒeƒBƒbƒN‚Ì…•½“ü—Í’l‚ğƒJƒƒ‰‰E•ûŒü‚É”½‰f‚µA
-    // ƒXƒeƒBƒbƒN‚Ì‚’¼“ü—Í’l‚ğƒJƒƒ‰‘O•ûŒü‚É”½‰f‚µA
-    // isƒxƒNƒgƒ‹‚ğŒvZ‚·‚é
+    // ã‚¹ãƒ†ã‚£ãƒƒã‚¯ã®æ°´å¹³å…¥åŠ›å€¤ã‚’ã‚«ãƒ¡ãƒ©å³æ–¹å‘ã«åæ˜ ã—ã€
+    // ã‚¹ãƒ†ã‚£ãƒƒã‚¯ã®å‚ç›´å…¥åŠ›å€¤ã‚’ã‚«ãƒ¡ãƒ©å‰æ–¹å‘ã«åæ˜ ã—ã€
+    // é€²è¡Œãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨ˆç®—ã™ã‚‹
     DirectX::XMFLOAT3 vec;
     vec.x = (cameraRightX * axisX) + (cameraFrontX * axisY);
     vec.z = (cameraRightZ * axisX) + (cameraFrontZ * axisY);
-    // Y²•ûŒü‚É‚ÍˆÚ“®‚µ‚È‚¢
+    // Yè»¸æ–¹å‘ã«ã¯ç§»å‹•ã—ãªã„
     vec.y = 0.0f;
 
     return vec;
 }
 
-// ƒLƒƒƒ‰ƒNƒ^[‘O•ûŒüŒvZ
+// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å‰æ–¹å‘è¨ˆç®—
 DirectX::XMFLOAT3 Character::CharacterForward(DirectX::XMFLOAT3 angle)
 {
-    // ‘OƒxƒNƒgƒ‹‚ğŒvZ
-    float forwardX = sinf(angle.y);
-    float forwardZ = cosf(angle.y);
-
-    DirectX::XMFLOAT3 vec;
-    vec.x = forwardX;
-    vec.y = 0.0f;
-    vec.z = forwardZ;
-
-    return vec;
+    return { sinf(angle.y), 0.0f, cosf(angle.y) };
 }
 
-// ƒLƒƒƒ‰ƒNƒ^[Œã‚ë•ûŒüŒvZ
+// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å¾Œã‚æ–¹å‘è¨ˆç®—
 DirectX::XMFLOAT3 Character::CharacterBack(DirectX::XMFLOAT3 angle)
 {
-    // Œã‚ëƒxƒNƒgƒ‹‚ğŒvZ
-    float backX = -sinf(angle.y);
-    float backZ = -cosf(angle.y);
-
-    DirectX::XMFLOAT3 vec;
-    vec.x = backX;
-    vec.y = 0.0f;
-    vec.z = backZ;
-
-    return vec;
+    return { -sinf(angle.y), 0.0f, -cosf(angle.y) };
 }
 
-// ƒLƒƒƒ‰ƒNƒ^[¶•ûŒüŒvZ
+// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å·¦æ–¹å‘è¨ˆç®—
 DirectX::XMFLOAT3 Character::CharacterLeft(DirectX::XMFLOAT3 angle)
 {
-    // ¶ƒxƒNƒgƒ‹‚ğŒvZ
-    float leftX = cosf(angle.y);
-    float leftZ = -sinf(angle.y);
-
-    DirectX::XMFLOAT3 vec;
-    vec.x = leftX;
-    vec.y = 0.0f;
-    vec.z = leftZ;
-
-    return vec;
+    return { cosf(angle.y), 0.0f, -sinf(angle.y) };
 }
 
-// ƒLƒƒƒ‰ƒNƒ^[‰E•ûŒüŒvZ
+// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å³æ–¹å‘è¨ˆç®—
 DirectX::XMFLOAT3 Character::CharacterRight(DirectX::XMFLOAT3 angle)
 {
-    // ‰EƒxƒNƒgƒ‹‚ğŒvZ
-    float rightX = -cosf(angle.y);
-    float rightZ = sinf(angle.y);
-
-    DirectX::XMFLOAT3 vec;
-    vec.x = rightX;
-    vec.y = 0.0f;
-    vec.z = rightZ;
-
-    return vec;
+    return { -cosf(angle.y), 0.0f, sinf(angle.y) };
 }
 
+// åœ°é¢ã¨ã®è·é›¢ã‚’å–å¾—
 float Character::GetDistanceFromGround()
 {
-    // ƒŒƒC‚Ìn“_F‘«Œ³ipositionj‚©‚ç­‚µ‚¾‚¯ã‚É‚¿ã‚°‚é
-        // ¦ Š®‘S‚É0’n“_‚©‚çn‚ß‚é‚ÆA°‚Ìƒ|ƒŠƒSƒ“‚Æd‚È‚Á‚Ä”»’è‚ª‚·‚è”²‚¯‚éê‡‚ª‚ ‚é‚½‚ß
-    DirectX::XMFLOAT3 start = position;
-    start.y += 0.5f;
+    // ãƒ¬ã‚¤ã®å§‹ç‚¹ã¯è¶³å…ƒã‹ã‚‰å°‘ã—ã ã‘æŒã¡ä¸Šã’ã€ãã“ã‹ã‚‰çœŸä¸‹ã«ååˆ†ãªè·é›¢ã‚’ä¼¸ã°ã™
+    DirectX::XMFLOAT3 start = { position.x, position.y + GROUND_RAY_START_OFFSET, position.z };
+    DirectX::XMFLOAT3 end = { start.x, start.y - GROUND_RAY_LENGTH, start.z };
 
-    // ƒŒƒC‚ÌI“_Fn“_‚©‚ç^‰º‚É\•ª‚È‹——£‚ğL‚Î‚·
-    // ‚±‚±‚Å‚Í10.0fi10ƒ[ƒgƒ‹j‰º‚Éİ’èB‚±‚êˆÈã—£‚ê‚Ä‚¢‚ê‚Îu–³ŒÀ‰“vˆµ‚¢‚Æ‚·‚é
-    DirectX::XMFLOAT3 end = start;
-    end.y -= 10.0f;
-
+    // ã‚¹ãƒ†ãƒ¼ã‚¸ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’é€šã—ã¦ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã‚’å®Ÿè¡Œ
     HitResult hit;
-
-    // ƒXƒe[ƒWƒ}ƒl[ƒWƒƒ[‚ğ’Ê‚µ‚ÄƒŒƒCƒLƒƒƒXƒg‚ğÀs
-    // start ‚Æ end ‚ÌŠÔ‚ÅÕ“Ë”»’è‚ğs‚¤
     if (StageManager::Instance().RayCast(start, end, hit))
     {
-        // Õ“Ë‚µ‚½ê‡
-        // uŒ»İ‚Ì‘«Œ³‚ÌYÀ•Wv‚Æuƒqƒbƒg‚µ‚½’n–Ê‚ÌYÀ•Wv‚Ì·•ª‚ğ•Ô‚·
-        // hit.position.y ‚Íƒ[ƒ‹ƒhÀ•W‚Å‚ÌÕ“Ë“_
+        // ã€Œç¾åœ¨ã®è¶³å…ƒã®Yåº§æ¨™ã€ã¨ã€Œãƒ’ãƒƒãƒˆã—ãŸåœ°é¢ã®Yåº§æ¨™ã€ã®å·®åˆ†ã‚’è¿”ã™
         return position.y - hit.position.y;
     }
 
-    // ’n–Ê‚ªŒ©‚Â‚©‚ç‚È‚¢ê‡iŠR‚ÌŠO‚âA‹ó‚‚­‚É‚¢‚éê‡j
-    // ”»’è‚Éˆø‚Á‚©‚©‚ç‚È‚¢‚æ‚¤A”ñí‚É‘å‚«‚È’l‚ğ•Ô‚·
+    // åœ°é¢ãŒè¦‹ã¤ã‹ã‚‰ãªã„å ´åˆï¼ˆå´–ã®å¤–ã‚„ã€ç©ºé«˜ãã«ã„ã‚‹å ´åˆï¼‰ã¯
+    // åˆ¤å®šã«å¼•ã£ã‹ã‹ã‚‰ãªã„ã‚ˆã†ã€éå¸¸ã«å¤§ããªå€¤ã‚’è¿”ã™
     return FLT_MAX;
 }
 
-// ƒ_ƒ[ƒW‚ğ—^‚¦‚é
-bool Character::ApplyDamage(int damage, float invicibleTime, bool isState, DirectX::XMFLOAT3 HitPosition)
+// ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’ä¸ãˆã‚‹
+bool Character::ApplyDamage(int damage, float invincibleTime, bool isState, DirectX::XMFLOAT3 hitPosition)
 {
-    // ƒ_ƒ[ƒW‚ª0‚Ìê‡‚ÍŒ’Nó‘Ô‚ğ•ÏX‚·‚é•K—v‚ª‚È‚¢
+    // ãƒ€ãƒ¡ãƒ¼ã‚¸ãŒ0ã®å ´åˆã¯å¥åº·çŠ¶æ…‹ã‚’å¤‰æ›´ã™ã‚‹å¿…è¦ãŒãªã„
     if (damage == 0) return false;
 
-    // €–S‚µ‚Ä‚¢‚éê‡‚ÍŒ’Nó‘Ô‚ğ•ÏX‚µ‚È‚¢
+    // æ­»äº¡ã—ã¦ã„ã‚‹å ´åˆã¯å¥åº·çŠ¶æ…‹ã‚’å¤‰æ›´ã—ãªã„
     if (health <= 0)
     {
         health = 0;
         return false;
     }
 
-    // –³“GŠÔ’†‚Íƒ_ƒ[ƒW‚ğ—^‚¦‚È‚¢
+    // ç„¡æ•µæ™‚é–“ä¸­ã¯ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’ä¸ãˆãªã„
     if (invincibleTimer > 0.0f) return false;
 
-    // ƒ_ƒ[ƒWˆ—
+    // ãƒ€ãƒ¡ãƒ¼ã‚¸å‡¦ç†
     health -= damage;
 
-    // –³“GŠÔİ’è
-    invincibleTimer = invicibleTime;
+    // è‡´å‘½å‚·ã‚’å—ã‘ã¦ã‚‚å€’ã‚Œãªã„çŠ¶æ…‹ãªã‚‰ã€ä½“åŠ›1ã§è¸ã¿ã¨ã©ã¾ã‚‹
+    if (health <= 0 && ShouldSurviveLethalDamage())
+    {
+        health = 1;
+    }
+
+    // ç„¡æ•µæ™‚é–“è¨­å®š
+    invincibleTimer = invincibleTime;
 
     if (!isState)
     {
         return true;
     }
 
-    // €–S’Ê’m
-    if (health <= 0 && !isSuperArmor)
+    // æ­»äº¡é€šçŸ¥
+    // ã‚¹ãƒ¼ãƒ‘ãƒ¼ã‚¢ãƒ¼ãƒãƒ¼ä¸­ã§ã‚‚ä½“åŠ›ãŒå°½ããŸã‚‰å¿…ãšæ­»äº¡ã•ã›ã‚‹ã€‚
+    // ã“ã“ã§ã‚¹ãƒ¼ãƒ‘ãƒ¼ã‚¢ãƒ¼ãƒãƒ¼ã‚’è¦‹ã¦ã—ã¾ã†ã¨ã€ä½“åŠ›ãŒ0ã®ã¾ã¾OnDeadãŒå‘¼ã°ã‚Œãšã€
+    // ä»¥é™ã¯é–¢æ•°å…ˆé ­ã®æ—©æœŸãƒªã‚¿ãƒ¼ãƒ³ã«é˜»ã¾ã‚Œã¦äºŒåº¦ã¨æ­»ã­ãªããªã‚‹ã€‚
+    // ãªãŠã€è¢«å¼¾ãƒªã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã®æ‰“ã¡æ¶ˆã—ã¯EnemyBosså´ã§åˆ¥é€”è¡Œã£ã¦ã„ã‚‹ã€‚
+    if (health <= 0)
     {
         OnDead();
     }
@@ -220,82 +200,81 @@ bool Character::ApplyDamage(int damage, float invicibleTime, bool isState, Direc
         OnDamaged();
     }
 
-    // Œ’Nó‘Ô‚ª•ÏX‚µ‚½ê‡‚Ítrue‚ğ•Ô‚·
+    // å¥åº·çŠ¶æ…‹ãŒå¤‰æ›´ã—ãŸå ´åˆã¯trueã‚’è¿”ã™
     return true;
 }
 
-// ÕŒ‚‚ğ—^‚¦‚é
+// è¡æ’ƒã‚’ä¸ãˆã‚‹
 void Character::AddImpulse(const DirectX::XMFLOAT3& impulse)
 {
-    // ‘¬—Í‚É—Í‚ğ‰Á‚¦‚é
+    // é€ŸåŠ›ã«åŠ›ã‚’åŠ ãˆã‚‹
     velocity.x += impulse.x;
     velocity.y += impulse.y;
     velocity.z += impulse.z;
 }
 
-// ƒ^[ƒQƒbƒg‚Æ‚Ì‹——£‚ğŒvZ
-float Character::calcTargetDist(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 targetPosition)
+// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ã®è·é›¢ã‚’è¨ˆç®—
+float Character::CalcTargetDist(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 targetPosition)
 {
     float vx = targetPosition.x - position.x;
     float vy = targetPosition.y - position.y;
     float vz = targetPosition.z - position.z;
-    float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 
-    return dist;
+    return sqrtf(vx * vx + vy * vy + vz * vz);
 }
 
-void Character::initAnimSpeed()
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿé€Ÿåº¦ã‚’åˆæœŸåŒ–
+void Character::InitAnimSpeed()
 {
-    if (model)
+    if (!model) return;
+
+    const auto& animations = model->GetResource()->GetAnimations();
+    for (int i = 0; i < animations.size(); ++i)
     {
-        auto animations = model->GetResource()->GetAnimations();
-        for (int i = 0; i < animations.size(); ++i)
-        {
-            animSpeed[i] = 1.0f;  // ƒfƒtƒHƒ‹ƒg‚ÌƒXƒs[ƒh‚ğ1.0f‚Éİ’è
-        }
+        animSpeed[i] = DEFAULT_ANIM_SPEED;
     }
 }
 
-// ˆÚ“®ˆ—
+// ç§»å‹•å‡¦ç†
 void Character::Move(float vx, float vz, float speed)
 {
-    // ˆÚ“®•ûŒüƒxƒNƒgƒ‹‚ğİ’è
+    // ç§»å‹•æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨­å®š
     moveVecX = vx;
     moveVecZ = vz;
 
-    // Å‘å‘¬“xİ’è
+    // æœ€å¤§é€Ÿåº¦è¨­å®š
     maxSpeed = speed;
 }
 
-// ù‰ñˆ—
+// æ—‹å›å‡¦ç†
 void Character::Turn(float elapsedTime, float vx, float vz, float speed)
 {
     speed *= elapsedTime;
 
-    // isƒxƒNƒgƒ‹‚ªƒ[ƒƒxƒNƒgƒ‹‚Ìê‡‚Íˆ—‚·‚é•K—v‚È‚µ
+    // é€²è¡Œãƒ™ã‚¯ãƒˆãƒ«ãŒã‚¼ãƒ­ãƒ™ã‚¯ãƒˆãƒ«ã®å ´åˆã¯å‡¦ç†ã™ã‚‹å¿…è¦ãªã—
     float len = sqrtf(vx * vx + vz * vz);
-    if (len < 0.001f) return;
+    if (len < TURN_INPUT_EPSILON) return;
 
-    // isƒxƒNƒgƒ‹‚ğ’PˆÊƒxƒNƒgƒ‹‰»
+    // é€²è¡Œãƒ™ã‚¯ãƒˆãƒ«ã‚’å˜ä½ãƒ™ã‚¯ãƒˆãƒ«åŒ–
     vx /= len;
     vz /= len;
 
-    // ©g‚Ì‰ñ“]’l‚©‚ç‘O•ûŒü‚ğ‹‚ß‚é
+    // è‡ªèº«ã®å›è»¢å€¤ã‹ã‚‰å‰æ–¹å‘ã‚’æ±‚ã‚ã‚‹
     float frontX = sinf(angle.y);
     float frontZ = cosf(angle.y);
 
-    // ‰ñ“]Šp‚ğ‹‚ß‚é‚½‚ßA2‚Â‚Ì’PˆÊƒxƒNƒgƒ‹‚Ì“àÏ‚ğŒvZ‚·‚é
+    // å›è»¢è§’ã‚’æ±‚ã‚ã‚‹ãŸã‚ã€2ã¤ã®å˜ä½ãƒ™ã‚¯ãƒˆãƒ«ã®å†…ç©ã‚’è¨ˆç®—ã™ã‚‹
     float dot = frontX * vx + frontZ * vz;
 
-    // “àÏ’l‚Í-1.0f`1.0f‚Å•\Œ»‚³‚ê‚Ä‚¨‚èA2‚Â‚Ì’PˆÊƒxƒNƒgƒ‹‚ÌŠp“x‚ª
-    // ¬‚³‚¢‚Ù‚Ç1.0‚É‹ß‚Ã‚­‚Æ‚¢‚¤«¿‚ğ—˜—p‚µ‚Ä‰ñ“]‘¬“x‚ğ’²®‚·‚é
+    // å†…ç©å€¤ã¯-1.0fï½1.0fã§è¡¨ç¾ã•ã‚Œã¦ãŠã‚Šã€2ã¤ã®å˜ä½ãƒ™ã‚¯ãƒˆãƒ«ã®è§’åº¦ãŒ
+    // å°ã•ã„ã»ã©1.0ã«è¿‘ã¥ãã¨ã„ã†æ€§è³ªã‚’åˆ©ç”¨ã—ã¦å›è»¢é€Ÿåº¦ã‚’èª¿æ•´ã™ã‚‹
     float rot = 1.0f - dot;
 
-    // ¶‰E”»’è‚ğs‚¤‚½‚ß‚É2‚Â‚Ì’PˆÊƒxƒNƒgƒ‹‚ÌŠOÏ‚ğŒvZ‚·‚é
+    // å·¦å³åˆ¤å®šã‚’è¡Œã†ãŸã‚ã«2ã¤ã®å˜ä½ãƒ™ã‚¯ãƒˆãƒ«ã®å¤–ç©ã‚’è¨ˆç®—ã™ã‚‹
     float cross = frontX * vz - frontZ * vx;
 
-    // 2D‚ÌŠOÏ’l‚ª³‚Ìê‡‚©•‰‚Ìê‡‚É‚æ‚Á‚Ä¶‰E”»’è‚ªs‚¦‚é
-    // ¶‰E”»’è‚ğs‚¤‚±‚Æ‚É‚æ‚Á‚Ä¶‰E‰ñ“]‚ğ‘I‘ğ‚·‚é
+    // 2Dã®å¤–ç©å€¤ãŒæ­£ã®å ´åˆã‹è² ã®å ´åˆã«ã‚ˆã£ã¦å·¦å³åˆ¤å®šãŒè¡Œãˆã‚‹
+    // å·¦å³åˆ¤å®šã‚’è¡Œã†ã“ã¨ã«ã‚ˆã£ã¦å·¦å³å›è»¢ã‚’é¸æŠã™ã‚‹
     if (cross < 0.0f)
     {
         angle.y += rot * speed;
@@ -305,212 +284,121 @@ void Character::Turn(float elapsedTime, float vx, float vz, float speed)
         angle.y -= rot * speed;
     }
 
-    if (angle.y > DirectX::XMConvertToRadians(360))
-    {
-        angle.y = DirectX::XMConvertToRadians(0);
-    }
-    if (angle.y < DirectX::XMConvertToRadians(0))
-    {
-        angle.y = DirectX::XMConvertToRadians(360);
-    }
-
+    // å›è»¢è§’ã‚’0ï½360åº¦ã®ç¯„å›²ã«åã‚ã‚‹
+    if (angle.y > FULL_TURN_RADIAN) angle.y = 0.0f;
+    if (angle.y < 0.0f) angle.y = FULL_TURN_RADIAN;
 }
 
-// ƒWƒƒƒ“ƒvˆ—
+// ã‚¸ãƒ£ãƒ³ãƒ—å‡¦ç†
 void Character::Jump(float speed)
 {
-    // ã•ûŒü‚Ì—Í‚ğİ’è
+    // ä¸Šæ–¹å‘ã®åŠ›ã‚’è¨­å®š
     velocity.y = speed;
 }
 
-// ‘¬—Íˆ—XV
+// é€ŸåŠ›å‡¦ç†æ›´æ–°
 void Character::UpdateVelocity(float elapsedTime)
 {
-    // Œo‰ßƒtƒŒ[ƒ€
-    float elapsedFrame = 60.0f * elapsedTime;
+    // çµŒéãƒ•ãƒ¬ãƒ¼ãƒ 
+    float elapsedFrame = REFERENCE_FPS * elapsedTime;
 
-    // ‚’¼‘¬—ÍXVˆ—
+    // å‚ç›´é€ŸåŠ›æ›´æ–°å‡¦ç†
     UpdateVerticalVelocity(elapsedFrame);
 
-    // …•½‘¬—ÍXVˆ—
+    // æ°´å¹³é€ŸåŠ›æ›´æ–°å‡¦ç†
     UpdateHorizontalVelocity(elapsedFrame);
 
-    // ‚’¼ˆÚ“®XVˆ—
+    // å‚ç›´ç§»å‹•æ›´æ–°å‡¦ç†
     UpdateVerticalMove(elapsedTime);
 
-    // …•½ˆÚ“®XVˆ—
+    // æ°´å¹³ç§»å‹•æ›´æ–°å‡¦ç†
     UpdateHorizontalMove(elapsedTime);
 }
 
-// ‘¬—ÍXVˆ—
+// é€ŸåŠ›æ›´æ–°å‡¦ç†
 void Character::UpdateVelocity(DirectX::XMFLOAT3* position, DirectX::XMFLOAT3* angle, DirectX::XMFLOAT3* velocity, float elapsedTime)
 {
-    // Œo‰ßƒtƒŒ[ƒ€
-    float elapsedFrame = 60.0f * elapsedTime;
+    // çµŒéãƒ•ãƒ¬ãƒ¼ãƒ 
+    float elapsedFrame = REFERENCE_FPS * elapsedTime;
 
-    // ‚’¼‘¬—ÍXVˆ—
+    // å‚ç›´é€ŸåŠ›æ›´æ–°å‡¦ç†
     UpdateVerticalVelocity(velocity, elapsedFrame);
 
-    // ‚’¼ˆÚ“®XVˆ—
+    // å‚ç›´ç§»å‹•æ›´æ–°å‡¦ç†
     UpdateVerticalMove(position, angle, velocity, elapsedTime);
 }
 
-// ‚’¼‘¬—ÍXVˆ—
+// å‚ç›´é€ŸåŠ›æ›´æ–°å‡¦ç†
 void Character::UpdateVerticalVelocity(float elapsedTime)
 {
-    // d—Íˆ—
-    velocity.y += gravity * elapsedTime;
+    UpdateVerticalVelocity(&velocity, elapsedTime);
 }
 
-// ‚’¼‘¬—ÍXVˆ—
+// å‚ç›´é€ŸåŠ›æ›´æ–°å‡¦ç†
 void Character::UpdateVerticalVelocity(DirectX::XMFLOAT3* velocity, float elapsedTime)
 {
-    // d—Íˆ—
+    // é‡åŠ›å‡¦ç†
     velocity->y += gravity * elapsedTime;
 }
 
-// ‚’¼ˆÚ“®XVˆ—
+// å‚ç›´ç§»å‹•æ›´æ–°å‡¦ç†
 void Character::UpdateVerticalMove(float elapsedTime)
 {
-    // ‚’¼•ûŒü‚ÌˆÚ“®—Ê
-    float my = velocity.y * elapsedTime;
-
-    // ƒLƒƒƒ‰ƒNƒ^[‚ÌY²•ûŒü‚Æ‚È‚é–@üƒxƒNƒgƒ‹
-    DirectX::XMFLOAT3 normal = { 0, 1, 0 };
-
-    slopeRate = 0.0f;
-
-    // —‰º’†
-    if (my < 0.0f)
-    {
-        // ƒŒƒC‚ÌŠJnˆÊ’u‚Í‘«Œ³‚æ‚è­‚µã
-        DirectX::XMFLOAT3 start = { position.x, position.y + stepOffset, position.z };
-        // ƒŒƒC‚ÌI“_ˆÊ’u‚ÍˆÚ“®—Ê‚ÌˆÊ’u
-        DirectX::XMFLOAT3 end = { position.x, position.y + my, position.z };
-
-#ifdef _DEBUG || DEBUG
-
-        Graphics::Instance().GetShapeRenderer()->DrawSphere(start, 0.05f, { 0,1,0,0 });
-        Graphics::Instance().GetShapeRenderer()->DrawSphere(end, 0.05f, { 0,1,0,1 });
-
-#endif // _DEBUG || DEBUG
-
-        // ƒŒƒCƒLƒƒƒXƒg‚É‚æ‚é’n–Ê”»’è
-        HitResult hit;
-        if (StageManager::Instance().RayCast(start, end, hit))
-        {
-            // –@üƒxƒNƒgƒ‹æ“¾
-            normal = hit.normal;
-
-            // ’n–Ê‚ÉÚ‚µ‚Ä‚¢‚é
-            position = hit.position;
-
-#ifdef _DEBUG || DEBUG
-
-            Graphics::Instance().GetShapeRenderer()->DrawSphere(hit.position, 0.05f, { 1,0,0,1 });
-
-#endif // _DEBUG || DEBUG
-
-
-            // ‰ñ“]
-            angle.x += hit.rotation.x;
-            angle.y += hit.rotation.y;
-            angle.z += hit.rotation.z;
-
-            // ŒXÎ—¦‚ÌŒvZ
-            float normalLengthXZ = sqrtf(hit.normal.x * hit.normal.x + hit.normal.z * hit.normal.z);
-            slopeRate = 1.0f - (hit.normal.y / (normalLengthXZ + hit.normal.y));
-
-            // ’…’n‚µ‚½
-            if (!isGround)
-            {
-                OnLanding();
-            }
-            isGround = true;
-            velocity.y = 0.0f;
-        }
-        else
-        {
-            // ‹ó’†‚É•‚‚¢‚Ä‚¢‚é
-            position.y += my;
-            isGround = false;
-        }
-    }
-    // ã¸’†
-    else if (my > 0.0f)
-    {
-        position.y += my;
-        isGround = false;
-    }
-
-    // ’n–Ê‚ÌŒü‚«‚É‰ˆ‚¤‚æ‚¤‚ÉXZ²‰ñ“]
-    {
-        // Y²‚ª–@üƒxƒNƒgƒ‹•ûŒü‚ÉŒü‚­ƒIƒCƒ‰[Šp‰ñ“]‚ğZo‚·‚é
-        DirectX::XMFLOAT3 test = { angle.x, angle.y, angle.z };
-        test.x = atan2f(normal.z, normal.y);
-        test.z = -atan2f(normal.x, normal.y);
-
-        // üŒ`•âŠ®‚ÅŠŠ‚ç‚©‚É‰ñ“]‚·‚é
-        angle.x = Mathf::Lerp(angle.x, test.x, 0.1f);
-        angle.z = Mathf::Lerp(angle.z, test.z, 0.1f);
-    }
+    UpdateVerticalMove(&position, &angle, &velocity, elapsedTime);
 }
 
-// ‚’¼ˆÚ“®XVˆ—
+// å‚ç›´ç§»å‹•æ›´æ–°å‡¦ç†
 void Character::UpdateVerticalMove(DirectX::XMFLOAT3* position, DirectX::XMFLOAT3* angle, DirectX::XMFLOAT3* velocity, float elapsedTime)
 {
-    // ‚’¼•ûŒü‚ÌˆÚ“®—Ê
+    // å‚ç›´æ–¹å‘ã®ç§»å‹•é‡
     float my = velocity->y * elapsedTime;
 
-    // ƒLƒƒƒ‰ƒNƒ^[‚ÌY²•ûŒü‚Æ‚È‚é–@üƒxƒNƒgƒ‹
+    // ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®Yè»¸æ–¹å‘ã¨ãªã‚‹æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«
     DirectX::XMFLOAT3 normal = { 0, 1, 0 };
 
     slopeRate = 0.0f;
 
-    // —‰º’†
+    // è½ä¸‹ä¸­
     if (my < 0.0f)
     {
-        // ƒŒƒC‚ÌŠJnˆÊ’u‚Í‘«Œ³‚æ‚è­‚µã
+        // ãƒ¬ã‚¤ã®é–‹å§‹ä½ç½®ã¯è¶³å…ƒã‚ˆã‚Šå°‘ã—ä¸Š
         DirectX::XMFLOAT3 start = { position->x, position->y + stepOffset, position->z };
-        // ƒŒƒC‚ÌI“_ˆÊ’u‚ÍˆÚ“®—Ê‚ÌˆÊ’u
+        // ãƒ¬ã‚¤ã®çµ‚ç‚¹ä½ç½®ã¯ç§»å‹•é‡ã®ä½ç½®
         DirectX::XMFLOAT3 end = { position->x, position->y + my, position->z };
 
-#ifdef _DEBUG || DEBUG
+#if defined(_DEBUG) || defined(DEBUG)
 
-        Graphics::Instance().GetShapeRenderer()->DrawSphere(start, 0.05f, { 0,1,0,0 });
-        Graphics::Instance().GetShapeRenderer()->DrawSphere(end, 0.05f, { 0,1,0,1 });
+        Graphics::Instance().GetShapeRenderer()->DrawSphere(start, DEBUG_SPHERE_RADIUS, { 0,1,0,0 });
+        Graphics::Instance().GetShapeRenderer()->DrawSphere(end, DEBUG_SPHERE_RADIUS, { 0,1,0,1 });
 
-#endif // _DEBUG || DEBUG
+#endif
 
-        // ƒŒƒCƒLƒƒƒXƒg‚É‚æ‚é’n–Ê”»’è
+        // ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã«ã‚ˆã‚‹åœ°é¢åˆ¤å®š
         HitResult hit;
         if (StageManager::Instance().RayCast(start, end, hit))
         {
-            // –@üƒxƒNƒgƒ‹æ“¾
+            // æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«å–å¾—
             normal = hit.normal;
 
-            // ’n–Ê‚ÉÚ‚µ‚Ä‚¢‚é
-            position->x = hit.position.x;
-            position->y = hit.position.y;
-            position->z = hit.position.z;
+            // åœ°é¢ã«æ¥ã—ã¦ã„ã‚‹
+            *position = hit.position;
 
-#ifdef _DEBUG || DEBUG
+#if defined(_DEBUG) || defined(DEBUG)
 
-            Graphics::Instance().GetShapeRenderer()->DrawSphere(hit.position, 0.05f, { 1,0,0,1 });
+            Graphics::Instance().GetShapeRenderer()->DrawSphere(hit.position, DEBUG_SPHERE_RADIUS, { 1,0,0,1 });
 
-#endif // _DEBUG || DEBUG
+#endif
 
-
-            // ‰ñ“]
+            // å›è»¢
             angle->x += hit.rotation.x;
             angle->y += hit.rotation.y;
             angle->z += hit.rotation.z;
 
-            // ŒXÎ—¦‚ÌŒvZ
+            // å‚¾æ–œç‡ã®è¨ˆç®—
             float normalLengthXZ = sqrtf(hit.normal.x * hit.normal.x + hit.normal.z * hit.normal.z);
             slopeRate = 1.0f - (hit.normal.y / (normalLengthXZ + hit.normal.y));
 
-            // ’…’n‚µ‚½
+            // ç€åœ°ã—ãŸ
             if (!isGround)
             {
                 OnLanding();
@@ -520,52 +408,51 @@ void Character::UpdateVerticalMove(DirectX::XMFLOAT3* position, DirectX::XMFLOAT
         }
         else
         {
-            // ‹ó’†‚É•‚‚¢‚Ä‚¢‚é
+            // ç©ºä¸­ã«æµ®ã„ã¦ã„ã‚‹
             position->y += my;
             isGround = false;
         }
     }
-    // ã¸’†
+    // ä¸Šæ˜‡ä¸­
     else if (my > 0.0f)
     {
         position->y += my;
         isGround = false;
     }
 
-    // ’n–Ê‚ÌŒü‚«‚É‰ˆ‚¤‚æ‚¤‚ÉXZ²‰ñ“]
+    // åœ°é¢ã®å‘ãã«æ²¿ã†ã‚ˆã†ã«XZè»¸å›è»¢
     {
-        // Y²‚ª–@üƒxƒNƒgƒ‹•ûŒü‚ÉŒü‚­ƒIƒCƒ‰[Šp‰ñ“]‚ğZo‚·‚é
-        DirectX::XMFLOAT3 test = { angle->x, angle->y, angle->z };
-        test.x = atan2f(normal.z, normal.y);
-        test.z = -atan2f(normal.x, normal.y);
+        // Yè»¸ãŒæ³•ç·šãƒ™ã‚¯ãƒˆãƒ«æ–¹å‘ã«å‘ãã‚ªã‚¤ãƒ©ãƒ¼è§’å›è»¢ã‚’ç®—å‡ºã™ã‚‹
+        float targetAngleX = atan2f(normal.z, normal.y);
+        float targetAngleZ = -atan2f(normal.x, normal.y);
 
-        // üŒ`•âŠ®‚ÅŠŠ‚ç‚©‚É‰ñ“]‚·‚é
-        angle->x = Mathf::Lerp(angle->x, test.x, 0.1f);
-        angle->z = Mathf::Lerp(angle->z, test.z, 0.1f);
+        // ç·šå½¢è£œå®Œã§æ»‘ã‚‰ã‹ã«å›è»¢ã™ã‚‹
+        angle->x = Mathf::Lerp(angle->x, targetAngleX, SLOPE_ROTATION_LERP_RATE);
+        angle->z = Mathf::Lerp(angle->z, targetAngleZ, SLOPE_ROTATION_LERP_RATE);
     }
 }
 
-// …•½‘¬—ÍXVˆ—
+// æ°´å¹³é€ŸåŠ›æ›´æ–°å‡¦ç†
 void Character::UpdateHorizontalVelocity(float elapsedTime)
 {
-    // XZ•½–Ê‚Ì‘¬—Í‚ğŒ¸‘¬
+    // XZå¹³é¢ã®é€ŸåŠ›ã‚’æ¸›é€Ÿ
     float length = sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
     if (length > 0.0f)
     {
-        // –€C—Í
+        // æ‘©æ“¦åŠ›
         float friction = this->friction * elapsedTime;
 
-        // –€C‚É‚æ‚é‰¡•ûŒü‚ÌŒ¸‘¬ˆ—
+        // æ‘©æ“¦ã«ã‚ˆã‚‹æ¨ªæ–¹å‘ã®æ¸›é€Ÿå‡¦ç†
         if (length > friction)
         {
-            // ’PˆÊƒxƒNƒgƒ‹‰»
+            // å˜ä½ãƒ™ã‚¯ãƒˆãƒ«åŒ–
             float vx = velocity.x / length;
             float vz = velocity.z / length;
 
             velocity.x -= vx * friction;
             velocity.z -= vz * friction;
         }
-        // ‰¡•ûŒü‚Ì‘¬—Í‚ª–€C—ÍˆÈ‰º‚É‚È‚Á‚½‚Ì‚Å‘¬—Í‚ğ–³Œø‰»
+        // æ¨ªæ–¹å‘ã®é€ŸåŠ›ãŒæ‘©æ“¦åŠ›ä»¥ä¸‹ã«ãªã£ãŸã®ã§é€ŸåŠ›ã‚’ç„¡åŠ¹åŒ–
         else
         {
             velocity.x = 0.0f;
@@ -573,85 +460,85 @@ void Character::UpdateHorizontalVelocity(float elapsedTime)
         }
     }
 
-    // XZ•½–Ê‚Ì‘¬—Í‚ğ’¼ÚƒZƒbƒgi‰Á‘¬‚È‚µj
+    // XZå¹³é¢ã®é€ŸåŠ›ã‚’ç›´æ¥ã‚»ãƒƒãƒˆï¼ˆåŠ é€Ÿãªã—ï¼‰
     float moveVecLength = sqrtf(moveVecX * moveVecX + moveVecZ * moveVecZ);
     if (moveVecLength > 0.0f)
     {
-        // ˆÚ“®ƒxƒNƒgƒ‹‚ğ³‹K‰»
+        // ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ­£è¦åŒ–
         float vx = moveVecX / moveVecLength;
         float vz = moveVecZ / moveVecLength;
 
-        // ‘¦‚ÉÅ‘å‘¬“x‚Å‘¬“xƒxƒNƒgƒ‹‚ğİ’è
+        // å³æ™‚ã«æœ€å¤§é€Ÿåº¦ã§é€Ÿåº¦ãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨­å®š
         velocity.x = vx * maxSpeed;
         velocity.z = vz * maxSpeed;
     }
 
-    // ˆÚ“®ƒxƒNƒgƒ‹‚ğƒŠƒZƒbƒg
+    // ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«ã‚’ãƒªã‚»ãƒƒãƒˆ
     moveVecX = 0.0f;
     moveVecZ = 0.0f;
 }
 
-// …•½ˆÚ“®XVˆ—
+// æ°´å¹³ç§»å‹•æ›´æ–°å‡¦ç†
 void Character::UpdateHorizontalMove(float elapsedTime)
 {
-    // ƒŒƒCƒLƒƒƒXƒgƒfƒoƒbƒO‹…
-    float vx = sinf(angle.y) * 5.f;
-    float vz = cosf(angle.y) * 5.f;
-    DirectX::XMFLOAT3 pp = { position.x, position.y + 0.5f, position.z };
-    DirectX::XMFLOAT3 ee = { pp.x + vx, pp.y, pp.z + vz };
-    HitResult hh;
-    if (StageManager::Instance().RayCast(pp, ee, hh))
+#if defined(_DEBUG) || defined(DEBUG)
+
+    // å‰æ–¹å‘ã¸ã®ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆçµæœã‚’ãƒ‡ãƒãƒƒã‚°çƒã§å¯è¦–åŒ–ã™ã‚‹
     {
-        Graphics::Instance().GetShapeRenderer()->DrawSphere(hh.position, 0.1f, { 1,0,0,1 });
+        DirectX::XMFLOAT3 forward = CharacterForward(angle);
+        DirectX::XMFLOAT3 debugStart = { position.x, position.y + GROUND_RAY_START_OFFSET, position.z };
+        DirectX::XMFLOAT3 debugEnd =
+        {
+            debugStart.x + forward.x * DEBUG_FORWARD_RAY_LENGTH,
+            debugStart.y,
+            debugStart.z + forward.z * DEBUG_FORWARD_RAY_LENGTH
+        };
+
+        HitResult debugHit;
+        if (StageManager::Instance().RayCast(debugStart, debugEnd, debugHit))
+        {
+            Graphics::Instance().GetShapeRenderer()->DrawSphere(debugHit.position, DEBUG_HIT_SPHERE_RADIUS, { 1,0,0,1 });
+        }
     }
 
+#endif
 
-    // …•½‘¬—Í—ÊŒvZ
+    // æ°´å¹³é€ŸåŠ›é‡è¨ˆç®—
     float velocityLengthXZ = sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
     if (velocityLengthXZ > 0.0f)
     {
-        // …•½ˆÚ“®’l
+        // æ°´å¹³ç§»å‹•å€¤
         float mx = velocity.x * elapsedTime;
         float mz = velocity.z * elapsedTime;
         DirectX::XMFLOAT3 start = { position.x, position.y + stepOffset, position.z };
         DirectX::XMFLOAT3 end = { position.x + mx, position.y + stepOffset, position.z + mz };
-        // ƒŒƒCƒLƒƒƒXƒg‚É‚æ‚é•Ç”»’è
+        // ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã«ã‚ˆã‚‹å£åˆ¤å®š
         HitResult hit;
         if (StageManager::Instance().RayCast(start, end, hit))
         {
-            // •Ç‚Ü‚Å‚ÌƒxƒNƒgƒ‹
-            DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&hit.position); // “_P
-            DirectX::XMVECTOR End = DirectX::XMLoadFloat3(&end); // “_B
+            // å£ã¾ã§ã®ãƒ™ã‚¯ãƒˆãƒ«
+            DirectX::XMVECTOR Start = DirectX::XMLoadFloat3(&hit.position); // ç‚¹P
+            DirectX::XMVECTOR End = DirectX::XMLoadFloat3(&end); // ç‚¹B
             DirectX::XMVECTOR Vec = DirectX::XMVectorSubtract(End, Start);
-            // •Ç‚Ì–@ü
+            // å£ã®æ³•ç·š
             DirectX::XMVECTOR Normal = DirectX::XMLoadFloat3(&hit.normal);
-            // “üËƒxƒNƒgƒ‹‚ğ–@üƒxƒNƒgƒ‹‚ÉË‰e
+            // å…¥å°„ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ³•ç·šãƒ™ã‚¯ãƒˆãƒ«ã«å°„å½±
             DirectX::XMVECTOR Dot = DirectX::XMVector3Dot(DirectX::XMVectorNegate(Vec), Normal);
-            // •â³ˆÊ’u‚ÌŒvZ
-            float a = DirectX::XMVectorGetX(Dot);
-            a += 0.01f;
-            DirectX::XMVECTOR R = DirectX::XMVectorAdd(Vec, DirectX::XMVectorScale(Normal, a));
+            // è£œæ­£ä½ç½®ã®è¨ˆç®—
+            float projection = DirectX::XMVectorGetX(Dot) + WALL_SLIDE_PUSH_OUT;
+            DirectX::XMVECTOR R = DirectX::XMVectorAdd(Vec, DirectX::XMVectorScale(Normal, projection));
             DirectX::XMVECTOR O = DirectX::XMVectorAdd(Start, R);
             DirectX::XMFLOAT3 o;
             DirectX::XMStoreFloat3(&o, O);
-#if 1
-            //•ÇÛ‚Å•Ç‚¸‚èŒã‚ÌˆÊ’u‚ª‚ß‚è‚ñ‚Å‚¢‚È‚¢‚©ƒŒƒCƒLƒƒƒXƒg‚Åƒ`ƒFƒbƒN‚·‚é
+
+            // å£éš›ã§å£ãšã‚Šå¾Œã®ä½ç½®ãŒã‚ã‚Šè¾¼ã‚“ã§ã„ãªã„ã‹ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã§ãƒã‚§ãƒƒã‚¯ã™ã‚‹
             if (StageManager::Instance().RayCast(start, o, hit))
             {
-                //‚ß‚è‚ñ‚Å‚¢‚½ê‡‚ÍƒvƒŒƒCƒ„[‚ÌˆÊ’u‚É¡‰ñƒŒƒCƒLƒƒƒXƒg‚µ‚½Œğ“_‚ğİ’è‚·‚é
-                //ƒvƒŒƒCƒ„[‚ÌˆÊ’u‚ª•Ç‚É‚Ò‚Á‚½‚è‚­‚Á‚Â‚©‚È‚¢‚æ‚¤‚É•â³‚·‚é
-                DirectX::XMVECTOR P = DirectX::XMLoadFloat3(&hit.position);
-                DirectX::XMVECTOR S = DirectX::XMLoadFloat3(&start);
-                DirectX::XMVECTOR PS = DirectX::XMVectorSubtract(S, Start);
-                DirectX::XMVECTOR V = DirectX::XMVector3Normalize(PS);
-                Start = DirectX::XMVectorAdd(P, DirectX::XMVectorScale(V, 0.001f));
-                DirectX::XMFLOAT3 p;
-                DirectX::XMStoreFloat3(&p, P);
-                position.x = p.x;
-                position.z = p.z;
+                // ã‚ã‚Šè¾¼ã‚“ã§ã„ãŸå ´åˆã¯ä»Šå›ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã—ãŸäº¤ç‚¹ã‚’ä½ç½®ã¨ã—ã¦è¨­å®šã™ã‚‹
+                position.x = hit.position.x;
+                position.z = hit.position.z;
             }
             else
-#endif
             {
                 position.x = o.x;
                 position.z = o.z;
@@ -659,31 +546,31 @@ void Character::UpdateHorizontalMove(float elapsedTime)
         }
         else
         {
-            // ˆÚ“®
+            // ç§»å‹•
             position.x += mx;
             position.z += mz;
         }
     }
 }
 
-// ƒGƒŠƒAŠO‚És‚¯‚È‚¢‚æ‚¤‚É‚·‚é
+// ã‚¨ãƒªã‚¢å¤–ã«è¡Œã‘ãªã„ã‚ˆã†ã«ã™ã‚‹
 void Character::KeepAreaLimit(DirectX::XMFLOAT3& position)
 {
     float dx = position.x - areaCenter.x;
     float dz = position.z - areaCenter.z;
     float distance = sqrt(dx * dx + dz * dz);
 
-    // ‹——£‚ª”¼Œa‚ğ’´‚¦‚½ê‡‚Ìˆ—
+    // è·é›¢ãŒåŠå¾„ã‚’è¶…ãˆãŸå ´åˆã®å‡¦ç†
     if (distance > areaSize)
     {
-        // ’´‚¦‚½ê‡AˆÊ’u‚ğ‰~üã‚É§ŒÀ
-        float scale = areaSize / distance;  // •K—v‚ÈkÚ
+        // è¶…ãˆãŸå ´åˆã€ä½ç½®ã‚’å††å‘¨ä¸Šã«åˆ¶é™
+        float scale = areaSize / distance;  // å¿…è¦ãªç¸®å°º
         position.x = areaCenter.x + dx * scale;
         position.z = areaCenter.z + dz * scale;
     }
 }
 
-// –³“GŠÔXV
+// ç„¡æ•µæ™‚é–“æ›´æ–°
 void Character::UpdateInvincibleTimer(float elapsedTime)
 {
     if (invincibleTimer > 0.0f)
@@ -692,7 +579,7 @@ void Character::UpdateInvincibleTimer(float elapsedTime)
     }
 }
 
-// ‘Sg‚É“–‚½‚è”»’è‚ğ•t—^‚·‚é
+// å…¨èº«ã«å½“ãŸã‚Šåˆ¤å®šã‚’ä»˜ä¸ã™ã‚‹
 void Character::AddCollisionSpheres(std::shared_ptr<Model> model, std::vector<NodeHitSphere> nodeHitSpheres)
 {
     for (const auto& node : nodeHitSpheres)
@@ -700,7 +587,7 @@ void Character::AddCollisionSpheres(std::shared_ptr<Model> model, std::vector<No
         Model::Node* modelNode = model->FindNode(node.nodeName);
         if (!modelNode) continue;
 
-        // ƒm[ƒh‚ÌˆÊ’u‚ğæ“¾‚µ‚Ä‹…‚ğ•`‰æ
+        // ãƒãƒ¼ãƒ‰ã®ä½ç½®ã‚’å–å¾—ã—ã¦çƒã‚’æç”»
         ShapeRenderer* debugRenderer = Graphics::Instance().GetShapeRenderer();
 
         if (drawCollisionPrimitive)

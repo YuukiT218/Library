@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <d3d11.h>
 #include <wrl.h>
@@ -27,7 +27,7 @@ enum class FrameBufferId
 	EnumCount
 };
 
-// ƒOƒ‰ƒtƒBƒbƒNƒX
+// ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ã‚¹
 class Graphics
 {
 private:
@@ -35,69 +35,69 @@ private:
 	~Graphics() = default;
 
 public:
-	// ƒCƒ“ƒXƒ^ƒ“ƒXæ“¾
+	// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹å–å¾—
 	static Graphics& Instance()
 	{
 		static Graphics instance;
 		return instance;
 	}
 
-	// ‰Šú‰»
+	// åˆæœŸåŒ–
 	void Initialize(HWND hWnd);
 
-	// ƒNƒŠƒA
+	// ã‚¯ãƒªã‚¢
 	void Clear(float r, float g, float b, float a);
 
-	// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgİ’è
+	// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆè¨­å®š
 	void SetRenderTargets();
 
-	// ‰æ–Ê•\¦
+	// ç”»é¢è¡¨ç¤º
 	void Present(UINT syncInterval);
 
-	// ƒEƒCƒ“ƒhƒEƒnƒ“ƒhƒ‹æ“¾
+	// ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦ãƒãƒ³ãƒ‰ãƒ«å–å¾—
 	HWND GetWindowHandle() { return hWnd; }
 
-	// ƒfƒoƒCƒXæ“¾
+	// ãƒ‡ãƒã‚¤ã‚¹å–å¾—
 	ID3D11Device* GetDevice() { return device.Get(); }
 
-	// ƒfƒoƒCƒXƒRƒ“ƒeƒLƒXƒgæ“¾
+	// ãƒ‡ãƒã‚¤ã‚¹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆå–å¾—
 	ID3D11DeviceContext* GetDeviceContext() { return immediateContext.Get(); }
 
 	ID3D11RenderTargetView* GetRenderTargetView() { return renderTargetView.Get(); }
 
 	ID3D11DepthStencilView* GetDepthStencilView() { return depthStencilView.Get(); }
 
-	// ƒXƒNƒŠ[ƒ“•æ“¾
+	// ã‚¹ã‚¯ãƒªãƒ¼ãƒ³å¹…å–å¾—
 	float GetScreenWidth() const { return screenWidth; }
 
-	// ƒXƒNƒŠ[ƒ“‚‚³æ“¾
+	// ã‚¹ã‚¯ãƒªãƒ¼ãƒ³é«˜ã•å–å¾—
 	float GetScreenHeight() const { return screenHeight; }
 
-	// ƒtƒŒ[ƒ€ƒoƒbƒtƒ@æ“¾
+	// ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡å–å¾—
 	FrameBuffer* GetFrameBuffer(FrameBufferId frameBufferId)
 	{
 		return frameBuffers[static_cast<int>(frameBufferId)].get();
 	}
 
-	// ƒŒƒ“ƒ_[ƒXƒe[ƒgæ“¾
+	// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¹ãƒ†ãƒ¼ãƒˆå–å¾—
 	RenderState* GetRenderState() { return renderState.get(); }
 
-	// ƒVƒF[ƒ_[æ“¾
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼å–å¾—
 	Shader* GetShader(ShaderId shaderId) { return shaders[static_cast<int>(shaderId)].get(); }
 
-	// ƒVƒƒƒhƒEƒ}ƒbƒvæ“¾
+	// ã‚·ãƒ£ãƒ‰ã‚¦ãƒãƒƒãƒ—å–å¾—
 	ShadowMap* GetShadowMap() { return shadowMap.get(); }
 
-	// ƒvƒŠƒ~ƒeƒBƒuƒŒƒ“ƒ_ƒ‰æ“¾
+	// ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ãƒ¬ãƒ³ãƒ€ãƒ©å–å¾—
 	PrimitiveRenderer* GetPrimitiveRenderer() const { return primitiveRenderer.get(); }
 
-	// ƒVƒFƒCƒvƒŒƒ“ƒ_ƒ‰æ“¾
+	// ã‚·ã‚§ã‚¤ãƒ—ãƒ¬ãƒ³ãƒ€ãƒ©å–å¾—
 	ShapeRenderer* GetShapeRenderer() const { return shapeRenderer.get(); }
 
-	// ƒ‚ƒfƒ‹ƒŒƒ“ƒ_ƒ‰æ“¾
+	// ãƒ¢ãƒ‡ãƒ«ãƒ¬ãƒ³ãƒ€ãƒ©å–å¾—
 	ModelRenderer* GetModelRenderer() const { return modelRenderer.get(); }
 
-	// ƒgƒŒƒCƒ‹ƒŒƒ“ƒ_ƒ‰æ“¾
+	// ãƒˆãƒ¬ã‚¤ãƒ«ãƒ¬ãƒ³ãƒ€ãƒ©å–å¾—
 	TrailRenderer* GetTrailRenderer() const { return trailRenderer.get(); }
 
 	std::mutex& GetMutex() { return mutex; }

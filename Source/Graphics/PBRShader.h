@@ -61,7 +61,8 @@ private:
 	{
 		float isEmissive = 0;//強調発光するかどうか
 		float emissiveFactor = 0;//発光度
-		DirectX::XMFLOAT2 color_dummy{};
+		float hasEmissiveTexture = 0;//エミッシブテクスチャを持っているか
+		float color_dummy = 0;
 		DirectX::XMFLOAT4 adjustColor{};//色の調整
 	};
 
@@ -84,20 +85,35 @@ private:
 	};
 	CbSetUp cbSetUp;
 
-	static const int ShadowBufferSize = 4;
+	static const int SHADOW_BUFFER_SIZE = 4;
+	// ※HLSL側の CbShadow (PBR.hlsli) と並び順を一致させること
 	struct CbShadow
 	{
-		DirectX::XMFLOAT4X4 CascadeLightViewProjection[ShadowBufferSize];
-		DirectX::XMFLOAT4 CascadeShadowBias;
+		DirectX::XMFLOAT4X4 CascadeLightViewProjection[SHADOW_BUFFER_SIZE];
 
-		DirectX::XMFLOAT4 cascadeFlags; // DisplayCascadeArea, IsCascade を float にし、余りを使う
+		// 各カスケードの終端距離
+		DirectX::XMFLOAT4 cascadeSplits;
 
+		// 影の色
 		DirectX::XMFLOAT4 shadowColor;
+
+		// x: カスケードを色分け表示するか
+		DirectX::XMFLOAT4 cascadeFlags;
+
 		float shadowTexelSize;
 		float shadowAttenuation;
 		float shadowBias;
-		float dummy;
-		DirectX::XMFLOAT4 cascadeSplits;
+
+		// 法線方向へずらす量（法線マップの起伏で影が途切れるのを防ぐ）
+		float shadowNormalOffset;
+
+		// 間接光にも影をどれだけ効かせるか
+		float indirectShadowStrength;
+
+		float shadowPadding[3];
+
+		// カスケードごとのシャドウマップ1テクセルのワールドサイズ
+		DirectX::XMFLOAT4 cascadeTexelWorldSize;
 	};
 
 	struct CbRimLight

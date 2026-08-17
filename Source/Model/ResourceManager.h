@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <memory>
 #include <string>
@@ -12,14 +12,14 @@ private:
 	~ResourceManager() {}
 
 public:
-	// —Bˆê‚ÌƒCƒ“ƒXƒ^ƒ“ƒX
+	// å”¯ä¸€ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹
 	static ResourceManager& Instance()
 	{
 		static ResourceManager instance;
 		return instance;
 	}
 
-	// ƒ‚ƒfƒ‹ƒŠƒ\[ƒX“Ç‚İ‚İ
+	// ãƒ¢ãƒ‡ãƒ«ãƒªã‚½ãƒ¼ã‚¹èª­ã¿è¾¼ã¿
 	std::shared_ptr<ModelResource> LoadModelResource(const char* filename, float scale = 1.0f);
 
 	void Clear();

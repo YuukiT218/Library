@@ -103,8 +103,8 @@ PostEffect::PostEffect(ID3D11Device* device)
 		sizeof(CbFpost),
 		cbFpostconstantBuffer.GetAddressOf());
 
-	uint32_t width = Graphics::Instance().GetScreenWidth();
-	uint32_t height = Graphics::Instance().GetScreenHeight();
+	uint32_t width = static_cast<uint32_t>(Graphics::Instance().GetScreenWidth());
+	uint32_t height = static_cast<uint32_t>(Graphics::Instance().GetScreenHeight());
 	for (size_t downsampled_index = 0; downsampled_index < downsampled_count; ++downsampled_index)
 	{
 		gaussian_blur[downsampled_index][0] = std::make_unique<FrameBuffer>(device, width >> downsampled_index, height >> downsampled_index);
@@ -185,11 +185,11 @@ void PostEffect::SetUp(float elapsedTime)
 
 	//}
 
-	//AccelTimer = Camera::Instance().GetAcceleration();
+	//accelTimer = Camera::Instance().GetAcceleration();
 
-	//if (AccelTimer > 0.0f)
+	//if (accelTimer > 0.0f)
 	//{
-	//	AccelTimer -= elapsedTime;
+	//	accelTimer -= elapsedTime;
 
 	//	cbFpost.AccelWeight = 1.0f;
 	//}
@@ -197,7 +197,7 @@ void PostEffect::SetUp(float elapsedTime)
 	//{
 	//	cbFpost.AccelWeight = 0.0f;
 	//}
-	//Camera::Instance().SetAcceleration(AccelTimer);
+	//Camera::Instance().SetAcceleration(accelTimer);
 
 	//ElderDragon* dragon = EnemyManager::Instance().FindElderDragon();
 	//if (dragon->GetIsRoarUsing())
@@ -360,17 +360,17 @@ void PostEffect::KawaseBloom(const RenderContext& rc, ID3D11ShaderResourceView* 
 		// Downsampling
 		dc->PSSetShader(downSamplePS.Get(), 0, 0);
 
-		DrawBuffer(downsampled_index, 0, gaussian_blur[downsampled_index - 1][0]->GetColorMap());
+		DrawBuffer(static_cast<int>(downsampled_index), 0, gaussian_blur[downsampled_index - 1][0]->GetColorMap());
 
 		// Ping-pong gaussian blur
 		dc->PSSetShader(horizontalPS.Get(), 0, 0);
 
-		DrawBuffer(downsampled_index, 1, gaussian_blur[downsampled_index][0]->GetColorMap());
+		DrawBuffer(static_cast<int>(downsampled_index), 1, gaussian_blur[downsampled_index][0]->GetColorMap());
 		dc->PSSetShaderResources(0, 1, &null_shader_resource_view);
 
 		dc->PSSetShader(verticalPS.Get(), 0, 0);
 
-		DrawBuffer(downsampled_index, 0, gaussian_blur[downsampled_index][1]->GetColorMap());
+		DrawBuffer(static_cast<int>(downsampled_index), 0, gaussian_blur[downsampled_index][1]->GetColorMap());
 
 	}
 
@@ -387,7 +387,7 @@ void PostEffect::KawaseBloom(const RenderContext& rc, ID3D11ShaderResourceView* 
 	{
 		shader_resource_views.push_back(gaussian_blur[downsampled_index][0]->GetColorMap());
 	}
-	dc->PSSetShaderResources(0, shader_resource_views.size(), shader_resource_views.data());
+	dc->PSSetShaderResources(0, static_cast<UINT>(shader_resource_views.size()), shader_resource_views.data());
 
 	dc->Draw(4, 0);
 
@@ -443,7 +443,7 @@ void PostEffect::GaussianFilter(const RenderContext& rc, ID3D11ShaderResourceVie
 	gaussianFilterDatas.textureSize.x = 1280;
 	gaussianFilterDatas.textureSize.y = 720;
 
-	cbGaussianFilter.kernelSize = kernelSize;
+	cbGaussianFilter.kernelSize = static_cast<float>(kernelSize);
 	cbGaussianFilter.texcel.x = 1.0f / gaussianFilterDatas.textureSize.x;
 	cbGaussianFilter.texcel.y = 1.0f / gaussianFilterDatas.textureSize.y;
 	//	重みを算出

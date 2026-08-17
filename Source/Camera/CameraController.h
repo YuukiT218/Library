@@ -2,8 +2,6 @@
 #include <DirectXMath.h>
 #include "Character/Enemy/EnemyBoss.h"
 
-#define CameraLerp (1)
-
 class CameraController
 {
 public:
@@ -46,7 +44,7 @@ public:
 private:
     DirectX::XMFLOAT3 target = { 0, 0, 0 };
     DirectX::XMFLOAT3 eye = { 0, 0, 0 };
-    DirectX::XMFLOAT3 lockonpoint = { 0, 0, 0 };
+    DirectX::XMFLOAT3 lockOnPoint = { 0, 0, 0 };
 
     Enemy* closestEnemy = nullptr;
 
@@ -69,11 +67,11 @@ private:
     DirectX::XMFLOAT3 newTarget = { 0, 0, 0 };
 
     float lerpSpeed = 5.5f;
-    float AnglelerpSpeed = 5.5f;
+    float angleLerpSpeed = 5.5f;
 
     bool freeCameraFlag = false;
-    bool islockon = false;
-    bool oldLockFlag = false;
+    bool isLockOn = false;
+    bool oldLockOnFlag = false;
 
     // カメラシェイク
     float cameraShakeRange = 0.03f;

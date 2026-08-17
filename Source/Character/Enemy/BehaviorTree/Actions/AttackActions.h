@@ -1,6 +1,6 @@
 ﻿// AttackActions.h
 #pragma once
-#include "BehaviorTree/ActionBase.h"
+#include "EnemyActionBase.h"
 #include "Character/Player/Player.h"
 #include "Character/Projectile/ProjectileManager.h"
 #include "Math/Mathf.h"
@@ -12,47 +12,47 @@ using namespace DirectX::SimpleMath;
 
 // 斬撃コンボ1
 template <typename ActorType>
-class SlashCombo1Action : public ActionBase<ActorType>
+class SlashCombo1Action : public EnemyActionBase<ActorType>
 {
 public:
-	SlashCombo1Action(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	SlashCombo1Action(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
-	int animationIndexs[4] = { 
+	int animationIndexes[4] = { 
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_01_01_Seq_0"),
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_01_02_Seq_0"),
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_02_03_Seq_0"),
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_02_04_Seq_0") 
 	};
-	int AttackCount = 0;
+	int attackCount = 0;
 	bool init = false;
 	float timer = 0.0f;
 	float duration = 1.0f;
 	Vector3 epsilon{ 2.5f, 1.0f, 2.5f };
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		auto* model = this->owner->GetModel();
-		int index = model->GetCurrentAnimationIndex();
-		float frame = model->GetCurrentAnimationSeconds();
-		AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", index);
+		auto* model = this->GetModel();
+		float frame = this->GetAnimationFrame();
+		AnimationConfig* config = this->GetCurrentAnimationConfig();
 
-		this->owner->GetSword()->AttackAnimationCollision(model, config, this->owner->GetCharacter());
-		this->owner->SetTargetPosition(Player::Instance().GetPosition());
+		this->UpdateAttackCollision();
+		this->owner->SetTargetPosition(this->PlayerPosition());
 
 		switch (this->step)
 		{
 		case 0:
-			model->PlayRootMotion(animationIndexs[AttackCount++], false, true, this->owner->GetBlendSeconds(), "root");
+			this->PlayRootMotion(animationIndexes[attackCount++], false);
 			this->step++;
 			break;
 
 		case 1:
-			this->owner->TurnToTarget(elapsedTime, 10000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::INSTANT);
 			if (frame >= config->advanceInputEndFrame)
 			{
-				model->PlayRootMotion(animationIndexs[AttackCount++], false, true, this->owner->GetBlendSeconds(), "root");
+				this->PlayRootMotion(animationIndexes[attackCount++], false);
 			}
-			if (AttackCount >= 4)
+			if (attackCount >= 4)
 			{
 				init = false;
 				this->step++;
@@ -65,17 +65,12 @@ public:
 			timer += elapsedTime;
 			float t = std::clamp(timer / duration, 0.0f, 1.0f);
 
-			this->owner->TurnToTarget(elapsedTime, 10000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::INSTANT);
 			if (frame >= config->advanceInputStartFrame)
 			{
-				auto playerPos = Player::Instance().GetPosition();
-				if (!XMVector3NearEqual(XMLoadFloat3(&this->owner->GetPosition()), XMLoadFloat3(&playerPos), epsilon))
+				if (!this->IsNearPlayer(epsilon))
 				{
-					this->owner->SetPosition({
-						Mathf::Lerp(this->owner->GetPosition().x, playerPos.x, t),
-						Mathf::Lerp(this->owner->GetPosition().y, playerPos.y, t),
-						Mathf::Lerp(this->owner->GetPosition().z, playerPos.z, t)
-					});
+					this->LerpTowardPlayer(t);
 				}
 				else this->step++;
 			}
@@ -83,31 +78,30 @@ public:
 		}
 
 		case 3:
-			if (!model->IsPlayAnimation()) return ResetState(ActionBase<ActorType>::State::Complete);
+			if (!model->IsPlayAnimation()) return this->ResetState(State::Complete);
 			break;
 		}
 
-		if (this->owner->IsAnyDamage() || this->owner->IsDeathFlag()) return ResetState(ActionBase<ActorType>::State::Failed);
-		return ActionBase<ActorType>::State::Run;
+		if (this->IsInterrupted()) return this->ResetState(State::Failed);
+		return State::Run;
 	}
 
 private:
-	typename ActionBase<ActorType>::State ResetState(typename ActionBase<ActorType>::State state)
+	void OnReset() override
 	{
-		this->step = 0;
-		AttackCount = 0;
+		attackCount = 0;
 		init = false;
 		timer = 0.0f;
-		return state;
 	}
 };
 
 // 斬撃波
 template <typename ActorType>
-class SlashWave : public ActionBase<ActorType>
+class SlashWave : public EnemyActionBase<ActorType>
 {
 public:
-	SlashWave(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	SlashWave(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
 	int animationIndexes[4] = { 
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_Wave_05_01_Seq_0"),
@@ -115,29 +109,27 @@ public:
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_Wave_05_03_Seq_0"),
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_Wave_05_04_Seq_0") 
 	};
-	int AttackCount = 0;
+	int attackCount = 0;
 
 private:
 	bool hasShot = false;
 
 public:
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		this->owner->SetTargetPosition(Player::Instance().GetPosition());
-		this->owner->TurnToTarget(elapsedTime, 10000);
+		this->owner->SetTargetPosition(this->PlayerPosition());
+		this->owner->TurnToTarget(elapsedTime, TurnSpeed::INSTANT);
 
-		auto* model = this->owner->GetModel();
-		int index = model->GetCurrentAnimationIndex();
-		float frame = model->GetCurrentAnimationSeconds();
-		AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", index);
+		auto* model = this->GetModel();
+		float frame = this->GetAnimationFrame();
+		AnimationConfig* config = this->GetCurrentAnimationConfig();
 
-		if (!this->owner->isPlayerInvincible)
-			this->owner->GetSword()->AttackAnimationCollision(model, config, this->owner->GetCharacter());
+		this->UpdateAttackCollision();
 
 		switch (this->step)
 		{
 		case 0:
-			model->PlayAnimation(animationIndexes[AttackCount % 4], false);
+			model->PlayAnimation(animationIndexes[attackCount % 4], false);
 			hasShot = false;
 			this->step++;
 			break;
@@ -154,43 +146,42 @@ public:
 				info.direction = bossForward;
 
 				if (Projectile* p = ProjectileManager::Instance().Launch(info))
-					p->FireAt(Player::Instance().GetPosition(), info.speed, false);
+					p->FireAt(this->PlayerPosition(), info.speed, false);
 
 				hasShot = true;
 			}
 
 			if (frame >= config->advanceInputEndFrame)
 			{
-				AttackCount++;
-				this->step = (AttackCount >= 4) ? 2 : 0;
+				attackCount++;
+				this->step = (attackCount >= 4) ? 2 : 0;
 			}
 			break;
 
 		case 2:
-			if (!model->IsPlayAnimation()) return ResetState(ActionBase<ActorType>::State::Complete);
+			if (!model->IsPlayAnimation()) return this->ResetState(State::Complete);
 			break;
 		}
 
-		if (this->owner->IsAnyDamage() || this->owner->IsDeathFlag()) return ResetState(ActionBase<ActorType>::State::Failed);
-		return ActionBase<ActorType>::State::Run;
+		if (this->IsInterrupted()) return this->ResetState(State::Failed);
+		return State::Run;
 	}
 
 private:
-	typename ActionBase<ActorType>::State ResetState(typename ActionBase<ActorType>::State state)
+	void OnReset() override
 	{
-		this->step = 0;
-		AttackCount = 0;
+		attackCount = 0;
 		hasShot = false;
-		return state;
 	}
 };
 
 // 突進斬り
 template <typename ActorType>
-class DashSlashAction : public ActionBase<ActorType>
+class DashSlashAction : public EnemyActionBase<ActorType>
 {
 public:
-	DashSlashAction(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	DashSlashAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
 	int animationIndex = this->owner->GetModel()->GetAnimationIndex("Run_Attack_01_Seq_0");
 	bool init = false;
@@ -199,17 +190,16 @@ public:
 	Vector3 epsilon{ 3.5f, 1.0f, 3.5f };
 	Vector3 teleportPosition;
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		this->owner->SetTargetPosition(Player::Instance().GetPosition());
+		this->owner->SetTargetPosition(this->PlayerPosition());
 		if (!init) { init = true; timer = 0.0f; }
 
-		auto* model = this->owner->GetModel();
-		float frame = model->GetCurrentAnimationSeconds();
-		AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", animationIndex);
+		auto* model = this->GetModel();
+		float frame = this->GetAnimationFrame();
+		AnimationConfig* config = this->GetAnimationConfig(animationIndex);
 
-		if (!this->owner->isPlayerInvincible)
-			this->owner->GetSword()->AttackAnimationCollision(model, config, this->owner->GetCharacter());
+		this->UpdateAttackCollision();
 
 		timer += elapsedTime;
 		float t = std::clamp(timer / duration, 0.0f, 1.0f);
@@ -228,31 +218,26 @@ public:
 				teleportPosition = this->owner->CalculateVisibleTeleportPos(15.0f);
 				duration = 15.0f;
 			}
-			model->PlayRootMotion(animationIndex, false, true, this->owner->GetBlendSeconds(), "root");
+			this->PlayRootMotion(animationIndex, false);
 			this->owner->SetGravity(-0.001f);
 			this->step++;
 			break;
 
 		case 1:
 			if (frame >= config->advanceInputStartFrame) model->PauseAnimation(true);
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 
 			if (!this->owner->IsTeleporting())
 			{
-				auto playerPos = Player::Instance().GetPosition();
-				this->owner->SetPosition({
-					Mathf::Lerp(this->owner->GetPosition().x, playerPos.x, t),
-					Mathf::Lerp(this->owner->GetPosition().y, playerPos.y, t),
-					Mathf::Lerp(this->owner->GetPosition().z, playerPos.z, t)
-				});
+				this->LerpTowardPlayer(t);
 			}
 
-			if (XMVector3NearEqual(XMLoadFloat3(&this->owner->GetPosition()), XMLoadFloat3(&Player::Instance().GetPosition()), epsilon))
+			if (this->IsNearPlayer(epsilon))
 			{
 				if (this->behaviorData->IsInSequenceAndNotLast() && !this->owner->IsTeleporting())
 				{
 					this->owner->StartTeleport(teleportPosition, 0.1f);
-					return ResetState(ActionBase<ActorType>::State::Complete);
+					return this->ResetState(State::Complete);
 				}
 				if ((!this->behaviorData->IsInSequence() || this->behaviorData->IsLastNodeInSequence()) && !this->owner->IsTeleporting())
 				{
@@ -267,43 +252,46 @@ public:
 			if (!model->IsPlayAnimation() || (!this->owner->IsGround() && frame >= config->advanceInputEndFrame))
 			{
 				duration = 3.0f;
-				return ResetState(ActionBase<ActorType>::State::Complete);
+				return this->ResetState(State::Complete);
 			}
 			break;
 		}
 
-		if (this->owner->IsAnyDamage() || this->owner->IsDeathFlag())
+		if (this->IsInterrupted())
 		{
 			model->PauseAnimation(false);
-			return ResetState(ActionBase<ActorType>::State::Failed);
+			return this->ResetState(State::Failed);
 		}
-		return ActionBase<ActorType>::State::Run;
+		return State::Run;
 	}
 
 private:
-	typename ActionBase<ActorType>::State ResetState(typename ActionBase<ActorType>::State state)
+	void OnReset() override
 	{
 		this->owner->SetGravity(-0.3f);
 		init = false;
 		this->owner->SetPlayedEffect(false);
-		this->step = 0;
 		timer = 0;
-		return state;
 	}
 };
 
 // 光柱円形収束
 template <typename ActorType>
-class PillarSpiralConv : public ActionBase<ActorType>
+class PillarSpiralConv : public EnemyActionBase<ActorType>
 {
 public:
-	PillarSpiralConv(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	PillarSpiralConv(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
 	int animationIndexes[3] = { 
 		this->owner->GetModel()->GetAnimationIndex("Power_Attack_Start_Seq_0"),
 		this->owner->GetModel()->GetAnimationIndex("Power_Attack_Loop_Seq_0"),
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_Wave_05_02_Seq_0") 
 	};
+	// 円状に並べる光柱の本数と半径
+	static constexpr int PILLAR_COUNT = 8;
+	static constexpr float CIRCLE_RADIUS = 3.0f;
+
 	std::vector<Projectile*> spawnedProjectiles;
 	float waitTimer = 0.0f;
 	const float waitDuration = 1.5f;
@@ -313,42 +301,27 @@ public:
 	float lockOnTime = 0.3f;
 	float currentRotationAngle = 0.0f;
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		auto* model = this->owner->GetModel();
+		auto* model = this->GetModel();
 
 		switch (this->step)
 		{
 		case 0:
-			model->PlayRootMotion(animationIndexes[0], false, true, 0.2f, "root");
+			this->PlayRootMotion(animationIndexes[0], false, 0.2f);
 			this->step++;
 			break;
 
 		case 1:
 		{
-			model->PlayRootMotion(animationIndexes[1], true, true, 0.2f, "root");
+			this->PlayRootMotion(animationIndexes[1], true, 0.2f);
 			spawnedProjectiles.clear();
 			
-			int count = 8;
-			float radius = 3.0f;
-			XMFLOAT3 playerPos = Player::Instance().GetPosition();
-
-			for (int i = 0; i < count; ++i)
-			{
-				ProjectileInfo info = ProjectileManager::GetLightPillarInfo();
-				info.owner = this->owner;
-				info.moveType = MovementType::Stationary;
-				info.scale = 0.4f;
-				info.radius = 0.5f;
-				info.lifeTime = 8.0f; 
-				info.invincibleTime = 0.5f;
-
-				float angle = XM_2PI * (float)i / count;
-				info.spawnPosition = { playerPos.x + cosf(angle) * radius, this->owner->GetPosition().y, playerPos.z + sinf(angle) * radius };
-
-				if (Projectile* p = ProjectileManager::Instance().Launch(info))
-					spawnedProjectiles.push_back(p);
-			}
+			// プレイヤーを囲むように光柱を円状に配置する
+			XMFLOAT3 playerPos = this->PlayerPosition();
+			XMFLOAT3 center = { playerPos.x, this->owner->GetPosition().y, playerPos.z };
+			this->SpawnLightPillarCircle(spawnedProjectiles, center,
+				PILLAR_COUNT, CIRCLE_RADIUS, 0.4f, 0.5f, 8.0f, 0.5f, false);
 			waitTimer = 0.0f;
 			this->step++;
 			break;
@@ -368,7 +341,7 @@ public:
 					if (Projectile* p = spawnedProjectiles[i]; p && p->IsActive())
 					{
 						float angle = (XM_2PI * (float)i / count) + currentRotationAngle;
-						p->SetPosition({ playerPos.x + cosf(angle) * 3.0f, this->owner->GetPosition().y, playerPos.z + sinf(angle) * 3.0f });
+						p->SetPosition({ playerPos.x + cosf(angle) * CIRCLE_RADIUS, this->owner->GetPosition().y, playerPos.z + sinf(angle) * CIRCLE_RADIUS });
 					}
 				}
 			}
@@ -377,12 +350,8 @@ public:
 		}
 
 		case 3:
-			model->PlayRootMotion(animationIndexes[2], false, true, 0.2f, "root");
-			for (auto* p : spawnedProjectiles)
-			{
-				if (p && p->IsActive()) p->FireAt(Player::Instance().GetPosition(), 20.0f, true);
-			}
-			spawnedProjectiles.clear();
+			this->PlayRootMotion(animationIndexes[2], false, 0.2f);
+			this->FireAndClear(spawnedProjectiles, 20.0f, true);
 			
 			waitTimer += elapsedTime;
 			if (waitTimer >= waitDuration) this->step++;
@@ -395,80 +364,64 @@ public:
 		case 5:
 			model->PlayAnimation(model->GetAnimationIndex("Idle_Combat_Seq_0"), true, 0.2f);
 			recoveryTimer += elapsedTime;
-			if (recoveryTimer >= recoveryDuration) return ResetState(ActionBase<ActorType>::State::Complete);
+			if (recoveryTimer >= recoveryDuration) return this->ResetState(State::Complete);
 			break;
 		}
 
-		if (this->owner->IsAnyDamage() || this->owner->IsDeathFlag()) return ResetState(ActionBase<ActorType>::State::Failed);
-		return ActionBase<ActorType>::State::Run;
+		if (this->IsInterrupted()) return this->ResetState(State::Failed);
+		return State::Run;
 	}
 
 private:
-	typename ActionBase<ActorType>::State ResetState(typename ActionBase<ActorType>::State state)
+	void OnReset() override
 	{
-		this->step = 0;
 		waitTimer = 0.0f;
 		recoveryTimer = 0.0f;
 		spawnedProjectiles.clear();
-		return state;
 	}
 };
 
 // 光柱円形拡散
 template <typename ActorType>
-class PillarSpiralDiff : public ActionBase<ActorType>
+class PillarSpiralDiff : public EnemyActionBase<ActorType>
 {
 public:
-	PillarSpiralDiff(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	PillarSpiralDiff(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
 	int animationIndexes[3] = { 
 		this->owner->GetModel()->GetAnimationIndex("Power_Attack_Start_Seq_0"),
 		this->owner->GetModel()->GetAnimationIndex("Power_Attack_Loop_Seq_0"),
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_Wave_05_02_Seq_0") 
 	};
+	// 円状に並べる光柱の本数と初期半径
+	static constexpr int PILLAR_COUNT = 8;
+	static constexpr float INITIAL_RADIUS = 2.0f;
+
 	std::vector<Projectile*> spawnedProjectiles;
 	float waitTimer = 0.0f;
 	const float waitDuration = 1.5f;
 	float recoveryTimer = 0.0f;
 	const float recoveryDuration = 2.0f;
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		auto* model = this->owner->GetModel();
+		auto* model = this->GetModel();
 
 		switch (this->step)
 		{
 		case 0:
-			model->PlayRootMotion(animationIndexes[0], false, true, 0.2f, "root");
+			this->PlayRootMotion(animationIndexes[0], false, 0.2f);
 			this->step++;
 			break;
 
 		case 1:
-			model->PlayRootMotion(animationIndexes[1], true, true, 0.2f, "root");
+			this->PlayRootMotion(animationIndexes[1], true, 0.2f);
 			if (spawnedProjectiles.empty())
 			{
-				int count = 8;
-				float initialRadius = 2.0f;
-				XMFLOAT3 center = this->owner->GetPosition();
-
-				for (int i = 0; i < count; ++i)
-				{
-					ProjectileInfo info = ProjectileManager::GetLightPillarInfo();
-					info.owner = this->owner;
-					info.moveType = MovementType::Stationary;
-					info.scale = 0.5f;
-					info.radius = 0.7f;
-					info.lifeTime = 5.0f;
-					info.centerPosition = center;
-					info.currentRadius = initialRadius;
-					info.invincibleTime = 1.0f;
-
-					float angle = XM_2PI * (float)i / count;
-					info.currentAngle = angle;
-					info.spawnPosition = { center.x + cosf(angle) * initialRadius, center.y, center.z + sinf(angle) * initialRadius };
-
-					if (Projectile* p = ProjectileManager::Instance().Launch(info)) spawnedProjectiles.push_back(p);
-				}
+				// 自分を中心に光柱を円状に配置し、外へ広がる軌道情報を持たせる
+				this->SpawnLightPillarCircle(spawnedProjectiles, this->owner->GetPosition(),
+					PILLAR_COUNT, INITIAL_RADIUS, 0.5f, 0.7f, 5.0f, 1.0f, true);
 			}
 
 			waitTimer += elapsedTime;
@@ -480,7 +433,7 @@ public:
 			{
 				if (p && p->IsActive())
 				{
-					model->PlayRootMotion(animationIndexes[3], false, true, 0.2f, "root"); // NOTE: index bounds check needed if out of range, original code used 3.
+					this->PlayRootMotion(animationIndexes[3], false, 0.2f); // NOTE: index bounds check needed if out of range, original code used 3.
 					p->StartSpiral(3.0f, 5.0f);
 				}
 			}
@@ -495,31 +448,30 @@ public:
 		case 4:
 			model->PlayAnimation(model->GetAnimationIndex("Idle_Combat_Seq_0"), true, 0.2f);
 			recoveryTimer += elapsedTime;
-			if (recoveryTimer >= recoveryDuration) return ResetState(ActionBase<ActorType>::State::Complete);
+			if (recoveryTimer >= recoveryDuration) return this->ResetState(State::Complete);
 			break;
 		}
 
-		if (this->owner->IsAnyDamage() || this->owner->IsDeathFlag()) return ResetState(ActionBase<ActorType>::State::Failed);
-		return ActionBase<ActorType>::State::Run;
+		if (this->IsInterrupted()) return this->ResetState(State::Failed);
+		return State::Run;
 	}
 
 private:
-	typename ActionBase<ActorType>::State ResetState(typename ActionBase<ActorType>::State state)
+	void OnReset() override
 	{
-		this->step = 0;
 		waitTimer = 0.0f;
 		recoveryTimer = 0.0f;
 		spawnedProjectiles.clear();
-		return state;
 	}
 };
 
 // テレポート強襲
 template <typename ActorType>
-class TelePortAssault : public ActionBase<ActorType>
+class TelePortAssault : public EnemyActionBase<ActorType>
 {
 public:
-	TelePortAssault(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	TelePortAssault(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
 	int animationIndexes[3] = { 
 		this->owner->GetModel()->GetAnimationIndex("Dodge_Combat_B_Seq_0"),
@@ -529,24 +481,22 @@ public:
 	Vector3 teleportPosition;
 	std::vector<Projectile*> spawnedProjectiles;
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		auto* model = this->owner->GetModel();
-		float frame = model->GetCurrentAnimationSeconds();
-		int index = model->GetCurrentAnimationIndex();
-		AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", index);
+		auto* model = this->GetModel();
+		float frame = this->GetAnimationFrame();
+		AnimationConfig* config = this->GetCurrentAnimationConfig();
 
-		if (!this->owner->isPlayerInvincible)
-			this->owner->GetSword()->AttackAnimationCollision(model, config, this->owner->GetCharacter());
+		this->UpdateAttackCollision();
 
-		this->owner->SetTargetPosition(Player::Instance().GetPosition());
+		this->owner->SetTargetPosition(this->PlayerPosition());
 
 		switch (this->step)
 		{
 		case 0:
 			teleportPosition = this->owner->CalculateVisibleTeleportPos(3.0f);
 			this->owner->SetGravity(-0.001f);
-			model->PlayRootMotion(animationIndexes[0], false, true, this->owner->GetBlendSeconds(), "root");
+			this->PlayRootMotion(animationIndexes[0], false);
 			this->step++;
 			break;
 
@@ -563,42 +513,22 @@ public:
 			break;
 
 		case 3:
-			this->owner->TurnToTarget(elapsedTime, 10000);
-			model->PlayRootMotion(animationIndexes[1], false, true, this->owner->GetBlendSeconds(), "root");
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::INSTANT);
+			this->PlayRootMotion(animationIndexes[1], false);
 			
-			if (this->owner->GetHealth() <= (this->owner->GetMaxHealth() * 0.5) && this->behaviorData->IsLastNodeInSequence() && spawnedProjectiles.empty())
+			if (this->IsHealthBelowRate(0.5f) && this->behaviorData->IsLastNodeInSequence() && spawnedProjectiles.empty())
 			{
-				for (int i = 0; i < 2; i++)
-				{
-					ProjectileInfo info = ProjectileManager::GetLightPillarInfo();
-					info.owner = this->owner;
-					info.moveType = MovementType::Stationary;
-					info.scale = 0.5f;
-					info.radius = 0.7f;
-					info.lifeTime = 5.0f;
-					info.speed = 40.0f;
-
-					auto posx = (i == 0) ? this->owner->CharacterLeft(this->owner->GetAngle()).x : this->owner->CharacterRight(this->owner->GetAngle()).x;
-					auto posz = (i == 0) ? this->owner->CharacterLeft(this->owner->GetAngle()).z : this->owner->CharacterRight(this->owner->GetAngle()).z;
-
-					info.spawnPosition = {
-						this->owner->GetPosition().x + (this->owner->CharacterBack(this->owner->GetAngle()).x - posx) * 3.0f,
-						-1,
-						this->owner->GetPosition().z + (this->owner->CharacterBack(this->owner->GetAngle()).z - posz) * 2.0f
-					};
-
-					if (Projectile* p = ProjectileManager::Instance().Launch(info)) spawnedProjectiles.push_back(p);
-				}
+				this->SpawnSideLightPillars(spawnedProjectiles);
 			}
 			this->step++;
 			break;
 
 		case 4:
-			this->owner->TurnToTarget(elapsedTime, 10000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::INSTANT);
 			if (frame >= config->advanceInputEndFrame)
 			{
 				this->owner->SetGravity(-0.3f);
-				model->PlayRootMotion(animationIndexes[2], false, true, this->owner->GetBlendSeconds(), "root");
+				this->PlayRootMotion(animationIndexes[2], false);
 				this->step++;
 			}
 			break;
@@ -608,11 +538,7 @@ public:
 			{
 				if (this->behaviorData->IsLastNodeInSequence())
 				{
-					for (auto* p : spawnedProjectiles)
-					{
-						if (p && p->IsActive()) p->FireAt(Player::Instance().GetPosition(), 20.0f, true);
-					}
-					spawnedProjectiles.clear();
+					this->FireAndClear(spawnedProjectiles, 20.0f, true);
 				}
 				this->step++;
 			}
@@ -620,36 +546,35 @@ public:
 			break;
 
 		case 6:
-			if (this->behaviorData->IsInSequenceAndNotLast() && frame >= config->advanceInputStartFrame) return ResetState(ActionBase<ActorType>::State::Complete);
+			if (this->behaviorData->IsInSequenceAndNotLast() && frame >= config->advanceInputStartFrame) return this->ResetState(State::Complete);
 
 			if (!model->IsPlayAnimation() || (frame >= config->advanceInputEndFrame && !this->owner->IsGround()))
 			{
-				return ResetState(ActionBase<ActorType>::State::Complete);
+				return this->ResetState(State::Complete);
 			}
 			break;
 		}
 
-		if (this->owner->IsAnyDamage() || this->owner->IsDeathFlag()) return ResetState(ActionBase<ActorType>::State::Failed);
-		return ActionBase<ActorType>::State::Run;
+		if (this->IsInterrupted()) return this->ResetState(State::Failed);
+		return State::Run;
 	}
 
 private:
-	typename ActionBase<ActorType>::State ResetState(typename ActionBase<ActorType>::State state)
+	void OnReset() override
 	{
 		this->owner->SetGravity(-0.3f);
-		this->step = 0;
-		return state;
 	}
 };
 
 // テレポートコンボ
 template <typename ActorType>
-class TeleportCombo : public ActionBase<ActorType>
+class TeleportCombo : public EnemyActionBase<ActorType>
 {
 public:
-	TeleportCombo(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	TeleportCombo(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
-	int AttackCount = 0;
+	int attackCount = 0;
 	int teleportAnimationIndex = this->owner->GetModel()->GetAnimationIndex("Dodge_Combat_B_Seq_0");
 	int comboAnimationIndexes[5] = { 
 		this->owner->GetModel()->GetAnimationIndex("Combo_Attack_03_01_Seq_0"),
@@ -660,30 +585,28 @@ public:
 	};
 	Vector3 teleportPosition;
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		auto* model = this->owner->GetModel();
-		float frame = model->GetCurrentAnimationSeconds();
-		int index = model->GetCurrentAnimationIndex();
-		AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", index);
+		auto* model = this->GetModel();
+		float frame = this->GetAnimationFrame();
+		AnimationConfig* config = this->GetCurrentAnimationConfig();
 		
-		this->owner->SetTargetPosition(Player::Instance().GetPosition());
-		if (!this->owner->isPlayerInvincible)
-			this->owner->GetSword()->AttackAnimationCollision(model, config, this->owner->GetCharacter());
+		this->owner->SetTargetPosition(this->PlayerPosition());
+		this->UpdateAttackCollision();
 
 		switch (this->step)
 		{
 		case 0:
-			model->PlayRootMotion(teleportAnimationIndex, false, true, this->owner->GetBlendSeconds(), "root");
+			this->PlayRootMotion(teleportAnimationIndex, false);
 			this->step++;
 			break;
 
 		case 1:
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 			if (frame >= config->advanceInputEndFrame && !this->owner->IsTeleporting())
 			{
-				teleportPosition = this->owner->CalculateVisibleTeleportPos((AttackCount < 3) ? 2.0f : 1.5f);
-				if (AttackCount >= 3) teleportPosition.y += 3.0f;
+				teleportPosition = this->owner->CalculateVisibleTeleportPos((attackCount < 3) ? 2.0f : 1.5f);
+				if (attackCount >= 3) teleportPosition.y += 3.0f;
 
 				this->owner->SetGravity(0.0f);
 				this->owner->StartTeleport(teleportPosition, 0.1f);
@@ -692,54 +615,53 @@ public:
 			break;
 
 		case 2:
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 			if (!this->owner->IsTeleporting()) this->step++;
 			break;
 
 		case 3:
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 			if (!this->owner->IsTeleporting())
 			{
-				model->PlayRootMotion(comboAnimationIndexes[AttackCount++], false, true, this->owner->GetBlendSeconds(), "root");
-				if (frame >= config->advanceInputEndFrame) this->step = (AttackCount < 4) ? 1 : this->step + 1;
+				this->PlayRootMotion(comboAnimationIndexes[attackCount++], false);
+				if (frame >= config->advanceInputEndFrame) this->step = (attackCount < 4) ? 1 : this->step + 1;
 			}
 			break;
 
 		case 4:
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 			if (frame >= config->advanceInputEndFrame && !this->owner->IsTeleporting())
 			{
 				this->owner->SetGravity(-1.5f);
-				model->PlayRootMotion(comboAnimationIndexes[AttackCount], false, true, this->owner->GetBlendSeconds(), "root");
+				this->PlayRootMotion(comboAnimationIndexes[attackCount], false);
 				this->step++;
 			}
 			break;
 
 		case 5:
-			if (frame >= config->advanceInputEndFrame) return ResetState(ActionBase<ActorType>::State::Complete);
+			if (frame >= config->advanceInputEndFrame) return this->ResetState(State::Complete);
 			break;
 		}
 
-		if (this->owner->IsAnyDamage() || this->owner->IsDeathFlag()) return ResetState(ActionBase<ActorType>::State::Failed);
-		return ActionBase<ActorType>::State::Run;
+		if (this->IsInterrupted()) return this->ResetState(State::Failed);
+		return State::Run;
 	}
 
 private:
-	typename ActionBase<ActorType>::State ResetState(typename ActionBase<ActorType>::State state)
+	void OnReset() override
 	{
-		this->step = 0;
-		AttackCount = 0;
+		attackCount = 0;
 		this->owner->SetGravity(-0.3f);
-		return state;
 	}
 };
 
 // 必殺技
 template <typename ActorType>
-class SpecialAttack : public ActionBase<ActorType>
+class SpecialAttack : public EnemyActionBase<ActorType>
 {
 public:
-	SpecialAttack(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	SpecialAttack(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
 	int animationIndexes[5] = { 
 		this->owner->GetModel()->GetAnimationIndex("Dodge_Combat_B_Seq_0"),
@@ -765,12 +687,11 @@ public:
 	float lockOnTime = 0.3f;
 	float currentRotationAngle = 0.0f;
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		auto* model = this->owner->GetModel();
-		float frame = model->GetCurrentAnimationSeconds();
-		int index = model->GetCurrentAnimationIndex();
-		AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", index);
+		auto* model = this->GetModel();
+		float frame = this->GetAnimationFrame();
+		AnimationConfig* config = this->GetCurrentAnimationConfig();
 
 		if (this->step >= 2 && this->step <= 11)
 		{
@@ -791,12 +712,12 @@ public:
 		switch (this->step)
 		{
 		case 0:
-			model->PlayRootMotion(animationIndexes[0], false, true, this->owner->GetBlendSeconds(), "root");
+			this->PlayRootMotion(animationIndexes[0], false);
 			this->step++;
 			break;
 
 		case 1:
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 			if (frame >= config->advanceInputEndFrame && !this->owner->IsTeleporting())
 			{
 				this->owner->SetGravity(0.0f);
@@ -809,7 +730,7 @@ public:
 			if (!this->owner->IsTeleporting() && !playedEffect)
 			{
 				handle = this->owner->magicCircle->Play(this->owner->GetPosition(), 5.0f);
-				model->PlayRootMotion(animationIndexes[2], true, true, 0.2f, "root");
+				this->PlayRootMotion(animationIndexes[2], true, 0.2f);
 				playedEffect = true;
 			}
 			waitTimer += elapsedTime;
@@ -882,7 +803,7 @@ public:
 				info.spawnPosition = spawnPos;
 
 				if (Projectile* p = ProjectileManager::Instance().Launch(info))
-					p->FireAt(Player::Instance().GetPosition(), 25.0f, true);
+					p->FireAt(this->PlayerPosition(), 25.0f, true);
 
 				if (++shotCount >= 6) this->step++;
 			}
@@ -940,7 +861,7 @@ public:
 			break;
 
 		case 10:
-			for (auto* p : groupHoming) if (p && p->IsActive()) p->FireAt(Player::Instance().GetPosition(), 20.0f, true);
+			for (auto* p : groupHoming) if (p && p->IsActive()) p->FireAt(this->PlayerPosition(), 20.0f, true);
 			groupHoming.clear();
 
 			if (++waveCount < 2) { waitTimer = 0.0f; this->step = 11; }
@@ -953,26 +874,25 @@ public:
 			break;
 
 		case 12:
-			model->PlayRootMotion(animationIndexes[3], true, true, 0.2f, "root");
+			this->PlayRootMotion(animationIndexes[3], true, 0.2f);
 			this->owner->magicCircle->Stop(handle);
 			handle = -1;
 			recoveryTimer += elapsedTime;
 			if (recoveryTimer >= recoveryDuration)
 			{
-				model->PlayRootMotion(animationIndexes[4], true, true, 0.2f, "root");
-				return ResetState(ActionBase<ActorType>::State::Complete);
+				this->PlayRootMotion(animationIndexes[4], true, 0.2f);
+				return this->ResetState(State::Complete);
 			}
 			break;
 		}
 
-		if (this->owner->IsAnyDamage() || this->owner->IsDeathFlag()) return ResetState(ActionBase<ActorType>::State::Failed);
-		return ActionBase<ActorType>::State::Run;
+		if (this->IsInterrupted()) return this->ResetState(State::Failed);
+		return State::Run;
 	}
 
 private:
-	typename ActionBase<ActorType>::State ResetState(typename ActionBase<ActorType>::State state)
+	void OnReset() override
 	{
-		this->step = 0;
 		playedEffect = false;
 		waitTimer = 0.0f;
 		recoveryTimer = 0.0f;
@@ -983,16 +903,16 @@ private:
 		groupSpiral2.clear();
 		this->owner->SetGravity(-0.3f);
 		this->owner->SetSpecialReady(false);
-		return state;
 	}
 };
 
 // 強制反撃1
 template <typename ActorType>
-class RevengeDive : public ActionBase<ActorType>
+class RevengeDive : public EnemyActionBase<ActorType>
 {
 public:
-	RevengeDive(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	RevengeDive(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
 	float intervalTimer = 0.0f;
 	const float intervalDuration = 0.7f;
@@ -1001,18 +921,16 @@ public:
 		this->owner->GetModel()->GetAnimationIndex("Attack_Air_To_Floor_End_02_Seq_0") 
 	};
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		auto* model = this->owner->GetModel();
-		float frame = model->GetCurrentAnimationSeconds();
-		int index = model->GetCurrentAnimationIndex();
-		AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", index);
+		auto* model = this->GetModel();
+		float frame = this->GetAnimationFrame();
+		AnimationConfig* config = this->GetCurrentAnimationConfig();
 		
-		this->owner->SetTargetPosition(Player::Instance().GetPosition());
+		this->owner->SetTargetPosition(this->PlayerPosition());
 		this->owner->SetSuperArmor(true);
 		
-		if (!this->owner->isPlayerInvincible)
-			this->owner->GetSword()->AttackAnimationCollision(model, config, this->owner->GetCharacter());
+		this->UpdateAttackCollision();
 
 		switch (this->step)
 		{
@@ -1024,11 +942,11 @@ public:
 
 		case 1:
 			intervalTimer += elapsedTime;
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 			if (!this->owner->IsTeleporting())
 			{
 				this->owner->SetPosition(Player::Instance().launchKnockbackPosition);
-				model->PlayRootMotion(animationIndexes[0], true, true, this->owner->GetBlendSeconds(), "root");
+				this->PlayRootMotion(animationIndexes[0], true);
 			}
 			if (intervalTimer >= intervalDuration)
 			{
@@ -1038,11 +956,11 @@ public:
 			break;
 
 		case 2:
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 			if (frame >= config->advanceInputEndFrame && !this->owner->IsTeleporting())
 			{
 				this->owner->SetGravity(-1.5f);
-				model->PlayRootMotion(animationIndexes[1], false, true, this->owner->GetBlendSeconds(), "root");
+				this->PlayRootMotion(animationIndexes[1], false);
 				this->step++;
 			}
 			break;
@@ -1054,20 +972,21 @@ public:
 				this->owner->SetGravity(-0.3f);
 				this->owner->SetRevengeState(false);
 				this->owner->SetSuperArmor(false);
-				return ActionBase<ActorType>::State::Complete;
+				return State::Complete;
 			}
 			break;
 		}
-		return ActionBase<ActorType>::State::Run;
+		return State::Run;
 	}
 };
 
 // 強制反撃2
 template <typename ActorType>
-class RevengeAssault : public ActionBase<ActorType>
+class RevengeAssault : public EnemyActionBase<ActorType>
 {
 public:
-	RevengeAssault(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	RevengeAssault(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
 	float intervalTimer = 0.0f;
 	const float intervalDuration = 0.7f;
@@ -1079,25 +998,23 @@ public:
 	Vector3 teleportPosition;
 	std::vector<Projectile*> spawnedProjectiles;
 
-	typename ActionBase<ActorType>::State Run(float elapsedTime) override
+	State Run(float elapsedTime) override
 	{
-		auto* model = this->owner->GetModel();
-		float frame = model->GetCurrentAnimationSeconds();
-		int index = model->GetCurrentAnimationIndex();
-		AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", index);
+		auto* model = this->GetModel();
+		float frame = this->GetAnimationFrame();
+		AnimationConfig* config = this->GetCurrentAnimationConfig();
 		
 		this->owner->SetSuperArmor(true);
-		this->owner->SetTargetPosition(Player::Instance().GetPosition());
+		this->owner->SetTargetPosition(this->PlayerPosition());
 		
-		if (!this->owner->isPlayerInvincible)
-			this->owner->GetSword()->AttackAnimationCollision(model, config, this->owner->GetCharacter());
+		this->UpdateAttackCollision();
 
 		switch (this->step)
 		{
 		case 0:
 			teleportPosition = this->owner->CalculateVisibleTeleportPos(3.0f);
 			this->owner->SetGravity(0.0f);
-			model->PlayRootMotion(animationIndexes[0], false, true, this->owner->GetBlendSeconds(), "root");
+			this->PlayRootMotion(animationIndexes[0], false);
 			this->step++;
 			break;
 
@@ -1113,42 +1030,22 @@ public:
 			this->owner->MoveToTarget(elapsedTime, 0.1f);
 			if (!this->owner->IsTeleporting())
 			{
-				model->PlayRootMotion(animationIndexes[1], false, true, this->owner->GetBlendSeconds(), "root");
+				this->PlayRootMotion(animationIndexes[1], false);
 				
-				if (this->owner->GetHealth() <= (this->owner->GetMaxHealth() * 0.5) && spawnedProjectiles.empty())
+				if (this->IsHealthBelowRate(0.5f) && spawnedProjectiles.empty())
 				{
-					for (int i = 0; i < 2; i++)
-					{
-						ProjectileInfo info = ProjectileManager::GetLightPillarInfo();
-						info.owner = this->owner;
-						info.moveType = MovementType::Stationary;
-						info.scale = 0.5f;
-						info.radius = 0.7f;
-						info.lifeTime = 5.0f;
-						info.speed = 40.0f;
-
-						auto posx = (i == 0) ? this->owner->CharacterLeft(this->owner->GetAngle()).x : this->owner->CharacterRight(this->owner->GetAngle()).x;
-						auto posz = (i == 0) ? this->owner->CharacterLeft(this->owner->GetAngle()).z : this->owner->CharacterRight(this->owner->GetAngle()).z;
-
-						info.spawnPosition = {
-							this->owner->GetPosition().x + (this->owner->CharacterBack(this->owner->GetAngle()).x - posx) * 3.0f,
-							-1,
-							this->owner->GetPosition().z + (this->owner->CharacterBack(this->owner->GetAngle()).z - posz) * 2.0f
-						};
-						
-						if (Projectile* p = ProjectileManager::Instance().Launch(info)) spawnedProjectiles.push_back(p);
-					}
+					this->SpawnSideLightPillars(spawnedProjectiles);
 				}
 				this->step++;
 			}
 			break;
 
 		case 3:
-			this->owner->TurnToTarget(elapsedTime, 1000);
+			this->owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 			if (frame >= config->advanceInputEndFrame && !this->owner->IsTeleporting())
 			{
 				this->owner->SetGravity(-1.5f);
-				model->PlayRootMotion(animationIndexes[2], false, true, this->owner->GetBlendSeconds(), "root");
+				this->PlayRootMotion(animationIndexes[2], false);
 				this->step++;
 			}
 			break;
@@ -1156,12 +1053,8 @@ public:
 		case 4:
 			if (frame >= config->advanceInputStartFrame)
 			{
-				for (auto* p : spawnedProjectiles)
-				{
-					if (p && p->IsActive()) p->FireAt(Player::Instance().GetPosition(), 20.0f, true);
-				}
+				this->FireAndClear(spawnedProjectiles, 20.0f, true);
 				this->step++;
-				spawnedProjectiles.clear();
 			}
 			break;
 
@@ -1173,10 +1066,10 @@ public:
 				this->owner->SetGravity(-0.3f);
 				this->owner->SetSuperArmor(false);
 				this->owner->SetRevengeState(false);
-				return ActionBase<ActorType>::State::Complete;
+				return State::Complete;
 			}
 			break;
 		}
-		return ActionBase<ActorType>::State::Run;
+		return State::Run;
 	}
 };

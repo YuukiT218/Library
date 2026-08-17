@@ -720,6 +720,9 @@
     <FxCompile Include="Shader\GaugePS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Shader\PortraitPS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
     <FxCompile Include="Shader\GPUParticleCS.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>

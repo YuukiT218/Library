@@ -1,30 +1,30 @@
-#include "Camera.h"
+ï»¿#include "Camera.h"
 
 
 #include <stdlib.h>
 
 
 
-// ƒNƒH[ƒ^ƒjƒIƒ“‚É‚æ‚é‰ñ“]Ý’è
+// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã«ã‚ˆã‚‹å›žè»¢è¨­å®š
 void Camera::SetRotation(const DirectX::XMFLOAT4& quaternion)
 {
     rotation = quaternion;
 }
 
-// ˆÊ’uÝ’è
+// ä½ç½®è¨­å®š
 void Camera::SetPosition(const DirectX::XMFLOAT3& position)
 {
     eye = position;
 }
 
-// ƒNƒH[ƒ^ƒjƒIƒ“‚ÆˆÊ’u‚©‚çs—ñ‚ðXV
+// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã¨ä½ç½®ã‹ã‚‰è¡Œåˆ—ã‚’æ›´æ–°
 void Camera::UpdateMatrices()
 {
-    // ƒNƒH[ƒ^ƒjƒIƒ“‚©‚ç‰ñ“]s—ñ‚ð¶¬
+    // ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‹ã‚‰å›žè»¢è¡Œåˆ—ã‚’ç”Ÿæˆ
     DirectX::XMVECTOR quat = DirectX::XMLoadFloat4(&rotation);
     DirectX::XMMATRIX rotMatrix = DirectX::XMMatrixRotationQuaternion(quat);
 
-    // •ûŒüƒxƒNƒgƒ‹‚ðŒvŽZ
+    // æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨ˆç®—
     DirectX::XMVECTOR rightVec = DirectX::XMVector3TransformNormal(
         DirectX::XMVectorSet(1, 0, 0, 0), rotMatrix);
     DirectX::XMVECTOR upVec = DirectX::XMVector3TransformNormal(
@@ -36,13 +36,13 @@ void Camera::UpdateMatrices()
     DirectX::XMStoreFloat3(&up, upVec);
     DirectX::XMStoreFloat3(&front, frontVec);
 
-    // ’Ž‹“_‚ðŒvŽZiƒJƒƒ‰ˆÊ’u + ‘O•ûŒü * ‹——£j
+    // æ³¨è¦–ç‚¹ã‚’è¨ˆç®—ï¼ˆã‚«ãƒ¡ãƒ©ä½ç½® + å‰æ–¹å‘ * è·é›¢ï¼‰
     DirectX::XMVECTOR eyeVec = DirectX::XMLoadFloat3(&eye);
     DirectX::XMVECTOR focusVec = DirectX::XMVectorAdd(eyeVec,
         DirectX::XMVectorScale(frontVec, 10.0f));
     DirectX::XMStoreFloat3(&focus, focusVec);
 
-    // ƒrƒ…[s—ñ‚ðì¬
+    // ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã‚’ä½œæˆ
     DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(
         eyeVec,
         focusVec,
@@ -51,22 +51,22 @@ void Camera::UpdateMatrices()
     DirectX::XMStoreFloat4x4(&view, View);
 }
 
-// ]—ˆ‚ÌŒÝŠ·«‚Ì‚½‚ß‚ÌŠÖ”
+// å¾“æ¥ã®äº’æ›æ€§ã®ãŸã‚ã®é–¢æ•°
 void Camera::SetLookAt(const DirectX::XMFLOAT3& eye, const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT3& up)
 {
-    // Ž‹“_A’Ž‹“_Aã•ûŒü‚©‚çƒrƒ…[s—ñ‚ðì¬
+    // è¦–ç‚¹ã€æ³¨è¦–ç‚¹ã€ä¸Šæ–¹å‘ã‹ã‚‰ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã‚’ä½œæˆ
     DirectX::XMVECTOR Eye = DirectX::XMLoadFloat3(&eye);
     DirectX::XMVECTOR Focus = DirectX::XMLoadFloat3(&focus);
     DirectX::XMVECTOR Up = DirectX::XMLoadFloat3(&up);
     DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(Eye, Focus, Up);
     DirectX::XMStoreFloat4x4(&view, View);
 
-    // ƒrƒ…[‚ð‹ts—ñ‰»‚µAƒ[ƒ‹ƒhs—ñ‚É–ß‚·
+    // ãƒ“ãƒ¥ãƒ¼ã‚’é€†è¡Œåˆ—åŒ–ã—ã€ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã«æˆ»ã™
     DirectX::XMMATRIX World = DirectX::XMMatrixInverse(nullptr, View);
     DirectX::XMFLOAT4X4 world;
     DirectX::XMStoreFloat4x4(&world, World);
 
-    // ƒJƒƒ‰‚Ì•ûŒü‚ðŽæ‚èo‚·
+    // ã‚«ãƒ¡ãƒ©ã®æ–¹å‘ã‚’å–ã‚Šå‡ºã™
     this->right.x = world._11;
     this->right.y = world._12;
     this->right.z = world._13;
@@ -77,16 +77,16 @@ void Camera::SetLookAt(const DirectX::XMFLOAT3& eye, const DirectX::XMFLOAT3& fo
     this->front.y = world._32;
     this->front.z = world._33;
 
-    // Ž‹“_A’Ž‹“_‚ð•Û‘¶
+    // è¦–ç‚¹ã€æ³¨è¦–ç‚¹ã‚’ä¿å­˜
     this->eye = eye;
     this->focus = focus;
 
-    // ƒNƒH[ƒ^ƒjƒIƒ“‚É•ÏŠ·‚µ‚Ä•Û‘¶
+    // ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã«å¤‰æ›ã—ã¦ä¿å­˜
     DirectX::XMVECTOR quat = DirectX::XMQuaternionRotationMatrix(World);
     DirectX::XMStoreFloat4(&rotation, quat);
 }
 
-// ƒp[ƒXƒyƒNƒeƒBƒuÝ’è
+// ãƒ‘ãƒ¼ã‚¹ãƒšã‚¯ãƒ†ã‚£ãƒ–è¨­å®š
 void Camera::SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ)
 {
     this->fov = fovY;
@@ -98,7 +98,7 @@ void Camera::SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ
     DirectX::XMStoreFloat4x4(&projection, Projection);
 }
 
-// ƒ[ƒ‹ƒhÀ•W‚ðƒXƒNƒŠ[ƒ“À•WiNDCj‚É•ÏŠ·
+// ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã‚’ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ï¼ˆNDCï¼‰ã«å¤‰æ›
 DirectX::XMFLOAT3 Camera::WorldToNDC(const DirectX::XMFLOAT3& worldPos) const
 {
     DirectX::XMVECTOR pos = DirectX::XMLoadFloat3(&worldPos);
@@ -113,39 +113,39 @@ DirectX::XMFLOAT3 Camera::WorldToNDC(const DirectX::XMFLOAT3& worldPos) const
     return result;
 }
 
-// ƒ[ƒ‹ƒhÀ•W‚ª‰æŠp“à‚É‚ ‚é‚©ƒ`ƒFƒbƒN
+// ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ãŒç”»è§’å†…ã«ã‚ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
 bool Camera::IsInViewport(const DirectX::XMFLOAT3& worldPos, float margin) const
 {
     DirectX::XMFLOAT3 ndc = WorldToNDC(worldPos);
 
-    // NDCÀ•W‚Åƒ`ƒFƒbƒNi-1?1‚Ì”ÍˆÍAƒ}[ƒWƒ“l—¶j
+    // NDCåº§æ¨™ã§ãƒã‚§ãƒƒã‚¯ï¼ˆ-1?1ã®ç¯„å›²ã€ãƒžãƒ¼ã‚¸ãƒ³è€ƒæ…®ï¼‰
     return (ndc.x >= -1.0f + margin && ndc.x <= 1.0f - margin &&
         ndc.y >= -1.0f + margin && ndc.y <= 1.0f - margin &&
         ndc.z >= 0.0f && ndc.z <= 1.0f);
 }
 
-// Ž‹‘ä‚Ì8‚Â‚Ì’¸“_‚ðƒ[ƒ‹ƒhÀ•W‚ÅŽæ“¾
+// è¦–éŒå°ã®8ã¤ã®é ‚ç‚¹ã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã§å–å¾—
 void Camera::GetFrustumCorners(float zNear, float zFar, DirectX::XMFLOAT3* corners) const
 {
-    // Žw’è‚³‚ê‚½Near/Far‚ÅˆêŽž“I‚ÈƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ‚ðì¬
+    // æŒ‡å®šã•ã‚ŒãŸNear/Farã§ä¸€æ™‚çš„ãªãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã‚’ä½œæˆ
     DirectX::XMMATRIX Proj = DirectX::XMMatrixPerspectiveFovLH(fov, aspect, zNear, zFar);
     DirectX::XMMATRIX View = DirectX::XMLoadFloat4x4(&view);
     DirectX::XMMATRIX ViewProj = DirectX::XMMatrixMultiply(View, Proj);
     DirectX::XMMATRIX InvViewProj = DirectX::XMMatrixInverse(nullptr, ViewProj);
 
-    // NDCi³‹K‰»ƒfƒoƒCƒXÀ•WŒnj‚É‚¨‚¯‚é8‚Â‚Ì’¸“_
+    // NDCï¼ˆæ­£è¦åŒ–ãƒ‡ãƒã‚¤ã‚¹åº§æ¨™ç³»ï¼‰ã«ãŠã‘ã‚‹8ã¤ã®é ‚ç‚¹
     DirectX::XMVECTOR ndcCorners[8] = {
-        DirectX::XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f), // Near ¶‰º
-        DirectX::XMVectorSet(1.0f, -1.0f, 0.0f, 1.0f), // Near ‰E‰º
-        DirectX::XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f), // Near ¶ã
-        DirectX::XMVectorSet(1.0f,  1.0f, 0.0f, 1.0f), // Near ‰Eã
-        DirectX::XMVectorSet(-1.0f, -1.0f, 1.0f, 1.0f), // Far ¶‰º
-        DirectX::XMVectorSet(1.0f, -1.0f, 1.0f, 1.0f), // Far ‰E‰º
-        DirectX::XMVectorSet(-1.0f,  1.0f, 1.0f, 1.0f), // Far ¶ã
-        DirectX::XMVectorSet(1.0f,  1.0f, 1.0f, 1.0f)  // Far ‰Eã
+        DirectX::XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f), // Near å·¦ä¸‹
+        DirectX::XMVectorSet(1.0f, -1.0f, 0.0f, 1.0f), // Near å³ä¸‹
+        DirectX::XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f), // Near å·¦ä¸Š
+        DirectX::XMVectorSet(1.0f,  1.0f, 0.0f, 1.0f), // Near å³ä¸Š
+        DirectX::XMVectorSet(-1.0f, -1.0f, 1.0f, 1.0f), // Far å·¦ä¸‹
+        DirectX::XMVectorSet(1.0f, -1.0f, 1.0f, 1.0f), // Far å³ä¸‹
+        DirectX::XMVectorSet(-1.0f,  1.0f, 1.0f, 1.0f), // Far å·¦ä¸Š
+        DirectX::XMVectorSet(1.0f,  1.0f, 1.0f, 1.0f)  // Far å³ä¸Š
     };
 
-    // NDC‚©‚çƒ[ƒ‹ƒh‹óŠÔ‚Ö‹t•ÏŠ·
+    // NDCã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰ç©ºé–“ã¸é€†å¤‰æ›
     for (int i = 0; i < 8; ++i)
     {
         DirectX::XMVECTOR worldPos = DirectX::XMVector4Transform(ndcCorners[i], InvViewProj);

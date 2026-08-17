@@ -1,6 +1,6 @@
-#include "TransformUtils.h"
+ï»¿#include "TransformUtils.h"
 
-// s—ñ‚©‚çƒˆ[Aƒsƒbƒ`Aƒ[ƒ‹‚ğs—ñ‚ğŒvZ‚·‚éB
+// è¡Œåˆ—ã‹ã‚‰ãƒ¨ãƒ¼ã€ãƒ”ãƒƒãƒã€ãƒ­ãƒ¼ãƒ«ã‚’è¡Œåˆ—ã‚’è¨ˆç®—ã™ã‚‹ã€‚
 bool TransformUtils::MatrixToRollPitchYaw(const DirectX::XMFLOAT4X4& m, float& pitch, float& yaw, float& roll)
 {
 	float xRadian = asinf(-m._32);
@@ -28,7 +28,7 @@ bool TransformUtils::MatrixToRollPitchYaw(const DirectX::XMFLOAT4X4& m, float& p
 	}
 }
 
-// ƒNƒH[ƒ^ƒjƒIƒ“‚©‚çƒˆ[Aƒsƒbƒ`Aƒ[ƒ‹‚ğs—ñ‚ğŒvZ‚·‚éB
+// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‹ã‚‰ãƒ¨ãƒ¼ã€ãƒ”ãƒƒãƒã€ãƒ­ãƒ¼ãƒ«ã‚’è¡Œåˆ—ã‚’è¨ˆç®—ã™ã‚‹ã€‚
 bool TransformUtils::QuaternionToRollPitchYaw(const DirectX::XMFLOAT4& q, float& pitch, float& yaw, float& roll)
 {
 	DirectX::XMVECTOR Q = DirectX::XMLoadFloat4(&q);

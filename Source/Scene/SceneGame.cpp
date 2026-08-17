@@ -23,18 +23,6 @@
 #include "System/Audio/Audio.h"
 
 
-//0~255のカラーの値を0~1に変換する処理
-static const DirectX::XMFLOAT4& Color255ToNormalized(const DirectX::XMFLOAT4& color)
-{
-	return DirectX::XMFLOAT4
-	{
-		color.x / 255.0f,
-		color.y / 255.0f,
-		color.z / 255.0f,
-		color.w / 255.0f
-	};
-}
-
 // 初期化
 void SceneGame::Initialize()
 {
@@ -55,7 +43,10 @@ void SceneGame::Initialize()
 	BGM = Audio::Instance().LoadAudioSource("Data/Sound/BGM/Fight to the Death.wav");
 
 	Camera& camera = Camera::Instance();
+
+	// ロックオン状態の初期化（前回のシーンの状態を持ち越さない）
 	CameraParam::Instance().SetIsLockOn(false);
+	CameraParam::Instance().SetLockOnEnemy(nullptr);
 
 	camera.SetEye({ 0.0f,2.0f,-20.0f });
 	camera.SetFocus({ 0.0f,0.0f,0.0f });
@@ -82,7 +73,7 @@ void SceneGame::Initialize()
 	// ライト設定
 	DirectionalLight directionalLight;
 	directionalLight.direction = { direction };
-	directionalLight.color = { Directioncolor };
+	directionalLight.color = { directionColor };
 	lightManager.SetDirectionalLight(directionalLight);
 
 	skyBox = std::make_unique<SkyBox>(device);
@@ -400,10 +391,10 @@ void SceneGame::DrawDebugGUI()
 				direction.y /= x;
 				direction.z /= x;
 			}
-			ImGui::ColorEdit3("Directioncolor", &Directioncolor.x);
-			ImGui::SliderFloat("intensity", &Directioncolor.w, 0.0f, +1000.0f);
+			ImGui::ColorEdit3("directionColor", &directionColor.x);
+			ImGui::SliderFloat("intensity", &directionColor.w, 0.0f, +1000.0f);
 
-			directionalLight = { direction,Directioncolor };
+			directionalLight = { direction,directionColor };
 
 			LightManager& lightManager = LightManager::Instance();
 			lightManager.SetDirectionalLight(directionalLight);

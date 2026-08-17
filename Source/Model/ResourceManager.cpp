@@ -1,10 +1,10 @@
-#include "Graphics/Graphics.h"
+ï»¿#include "Graphics/Graphics.h"
 #include "ResourceManager.h"
 
-// ƒ‚ƒfƒ‹ƒŠƒ\[ƒX“Ç‚İ‚İ
+// ãƒ¢ãƒ‡ãƒ«ãƒªã‚½ãƒ¼ã‚¹èª­ã¿è¾¼ã¿
 std::shared_ptr<ModelResource> ResourceManager::LoadModelResource(const char* filename, float scale)
 {
-    // ƒ‚ƒfƒ‹‚ğŒŸõ
+    // ãƒ¢ãƒ‡ãƒ«ã‚’æ¤œç´¢
     int result;
     for (auto& model : models)
     {
@@ -23,12 +23,12 @@ std::shared_ptr<ModelResource> ResourceManager::LoadModelResource(const char* fi
         }
     }
 
-    // V‹Kƒ‚ƒfƒ‹ƒŠƒ\[ƒXì¬•“Ç‚İ‚İ
+    // æ–°è¦ãƒ¢ãƒ‡ãƒ«ãƒªã‚½ãƒ¼ã‚¹ä½œæˆï¼†èª­ã¿è¾¼ã¿
     std::shared_ptr<ModelResource> model;
     model = std::make_shared<ModelResource>();
     model->Load(Graphics::Instance().GetDevice(), filename, 60);
 
-    // ƒ}ƒbƒv‚É“o˜^
+    // ãƒãƒƒãƒ—ã«ç™»éŒ²
     models.insert(std::make_pair(std::string(filename), std::weak_ptr<ModelResource>(model)));
 
     return model;

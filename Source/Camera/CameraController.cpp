@@ -22,8 +22,8 @@ void CameraController::Update(float elapsedTime)
             : fmodf((angle)-DirectX::XM_PI, DirectX::XM_2PI) + DirectX::XM_PI;
         };
 
-    oldLockFlag = islockon;
-    islockon = CameraParam::Instance().GetIsLockOn();
+    oldLockOnFlag = isLockOn;
+    isLockOn = CameraParam::Instance().GetIsLockOn();
 
     // 通常カメラ操作（ロックオンしていない時）
     {
@@ -49,28 +49,28 @@ void CameraController::Update(float elapsedTime)
     DirectX::XMFLOAT3 front;
     DirectX::XMStoreFloat3(&front, Front);
 
-    if (islockon)
+    if (isLockOn)
     {
         // 最新の敵位置を取得
         if (closestEnemy->IsTeleporting())
         {
-            lockonpoint = closestEnemy->GetCameraTrackingPosition();
+            lockOnPoint = closestEnemy->GetCameraTrackingPosition();
         }
         else
         {
-            lockonpoint = closestEnemy->GetPosition();
+            lockOnPoint = closestEnemy->GetPosition();
         }
 
         // プレイヤーと敵の位置ベクトル
         DirectX::XMVECTOR vPlayer = DirectX::XMLoadFloat3(&target);
-        DirectX::XMVECTOR vEnemy = DirectX::XMLoadFloat3(&lockonpoint);
+        DirectX::XMVECTOR vEnemy = DirectX::XMLoadFloat3(&lockOnPoint);
         DirectX::XMVECTOR vDiff = DirectX::XMVectorSubtract(vEnemy, vPlayer);
         float distToEnemy = DirectX::XMVectorGetX(DirectX::XMVector3Length(vDiff));
 
         // 高低差と平均の高さ
-        float deltaY = lockonpoint.y - target.y; // +なら敵が高い、-ならプレイヤーが高い
+        float deltaY = lockOnPoint.y - target.y; // +なら敵が高い、-ならプレイヤーが高い
         float diffY = fabsf(deltaY);
-        float midY = (target.y + lockonpoint.y) * 0.5f;
+        float midY = (target.y + lockOnPoint.y) * 0.5f;
 
         float t = (distToEnemy - distanceParamMin) / (distanceParamMax - distanceParamMin);
         t = std::clamp(t, 0.0f, 1.0f);
@@ -216,7 +216,7 @@ void CameraController::Update(float elapsedTime)
         angle.y = normalizeAngle(angle.y);
 
         // ロックオンを解除した瞬間の処理（カメラのワープ防止）
-        if (oldLockFlag && !islockon)
+        if (oldLockOnFlag && !isLockOn)
         {
             // 現在のカメラ位置からプレイヤー(target)へのベクトルを計算
             DirectX::XMVECTOR vTarget = DirectX::XMLoadFloat3(&target);
@@ -278,7 +278,7 @@ void CameraController::SetLockonPoint()
     if (closestEnemy)  
     {  
         DirectX::XMFLOAT3 enemyPosition = closestEnemy->GetPosition();  
-        lockonpoint = enemyPosition;  
+        lockOnPoint = enemyPosition;  
         CameraParam::Instance().SetLockOnEnemy(closestEnemy);  
     }  
     else  
@@ -338,8 +338,8 @@ void CameraController::CameraShake(float elapsedTime)
 void CameraController::MouseCameraController(float elapsedTime)
 {
     Mouse& mouse = Input::Instance().GetMouse();
-    float bx = mouse.GetPositionX();
-    float by = mouse.GetPositionY();
+    float bx = static_cast<float>(mouse.GetPositionX());
+    float by = static_cast<float>(mouse.GetPositionY());
 
     // 移動量（delta）の計算
     float dx = 0.0f;
@@ -348,8 +348,8 @@ void CameraController::MouseCameraController(float elapsedTime)
 #ifdef _DEBUG
     // 【Debugモード】
     // カーソルは固定されないため、Inputクラスが記録した「前回位置」との差分を使用
-    float oldbx = mouse.GetOldPositionX();
-    float oldby = mouse.GetOldPositionY();
+    float oldbx = static_cast<float>(mouse.GetOldPositionX());
+    float oldby = static_cast<float>(mouse.GetOldPositionY());
     dx = bx - oldbx;
     dy = by - oldby;
 #else

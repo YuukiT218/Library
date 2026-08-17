@@ -453,6 +453,7 @@ void PlayerDodgeState::Exit()
     player->GetPlayerModel()->SetAnimationSpeed(1.0f);
     player->SetGravity(-0.3f);
     player->SetPlayerRolling(false);
+    nextShiftReady = false;
 }
 
 // デバッグ用GUI描画

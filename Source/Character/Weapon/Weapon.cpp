@@ -1,4 +1,4 @@
-#include "Weapon.h"
+ï»¿#include "Weapon.h"
 #include "Graphics/Graphics.h"
 #include "Character/Player/Player.h"
 #include "Character/Enemy/EnemyBoss.h"
@@ -8,31 +8,60 @@
 #include "Graphics/Light.h"
 #include "Math/Mathf.h"
 #include "Effect/EffectManager.h"
+#include "System/Audio/Audio.h"
 
 
 #include <stdlib.h>
 
+namespace
+{
+    // æ”»æ’ƒä¸­ã«åˆƒã‹ã‚‰ç™ºç”Ÿã•ã›ã‚‹ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®1ãƒ•ãƒ¬ãƒ¼ãƒ ã‚ãŸã‚Šã®æ•°
+    constexpr int TRAIL_PARTICLE_EMIT_COUNT = 10;
 
+    // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ãŒå¼¾ã‘é£›ã¶é€Ÿåº¦ã®æŒ¯ã‚Œå¹…
+    constexpr float TRAIL_PARTICLE_SPREAD_SPEED = 0.5f;
+
+    // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®å¤§ãã•ï¼ˆæœ€å°å€¤ï¼‹ãƒ©ãƒ³ãƒ€ãƒ å¹…ï¼‰
+    constexpr float TRAIL_PARTICLE_MIN_SIZE = 0.05f;
+    constexpr float TRAIL_PARTICLE_SIZE_RANGE = 0.1f;
+
+    // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®å¯¿å‘½ï¼ˆæœ€å°å€¤ï¼‹ãƒ©ãƒ³ãƒ€ãƒ å¹…ï¼‰
+    constexpr float TRAIL_PARTICLE_MIN_LIFETIME = 0.3f;
+    constexpr float TRAIL_PARTICLE_LIFETIME_RANGE = 1.0f;
+
+    // æ•µã«æ”»æ’ƒãŒå½“ãŸã£ãŸæ™‚ã®ãƒ’ãƒƒãƒˆã‚¹ãƒˆãƒƒãƒ—
+    constexpr float HIT_STOP_TIME = 3.0f;
+    constexpr float HIT_STOP_SPEED = 0.1f;
+
+    // ãƒˆãƒ¬ã‚¤ãƒ«ã®ã‚¹ãƒ—ãƒ©ã‚¤ãƒ³æ›²ç·šã‚’ä½•åˆ†å‰²ã—ã¦æãã‹
+    constexpr int TRAIL_SPLINE_DIVISION = 10;
+
+    // 0.0ï½1.0ã®ãƒ©ãƒ³ãƒ€ãƒ å€¤ã‚’è¿”ã™
+    float Random01()
+    {
+        return static_cast<float>(rand()) / RAND_MAX;
+    }
+}
 
 void Weapon::Attach(std::string nodeName, Model* character)
 {
     std::string objName = nodeName;
 
-    // •Ší‚Ìƒ[ƒJƒ‹s—ñ‚ğŒvZ‚·‚é
+    // æ­¦å™¨ã®ãƒ­ãƒ¼ã‚«ãƒ«è¡Œåˆ—ã‚’è¨ˆç®—ã™ã‚‹
     DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
     DirectX::XMMATRIX R = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
     DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
     DirectX::XMMATRIX weaponLocalTransform = S * R * T;
 
-    // ƒLƒƒƒ‰ƒNƒ^[ƒ‚ƒfƒ‹‚©‚ç‰Eèƒm[ƒh‚ğŒŸõ‚·‚é
+    // ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ãƒ¢ãƒ‡ãƒ«ã‹ã‚‰å³æ‰‹ãƒãƒ¼ãƒ‰ã‚’æ¤œç´¢ã™ã‚‹
     for (const Model::Node& node : character->GetNodes())
     {
         if (node.name == objName)
         {
-            // ‰Eèƒm[ƒh‚Ìƒ[ƒ‹ƒhs—ñ‚ğæ“¾
+            // å³æ‰‹ãƒãƒ¼ãƒ‰ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’å–å¾—
             DirectX::XMMATRIX handWorldTransform = DirectX::XMLoadFloat4x4(&node.worldTransform);
 
-            // •Ší‚Ìƒ[ƒ‹ƒhs—ñ‚ğŒvZi‰Eè‚Ìƒ[ƒ‹ƒhs—ñ‚Æ•Ší‚Ìƒ[ƒJƒ‹s—ñ‚ğŠ|‚¯‡‚í‚¹‚éj
+            // æ­¦å™¨ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’è¨ˆç®—ï¼ˆå³æ‰‹ã®ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã¨æ­¦å™¨ã®ãƒ­ãƒ¼ã‚«ãƒ«è¡Œåˆ—ã‚’æ›ã‘åˆã‚ã›ã‚‹ï¼‰
             DirectX::XMMATRIX weaponWorldTransform = weaponLocalTransform * handWorldTransform;
 
             DirectX::XMStoreFloat4x4(&transform, weaponWorldTransform);
@@ -48,69 +77,65 @@ void Weapon::TrailUpdate(float elapsedTime)
     DirectX::XMFLOAT3 currentRootPos;
     DirectX::XMFLOAT3 currentTipPos;
     {
-        // Œ•‚ÌŒ´“_‚©‚çª–{‚Ææ’[‚Ü‚Å‚ÌƒIƒtƒZƒbƒg’l
-        DirectX::XMVECTOR RootOffset = DirectX::XMVectorSet(trailoffset[0].x, trailoffset[0].y, trailoffset[0].z, 0);
-        DirectX::XMVECTOR TipOffset = DirectX::XMVectorSet(trailoffset[1].x, trailoffset[1].y, trailoffset[1].z, 0);
+        // å‰£ã®åŸç‚¹ã‹ã‚‰æ ¹æœ¬ã¨å…ˆç«¯ã¾ã§ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆå€¤
+        DirectX::XMVECTOR RootOffset = DirectX::XMVectorSet(trailOffset[0].x, trailOffset[0].y, trailOffset[0].z, 0);
+        DirectX::XMVECTOR TipOffset = DirectX::XMVectorSet(trailOffset[1].x, trailOffset[1].y, trailOffset[1].z, 0);
 
         DirectX::XMMATRIX W = weaponWorldTransform;
         DirectX::XMVECTOR Root = DirectX::XMVector3TransformCoord(RootOffset, W);
         DirectX::XMVECTOR Tip = DirectX::XMVector3TransformCoord(TipOffset, W);
 
-        DirectX::XMStoreFloat3(&currentRootPos, Root); // ª–{
-        DirectX::XMStoreFloat3(&currentTipPos, Tip);   // æ’[
+        DirectX::XMStoreFloat3(&currentRootPos, Root); // æ ¹æœ¬
+        DirectX::XMStoreFloat3(&currentTipPos, Tip);   // å…ˆç«¯
     }
 
-    if (IsAttack)
+    if (isAttack)
     {
-        // UŒ‚’†F—š—ğ‚ğ1‚Â‚¸‚ÂŒã‚ë‚É‚¸‚ç‚µ‚ÄAæ“ª‚ÉÅVÀ•W‚ğ“ü‚ê‚é
+        // æ”»æ’ƒä¸­ï¼šå±¥æ­´ã‚’1ã¤ãšã¤å¾Œã‚ã«ãšã‚‰ã—ã¦ã€å…ˆé ­ã«æœ€æ–°åº§æ¨™ã‚’å…¥ã‚Œã‚‹
         for (int i = MAX_POLYGON - 1; i > 0; i--)
         {
             trailPositions[0][i] = trailPositions[0][i - 1];
             trailPositions[1][i] = trailPositions[1][i - 1];
         }
 
-        // ÅV‚ÌÀ•W‚ğ•Û‘¶
+        // æœ€æ–°ã®åº§æ¨™ã‚’ä¿å­˜
         trailPositions[0][0] = currentRootPos;
         trailPositions[1][0] = currentTipPos;
-
-        // 1ƒtƒŒ[ƒ€‚ ‚½‚è‚Ì”­¶”
-        int emitCount = 10;
 
         DirectX::XMVECTOR rootVec = DirectX::XMLoadFloat3(&currentRootPos);
         DirectX::XMVECTOR tipVec = DirectX::XMLoadFloat3(&currentTipPos);
 
-        for (int i = 0; i < emitCount; ++i)
+        for (int i = 0; i < TRAIL_PARTICLE_EMIT_COUNT; ++i)
         {
-            // 0.0 ` 1.0 ‚Ìƒ‰ƒ“ƒ_ƒ€‚ÈŠ„‡‚ğì¬
-            float t = (float)rand() / RAND_MAX;
-
-            // ª–{‚Ææ’[‚ÌŠÔ‚Åƒ‰ƒ“ƒ_ƒ€‚ÈÀ•W‚ğŒvZ
-            DirectX::XMVECTOR emitPosVec = DirectX::XMVectorLerp(rootVec, tipVec, t);
+            // æ ¹æœ¬ã¨å…ˆç«¯ã®é–“ã§ãƒ©ãƒ³ãƒ€ãƒ ãªåº§æ¨™ã‚’è¨ˆç®—
+            DirectX::XMVECTOR emitPosVec = DirectX::XMVectorLerp(rootVec, tipVec, Random01());
             DirectX::XMFLOAT3 emitPos;
             DirectX::XMStoreFloat3(&emitPos, emitPosVec);
 
-            // U‚ç‚Î‚é‘¬“x (ƒ‰ƒ“ƒ_ƒ€‚É’e‚¯”ò‚Ô)
-            float vx = ((float)rand() / RAND_MAX - 0.5f) * 0.5f;
-            float vy = ((float)rand() / RAND_MAX - 0.5f) * 0.5f;
-            float vz = ((float)rand() / RAND_MAX - 0.5f) * 0.5f;
-            DirectX::XMFLOAT3 velocity = { vx, vy, vz };
+            // æ•£ã‚‰ã°ã‚‹é€Ÿåº¦ (ãƒ©ãƒ³ãƒ€ãƒ ã«å¼¾ã‘é£›ã¶)
+            DirectX::XMFLOAT3 velocity =
+            {
+                (Random01() - 0.5f) * TRAIL_PARTICLE_SPREAD_SPEED,
+                (Random01() - 0.5f) * TRAIL_PARTICLE_SPREAD_SPEED,
+                (Random01() - 0.5f) * TRAIL_PARTICLE_SPREAD_SPEED
+            };
 
-            // F (ƒgƒŒƒCƒ‹‚ÌF TipBegin ‚É‡‚í‚¹‚Ä‚İ‚é‚Ì‚àãY—í‚Å‚·)
-            DirectX::XMFLOAT4 color = { TipBegin.x, TipBegin.y, TipBegin.z, 1.0f }; // ƒgƒŒƒCƒ‹æ’[‚ÌF‚ğg—p
+            // ãƒˆãƒ¬ã‚¤ãƒ«å…ˆç«¯ã®è‰²ã‚’ä½¿ç”¨
+            DirectX::XMFLOAT4 color = { tipBegin.x, tipBegin.y, tipBegin.z, 1.0f };
 
-            float size = 0.05f + ((float)rand() / RAND_MAX) * 0.1f;
-            float lifeTime = 0.3f + ((float)rand() / RAND_MAX) ; // ’Z‚ß‚ÅƒXƒb‚ÆÁ‚¦‚é
+            float size = TRAIL_PARTICLE_MIN_SIZE + Random01() * TRAIL_PARTICLE_SIZE_RANGE;
+            float lifeTime = TRAIL_PARTICLE_MIN_LIFETIME + Random01() * TRAIL_PARTICLE_LIFETIME_RANGE; // çŸ­ã‚ã§ã‚¹ãƒƒã¨æ¶ˆãˆã‚‹
 
-            // ƒp[ƒeƒBƒNƒ‹”­¶ (behaviorType = 0 ‚ğ‘z’è)
+            // ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ç™ºç”Ÿ (behaviorType = 0 ã‚’æƒ³å®š)
             EffectManager::Instance().EmitGpuParticle(emitPos, velocity, color, size, lifeTime, 0);
         }
     }
     else
     {
-        // UŒ‚’†‚Å‚È‚¢i‘Ò‹@AˆÚ“®A‹¯‚İA‰ñ”ğ‚È‚ÇjF
-        // —š—ğ”z—ñ‚Ìy‚·‚×‚Äz‚ğuŒ»İ‚ÌÀ•Wv‚Åã‘‚«‚·‚éB
-        // ‚±‚ê‚É‚æ‚èAƒgƒŒƒCƒ‹‚Ì’·‚³‚ªu0v‚Ìó‘Ô‚ªˆÛ‚³‚ê‚éB
-        // Ÿ‚É IsAttack ‚ª true ‚É‚È‚Á‚½‚Æ‚«AŒÃ‚¢êŠ‚©‚ç‚Ìˆø‚«‰„‚Î‚µ‚ª”­¶‚µ‚È‚­‚È‚éB
+        // æ”»æ’ƒä¸­ã§ãªã„ï¼ˆå¾…æ©Ÿã€ç§»å‹•ã€æ€¯ã¿ã€å›é¿ãªã©ï¼‰ï¼š
+        // å±¥æ­´é…åˆ—ã®ã€ã™ã¹ã¦ã€‘ã‚’ã€Œç¾åœ¨ã®åº§æ¨™ã€ã§ä¸Šæ›¸ãã™ã‚‹ã€‚
+        // ã“ã‚Œã«ã‚ˆã‚Šã€ãƒˆãƒ¬ã‚¤ãƒ«ã®é•·ã•ãŒã€Œ0ã€ã®çŠ¶æ…‹ãŒç¶­æŒã•ã‚Œã‚‹ã€‚
+        // æ¬¡ã« isAttack ãŒ true ã«ãªã£ãŸã¨ãã€å¤ã„å ´æ‰€ã‹ã‚‰ã®å¼•ãå»¶ã°ã—ãŒç™ºç”Ÿã—ãªããªã‚‹ã€‚
         for (int i = 0; i < MAX_POLYGON; i++)
         {
             trailPositions[0][i] = currentRootPos;
@@ -119,11 +144,11 @@ void Weapon::TrailUpdate(float elapsedTime)
     }
 }
 
-void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed)
+void Weapon::CollisionNodeVsEnemies(float nodeRadius, int attackDamage, float invincibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed)
 {
     GamePad& gamepad = Input::Instance().GetGamePad();
 
-    // “–‚½‚è”»’è—pƒIƒtƒZƒbƒg‚ğg‚¢A“–‚½‚è”»’èˆÊ’u‚ğ‹‚ß‚é
+    // å½“ãŸã‚Šåˆ¤å®šç”¨ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’ä½¿ã„ã€å½“ãŸã‚Šåˆ¤å®šä½ç½®ã‚’æ±‚ã‚ã‚‹
     DirectX::XMMATRIX weaponWorldMatrix = DirectX::XMLoadFloat4x4(&transform);
     for (int i = 0; i < hitSphereIndex; i++)
     {
@@ -131,10 +156,10 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
         DirectX::XMVECTOR P = DirectX::XMVector3Transform(weaponHitOffsetVec, weaponWorldMatrix);
         DirectX::XMStoreFloat3(&weaponHitPosition[i], P);
 
-        // “–‚½‚è”»’è—p‹…•`‰æ
+        // å½“ãŸã‚Šåˆ¤å®šç”¨çƒæç”»
         Graphics::Instance().GetShapeRenderer()->DrawSphere(weaponHitPosition[i], hitSphereRadius, { 1.0f, 0.0f, 0.0f, 1.0f });
 
-        // w’è‚Ìƒm[ƒh‚Æ“G‚ğ‘“–‚½‚è‚ÅÕ“Ëˆ—
+        // æŒ‡å®šã®ãƒãƒ¼ãƒ‰ã¨æ•µã‚’ç·å½“ãŸã‚Šã§è¡çªå‡¦ç†
 		EnemyBoss& boss = EnemyBoss::Instance();
     	std::vector<NodeHitSphere> enemyNode = boss.GetNodeHitSpheres();
         for (auto& enemyHitSphere : enemyNode)
@@ -142,7 +167,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
             Model* enemyModel = boss.GetModel();
             Model::Node* enemyNode = enemyModel->FindNode(enemyHitSphere.nodeName);
 
-            // ƒm[ƒhˆÊ’uæ“¾
+            // ãƒãƒ¼ãƒ‰ä½ç½®å–å¾—
             DirectX::XMFLOAT3 enemyNodePosition;
             enemyNodePosition = { enemyNode->worldTransform._41, enemyNode->worldTransform._42, enemyNode->worldTransform._43 };
 
@@ -158,7 +183,7 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
             {
                 {
                     boss.SetDamage(true);
-                    HitStop::Instance().HitStopStart(3.0f, 0.1f, 3.0f, 0.1f);
+                    HitStop::Instance().HitStopStart(HIT_STOP_TIME, HIT_STOP_SPEED, HIT_STOP_TIME, HIT_STOP_SPEED);
                 }
             }
         }
@@ -167,11 +192,11 @@ void Weapon::CollisionNodeVsEnemies(float nodeRadius, int AttackDamage, float in
 
 void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config, AnimationAttribute* activeAttribute, Character* character)
 {
-    if (!IsAttack) IsAttack = !IsAttack;
+    if (!isAttack) isAttack = !isAttack;
 
     GamePad& gamepad = Input::Instance().GetGamePad();
     
-    // “–‚½‚è”»’è—pƒIƒtƒZƒbƒg‚ğg‚¢A“–‚½‚è”»’èˆÊ’u‚ğ‹‚ß‚é
+    // å½“ãŸã‚Šåˆ¤å®šç”¨ã‚ªãƒ•ã‚»ãƒƒãƒˆã‚’ä½¿ã„ã€å½“ãŸã‚Šåˆ¤å®šä½ç½®ã‚’æ±‚ã‚ã‚‹
     DirectX::XMMATRIX weaponWorldMatrix = DirectX::XMLoadFloat4x4(&transform);
     for (int i = 0; i < hitSphereIndex; i++)
     {
@@ -213,7 +238,7 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
                 outPosition,
                 outHitPoint))
             {
-                // ƒAƒNƒeƒBƒu‚ÈUŒ‚‘®«‚Ìƒpƒ‰ƒ[ƒ^‚ğg—p
+                // ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãªæ”»æ’ƒå±æ€§ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’ä½¿ç”¨
                 if (character == static_cast<Character*>(&player) && activeAttribute && activeAttribute->flag == AnimationFlag::Attack)
                 {
                     auto& ap = activeAttribute->attackParam;
@@ -256,7 +281,7 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
                     if (Input::Instance().GetIsLastGamePad())
                         gamepad.Vibrate(ap.attackLeftVibrate, ap.attackRightVibrate); 
                     Camera::Instance().SetCameraShakeSwitch(true, 0.2f, 1.0f);
-                    // ƒ_ƒ[ƒW“K—piƒRƒƒ“ƒgƒAƒEƒg•”•ª‚ğ—LŒø‰»‚·‚éê‡j
+                    // ãƒ€ãƒ¡ãƒ¼ã‚¸é©ç”¨ï¼ˆã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆéƒ¨åˆ†ã‚’æœ‰åŠ¹åŒ–ã™ã‚‹å ´åˆï¼‰
                     if (boss.ApplyDamage(ap.attackDamage, ap.invisibleTime, true, outHitPoint))
                     {
 	                    attackHitEffectHandle = attackHitEffect->Play(outHitPoint, 0.2f);
@@ -266,7 +291,7 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
                 else if (character == static_cast<Character*>(&boss) && activeAttribute && activeAttribute->flag == AnimationFlag::Attack)
                 {
                     auto& ap = activeAttribute->attackParam;
-                    // ƒvƒŒƒCƒ„[‚ª‰ñ”ğ’†‚È‚çˆ—‚ğ”²‚¯‚é
+                    // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒå›é¿ä¸­ãªã‚‰å‡¦ç†ã‚’æŠœã‘ã‚‹
                     bool isPlayerRolling = Player::Instance().GetPlayerIsRolling();
                     if (isPlayerRolling || player.GetInvincibleTimer() > 0.0f)
                     {
@@ -280,7 +305,7 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
                     {
                         player.SetDamageDirection(boss.GetPosition());
 
-                        // ƒ_ƒ[ƒWƒ^ƒCƒv‚É‰‚¶‚Äƒtƒ‰ƒO‚ğİ’è
+                        // ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚¿ã‚¤ãƒ—ã«å¿œã˜ã¦ãƒ•ãƒ©ã‚°ã‚’è¨­å®š
                         if (ap.knockbackType == KnockbackType::None)
                         {
                             lightSE->Play(false, 0.1f);
@@ -318,21 +343,21 @@ void Weapon::CollisionNodeVsCharacter(float nodeRadius, AnimationConfig* config,
     }
 }
 
-void Weapon::AttackAnimationCollision(Model* character, float animTimeMin, float animTimeMax, int AttackDamage, float invicibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed)
+void Weapon::AttackAnimationCollision(Model* character, float animTimeMin, float animTimeMax, int attackDamage, float invincibleTime, float leftVibrate, float rightVibrate, float hitStopTime, float hitStopSpeed)
 {
     GamePad& gamepad = Input::Instance().GetGamePad();
 
-    //”CˆÓ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ÌÄ¶‹æŠÔ‚Ì‚İÕ“Ëˆ—‚ğ‚·‚é
+    //ä»»æ„ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å†ç”ŸåŒºé–“ã®ã¿è¡çªå‡¦ç†ã‚’ã™ã‚‹
     float animationTime = character->GetCurrentAnimationSeconds();
     {
-        //UŒ‚“–‚½‚è”»’è‹Œ‚ÆƒGƒlƒ~[‚ÌÕ“Ë”»’è
+        //æ”»æ’ƒå½“ãŸã‚Šåˆ¤å®šæ—§ã¨ã‚¨ãƒãƒŸãƒ¼ã®è¡çªåˆ¤å®š
         if (animationTime >= animTimeMin && animationTime <= animTimeMax)
         {
-            CollisionNodeVsEnemies(hitSphereRadius, AttackDamage, invicibleTime, leftVibrate, rightVibrate, hitStopTime, hitStopSpeed);
+            CollisionNodeVsEnemies(hitSphereRadius, attackDamage, invincibleTime, leftVibrate, rightVibrate, hitStopTime, hitStopSpeed);
         }
         else
         {
-            if (IsAttack) IsAttack = !IsAttack;
+            if (isAttack) isAttack = !isAttack;
 
             gamepad.Vibrate(0.0f, 0.0f);
         }
@@ -347,7 +372,7 @@ void Weapon::AttackAnimationCollision(Model* model, AnimationConfig* config, Cha
     bool anyAttackActive = false;
     AnimationAttribute* activeAttackAttribute = nullptr;
 
-    // •¡”‚ÌAttribute‚ğƒ`ƒFƒbƒN
+    // è¤‡æ•°ã®Attributeã‚’ãƒã‚§ãƒƒã‚¯
     for (auto& attribute : config->attributes)
     {
         if (attribute.flag == AnimationFlag::Attack && attribute.IsActive(animationTime))
@@ -355,16 +380,16 @@ void Weapon::AttackAnimationCollision(Model* model, AnimationConfig* config, Cha
             anyAttackActive = true;
             activeAttackAttribute = &attribute;
 
-            // UŒ‚“–‚½‚è”»’è‹…‚ÆƒGƒlƒ~[‚ÌÕ“Ë”»’èiƒAƒNƒeƒBƒu‚È‘®«‚ğ“n‚·j
+            // æ”»æ’ƒå½“ãŸã‚Šåˆ¤å®šçƒã¨ã‚¨ãƒãƒŸãƒ¼ã®è¡çªåˆ¤å®šï¼ˆã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãªå±æ€§ã‚’æ¸¡ã™ï¼‰
             CollisionNodeVsCharacter(hitSphereRadius, config, activeAttackAttribute, character);
 
-            break; // Å‰‚ÉŒ©‚Â‚©‚Á‚½ƒAƒNƒeƒBƒu‚ÈUŒ‚‘®«‚Ì‚İ‚ğˆ—
+            break; // æœ€åˆã«è¦‹ã¤ã‹ã£ãŸã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãªæ”»æ’ƒå±æ€§ã®ã¿ã‚’å‡¦ç†
         }
     }
 
     if (!anyAttackActive)
     {
-        if (IsAttack) IsAttack = !IsAttack;
+        if (isAttack) isAttack = !isAttack;
         gamepad.Vibrate(0.0f, 0.0f);
     }
 }
@@ -394,7 +419,7 @@ void Weapon::TrailRender(const RenderContext& rc)
 
 	float a = 1.0f / (MAX_POLYGON - 1);
 
-    // ƒXƒvƒ‰ƒCƒ“•âŠ®ˆ—‚É‚æ‚éŠŠ‚ç‚©‚Èƒ|ƒŠƒSƒ“‚ğ•`‰æ
+    // ã‚¹ãƒ—ãƒ©ã‚¤ãƒ³è£œå®Œå‡¦ç†ã«ã‚ˆã‚‹æ»‘ã‚‰ã‹ãªãƒãƒªã‚´ãƒ³ã‚’æç”»
     for (int i = 0; i < MAX_POLYGON - 3; ++i)
     {
         int index0 = i;
@@ -421,14 +446,14 @@ void Weapon::TrailRender(const RenderContext& rc)
         float dissolve = static_cast<float>(i) / static_cast<float>(MAX_POLYGON - 3);
         dissolve = 1.0f - (this->dissolve * 2) * (dissolve);
 
-        for (int j = 0; j <= 10; ++j)
+        for (int j = 0; j <= TRAIL_SPLINE_DIVISION; ++j)
         {
-            float t = j / static_cast<float>(10);
+            float t = j / static_cast<float>(TRAIL_SPLINE_DIVISION);
 
             DirectX::XMVECTOR Tip = DirectX::XMVectorCatmullRom(Tip0, Tip1, Tip2, Tip3, t);
             DirectX::XMVECTOR Root = DirectX::XMVectorCatmullRom(Root0, Root1, Root2, Root3, t);
             DirectX::XMVECTOR Alpha = DirectX::XMVectorCatmullRom(Alpha0, Alpha1, Alpha2, Alpha3, t);
-            DirectX::XMFLOAT3 root, middle, tip;
+            DirectX::XMFLOAT3 root, tip;
             DirectX::XMStoreFloat3(&root, Root);
             DirectX::XMStoreFloat3(&tip, Tip);
 
@@ -436,17 +461,17 @@ void Weapon::TrailRender(const RenderContext& rc)
             tipcolor.w *= alpha;
             rootcolor.w *= alpha;
 
-            DirectX::XMVECTOR TipBegin = DirectX::XMLoadFloat4(&this->TipBegin);
-            DirectX::XMVECTOR TipEnd = DirectX::XMLoadFloat4(&this->TipEnd);
-            DirectX::XMVECTOR TipColor = DirectX::XMVectorLerp(TipBegin, TipEnd, alpha);
+            DirectX::XMVECTOR tipBegin = DirectX::XMLoadFloat4(&this->tipBegin);
+            DirectX::XMVECTOR tipEnd = DirectX::XMLoadFloat4(&this->tipEnd);
+            DirectX::XMVECTOR TipColor = DirectX::XMVectorLerp(tipBegin, tipEnd, alpha);
             DirectX::XMStoreFloat4(&tipcolor, TipColor);
 
-            DirectX::XMVECTOR RootBegin = DirectX::XMLoadFloat4(&this->RootBegin);
-            DirectX::XMVECTOR RootEnd = DirectX::XMLoadFloat4(&this->RootEnd);
-            DirectX::XMVECTOR RootColor = DirectX::XMVectorLerp(RootBegin, RootEnd, alpha);
+            DirectX::XMVECTOR rootBegin = DirectX::XMLoadFloat4(&this->rootBegin);
+            DirectX::XMVECTOR rootEnd = DirectX::XMLoadFloat4(&this->rootEnd);
+            DirectX::XMVECTOR RootColor = DirectX::XMVectorLerp(rootBegin, rootEnd, alpha);
             DirectX::XMStoreFloat4(&rootcolor, RootColor);
 
-            float scale = Colorscale;
+            float scale = colorScale;
 
             trailRenderer->AddVertex(root, rootcolor, { alpha, 0 }, dissolve);
             trailRenderer->AddVertex(tip, { tipcolor.x * scale,tipcolor.y * scale,tipcolor.z * scale,tipcolor.w * scale }, { alpha, 1 }, dissolve);
@@ -456,39 +481,39 @@ void Weapon::TrailRender(const RenderContext& rc)
 
 void Weapon::ResetAttackState()
 {
-    // UŒ‚’†‚¾‚Á‚½ê‡‚Ì‚İˆ—
-    if (IsAttack)
+    // æ”»æ’ƒä¸­ã ã£ãŸå ´åˆã®ã¿å‡¦ç†
+    if (isAttack)
     {
-        IsAttack = false;
+        isAttack = false;
 
-        // ƒRƒ“ƒgƒ[ƒ‰[‚ÌU“®‚ªc‚ç‚È‚¢‚æ‚¤‚É’â~
+        // ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã®æŒ¯å‹•ãŒæ®‹ã‚‰ãªã„ã‚ˆã†ã«åœæ­¢
         Input::Instance().GetGamePad().Vibrate(0.0f, 0.0f);
 
-        // ƒgƒŒƒCƒ‹‚ğ‘¦À‚ÉƒŠƒZƒbƒg‚·‚é‚½‚ß‚ÉXV‚ğ‚©‚¯‚é
-        // (IsAttack = false ‚É‚µ‚½ó‘Ô‚ÅŒÄ‚Ô‚±‚Æ‚ÅA‘O‰ñ‚ÌC³ƒR[ƒh‚Ì else ƒ‹[ƒv‚ª‘–‚èA—š—ğ‚ªƒNƒŠƒA‚³‚ê‚é)
+        // ãƒˆãƒ¬ã‚¤ãƒ«ã‚’å³åº§ã«ãƒªã‚»ãƒƒãƒˆã™ã‚‹ãŸã‚ã«æ›´æ–°ã‚’ã‹ã‘ã‚‹
+        // (isAttack = false ã«ã—ãŸçŠ¶æ…‹ã§å‘¼ã¶ã“ã¨ã§ã€å‰å›ã®ä¿®æ­£ã‚³ãƒ¼ãƒ‰ã® else ãƒ«ãƒ¼ãƒ—ãŒèµ°ã‚Šã€å±¥æ­´ãŒã‚¯ãƒªã‚¢ã•ã‚Œã‚‹)
         TrailUpdate(0.0f);
     }
 }
 
-void Weapon::DrawDebugTrailGui()
+void Weapon::DrawDebugTrailGUI()
 {
     if (ImGui::CollapsingHeader("Trail", ImGuiTreeNodeFlags_DefaultOpen))
     {
         if (ImGui::TreeNode("Trail "))
         {
-            ImGui::Checkbox("AttackFlag", &IsAttack);
-            ImGui::DragFloat3("TrailTip", &trailoffset[1].x, 0.1f);
-            ImGui::DragFloat3("TrailRoot", &trailoffset[0].x, 0.1f);
+            ImGui::Checkbox("AttackFlag", &isAttack);
+            ImGui::DragFloat3("TrailTip", &trailOffset[1].x, 0.1f);
+            ImGui::DragFloat3("TrailRoot", &trailOffset[0].x, 0.1f);
 
             ImGui::DragFloat("TrailDissolve", &dissolve, 0.01f);
 
-            ImGui::ColorEdit4("TipBeginTrail", &TipBegin.x);
-            ImGui::ColorEdit4("TipEndTrail", &TipEnd.x);
+            ImGui::ColorEdit4("TipBeginTrail", &tipBegin.x);
+            ImGui::ColorEdit4("TipEndTrail", &tipEnd.x);
 
-            ImGui::ColorEdit4("RootBeginTrail", &RootBegin.x);
-            ImGui::ColorEdit4("RootEndTrail", &RootEnd.x);
+            ImGui::ColorEdit4("RootBeginTrail", &rootBegin.x);
+            ImGui::ColorEdit4("RootEndTrail", &rootEnd.x);
 
-            ImGui::DragFloat("ColorScale", &Colorscale, 0.1f);
+            ImGui::DragFloat("ColorScale", &colorScale, 0.1f);
 
             ImGui::TreePop();
         }
@@ -498,3 +523,49 @@ void Weapon::DrawDebugTrailGui()
 }
 
 
+
+// åˆƒã«æ²¿ã£ãŸå½“ãŸã‚Šåˆ¤å®šçƒã®åˆæœŸé…ç½®ï¼ˆæ´¾ç”Ÿã‚¯ãƒ©ã‚¹å…±é€šï¼‰
+void Weapon::SetupBladeHitSpheres(float sphereRadius)
+{
+    // æŸ„å…ƒã‹ã‚‰åˆ‡ã£å…ˆã«å‘ã‹ã£ã¦ç­‰é–“éš”ã«çƒã‚’ä¸¦ã¹ã‚‹
+    constexpr float bladeOffsetZ[HIT_SPHERE_COUNT] = { 0.0f, 0.6f, 0.85f, 1.1f, 1.35f };
+
+    hitSphereIndex = HIT_SPHERE_COUNT;
+    for (int i = 0; i < HIT_SPHERE_COUNT; ++i)
+    {
+        weaponHitOffset[i] = { 0.0f, 0.0f, bladeOffsetZ[i] };
+    }
+    hitSphereRadius = sphereRadius;
+}
+
+// æ­¦å™¨å…±é€šã®ãƒ‡ãƒãƒƒã‚°GUIï¼ˆä½ç½®ãƒ»å›è»¢ãƒ»ã‚¹ã‚±ãƒ¼ãƒ«ãƒ»å½“ãŸã‚Šåˆ¤å®šçƒï¼‰
+void Weapon::DrawCommonDebugGUI()
+{
+    ImGui::DragFloat3("WeaponPosition", &position.x, 0.01f);
+    ImGui::DragFloat3("WeaponAngle", &angle.x, 0.01f);
+    ImGui::DragFloat3("WeaponScale", &scale.x, 0.01f);
+
+    for (int i = 0; i < hitSphereIndex; i++)
+    {
+        ImGui::PushID(i);
+        ImGui::DragFloat3("WeaponHitSpherePos", &weaponHitOffset[i].x, 0.1f);
+        ImGui::PopID();
+    }
+    ImGui::DragFloat("WeaponHitSphereRadius", &hitSphereRadius, 0.01f, 0.0f, 10.0f);
+}
+
+// ãƒ’ãƒƒãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆã¨æ‰“æ’ƒéŸ³ã®èª­ã¿è¾¼ã¿ï¼ˆæ´¾ç”Ÿã‚¯ãƒ©ã‚¹å…±é€šï¼‰
+void Weapon::LoadCommonResources()
+{
+    attackHitEffect = std::make_shared<Effect>("Data/Effect/HitEffect.efkefc");
+    lightSE = Audio::Instance().LoadAudioSource("Data/Sound/SE/light_punch1.wav");
+    mediumSE = Audio::Instance().LoadAudioSource("Data/Sound/SE/medium_punch1.wav");
+    heavySE = Audio::Instance().LoadAudioSource("Data/Sound/SE/heavy_punch1.wav");
+}
+
+Weapon::~Weapon()
+{
+    delete lightSE;
+    delete mediumSE;
+    delete heavySE;
+}

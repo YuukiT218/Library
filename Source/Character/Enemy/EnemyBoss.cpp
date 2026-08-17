@@ -18,6 +18,24 @@
 
 #include <stdlib.h>
 
+namespace
+{
+	// 初期配置
+	const DirectX::XMFLOAT3 SPAWN_POSITION = { -1.0f, -1.4f, 6.5f };
+	constexpr float SPAWN_ANGLE_DEGREE = 180.0f;
+
+	// 縄張りの広さと索敵範囲
+	constexpr float TERRITORY_RANGE = 10.0f;
+	constexpr float SEARCH_RANGE = 20.0f;
+
+	// 体力
+	constexpr int MAX_HEALTH = 800;
+
+	// 当たり判定の大きさ
+	constexpr float BODY_RADIUS = 0.5f;
+	constexpr float BODY_HEIGHT = 1.0f;
+}
+
 static EnemyBoss* instance = nullptr;
 
 // インスタンス取得
@@ -42,12 +60,12 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	magicCircle = std::make_unique<Effect>("Data/Effect/MagicCircle.efkefc");
 	deathEffect = std::make_shared<Effect>("Data/Effect/Death.efkefc");
 
-	radius = 0.5f;
-	height = 1.0f;
-	IsGameClear = false;
+	radius = BODY_RADIUS;
+	height = BODY_HEIGHT;
+	isGameClear = false;
 	specialReady = true;
 
-	initAnimSpeed();
+	InitAnimSpeed();
 
 	// ビヘイビアツリー設定
 	behaviorData = std::make_unique<BehaviorData<EnemyBoss>>();
@@ -129,13 +147,13 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 		{"foot_r", nodeRadius[8]},
 	};
 
-	SetPosition(DirectX::XMFLOAT3(-1.0f, -1.4f, 6.5f));
-	SetAngle(DirectX::XMFLOAT3(0.0f, DirectX::XMConvertToRadians(180.0f), 0.0f));
-	SetTerritory(GetPosition(), 10.0f);
-	searchRange = 20.0f;
+	SetPosition(SPAWN_POSITION);
+	SetAngle(DirectX::XMFLOAT3(0.0f, DirectX::XMConvertToRadians(SPAWN_ANGLE_DEGREE), 0.0f));
+	SetTerritory(GetPosition(), TERRITORY_RANGE);
+	searchRange = SEARCH_RANGE;
 
-	SetMaxHealth(800);
-	SetHealth(800);
+	SetMaxHealth(MAX_HEALTH);
+	SetHealth(MAX_HEALTH);
 
 	SetRandomTargetPosition();
 
@@ -281,7 +299,8 @@ void EnemyBoss::Render(const RenderContext& rc, ShaderId shaderId)
 				afterimage.nodes,
 				afterimage.transform,
 				afterimage.alpha,
-				afterimage.darkness
+				afterimage.darkness,
+				GetAfterimageColor()
 			);
 		}
 	}
@@ -578,8 +597,8 @@ void EnemyBoss::DrawDebugGUI()
 		}
 		ImGui::Separator();
 
-		model->DebugGui(u8"Enemy");
-		sword->DrawDebugImGUi();
+		model->DebugGUI(u8"Enemy");
+		sword->DrawDebugGUI();
 	}
 	ImGui::End();
 	

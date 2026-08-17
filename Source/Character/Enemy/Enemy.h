@@ -19,17 +19,14 @@ public:
 	// 描画処理
 	virtual void Render(const RenderContext& rc, ShaderId shaderId) = 0;
 
-	// 破棄
-	void Destroy();
-
 	// ノードとプレイヤーの衝突処理
-	void CollisionNodeVsPlayer(std::vector<NodeHitSphere> attackSpheres, int AttackDamage, float invicibleTime);
+	void CollisionNodeVsPlayer(std::vector<NodeHitSphere> attackSpheres, int attackDamage, float invincibleTime);
 
 	// アニメーションの攻撃当たり判定を付ける
-	void AttackAnimationCollision(std::vector<NodeHitSphere> attackSpheres, float animTimeMin, float animTimeMax, int AttackDamage, float invicibleTime = 0.5f);
+	void AttackAnimationCollision(std::vector<NodeHitSphere> attackSpheres, float animTimeMin, float animTimeMax, int attackDamage, float invincibleTime = 0.5f);
 
 	// ブレスエフェクトの当たり判定を付ける
-	void BreathEffectCollision(float animTimeMin, float animTimeMax, DirectX::XMFLOAT3 startPosition, DirectX::XMFLOAT3 direction, float length, float sphereRadius, int sphereCount, int AttackDamage, float invicibleTime);
+	void BreathEffectCollision(float animTimeMin, float animTimeMax, DirectX::XMFLOAT3 startPosition, DirectX::XMFLOAT3 direction, float length, float sphereRadius, int sphereCount, int attackDamage, float invincibleTime);
 
 	// デバッグプリミティブ描画
 	virtual void DrawDebugPrimitive();
@@ -71,6 +68,14 @@ public:
 protected:
 	// 派生クラス専用の更新処理
 	virtual void UpdateEnemySpecific(float elapsedTime) {}
+
+	// テレポート中とスーパーアーマー中は、致命傷を受けても体力1で耐える
+	// （テレポートは演出が途中で止まらないように、
+	//   スーパーアーマーは動作を最後までやり切らせるため）
+	bool ShouldSurviveLethalDamage() const override
+	{
+		return IsTeleporting() || IsSuperArmor();
+	}
 
 protected:
 	std::shared_ptr<Model> model = nullptr;
@@ -169,8 +174,19 @@ protected:
 	};
 
 	std::vector<Afterimage> afterimages;         // 残像
-	float afterimageDuration = 1.0f;			 // 残像の持続時間
+	float afterimageDuration = 0.7f;			 // 残像1つあたりの持続時間
 	float afterimageDarkness = 0.8f;
+
+	// 残像の色味(rgb)と明るさ(a)
+	// 1を超える明るさにするとブルームが乗って残像が光って見える
+	DirectX::XMFLOAT4 afterimageColor = { 0.65f, 0.35f, 1.0f, 2.0f };
+
+	// 1フレーム分の区間に並べるGPUパーティクルの数
+	// 多いほど軌跡の線が密になる
+	int teleportTrailEmitCount = 80;
+
+	// 前回パーティクルを撒いた位置（区間の起点）
+	DirectX::XMFLOAT3 teleportTrailPreviousPosition = { 0.0f, 0.0f, 0.0f };
 
 public:
 	// テレポート開始
@@ -190,6 +206,15 @@ public:
 
 	// 残像更新
 	void UpdateAfterimage(float elapsedTime);
+
+	// 現在の姿勢から残像を1つ生成する
+	void SpawnAfterimage();
+
+	// テレポートの軌跡をGPUパーティクルで撒く（区間の起点と終点を指定する）
+	void EmitTeleportTrail(const DirectX::XMFLOAT3& from, const DirectX::XMFLOAT3& to);
+
+	// 残像の色を取得
+	const DirectX::XMFLOAT4& GetAfterimageColor() const { return afterimageColor; }
 
 	// 残像発生フラグチェック
 	bool HasAfterimage() const { return !afterimages.empty(); }

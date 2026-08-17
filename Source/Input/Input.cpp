@@ -1,16 +1,16 @@
-#include "Input/Input.h"
+ï»¿#include "Input/Input.h"
 #include <Xinput.h>
 
 Input* Input::instance = nullptr;
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 Input::Input(HWND hWnd)
     : mouse(hWnd)
 {
     instance = this;
 }
 
-// XVˆ—
+// æ›´æ–°å‡¦ç†
 void Input::Update()
 {
     gamePad.Update();
@@ -22,40 +22,40 @@ void Input::Update()
 void Input::IsThumbStickMoved()
 {
     XINPUT_STATE xinputState = {};
-    DWORD result = XInputGetState(0, &xinputState); // ƒvƒŒƒCƒ„[1iƒRƒ“ƒgƒ[ƒ‰[0j
+    DWORD result = XInputGetState(0, &xinputState); // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼1ï¼ˆã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼0ï¼‰
 
     if (result == ERROR_SUCCESS) {
-        // ƒQ[ƒ€ƒpƒbƒh‚Ìó‘Ô‚ğæ“¾‚Å‚«‚½
+        // ã‚²ãƒ¼ãƒ ãƒ‘ãƒƒãƒ‰ã®çŠ¶æ…‹ã‚’å–å¾—ã§ããŸ
         XINPUT_GAMEPAD& pad = xinputState.Gamepad;
 
-        // ƒ{ƒ^ƒ““ü—Í‚ğ”»’è
+        // ãƒœã‚¿ãƒ³å…¥åŠ›ã‚’åˆ¤å®š
         if (pad.wButtons != 0) {
-            PushGamePad = true; // ‰½‚©‚Ìƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½ê‡
+            pushGamePad = true; // ä½•ã‹ã®ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸå ´åˆ
         }
 
-        // LƒXƒeƒBƒbƒN‚ÆRƒXƒeƒBƒbƒN‚Ì“ü—Í’l‚ğæ“¾
+        // Lã‚¹ãƒ†ã‚£ãƒƒã‚¯ã¨Rã‚¹ãƒ†ã‚£ãƒƒã‚¯ã®å…¥åŠ›å€¤ã‚’å–å¾—
         short thumbLX = pad.sThumbLX;
         short thumbLY = pad.sThumbLY;
         short thumbRX = pad.sThumbRX;
         short thumbRY = pad.sThumbRY;
 
-        // ƒfƒbƒhƒ][ƒ“‚ğl—¶‚µ‚ÄLƒXƒeƒBƒbƒN‚Ü‚½‚ÍRƒXƒeƒBƒbƒN‚Ì“ü—Í‚ğ”»’è
+        // ãƒ‡ãƒƒãƒ‰ã‚¾ãƒ¼ãƒ³ã‚’è€ƒæ…®ã—ã¦Lã‚¹ãƒ†ã‚£ãƒƒã‚¯ã¾ãŸã¯Rã‚¹ãƒ†ã‚£ãƒƒã‚¯ã®å…¥åŠ›ã‚’åˆ¤å®š
         if (abs(thumbLX) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE ||
             abs(thumbLY) > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE ||
             abs(thumbRX) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE ||
             abs(thumbRY) > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) {
-            PushGamePad = true; // “ü—Í‚ª‚ ‚éê‡‚ÍTrue‚Éİ’è
+            pushGamePad = true; // å…¥åŠ›ãŒã‚ã‚‹å ´åˆã¯Trueã«è¨­å®š
         }
-        // “ü—Í‚ª‚È‚­‚Ä‚àPushGamePad‚Ìó‘Ô‚ÍˆÛ‚·‚é
+        // å…¥åŠ›ãŒãªãã¦ã‚‚PushGamePadã®çŠ¶æ…‹ã¯ç¶­æŒã™ã‚‹
     }
     else {
-        // ƒQ[ƒ€ƒpƒbƒh‚ªÚ‘±‚³‚ê‚Ä‚¢‚È‚¢ê‡‚Ì‚İFalse‚É‚·‚é
-        PushGamePad = false;
+        // ã‚²ãƒ¼ãƒ ãƒ‘ãƒƒãƒ‰ãŒæ¥ç¶šã•ã‚Œã¦ã„ãªã„å ´åˆã®ã¿Falseã«ã™ã‚‹
+        pushGamePad = false;
     }
 
     if (mouse.GetButtonDown())
     {
-        PushGamePad = false;
+        pushGamePad = false;
     }
 }
 

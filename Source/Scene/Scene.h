@@ -1,31 +1,31 @@
-#pragma once
+ï»¿#pragma once
 
-// ƒV[ƒ“Šî’ê
+// ã‚·ãƒ¼ãƒ³åŸºåº•
 class Scene
 {
 public:
 	Scene() = default;
 	virtual ~Scene() = default;
 
-	//‰Šú‰»
+	//åˆæœŸåŒ–
 	virtual void Initialize() {};
 
-	//I—¹‰»
+	//çµ‚äº†åŒ–
 	virtual void Finalize() {};
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	virtual void Update(float elapsedTime) {}
 
-	// •`‰æˆ—
+	// æç”»å‡¦ç†
 	virtual void Render(float elapsedTime) {}
 
-	// GUI•`‰æˆ—
+	// GUIæç”»å‡¦ç†
 	virtual void DrawGUI() {}
 
-	// €”õŠ®—¹‚µ‚Ä‚¢‚é‚©
+	// æº–å‚™å®Œäº†ã—ã¦ã„ã‚‹ã‹
 	bool IsReady() const { return ready; }
 
-	// €”õŠ®—¹İ’è
+	// æº–å‚™å®Œäº†è¨­å®š
 	void SetReady() { ready = true; }
 
 private:

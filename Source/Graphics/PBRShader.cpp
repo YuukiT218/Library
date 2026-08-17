@@ -68,6 +68,12 @@ PBRShader::PBRShader(ID3D11Device* device)
 		sizeof(CbRimLight),
 		rimLightConstantBuffer.GetAddressOf());
 
+	// カスケードシャドウ用定数バッファ
+	GpuResourceUtils::CreateConstantBuffer(
+		device,
+		sizeof(CbShadow),
+		shadowConstantBuffer.GetAddressOf());
+
 	//IBLテクスチャを読み込み
 	{
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
@@ -93,6 +99,27 @@ void PBRShader::Begin(const RenderContext& rc)
 	dc->VSSetShader(vertexShader.Get(), nullptr, 0);
 	dc->PSSetShader(pixelShader.Get(), nullptr, 0);
 
+	// カスケードシャドウ用定数バッファ更新
+	{
+		const ShadowMap* shadowMap = rc.shadowMap;
+
+		CbShadow cbShadow{};
+		for (int i = 0; i < SHADOW_BUFFER_SIZE; ++i)
+		{
+			cbShadow.CascadeLightViewProjection[i] = shadowMap->GetCascadeLightViewProjection(i);
+		}
+		cbShadow.cascadeSplits = shadowMap->GetCascadeSplits();
+		cbShadow.cascadeFlags.x = shadowMap->IsCascadeDebugView() ? 1.0f : 0.0f;
+		cbShadow.shadowColor = shadowMap->GetColor();
+		cbShadow.shadowTexelSize = shadowMap->GetTexelSize();
+		cbShadow.shadowAttenuation = shadowMap->GetAttenuation();
+		cbShadow.shadowBias = shadowMap->GetBias();
+		cbShadow.shadowNormalOffset = shadowMap->GetNormalOffset();
+		cbShadow.indirectShadowStrength = shadowMap->GetIndirectShadowStrength();
+		cbShadow.cascadeTexelWorldSize = shadowMap->GetCascadeTexelWorldSize();
+		dc->UpdateSubresource(shadowConstantBuffer.Get(), 0, 0, &cbShadow, 0, 0);
+	}
+
 	// 定数バッファ設定
 	ID3D11Buffer* constantBuffers[] =
 	{
@@ -100,6 +127,7 @@ void PBRShader::Begin(const RenderContext& rc)
 		materialConstantBuffer.Get(),
 		colorConstantBuffer.Get(),
 		setUpConstantBuffer.Get(),
+		shadowConstantBuffer.Get(),
 	};
 	dc->VSSetConstantBuffers(0, _countof(constantBuffers), constantBuffers);
 	// ピクセルシェーダーにも定数バッファを設定する
@@ -132,7 +160,7 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh,
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
-	if (!IsDraw) IsDraw = !IsDraw;
+	if (!isDraw) isDraw = !isDraw;
 
 	//セットアップ用定数バッファ更新
 	{
@@ -172,7 +200,11 @@ void PBRShader::Update(const RenderContext& rc, const ModelResource::Mesh& mesh,
 			? 1.0f
 			: 0.0f;
 		cbColor.emissiveFactor = (std::max)(0.0f, modelEmissive.emissiveFactor);
-		cbColor.adjustColor = mesh.material->emissiveColor;
+		// エミッシブテクスチャが無い場合はシェーダー側で白として扱う
+		cbColor.hasEmissiveTexture =
+			mesh.material->emissiveMap ? 1.0f : 0.0f;
+		// モデル側で指定した色味を使う（ImGuiのWeaponEmissiveColorが効くようになる）
+		cbColor.adjustColor = modelEmissive.adjustColor;
 		dc->UpdateSubresource(colorConstantBuffer.Get(), 0, 0, &cbColor, 0, 0);
 
 		//マテリアル用定数バッファ更新

@@ -1,4 +1,4 @@
-#include <memory>
+ï»¿#include <memory>
 #include <sstream>
 #include <imgui.h>
 
@@ -16,10 +16,10 @@
 #include "System/AnimationConfigLoader.h"
 #include "Effect/EffectManager.h"
 
-// ‚’¼“¯ŠúŠÔŠuİ’è
+// å‚ç›´åŒæœŸé–“éš”è¨­å®š
 static const int syncInterval = 1;
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 Framework::Framework(HWND hWnd)
 	: hWnd(hWnd)
 	, input(hWnd)
@@ -28,22 +28,22 @@ Framework::Framework(HWND hWnd)
 	ShowCursor(false);
 #endif
 
-	// ƒOƒ‰ƒtƒBƒbƒNƒX‰Šú‰»
+	// ã‚°ãƒ©ãƒ•ã‚£ãƒƒã‚¯ã‚¹åˆæœŸåŒ–
 	Graphics::Instance().Initialize(hWnd);
 
 	Audio::Instance().Initialize();
 
-	// IMGUI‰Šú‰»
+	// IMGUIåˆæœŸåŒ–
 	ImGuiRenderer::Initialize(hWnd, Graphics::Instance().GetDevice(), Graphics::Instance().GetDeviceContext());
 
 	EffectManager::Instance().Initialize();
 	AnimationConfigLoader::LoadAllConfigs();
 
-	// ƒV[ƒ“‰Šú‰»
+	// ã‚·ãƒ¼ãƒ³åˆæœŸåŒ–
 	SceneManager::Instance().ChangeScene(new SceneTitle);
 }
 
-// ƒfƒXƒgƒ‰ƒNƒ^
+// ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 Framework::~Framework()
 {
 	ShowCursor(true);
@@ -52,59 +52,59 @@ Framework::~Framework()
 
 	Audio::Instance().Finalize();
 
-	// IMGUII—¹‰»
+	// IMGUIçµ‚äº†åŒ–
 	ImGuiRenderer::Finalize();
 
 	EffectManager::Instance().Finalize();
 }
 
-// XVˆ—
+// æ›´æ–°å‡¦ç†
 void Framework::Update(float elapsedTime)
 {
 	input.Update();
 
 #ifndef _DEBUG
-	if (GetForegroundWindow() == hWnd) // ©•ª‚ÌƒEƒBƒ“ƒhƒE‚ªƒAƒNƒeƒBƒu‚È‚Ì‚İ
+	if (GetForegroundWindow() == hWnd) // è‡ªåˆ†ã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãŒã‚¢ã‚¯ãƒ†ã‚£ãƒ–ãªæ™‚ã®ã¿
 	{
 		RECT rect;
 		GetClientRect(hWnd, &rect);
-		// ƒEƒBƒ“ƒhƒE‚Ì’†‰›À•W‚ğŒvZ
+		// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ä¸­å¤®åº§æ¨™ã‚’è¨ˆç®—
 		POINT center = { (rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2 };
-		// ƒXƒNƒŠ[ƒ“À•W‚É•ÏŠ·
+		// ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ã«å¤‰æ›
 		ClientToScreen(hWnd, &center);
-		// ƒJ[ƒ\ƒ‹ˆÊ’u‚ğ‹­§“I‚É’†‰›‚ÖƒZƒbƒg
+		// ã‚«ãƒ¼ã‚½ãƒ«ä½ç½®ã‚’å¼·åˆ¶çš„ã«ä¸­å¤®ã¸ã‚»ãƒƒãƒˆ
 		SetCursorPos(center.x, center.y);
 	}
 #endif
 
-	// ƒV[ƒ“XVˆ—
+	// ã‚·ãƒ¼ãƒ³æ›´æ–°å‡¦ç†
 	SceneManager::Instance().Update(elapsedTime);
 	input.OnKeyUp();
 }
 
-// •`‰æˆ—
+// æç”»å‡¦ç†
 void Framework::Render(float elapsedTime)
 {
 	std::lock_guard<std::mutex>lock(Graphics::Instance().GetMutex());
 	ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
 
-	// IMGUIƒtƒŒ[ƒ€ŠJnˆ—	
+	// IMGUIãƒ•ãƒ¬ãƒ¼ãƒ é–‹å§‹å‡¦ç†	
 	ImGuiRenderer::NewFrame();
 
-	// ‰æ–ÊƒNƒŠƒA
+	// ç”»é¢ã‚¯ãƒªã‚¢
 	Graphics::Instance().GetFrameBuffer(FrameBufferId::Display)->Clear(dc, DirectX::XMFLOAT4(0, 0, 1, 1));
 
-	// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgİ’è
+	// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆè¨­å®š
 	Graphics::Instance().GetFrameBuffer(FrameBufferId::Display)->SetRenderTargets(dc);
 
-	// ƒV[ƒ“•`‰æˆ—
+	// ã‚·ãƒ¼ãƒ³æç”»å‡¦ç†
 	if (currentSceneType == SceneType::Edit)
 	{
 		ImVec2 size = ImGui::GetContentRegionAvail();
 		int width = static_cast<int>(size.x);
 		int height = static_cast<int>(size.y);
 
-		// ƒTƒCƒY•ÏXi•K—v‚Èê‡‚Ì‚İj
+		// ã‚µã‚¤ã‚ºå¤‰æ›´ï¼ˆå¿…è¦ãªå ´åˆã®ã¿ï¼‰
 		static int prevWidth = 0, prevHeight = 0;
 		if (width != prevWidth || height != prevHeight)
 		{
@@ -122,11 +122,11 @@ void Framework::Render(float elapsedTime)
 			}
 		}
 
-		// Scene—p‚ÉƒZƒbƒg
+		// Sceneç”¨ã«ã‚»ãƒƒãƒˆ
 		Graphics::Instance().GetFrameBuffer(FrameBufferId::Scene)->SetRenderTargets(dc);
 		Graphics::Instance().GetFrameBuffer(FrameBufferId::Scene)->Clear(dc, DirectX::XMFLOAT4(0.2f, 0.2f, 0.25f, 1.0f));
 
-		// ƒV[ƒ“•`‰æ
+		// ã‚·ãƒ¼ãƒ³æç”»
 		SceneManager::Instance().Render(elapsedTime);
 		auto* editScene = dynamic_cast<SceneEdit*>(SceneManager::Instance().GetCurrentScene());
 		if (editScene) {
@@ -135,17 +135,17 @@ void Framework::Render(float elapsedTime)
 	}
 	else
 	{
-		// ’Êí’Ê‚è•`‰æ
+		// é€šå¸¸é€šã‚Šæç”»
 		SceneManager::Instance().Render(elapsedTime);
 	}
 
-	// ƒOƒ[ƒoƒ‹‚Ü‚½‚ÍÃ“I•Ï”‚Æ‚µ‚ÄŠÇ—i•K—v‚É‰‚¶‚Äj
+	// ã‚°ãƒ­ãƒ¼ãƒãƒ«ã¾ãŸã¯é™çš„å¤‰æ•°ã¨ã—ã¦ç®¡ç†ï¼ˆå¿…è¦ã«å¿œã˜ã¦ï¼‰
 	static bool showSceneSelector = false;
 
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x * 0.5f - 20, 0), ImGuiCond_Always);
-	ImGui::SetNextWindowBgAlpha(0.3f); // ‚¿‚å‚Á‚Æ“§–¾‚É‚·‚é
+	ImGui::SetNextWindowBgAlpha(0.3f); // ã¡ã‚‡ã£ã¨é€æ˜ã«ã™ã‚‹
 
-	// Scene Selector ƒEƒBƒ“ƒhƒEi•\¦’†‚Ì‚İj
+	// Scene Selector ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ï¼ˆè¡¨ç¤ºä¸­ã®ã¿ï¼‰
 #if _DEBUG || DEBUG
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -181,13 +181,13 @@ void Framework::Render(float elapsedTime)
 #endif
 	
 #if 0
-	// IMGUIƒfƒ‚ƒEƒCƒ“ƒhƒE•`‰æiIMGUI‹@”\ƒeƒXƒg—pj
+	// IMGUIãƒ‡ãƒ¢ã‚¦ã‚¤ãƒ³ãƒ‰ã‚¦æç”»ï¼ˆIMGUIæ©Ÿèƒ½ãƒ†ã‚¹ãƒˆç”¨ï¼‰
 	ImGui::ShowDemoWindow();
 #endif
-	// IMGUI•`‰æ
+	// IMGUIæç”»
 	ImGuiRenderer::Render(dc);
 
-	// ‰æ–Ê•\¦
+	// ç”»é¢è¡¨ç¤º
 	Graphics::Instance().Present(syncInterval);
 }
 
@@ -200,7 +200,7 @@ void Framework::ChangeSceneButtonGUI(const char* name)
 	}
 }
 
-// ƒV[ƒ“Ø‚è‘Ö‚¦GUI
+// ã‚·ãƒ¼ãƒ³åˆ‡ã‚Šæ›¿ãˆGUI
 void Framework::SceneSelectGUI()
 {
 	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
@@ -211,7 +211,7 @@ void Framework::SceneSelectGUI()
 	ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Once);
 }
 
-// ƒtƒŒ[ƒ€ƒŒ[ƒgŒvZ
+// ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¬ãƒ¼ãƒˆè¨ˆç®—
 void Framework::CalculateFrameStats()
 {
 	// Code computes the average frames per second, and also the 
@@ -246,7 +246,7 @@ void Framework::ResizeSceneFramebufferToWindow()
 	Graphics::Instance().ResizeFrameBuffer(FrameBufferId::Scene, fbWidth, fbHeight);
 }
 
-// ƒAƒvƒŠƒP[ƒVƒ‡ƒ“ƒ‹[ƒv
+// ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ãƒ«ãƒ¼ãƒ—
 int Framework::Run()
 {
 	MSG msg = {};
@@ -271,7 +271,7 @@ int Framework::Run()
 	return static_cast<int>(msg.wParam);
 }
 
-// ƒƒbƒZ[ƒWƒnƒ“ƒhƒ‰
+// ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒãƒ³ãƒ‰ãƒ©
 LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGuiRenderer::HandleMessage(hWnd, msg, wParam, lParam))

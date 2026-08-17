@@ -1,11 +1,11 @@
-#include <imgui_impl_win32.h>
+ï»¿#include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
 #include <ImGuizmo.h>
 #include "ImGuiRenderer.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-// ‰Šú‰»
+// åˆæœŸåŒ–
 void ImGuiRenderer::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* dc)
 {
 	// Setup Dear ImGui context
@@ -59,7 +59,7 @@ void ImGuiRenderer::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceCont
 	IM_ASSERT(font != NULL);
 }
 
-// I—¹‰»
+// çµ‚äº†åŒ–
 void ImGuiRenderer::Finalize()
 {
 	ImGui_ImplDX11_Shutdown();
@@ -67,7 +67,7 @@ void ImGuiRenderer::Finalize()
 	ImGui::DestroyContext();
 }
 
-// ƒtƒŒ[ƒ€ŠJnˆ—
+// ãƒ•ãƒ¬ãƒ¼ãƒ é–‹å§‹å‡¦ç†
 void ImGuiRenderer::NewFrame()
 {
 	ImGui_ImplDX11_NewFrame();
@@ -117,7 +117,7 @@ void ImGuiRenderer::NewFrame()
 #endif
 }
 
-// •`‰æ
+// æç”»
 void ImGuiRenderer::Render(ID3D11DeviceContext* context)
 {
 	// Rendering
@@ -134,7 +134,7 @@ void ImGuiRenderer::Render(ID3D11DeviceContext* context)
 	}
 }
 
-// WIN32ƒƒbƒZ[ƒWƒnƒ“ƒhƒ‰[
+// WIN32ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãƒãƒ³ãƒ‰ãƒ©ãƒ¼
 LRESULT ImGuiRenderer::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	return ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);

@@ -65,7 +65,7 @@ private:
 	float attenuation = 4.5f;
 	//ディレクショナルライト
 	DirectX::XMFLOAT4 direction = { -0.949f, 0.314f, 0.0f, 1.0f };
-	DirectX::XMFLOAT4 Directioncolor = { 1.0f, 0.5f, 0.5f, 150.0f };
+	DirectX::XMFLOAT4 directionColor = { 1.0f, 0.5f, 0.5f, 50.0f };
 
 	//タイマー
 	float timer;

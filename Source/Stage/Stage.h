@@ -1,33 +1,33 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Graphics/Graphics.h"
 #include "Math/Collision.h"
 #include <DirectXCollision.h>
 #include <imgui.h>
 
-// ƒXƒe[ƒW
+// ã‚¹ãƒ†ãƒ¼ã‚¸
 class Stage
 {
 public:
 	Stage() {};
 	virtual ~Stage() {};
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	virtual void Update(float elapsedTime) = 0;
 
-	// •`‰æˆ—
+	// æç”»å‡¦ç†
 	virtual void Render(const RenderContext& rc, ShaderId shaderId) = 0;
 
-	// ƒŒƒCƒLƒƒƒXƒg
+	// ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆ
 	virtual bool RayCast(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, HitResult& hit) = 0;
-	//‹óŠÔ•ªŠ„ƒŒƒCƒLƒƒƒXƒg
+	//ç©ºé–“åˆ†å‰²ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆ
 	virtual bool SpaceDivisionRaycast(const DirectX::XMFLOAT3& start, const DirectX::XMFLOAT3& end, HitResult& hit) { return false; }
 	virtual bool SpaceDivisionSphereCast(const DirectX::XMFLOAT3& origin, const DirectX::XMFLOAT3& direction, float radius, float& distance, DirectX::XMFLOAT3& hitPosition, DirectX::XMFLOAT3& hitNormal) { return false; }
 
-	//ƒfƒoƒbƒO—p•ªŠ„‚³‚ê‚½‹óŠÔ‚Ì•\¦
+	//ãƒ‡ãƒãƒƒã‚°ç”¨åˆ†å‰²ã•ã‚ŒãŸç©ºé–“ã®è¡¨ç¤º
 	virtual void Debug(const RenderContext& rc) = 0;
 
-	//ƒfƒoƒbƒO—p
+	//ãƒ‡ãƒãƒƒã‚°ç”¨
 	virtual void DebugImGui() = 0;
 
 	Model* GetModel() const { return model.get(); }
@@ -55,12 +55,12 @@ protected:
 
 
 protected:
-	//‹óŠÔ•ªŠ„—p”»’èƒƒbƒVƒ…
+	//ç©ºé–“åˆ†å‰²ç”¨åˆ¤å®šãƒ¡ãƒƒã‚·ãƒ¥
 	CollisionMesh	collisionMesh;
 
-	//‹óŠÔ•ªŠ„‰Â”\‚ÈƒXƒe[ƒW‚©‚Ç‚¤‚©
+	//ç©ºé–“åˆ†å‰²å¯èƒ½ãªã‚¹ãƒ†ãƒ¼ã‚¸ã‹ã©ã†ã‹
 	bool isDivisionStage = true;
 
-	//ƒ‚ƒfƒ‹
+	//ãƒ¢ãƒ‡ãƒ«
 	std::shared_ptr<Model> model;
 };

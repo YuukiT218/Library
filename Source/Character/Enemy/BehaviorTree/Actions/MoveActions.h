@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ActionBase.h"
+#include "EnemyActionBase.h"
 #include "Character/Player/Player.h"
 #include "Character\Projectile/ProjectileManager.h"
 #include "Math\Mathf.h"
@@ -7,22 +7,24 @@
 
 // 通常テレポート
 template <typename ActorType>
-class NormalTeleport : public ActionBase<ActorType>
+class NormalTeleport : public EnemyActionBase<ActorType>
 {
 public:
-	NormalTeleport(ActorType* actor) : ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
+	using State = typename EnemyActionBase<ActorType>::State;
+	NormalTeleport(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
+	State Run(float elapsedTime);
 	int animationIndex = owner->GetModel()->GetAnimationIndex("Dodge_Combat_B_Seq_0");
 	DirectX::SimpleMath::Vector3 teleportPosition;
 };
 
 // 三連テレポート
 template <typename ActorType>
-class TripleTeleportAction : public ActionBase<ActorType>
+class TripleTeleportAction : public EnemyActionBase<ActorType>
 {
 public:
-	TripleTeleportAction(ActorType* actor) : ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
+	using State = typename EnemyActionBase<ActorType>::State;
+	TripleTeleportAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
+	State Run(float elapsedTime);
 	DirectX::SimpleMath::Vector3 WarpPosition[3];
 	DirectX::SimpleMath::Vector3 currentStartPosition;
 	bool init = false;
@@ -40,52 +42,57 @@ public:
 
 // 様子見歩き
 template <typename ActorType>
-class CautiousWalkAction : public ActionBase<ActorType>
+class CautiousWalkAction : public EnemyActionBase<ActorType>
 {
 public:
-	CautiousWalkAction(ActorType* actor) : ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
+	using State = typename EnemyActionBase<ActorType>::State;
+	CautiousWalkAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
+	State Run(float elapsedTime);
 	int animationIndexes[2] = { owner->GetModel()->GetAnimationIndex("Walk_Combat_Loop_F_L_90_RM_Seq_0"),
 								owner->GetModel()->GetAnimationIndex("Walk_Combat_Loop_F_R_90_RM_Seq_0") };
 };
 
 // 追跡行動
 template <typename ActorType>
-class PursuitAction : public ActionBase<ActorType>
+class PursuitAction : public EnemyActionBase<ActorType>
 {
 public:
-	PursuitAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
+	using State = typename EnemyActionBase<ActorType>::State;
+	PursuitAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
+	State Run(float elapsedTime);
 	int animationIndex = owner->GetModel()->GetAnimationIndex("Run_Combat_Loop_F_0_Seq_0");
 };
 
 // 徘徊行動
 template <typename ActorType>
-class WanderAction : public ActionBase<ActorType>
+class WanderAction : public EnemyActionBase<ActorType>
 {
 public:
-	WanderAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
+	using State = typename EnemyActionBase<ActorType>::State;
+	WanderAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
+	State Run(float elapsedTime);
 	int animationIndex = owner->GetModel()->GetAnimationIndex("Walk_Combat_Loop_F_0_RM_Seq_0");
 };
 
 // 待機行動
 template <typename ActorType>
-class IdleAction : public ActionBase<ActorType>
+class IdleAction : public EnemyActionBase<ActorType>
 {
 public:
-	IdleAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
+	using State = typename EnemyActionBase<ActorType>::State;
+	IdleAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
+	State Run(float elapsedTime);
 	int animationIndex = owner->GetModel()->GetAnimationIndex("Idle_Combat_Seq_0");
 };
 
 // 落下モーション
 template <typename ActorType>
-class FallAction : public ActionBase<ActorType>
+class FallAction : public EnemyActionBase<ActorType>
 {
 public:
-	FallAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
+	using State = typename EnemyActionBase<ActorType>::State;
+	FallAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
+	State Run(float elapsedTime);
 	int animationIndex1 = owner->GetModel()->GetAnimationIndex("Jump_Combat_Loop_0_Seq_0");
 	int animationIndex2 = owner->GetModel()->GetAnimationIndex("Jump_Combat_End_0_Seq_0");
 };
@@ -93,7 +100,7 @@ public:
 //-------------------------------------------------------------
 // 通常テレポート
 template <typename ActorType>
-typename ActionBase<ActorType>::State NormalTeleport<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State NormalTeleport<ActorType>::Run(float elapsedTime)
 {
 	owner->SetTargetPosition(Player::Instance().GetPosition());
 
@@ -110,7 +117,7 @@ typename ActionBase<ActorType>::State NormalTeleport<ActorType>::Run(float elaps
 		step++;
 		break;
 	case 1:
-		owner->TurnToTarget(elapsedTime, 1000);
+		owner->TurnToTarget(elapsedTime, TurnSpeed::FAST);
 
 		if (frame >= config->advanceInputEndFrame && !owner->IsTeleporting())
 		{
@@ -125,10 +132,10 @@ typename ActionBase<ActorType>::State NormalTeleport<ActorType>::Run(float elaps
 		if (!owner->IsTeleporting())
 		{
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 	}
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 
 //-------------------------------------------------------------
@@ -136,7 +143,7 @@ typename ActionBase<ActorType>::State NormalTeleport<ActorType>::Run(float elaps
 //-------------------------------------------------------------
 // 三連テレポート
 template <typename ActorType>
-typename ActionBase<ActorType>::State TripleTeleportAction<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State TripleTeleportAction<ActorType>::Run(float elapsedTime)
 {
 	owner->SetTargetPosition(Player::Instance().GetPosition());
 
@@ -163,7 +170,7 @@ typename ActionBase<ActorType>::State TripleTeleportAction<ActorType>::Run(float
 	{
 	case 0: // 開始演出（弾発射 + 姿を消す）
 	{
-		owner->TurnToTarget(elapsedTime, 10.0f);
+		owner->TurnToTarget(elapsedTime, TurnSpeed::SLOW);
 		owner->SetInvincible(true);
 		// (前回のコードと同じ弾発射処理)
 		ProjectileInfo info = ProjectileManager::GetLightPillarInfo();
@@ -202,7 +209,7 @@ typename ActionBase<ActorType>::State TripleTeleportAction<ActorType>::Run(float
 
 	case 1: // 放物線移動（ホッピング動作）
 	{
-		owner->TurnToTarget(elapsedTime, 10.0f);
+		owner->TurnToTarget(elapsedTime, TurnSpeed::SLOW);
 		timer += elapsedTime;
 		// 進行度 (0.0 -> 1.0)
 		float t = std::clamp(timer / duration, 0.0f, 1.0f);
@@ -314,18 +321,18 @@ typename ActionBase<ActorType>::State TripleTeleportAction<ActorType>::Run(float
 			init = false;
 			step = 0;
 			count = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		break;
 	}
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
 // 様子見歩き
 template <typename ActorType>
-typename ActionBase<ActorType>::State CautiousWalkAction<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State CautiousWalkAction<ActorType>::Run(float elapsedTime)
 {
 	float runTimer;
 	switch (step)
@@ -342,18 +349,18 @@ typename ActionBase<ActorType>::State CautiousWalkAction<ActorType>::Run(float e
 		if (runTimer <= 0.0f)
 		{
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		break;
 	}
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
 // 徘徊行動
 template <typename ActorType>
-typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsedTime)
 {
 	switch (step)
 	{
@@ -366,7 +373,7 @@ typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsed
 		if (owner->GetHealth() <= 0)
 		{
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		// 目的地点までのXZ平面での距離判定
 		DirectX::XMFLOAT3 position = owner->GetPosition();
@@ -381,7 +388,7 @@ typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsed
 		{
 			step = 0;
 			// 徘徊成功を返す
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 
 		// 目的地点へ移動
@@ -392,24 +399,24 @@ typename ActionBase<ActorType>::State WanderAction<ActorType>::Run(float elapsed
 		{
 			step = 0;
 			// 徘徊成功を返す
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		break;
 	}
-	if (owner->IsAnyDamage() || owner->IsDeathFlag())
+	if (this->IsInterrupted())
 	{
 		step = 0;
-		return ActionBase<ActorType>::State::Failed;
+		return State::Failed;
 	}
 	// 実行中を返す
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
 // 追跡行動
 template <typename ActorType>
-typename ActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapsedTime)
 {
 	float runTimer = owner->GetRunTimer();
 	switch (step)
@@ -425,7 +432,7 @@ typename ActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapse
 		if (owner->GetHealth() <= 0)
 		{
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		runTimer -= elapsedTime;
 		// タイマー更新
@@ -448,31 +455,31 @@ typename ActionBase<ActorType>::State PursuitAction<ActorType>::Run(float elapse
 		{
 			step = 0;
 			// 追跡成功を返す
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		// 行動時間が過ぎた時
 		if (runTimer <= 0.0f)
 		{
 			step = 0;
 			// 追跡失敗を返す
-			return ActionBase<ActorType>::State::Failed;
+			return State::Failed;
 		}
 		break;
 	}
-	if (owner->IsAnyDamage() || owner->IsDeathFlag())
+	if (this->IsInterrupted())
 	{
 		step = 0;
-		return ActionBase<ActorType>::State::Failed;
+		return State::Failed;
 	}
 	// 実行中を返す
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
 // 待機行動
 template <typename ActorType>
-typename ActionBase<ActorType>::State IdleAction<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State IdleAction<ActorType>::Run(float elapsedTime)
 {
 	float runTimer = owner->GetRunTimer();
 	switch (step)
@@ -499,31 +506,31 @@ typename ActionBase<ActorType>::State IdleAction<ActorType>::Run(float elapsedTi
 		{
 			owner->SetRandomTargetPosition();
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 
 		// プレイヤーを見つけた時
 		if (owner->SearchPlayer())
 		{
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		break;
 	}
 	if (owner->IsDamage() || owner->IsDeathFlag())
 	{
 		step = 0;
-		return ActionBase<ActorType>::State::Failed;
+		return State::Failed;
 	}
 	// 実行中を返す
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
 // 落下モーション
 template <typename ActorType>
-typename ActionBase<ActorType>::State FallAction<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State FallAction<ActorType>::Run(float elapsedTime)
 {
 	switch (step)
 	{
@@ -542,15 +549,15 @@ typename ActionBase<ActorType>::State FallAction<ActorType>::Run(float elapsedTi
 		if (!owner->GetModel()->IsPlayAnimation())
 		{
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		break;
 	}
 	if (owner->IsDamage() || owner->IsDeathFlag())
 	{
 		step = 0;
-		return ActionBase<ActorType>::State::Complete;
+		return State::Complete;
 	}
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 //-------------------------------------------------------------

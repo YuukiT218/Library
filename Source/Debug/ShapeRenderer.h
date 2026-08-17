@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <vector>
 #include <wrl.h>
@@ -11,40 +11,40 @@ public:
 	ShapeRenderer(ID3D11Device* device);
 	~ShapeRenderer() {}
 
-	// ” •`‰æ
+	// ç®±æç”»
 	void DrawBox(
 		const DirectX::XMFLOAT3& position,
 		const DirectX::XMFLOAT3& angle,
 		const DirectX::XMFLOAT3& size,
 		const DirectX::XMFLOAT4& color);
 
-	// ‹…•`‰æ
+	// çƒæç”»
 	void DrawSphere(
 		const DirectX::XMFLOAT3& position,
 		float radius,
 		const DirectX::XMFLOAT4& color);
 
-	// ‰~’Œ•`‰æ
+	// å††æŸ±æç”»
 	void DrawCylinder(
 		const DirectX::XMFLOAT3& position,
 		float radius,
 		float height,
 		const DirectX::XMFLOAT4& color);
 
-	// ƒJƒvƒZƒ‹•`‰æ
+	// ã‚«ãƒ—ã‚»ãƒ«æç”»
 	void DrawCapsule(
 		const DirectX::XMFLOAT4X4& transform,
 		float radius,
 		float height,
 		const DirectX::XMFLOAT4& color);
 
-	// œ•`‰æ
+	// éª¨æç”»
 	void DrawBone(
 		const DirectX::XMFLOAT4X4& transform,
 		float length,
 		const DirectX::XMFLOAT4& color);
 
-	// •`‰æÀs
+	// æç”»å®Ÿè¡Œ
 	void Render(
 		ID3D11DeviceContext* dc,
 		const DirectX::XMFLOAT4X4& view,
@@ -70,22 +70,22 @@ private:
 		DirectX::XMFLOAT4		color;
 	};
 
-	// ƒƒbƒVƒ…¶¬
+	// ãƒ¡ãƒƒã‚·ãƒ¥ç”Ÿæˆ
 	void CreateMesh(ID3D11Device* device, const std::vector<DirectX::XMFLOAT3>& vertices, Mesh& mesh);
 
-	// ” ƒƒbƒVƒ…ì¬
+	// ç®±ãƒ¡ãƒƒã‚·ãƒ¥ä½œæˆ
 	void CreateBoxMesh(ID3D11Device* device, float width, float height, float depth);
 
-	// ‹…ƒƒbƒVƒ…ì¬
+	// çƒãƒ¡ãƒƒã‚·ãƒ¥ä½œæˆ
 	void CreateSphereMesh(ID3D11Device* device, float radius, int subdivisions);
 
-	// ”¼‹…ƒƒbƒVƒ…ì¬
+	// åŠçƒãƒ¡ãƒƒã‚·ãƒ¥ä½œæˆ
 	void CreateHalfSphereMesh(ID3D11Device* device, float radius, int subdivisions);
 
-	// ‰~’Œ
+	// å††æŸ±
 	void CreateCylinderMesh(ID3D11Device* device, float radius1, float radius2, float start, float height, int subdivisions);
 
-	// œƒƒbƒVƒ…ì¬
+	// éª¨ãƒ¡ãƒƒã‚·ãƒ¥ä½œæˆ
 	void CreateBoneMesh(ID3D11Device* device, float length);
 
 private:

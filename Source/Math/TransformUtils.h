@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 
 #include <DirectXMath.h>
 
 class TransformUtils
 {
 public:
-	// s—ñ‚©‚çƒˆ[Aƒsƒbƒ`Aƒ[ƒ‹‚ğs—ñ‚ğŒvZ‚·‚éB
+	// è¡Œåˆ—ã‹ã‚‰ãƒ¨ãƒ¼ã€ãƒ”ãƒƒãƒã€ãƒ­ãƒ¼ãƒ«ã‚’è¡Œåˆ—ã‚’è¨ˆç®—ã™ã‚‹ã€‚
 	static bool MatrixToRollPitchYaw(const DirectX::XMFLOAT4X4& m, float& pitch, float& yaw, float& roll);
 
-	// ƒNƒH[ƒ^ƒjƒIƒ“‚©‚çƒˆ[Aƒsƒbƒ`Aƒ[ƒ‹‚ğs—ñ‚ğŒvZ‚·‚éB
+	// ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‹ã‚‰ãƒ¨ãƒ¼ã€ãƒ”ãƒƒãƒã€ãƒ­ãƒ¼ãƒ«ã‚’è¡Œåˆ—ã‚’è¨ˆç®—ã™ã‚‹ã€‚
 	static bool QuaternionToRollPitchYaw(const DirectX::XMFLOAT4& q, float& pitch, float& yaw, float& roll);
 };

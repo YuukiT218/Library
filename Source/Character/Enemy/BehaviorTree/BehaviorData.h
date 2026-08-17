@@ -127,7 +127,7 @@ bool BehaviorData<ActorType>::IsLastNodeInSequence() const
 	if (it == runSequenceStepMap.end()) return false;
 
 	int currentStep = it->second;
-	int childrenCount = sequenceNode->children.size();
+	int childrenCount = static_cast<int>(sequenceNode->children.size());
 
 	// 次のステップが子ノードの数以上なら最後
 	return currentStep >= childrenCount;

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <string>
 #include <vector>
@@ -55,7 +55,7 @@ public:
 		float				roughness = 0.0f;
 		float				occlusionStrength = 0.0f;
 		float				alphaCutoff = 0.5f;
-		bool				IsEmissive = false;
+		bool				isEmissive = false;
 		AlphaMode			alphaMode = AlphaMode::Opaque;
 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	baseMap;
@@ -145,41 +145,41 @@ public:
 		void serialize(Archive& archive);
 	};
 
-	// Šeíƒf[ƒ^æ“¾
+	// å„ç¨®ãƒ‡ãƒ¼ã‚¿å–å¾—
 	const std::vector<Mesh>& GetMeshes() const { return meshes; }
 	const std::vector<Node>& GetNodes() const { return nodes; }
 	const std::vector<Animation>& GetAnimations() const { return animations; }
 	const std::vector<Material>& GetMaterials() const { return materials; }
 
-	// “Ç‚İ‚İ
+	// èª­ã¿è¾¼ã¿
 	void Load(ID3D11Device* device, const char* filename, float sampleRate);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“’Ç‰Á“Ç‚İ‚İ
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¿½åŠ èª­ã¿è¾¼ã¿
 	void AppendAnimations(const char* filename);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒCƒ“ƒfƒbƒNƒXæ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 	int GetAnimationIndex(const char* animationName) const;
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“–¼æ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³åå–å¾—
 	const char* GetAnimationName(int animationIndex) const { return animations.at(animationIndex).name.c_str(); }
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ÅIƒtƒŒ[ƒ€æ“¾
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æœ€çµ‚ãƒ•ãƒ¬ãƒ¼ãƒ å–å¾—
 	float GetAnimationLength(int animationIndex) const { return animations.at(animationIndex).secondsLength; }
 
-	// ƒm[ƒhƒCƒ“ƒfƒbƒNƒXæ“¾
+	// ãƒãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 	int GetNodeIndex(const char* name) const;
 
 protected:
-	// ƒ‚ƒfƒ‹ƒZƒbƒgƒAƒbƒv
+	// ãƒ¢ãƒ‡ãƒ«ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—
 	void BuildModel(ID3D11Device* device, const char* dirname, std::filesystem::path dirpath);
 
-	// ƒVƒŠƒAƒ‰ƒCƒY
+	// ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º
 	void Serialize(const char* filename);
 
-	// ƒfƒVƒŠƒAƒ‰ƒCƒY
+	// ãƒ‡ã‚·ãƒªã‚¢ãƒ©ã‚¤ã‚º
 	void Deserialize(const char* filename);
 
-	// ƒm[ƒhƒCƒ“ƒfƒbƒNƒX‚ğæ“¾‚·‚é
+	// ãƒãƒ¼ãƒ‰ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å–å¾—ã™ã‚‹
 	int FindNodeIndex(NodeId nodeId) const;
 
 protected:

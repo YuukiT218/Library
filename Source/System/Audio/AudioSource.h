@@ -1,26 +1,26 @@
-#pragma once
+ï»¿#pragma once
 
 #include <memory>
 #include <xaudio2.h>
 #include "AudioResource.h"
 
-// ƒI[ƒfƒBƒIƒ\[ƒX
+// ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚½ãƒ¼ã‚¹
 class AudioSource
 {
 public:
 	AudioSource(IXAudio2* xaudio, std::shared_ptr<AudioResource>& resource);
 	~AudioSource();
 
-	// Ä¶
+	// å†ç”Ÿ
 	void Play(bool loop, float volume = 1.0f);
 
-	// ’â~
+	// åœæ­¢
 	void Stop();
 
-	// ‰¹—Êİ’è
+	// éŸ³é‡è¨­å®š
 	void SetVolume(float volume);
 
-	// ‘¬“xİ’è
+	// é€Ÿåº¦è¨­å®š
 	void SetSpeed(float speed);
 
 private:

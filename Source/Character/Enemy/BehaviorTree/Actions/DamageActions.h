@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ActionBase.h"
+#include "EnemyActionBase.h"
 #include "Character/Player/Player.h"
 #include "Math\Mathf.h"
 
@@ -14,12 +14,13 @@ enum class DamageType
 
 // 統合ダメージアクション
 template <typename ActorType>
-class UnifiedDamageAction : public ActionBase<ActorType>
+class UnifiedDamageAction : public EnemyActionBase<ActorType>
 {
 public:
-	UnifiedDamageAction(ActorType* actor) : ActionBase<ActorType>(actor) {}
+	using State = typename EnemyActionBase<ActorType>::State;
+	UnifiedDamageAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 
-	ActionBase<ActorType>::State Run(float elapsedTime) override;
+	State Run(float elapsedTime) override;
 
 	// アニメーションインデックス
 	struct DamageAnimations
@@ -90,11 +91,12 @@ public:
 
 // 死亡
 template <typename ActorType>
-class DeadAction : public ActionBase<ActorType>
+class DeadAction : public EnemyActionBase<ActorType>
 {
 public:
-	DeadAction(ActorType* actor) :ActionBase(actor) {}
-	ActionBase::State Run(float elapsedTime);
+	using State = typename EnemyActionBase<ActorType>::State;
+	DeadAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
+	State Run(float elapsedTime);
 private:
 	Effekseer::Handle handle = -1;
 };
@@ -106,7 +108,7 @@ template <typename ActorType>
 void UnifiedDamageAction<ActorType>::HandleDamageStart(DamageType type, float elapsedTime)
 {
 	owner->SetTargetPosition(Player::Instance().GetPosition());
-	owner->TurnToTarget(elapsedTime, 10000.0f);
+	owner->TurnToTarget(elapsedTime, TurnSpeed::INSTANT);
 
 	// ダメージフラグをリセット
 	owner->SetDamage(false);
@@ -213,7 +215,7 @@ void UnifiedDamageAction<ActorType>::HandleDamageStart(DamageType type, float el
 
 // メイン処理
 template <typename ActorType>
-typename ActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(float elapsedTime)
 {
 	// アニメーション初期化
 	InitializeAnimations();
@@ -234,7 +236,7 @@ typename ActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(float 
 		{
 			owner->SetGravity(-0.3f);
 			step = 0;
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 
 		// Heavyダメージで地上着地した場合、起き上がりへ
@@ -305,7 +307,7 @@ typename ActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(float 
 		{
 			step = 0;
 			owner->SetGravity(-0.3f);
-			return ActionBase<ActorType>::State::Complete;
+			return State::Complete;
 		}
 		break;
 
@@ -327,17 +329,17 @@ typename ActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(float 
 		owner->SetGravity(-0.3f);
 		owner->SetVerticalVelocity(0.0f);
 		step = 0;
-		return ActionBase<ActorType>::State::Complete;
+		return State::Complete;
 	}
 
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------
 // 死亡
 template <typename ActorType>
-typename ActionBase<ActorType>::State DeadAction<ActorType>::Run(float elapsedTime)
+typename EnemyActionBase<ActorType>::State DeadAction<ActorType>::Run(float elapsedTime)
 {
 	if (handle == -1)
 	{
@@ -345,6 +347,6 @@ typename ActionBase<ActorType>::State DeadAction<ActorType>::Run(float elapsedTi
 	}
 	owner->deathEffect->SetPosition(handle, { owner->GetPosition().x, owner->GetPosition().y + 1.0f, owner->GetPosition().z });
 	// 実行中を返す
-	return ActionBase<ActorType>::State::Run;
+	return State::Run;
 }
 //-------------------------------------------------------------

@@ -182,7 +182,7 @@ private:
 	bool Acceleration = false;
 
 	float flashTimer = 0;
-	float AccelTimer = 0;
+	float accelTimer = 0;
 
 	float radialRadius = 0;
 

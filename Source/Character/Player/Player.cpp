@@ -14,7 +14,14 @@
 
 #include <stdlib.h>
 
+namespace
+{
+    // ステージの高さに合わせた初期配置
+    const DirectX::XMFLOAT3 SPAWN_POSITION = { -1.0f, -1.432f, -15.0f };
 
+    // 体力
+    constexpr int MAX_HEALTH = 300;
+}
 
 static Player* instance = nullptr;
 
@@ -35,19 +42,17 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     model->SetAdRoughness(1.0f);
 
     // ステージの高さに合わせる
-    position.x = -1.0f;
-    position.y = -1.432f;
-    position.z = -15.0f;
+    position = SPAWN_POSITION;
 
     // アニメーションスピード設定
-    initAnimSpeed();
+    InitAnimSpeed();
 
     sword = std::make_unique<Sword>(device, "Data/Model/Weapon/Katana/GreenKatana.gltf");
     guardEffect = std::make_unique<Effect>("Data/Effect/Guard.efkefc");
     deathEffect = std::make_shared<Effect>("Data/Effect/Death.efkefc");
 
     // プレイヤーの最大体力と体力設定
-    maxHealth = 300;
+    maxHealth = MAX_HEALTH;
     health = maxHealth;
 
     // ステートマシーンの生成
@@ -71,6 +76,11 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
 
     // アイドルステートから開始
     ChangeState(PlayerStateId::Idle);
+
+    // 生成直後はブレンド元の姿勢がバインドポーズ(Tポーズ)なので、
+    // そのままだとイントロ演出中にTポーズから待機モーションへの補間が見えてしまう。
+    // ブレンドを打ち切って、最初のフレームから待機姿勢にする。
+    model->CancelAnimationBlend();
 
     // アニメーションごとのパラメーター設定
     const std::vector<ModelResource::Animation>& animations = model->GetResource()->GetAnimations();
@@ -842,11 +852,11 @@ void Player::DrawDebugGUI()
             ImGui::Separator();
 
             // プレイヤーモデルのパラメータ調整
-            model->DebugGui(u8"Player");
+            model->DebugGUI(u8"Player");
         }
 
         ImGui::Separator();
-		sword->DrawDebugImGUi();
+		sword->DrawDebugGUI();
 
     }
     ImGui::End();

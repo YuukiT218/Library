@@ -1,31 +1,31 @@
-#pragma once
+ï»¿#pragma once
 
 #include <DirectXMath.h>
 #include <Effekseer.h>
 
-// ƒGƒtƒFƒNƒg
+// ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
 class Effect
 {
 public:
 	Effect(const char* filename);
 	~Effect() {};
 
-	// Ä¶
+	// å†ç”Ÿ
 	Effekseer::Handle Play(const DirectX::XMFLOAT3& position, float scale = 1.0f, const DirectX::XMFLOAT3& rotation = {});
 
-	// ’â~
+	// åœæ­¢
 	void Stop(Effekseer::Handle handle);
 
-	// À•Wİ’è
+	// åº§æ¨™è¨­å®š
 	void SetPosition(Effekseer::Handle handle, const DirectX::XMFLOAT3& position);
 
-	// ƒXƒP[ƒ‹İ’è
+	// ã‚¹ã‚±ãƒ¼ãƒ«è¨­å®š
 	void SetScale(Effekseer::Handle handle, const DirectX::XMFLOAT3& scale);
 
-	// ƒ^[ƒQƒbƒgƒ|ƒWƒVƒ‡ƒ“İ’è
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆãƒã‚¸ã‚·ãƒ§ãƒ³è¨­å®š
 	void SetTargetPosition(Effekseer::Handle handle, const DirectX::XMFLOAT3& position);
 
-	// ‰ñ“]‚Ìİ’è
+	// å›è»¢ã®è¨­å®š
 	void SetRotation(Effekseer::Handle handle, const DirectX::XMFLOAT3& rotation);
 private:
 	Effekseer::EffectRef effekseerEffect;

@@ -34,7 +34,8 @@ cbuffer CbColor : register(b2)
 {
     float isEmissive; //強調発光するかどうか
     float emissiveFactor; //発光度
-    float2 color_dummy;
+    float hasEmissiveTexture; //エミッシブテクスチャを持っているか
+    float color_dummy;
     float4 adjustColor; //色の調整
 }
 
@@ -54,21 +55,35 @@ static const int ShadowBufferSize = 4;
 cbuffer CbShadow : register(b4)
 {
     row_major float4x4 CascadeLightViewProjection[ShadowBufferSize];
-    float4 CascadeShadowBias;
-    
-    float4 cascadeFlags; // DisplayCascadeArea, IsCascade を float にし、余りを使う
-    
+
+    //  各カスケードの終端距離
+    float4 cascadeSplits;
+
+    //  影の色
     float4 shadowColor;
-    // UV空間での1ピクセルのサイズ
+
+    //  x: カスケードを色分け表示するか
+    float4 cascadeFlags;
+
+    //  UV空間での1ピクセルのサイズ
     float shadowTexelSize;
 
-    float shadowAttenuation; //影の強さ
-    
-    float shadowBias;
-    
-    float dummy; //パディング
+    //  影の濃さ
+    float shadowAttenuation;
 
-    float4 cascadeSplits;
+    //  深度値補正
+    float shadowBias;
+
+    //  法線方向へずらす量(法線マップの起伏で影が途切れるのを防ぐ)
+    float shadowNormalOffset;
+
+    //  間接光にも影をどれだけ効かせるか
+    float indirectShadowStrength;
+
+    float3 shadowPadding;
+
+    //  カスケードごとのシャドウマップ1テクセルのワールドサイズ
+    float4 cascadeTexelWorldSize;
 };
 
 cbuffer CbConstants : register(b5)
@@ -116,4 +131,7 @@ cbuffer CbTeleport : register(b9)
     float enableDistortion;
     float enableDither;
     float3 teleportDummy;
+
+    //  残像の色味(rgb)と明るさ(a)
+    float4 afterimageColor;
 }

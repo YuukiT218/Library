@@ -17,7 +17,7 @@ public:
 	}
 
 	void ReversLockOnSwitch() { isLockOn = !isLockOn; }
-	void SetIsLockOn(bool islockon) { isLockOn = islockon; }
+	void SetIsLockOn(bool isLockOn) { this->isLockOn = isLockOn; }
 	bool GetIsLockOn() { return isLockOn; }
 
 	void SetLockOnEnemy(Enemy* enemy) { closestEnemy = enemy; }

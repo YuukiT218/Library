@@ -1,4 +1,4 @@
-#include "Enemy.h"
+ï»¿#include "Enemy.h"
 #include "System/HitStop.h"
 #include "Character/Player/Player.h"
 #include "Math/Collision.h"
@@ -6,22 +6,24 @@
 #include "Camera/Camera.h"
 #include <string>
 #include <Math/Mathf.h>
+#include "Effect/EffectManager.h"
+#include <algorithm>
 
 
 #include <stdlib.h>
 
 
 
-// ƒfƒoƒbƒOƒvƒŠƒ~ƒeƒBƒu•`‰æ
+// ãƒ‡ãƒãƒƒã‚°ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–æç”»
 void Enemy::DrawDebugPrimitive()
 {
 	ShapeRenderer* shapeRenderer = Graphics::Instance().GetShapeRenderer();
 
-	// Õ“Ë”»’è—pƒfƒoƒbƒO‹…‚ğ•`‰æ
+	// è¡çªåˆ¤å®šç”¨ãƒ‡ãƒãƒƒã‚°çƒã‚’æç”»
 	shapeRenderer->DrawSphere(position, radius, DirectX::XMFLOAT4(0, 0, 0, 1));
 }
 
-// ƒfƒoƒbƒOImGui•`‰æ
+// ãƒ‡ãƒãƒƒã‚°ImGuiæç”»
 void Enemy::DrawDebugGUI()
 {
     if (ImGui::TreeNode("Teleport System"))
@@ -53,7 +55,7 @@ void Enemy::DrawDebugGUI()
 
 void Enemy::EditUpdate(float elapsedTime)
 {
-	// ‹¤’Ê‚ÌXVˆ—
+	// å…±é€šã®æ›´æ–°å‡¦ç†
 	UpdateVelocity(elapsedTime);
 	UpdateInvincibleTimer(elapsedTime);
 	UpdateTransform();
@@ -69,16 +71,16 @@ void Enemy::Update(float elapsedTime)
 {
 	totalGameTime += elapsedTime;
 
-    // ƒeƒŒƒ|[ƒgXV
+    // ãƒ†ãƒ¬ãƒãƒ¼ãƒˆæ›´æ–°
     UpdateTeleport(elapsedTime);
 
-    // c‘œXV
+    // æ®‹åƒæ›´æ–°
     UpdateAfterimage(elapsedTime);
 
-	// ”h¶ƒNƒ‰ƒXê—pˆ—iƒfƒtƒHƒ‹ƒg‚Í‰½‚à‚µ‚È‚¢j
+	// æ´¾ç”Ÿã‚¯ãƒ©ã‚¹å°‚ç”¨å‡¦ç†ï¼ˆãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã¯ä½•ã‚‚ã—ãªã„ï¼‰
 	UpdateEnemySpecific(elapsedTime * HitStop::Instance().GetEnemyTimeScale());
 
-	// ‹¤’Ê‚ÌXVˆ—
+	// å…±é€šã®æ›´æ–°å‡¦ç†
 	UpdateVelocity(elapsedTime * HitStop::Instance().GetEnemyTimeScale());
 	UpdateInvincibleTimer(elapsedTime);
     UpdateTransform();
@@ -92,10 +94,10 @@ void Enemy::Update(float elapsedTime)
 
 void Enemy::UpdateTransform()
 {
-    // ƒeƒŒƒ|[ƒg’†‚ÍŒ©‚½–Ú‚ÌˆÊ’u‚ğg—p
+    // ãƒ†ãƒ¬ãƒãƒ¼ãƒˆä¸­ã¯è¦‹ãŸç›®ã®ä½ç½®ã‚’ä½¿ç”¨
     DirectX::XMFLOAT3 renderPosition = isTeleporting ? visualPosition : position;
 
-    // ƒ‚ƒfƒ‹‚Ìƒgƒ‰ƒ“ƒXƒtƒH[ƒ€‚ğXViŒ©‚½–Ú‚ÌˆÊ’u‚Åj
+    // ãƒ¢ãƒ‡ãƒ«ã®ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ ã‚’æ›´æ–°ï¼ˆè¦‹ãŸç›®ã®ä½ç½®ã§ï¼‰
     DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
     DirectX::XMMATRIX X = DirectX::XMMatrixRotationX(angle.x);
     DirectX::XMMATRIX Y = DirectX::XMMatrixRotationY(angle.y);
@@ -106,7 +108,7 @@ void Enemy::UpdateTransform()
     DirectX::XMStoreFloat4x4(&transform, W);
 }
 
-// ƒeƒŒƒ|[ƒgŠJn
+// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆé–‹å§‹
 void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
 {
     teleportPhase = TeleportPhase::FadeOut;
@@ -117,10 +119,21 @@ void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
     teleportStartPosition = position;
     teleportTargetPosition = targetPos;
 
-    // Œ©‚½–Ú‚ÌˆÊ’u‚ÍŒ»İˆÊ’u‚Ì‚Ü‚Ü
+    // è¦‹ãŸç›®ã®ä½ç½®ã¯ç¾åœ¨ä½ç½®ã®ã¾ã¾
     visualPosition = position;
 
-    // V‚µ‚¢c‘œ‚ğ¶¬‚µ‚Ä’Ç‰Á
+    // è»Œè·¡ã‚’æ’’ãåŒºé–“ã®èµ·ç‚¹ã‚’åˆæœŸåŒ–ã™ã‚‹
+    teleportTrailPreviousPosition = position;
+
+    // ãƒ†ãƒ¬ãƒãƒ¼ãƒˆé–‹å§‹åœ°ç‚¹ã«æ®‹åƒã‚’1ã¤ã ã‘æ®‹ã™
+    SpawnAfterimage();
+}
+
+// ç¾åœ¨ã®å§¿å‹¢ã‹ã‚‰æ®‹åƒã‚’1ã¤ç”Ÿæˆã™ã‚‹
+void Enemy::SpawnAfterimage()
+{
+    if (!model) return;
+
     Afterimage& newAfterimage = afterimages.emplace_back();
     newAfterimage.position = position;
     newAfterimage.angle = angle;
@@ -129,14 +142,11 @@ void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
     newAfterimage.lifetime = afterimageDuration;
     newAfterimage.darkness = afterimageDarkness;
 
-    // Œ»İ‚Ìƒ{[ƒ“p¨‚ğƒRƒs[
-    if (model)
-    {
-        newAfterimage.nodes = model->GetNodes();
-    }
+    // ç¾åœ¨ã®ãƒœãƒ¼ãƒ³å§¿å‹¢ã‚’ã‚³ãƒ”ãƒ¼
+    newAfterimage.nodes = model->GetNodes();
 }
 
-// ƒeƒŒƒ|[ƒgXV
+// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆæ›´æ–°
 void Enemy::UpdateTeleport(float elapsedTime)
 {
 if (teleportPhase == TeleportPhase::None) return;
@@ -146,10 +156,10 @@ if (teleportPhase == TeleportPhase::None) return;
     switch (teleportPhase)
     {
     case TeleportPhase::FadeOut:
-        // Á¸‰‰o’†
+        // æ¶ˆå¤±æ¼”å‡ºä¸­
         if (teleportPhaseTimer >= fadeOutDuration)
         {
-            // Á¸Š®—¹AˆÚ“®ƒtƒF[ƒY‚Ö
+            // æ¶ˆå¤±å®Œäº†ã€ç§»å‹•ãƒ•ã‚§ãƒ¼ã‚ºã¸
             teleportPhase = TeleportPhase::Moving;
             OnTeleportPhaseChanged(teleportPhase);
             teleportPhaseTimer = 0.0f;
@@ -157,42 +167,47 @@ if (teleportPhase == TeleportPhase::None) return;
         break;
         
     case TeleportPhase::Moving:
-        // ˆÊ’uˆÚ“®’†iŒ©‚¦‚È‚¢ó‘Ôj
+        // ä½ç½®ç§»å‹•ä¸­ï¼ˆè¦‹ãˆãªã„çŠ¶æ…‹ï¼‰
         {
             float t = teleportPhaseTimer / moveDuration;
             t = std::clamp(t, 0.0f, 1.0f);
             
-            // ƒC[ƒWƒ“ƒOieaseInOutCubicj
+            // ã‚¤ãƒ¼ã‚¸ãƒ³ã‚°ï¼ˆeaseInOutCubicï¼‰
             float easedT = t < 0.5f 
                 ? 4.0f * t * t * t 
                 : 1.0f - powf(-2.0f * t + 2.0f, 3.0f) / 2.0f;
             
-            // ˜_—ˆÊ’u‚ğˆÚ“®
+            // è«–ç†ä½ç½®ã‚’ç§»å‹•
             logicalPosition.x = Mathf::Lerp(teleportStartPosition.x, teleportTargetPosition.x, easedT);
             logicalPosition.y = Mathf::Lerp(teleportStartPosition.y, teleportTargetPosition.y, easedT);
             logicalPosition.z = Mathf::Lerp(teleportStartPosition.z, teleportTargetPosition.z, easedT);
             
-            // ÀÛ‚ÌˆÊ’u‚àXV
+            // å®Ÿéš›ã®ä½ç½®ã‚‚æ›´æ–°
             position = logicalPosition;
+
+            // é€šã£ãŸè»Œè·¡ã‚’GPUãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã§å¯è¦–åŒ–ã™ã‚‹
+            // æ®‹åƒã¯é–‹å§‹åœ°ç‚¹ã®1ã¤ã ã‘ãªã®ã§ã€çµŒè·¯ã®è¡¨ç¾ã¯ã“ã¡ã‚‰ãŒæ‹…å½“ã™ã‚‹
+            // å‰å›ä½ç½®ã‹ã‚‰ç¾åœ¨ä½ç½®ã¾ã§ã‚’çµã¶ã‚ˆã†ã«æ’’ãã¨ã€é–“ãŒç©ºã‹ãšç›´ç·šã«ãªã‚‹
+            EmitTeleportTrail(teleportTrailPreviousPosition, position);
+            teleportTrailPreviousPosition = position;
             
             if (teleportPhaseTimer >= moveDuration)
             {
-                // ˆÚ“®Š®—¹AoŒ»ƒtƒF[ƒY‚Ö
+                // ç§»å‹•å®Œäº†ã€å‡ºç¾ãƒ•ã‚§ãƒ¼ã‚ºã¸
                 position = teleportTargetPosition;
                 visualPosition = teleportTargetPosition;
                 teleportPhase = TeleportPhase::FadeIn;
                 OnTeleportPhaseChanged(teleportPhase);
                 teleportPhaseTimer = 0.0f;
-                
             }
         }
         break;
         
     case TeleportPhase::FadeIn:
-        // oŒ»‰‰o’†
+        // å‡ºç¾æ¼”å‡ºä¸­
         if (teleportPhaseTimer >= fadeInDuration)
         {
-            // oŒ»Š®—¹AƒeƒŒƒ|[ƒgI—¹
+            // å‡ºç¾å®Œäº†ã€ãƒ†ãƒ¬ãƒãƒ¼ãƒˆçµ‚äº†
             teleportPhase = TeleportPhase::None;
             OnTeleportPhaseChanged(teleportPhase);
             teleportPhaseTimer = 0.0f;
@@ -203,20 +218,23 @@ if (teleportPhase == TeleportPhase::None) return;
 
 void Enemy::UpdateAfterimage(float elapsedTime)
 {
-    // ƒŠƒXƒg“à‚Ì‚·‚×‚Ä‚Ìc‘œ‚ğXVEõ–½‚ªs‚«‚½‚à‚Ì‚ğíœ
+    // ãƒªã‚¹ãƒˆå†…ã®ã™ã¹ã¦ã®æ®‹åƒã‚’æ›´æ–°ãƒ»å¯¿å‘½ãŒå°½ããŸã‚‚ã®ã‚’å‰Šé™¤
     if (afterimages.empty()) return;
 
     for (auto it = afterimages.begin(); it != afterimages.end(); )
     {
         it->lifetime -= elapsedTime;
 
-        // “§–¾“x‚ğŠÔŒo‰ß‚ÅŒ¸Š
-        it->alpha = it->lifetime;
+        // é€æ˜åº¦ã‚’æ™‚é–“çµŒéã§æ¸›è¡°ã•ã›ã‚‹
+        // æŒç¶šæ™‚é–“ã§å‰²ã‚‹ã“ã¨ã§ã€æŒç¶šæ™‚é–“ã‚’å¤‰ãˆã¦ã‚‚å¿…ãš1.0ã‹ã‚‰0.0ã¸è½ã¡ã‚‹
+        it->alpha = (afterimageDuration > 0.0f)
+            ? std::clamp(it->lifetime / afterimageDuration, 0.0f, 1.0f)
+            : 0.0f;
 
-        // õ–½‚ªs‚«‚½‚çíœ
+        // å¯¿å‘½ãŒå°½ããŸã‚‰å‰Šé™¤
         if (it->lifetime <= 0.0f)
         {
-            // ƒfƒXƒgƒ‰ƒNƒ^‚ÅClearNodes‚ªŒÄ‚Î‚ê‚é
+            // ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã§ClearNodesãŒå‘¼ã°ã‚Œã‚‹
             it = afterimages.erase(it);
         }
         else
@@ -226,19 +244,71 @@ void Enemy::UpdateAfterimage(float elapsedTime)
     }
 }
 
+// ãƒ†ãƒ¬ãƒãƒ¼ãƒˆã®è»Œè·¡ã‚’GPUãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã§æ’’ã
+// 1ãƒ•ãƒ¬ãƒ¼ãƒ ã§é€²ã‚“ã åŒºé–“(fromâ†’to)ã®ä¸Šã«ç­‰é–“éš”ã§ä¸¦ã¹ã‚‹ã“ã¨ã§ã€
+// åŒã˜ä½ç½®ã«å›ºã¾ã‚‰ãš1æœ¬ã®ç›´ç·šã¨ã—ã¦ã¤ãªãŒã£ã¦è¦‹ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
+void Enemy::EmitTeleportTrail(const DirectX::XMFLOAT3& from, const DirectX::XMFLOAT3& to)
+{
+    // ç·šã¨ã—ã¦è¦‹ã›ãŸã„ã®ã§ã€æ•£ã‚‰ã™é‡ã¯æœ€å°é™ã«ã™ã‚‹
+    constexpr float TRAIL_CENTER_HEIGHT = 1.0f;  // ä½“ã®ä¸­å¿ƒã‚ãŸã‚Šã®é«˜ã•
+    constexpr float TRAIL_SPREAD = 0.07f;        // ç·šã®å¤ªã•
+    constexpr float TRAIL_DRIFT_SPEED = 0.25f;   // ã‚ãšã‹ã«æ¼‚ã‚ã›ã‚‹é€Ÿåº¦
+    constexpr float TRAIL_MIN_SIZE = 0.05f;
+    constexpr float TRAIL_SIZE_RANGE = 0.06f;
+    constexpr float TRAIL_MIN_LIFETIME = 0.30f;
+    constexpr float TRAIL_LIFETIME_RANGE = 0.30f;
+
+    // æ®‹åƒã¨åŒã˜è‰²ã«ã—ã¦ã€è»Œè·¡ã¨æ®‹åƒãŒåŒã˜æ¼”å‡ºã«è¦‹ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
+    const DirectX::XMFLOAT4 color =
+    {
+        afterimageColor.x * afterimageColor.w,
+        afterimageColor.y * afterimageColor.w,
+        afterimageColor.z * afterimageColor.w,
+        1.0f
+    };
+
+    const int emitCount = (std::max)(teleportTrailEmitCount, 1);
+
+    for (int i = 0; i < emitCount; ++i)
+    {
+        // åŒºé–“ã‚’ç­‰åˆ†ã—ãŸä½ç½®ã‚’æ±‚ã‚ã‚‹
+        float t = (emitCount > 1) ? static_cast<float>(i) / (emitCount - 1) : 0.0f;
+
+        DirectX::XMFLOAT3 particlePosition =
+        {
+            Mathf::Lerp(from.x, to.x, t) + Mathf::RandomRange(-1.0f, 1.0f) * TRAIL_SPREAD,
+            Mathf::Lerp(from.y, to.y, t) + TRAIL_CENTER_HEIGHT + Mathf::RandomRange(-1.0f, 1.0f) * TRAIL_SPREAD,
+            Mathf::Lerp(from.z, to.z, t) + Mathf::RandomRange(-1.0f, 1.0f) * TRAIL_SPREAD
+        };
+
+        // ç·šã®å½¢ã‚’ä¿ã¡ãŸã„ã®ã§ã€ã»ã¨ã‚“ã©å‹•ã‹ã•ãšãã®å ´ã§æ¶ˆãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
+        DirectX::XMFLOAT3 velocity =
+        {
+            Mathf::RandomRange(-1.0f, 1.0f) * TRAIL_DRIFT_SPEED,
+            Mathf::RandomRange(-0.2f, 1.0f) * TRAIL_DRIFT_SPEED,
+            Mathf::RandomRange(-1.0f, 1.0f) * TRAIL_DRIFT_SPEED
+        };
+
+        float size = TRAIL_MIN_SIZE + Mathf::RandomRange(0.0f, 1.0f) * TRAIL_SIZE_RANGE;
+        float lifeTime = TRAIL_MIN_LIFETIME + Mathf::RandomRange(0.0f, 1.0f) * TRAIL_LIFETIME_RANGE;
+
+        EffectManager::Instance().EmitGpuParticle(particlePosition, velocity, color, size, lifeTime, 2);
+    }
+}
+
 bool Enemy::IsPositionVisible(const DirectX::XMFLOAT3& worldPos)
 {
     DirectX::XMMATRIX view = XMLoadFloat4x4(&Camera::Instance().GetView());
     DirectX::XMMATRIX projection = XMLoadFloat4x4(&Camera::Instance().GetProjection());
 
-    // ƒ[ƒ‹ƒhÀ•W‚ğNDCi³‹K‰»ƒfƒoƒCƒXÀ•W: -1.0`1.0j‚É•ÏŠ·
+    // ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã‚’NDCï¼ˆæ­£è¦åŒ–ãƒ‡ãƒã‚¤ã‚¹åº§æ¨™: -1.0ï½1.0ï¼‰ã«å¤‰æ›
     DirectX::XMVECTOR posVec = DirectX::XMLoadFloat3(&worldPos);
     DirectX::XMVECTOR screenPos = DirectX::XMVector3TransformCoord(posVec, view * projection);
 
     DirectX::XMFLOAT3 ndc;
     DirectX::XMStoreFloat3(&ndc, screenPos);
 
-    // ‰æ–Ê‚Ì’[‚·‚¬‚é‚ÆŒ©Ø‚ê‚é‚½‚ßA0.8f ’ö“x‚Ìƒ}[ƒWƒ“‚ğ‚½‚¹‚é
+    // ç”»é¢ã®ç«¯ã™ãã‚‹ã¨è¦‹åˆ‡ã‚Œã‚‹ãŸã‚ã€0.8f ç¨‹åº¦ã®ãƒãƒ¼ã‚¸ãƒ³ã‚’æŒãŸã›ã‚‹
     const float margin = 0.7f;
     return (ndc.x >= -margin && ndc.x <= margin &&
         ndc.y >= -margin && ndc.y <= margin &&
@@ -250,7 +320,7 @@ DirectX::XMFLOAT3 Enemy::CalculateVisibleTeleportPos(float distance, bool bakeY)
     DirectX::XMFLOAT3 playerPos = Player::Instance().GetPosition();
     std::vector<DirectX::XMFLOAT3> availablePositions;
 
-    // 1. Œó•â’n“_ (availablePositions) ‚ğƒvƒŒƒCƒ„[‚ÌüˆÍ 8 •ûŒü‚É¶¬
+    // 1. å€™è£œåœ°ç‚¹ (availablePositions) ã‚’ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å‘¨å›² 8 æ–¹å‘ã«ç”Ÿæˆ
     for (int i = 0; i < 36; ++i)
     {
         float angle = DirectX::XMConvertToRadians(i * 10.0f);
@@ -261,12 +331,12 @@ DirectX::XMFLOAT3 Enemy::CalculateVisibleTeleportPos(float distance, bool bakeY)
         if (bakeY)
             pos.y = GetPosition().y;
 
-        // ’nŒ`§ŒÀi•Ç“Ë‚«”²‚¯–h~j
+        // åœ°å½¢åˆ¶é™ï¼ˆå£çªãæŠœã‘é˜²æ­¢ï¼‰
         KeepAreaLimit(pos);
         availablePositions.push_back(pos);
     }
 
-    // 2. ‰æ–Ê“à‚É“ü‚Á‚Ä‚¢‚é’n“_‚ğƒtƒBƒ‹ƒ^ƒŠƒ“ƒO
+    // 2. ç”»é¢å†…ã«å…¥ã£ã¦ã„ã‚‹åœ°ç‚¹ã‚’ãƒ•ã‚£ãƒ«ã‚¿ãƒªãƒ³ã‚°
     std::vector<DirectX::XMFLOAT3> visiblePositions;
     for (const auto& pos : availablePositions)
     {
@@ -276,14 +346,14 @@ DirectX::XMFLOAT3 Enemy::CalculateVisibleTeleportPos(float distance, bool bakeY)
         }
     }
 
-    // 3. ÅI‘Io
+    // 3. æœ€çµ‚é¸å‡º
     if (!visiblePositions.empty())
     {
-        // ‰æ–Ê“à‚ÌŒó•â‚ª‚ ‚ê‚Îƒ‰ƒ“ƒ_ƒ€‚É‘I‚Ô
+        // ç”»é¢å†…ã®å€™è£œãŒã‚ã‚Œã°ãƒ©ãƒ³ãƒ€ãƒ ã«é¸ã¶
         return visiblePositions[rand() % visiblePositions.size()];
     }
 
-    // ‰æ–Ê“à‚ÉŒó•â‚ª‚È‚¢ê‡‚ÍA‹­§“I‚É 0 ”Ô–ÚiƒvƒŒƒCƒ„[‚Ì³–Ê•ûŒü‚È‚Çj‚ğ•Ô‚·
+    // ç”»é¢å†…ã«å€™è£œãŒãªã„å ´åˆã¯ã€å¼·åˆ¶çš„ã« 0 ç•ªç›®ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ­£é¢æ–¹å‘ãªã©ï¼‰ã‚’è¿”ã™
     return availablePositions[0];
 }
 
@@ -292,24 +362,18 @@ float Enemy::GetTeleportProgress() const
     switch (teleportPhase)
     {
     case TeleportPhase::FadeOut:
-        // 0.0 ¨ 1.0 ‚Éis
+        // 0.0 â†’ 1.0 ã«é€²è¡Œ
         return std::clamp(teleportPhaseTimer / fadeOutDuration, 0.0f, 1.0f);
 
     case TeleportPhase::Moving:
-        // Š®‘S‚ÉÁ‚¦‚½ó‘Ôi1.0‚Ì‚Ü‚Üj
+        // å®Œå…¨ã«æ¶ˆãˆãŸçŠ¶æ…‹ï¼ˆ1.0ã®ã¾ã¾ï¼‰
         return 1.0f;
 
     case TeleportPhase::FadeIn:
-        // 1.0 ¨ 0.0 ‚É–ß‚é
+        // 1.0 â†’ 0.0 ã«æˆ»ã‚‹
         return 1.0f - std::clamp(teleportPhaseTimer / fadeInDuration, 0.0f, 1.0f);
 
     default:
         return 0.0f;
     }
-}
-
-// ”jŠü
-void Enemy::Destroy()
-{
-	Destroy();
 }

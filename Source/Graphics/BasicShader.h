@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Shader.h"
 
@@ -8,16 +8,16 @@ public:
 	BasicShader(ID3D11Device* device);
 	~BasicShader() override = default;
 
-	// ŠJnˆ—
+	// é–‹å§‹å‡¦ç†
 	void Begin(const RenderContext& rc) override;
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	void Update(const RenderContext& rc, const ModelResource::Mesh& mesh, const std::shared_ptr<Model> model) override;
 
-	// I—¹ˆ—
+	// çµ‚äº†å‡¦ç†
 	void End(const RenderContext& rc) override;
 
-	//ƒfƒoƒbƒO—pGUI
+	//ãƒ‡ãƒãƒƒã‚°ç”¨GUI
 	void ImGui() override{};
 
 private:

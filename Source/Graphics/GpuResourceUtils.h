@@ -1,12 +1,12 @@
-#pragma once
+ï»¿#pragma once
 
 #include <d3d11.h>
 
-// GPUƒŠƒ\[ƒXƒ†[ƒeƒBƒŠƒeƒB
+// GPUãƒªã‚½ãƒ¼ã‚¹ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£
 class GpuResourceUtils
 {
 public:
-	// ’¸“_ƒVƒF[ƒ_[“Ç‚İ‚İ
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 	static HRESULT LoadVertexShader(
 		ID3D11Device* device,
 		const char* filename,
@@ -15,32 +15,32 @@ public:
 		ID3D11InputLayout** inputLayout,
 		ID3D11VertexShader** vertexShader);
 
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[“Ç‚İ‚İ
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 	static HRESULT LoadPixelShader(
 		ID3D11Device* device,
 		const char* filename,
 		ID3D11PixelShader** pixelShader);
 
-	// ƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[“Ç‚İ‚İ
+	// ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 	static HRESULT LoadComputeShader(
 		ID3D11Device* device,
 		const char* filename,
 		ID3D11ComputeShader** computeShader);
 
-	// ƒWƒIƒƒgƒŠƒVƒF[ƒ_[“Ç‚İ‚İ
+	// ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 	static HRESULT LoadGeometryShader(
 		ID3D11Device* device,
 		const char* filename,
 		ID3D11GeometryShader** geometryShader);
 
-	// ƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 	static HRESULT LoadTexture(
 		ID3D11Device* device,
 		const char* filename,
 		ID3D11ShaderResourceView** shaderResourceView,
 		D3D11_TEXTURE2D_DESC* texture2dDesc = nullptr);
 
-	// ƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 	static HRESULT LoadTexture(
 		ID3D11Device* device,
 		const void* data,
@@ -48,20 +48,20 @@ public:
 		ID3D11ShaderResourceView** shaderResourceView,
 		D3D11_TEXTURE2D_DESC* texture2dDesc = nullptr);
 
-	// ƒ_ƒ~[ƒeƒNƒXƒ`ƒƒì¬
+	// ãƒ€ãƒŸãƒ¼ãƒ†ã‚¯ã‚¹ãƒãƒ£ä½œæˆ
 	static HRESULT CreateDummyTexture(
 		ID3D11Device* device,
 		UINT color,
 		ID3D11ShaderResourceView** shaderResourceView,
 		D3D11_TEXTURE2D_DESC* texture2dDesc = nullptr);
 
-	// ’è”ƒoƒbƒtƒ@ì¬
+	// å®šæ•°ãƒãƒƒãƒ•ã‚¡ä½œæˆ
 	static HRESULT CreateConstantBuffer(
 		ID3D11Device* device,
 		UINT bufferSize,
 		ID3D11Buffer** constantBuffer);
 
-	// \‘¢‰»ƒoƒbƒtƒ@ (Structured Buffer) ‚Æ UAV / SRV ‚Ìì¬
+	// æ§‹é€ åŒ–ãƒãƒƒãƒ•ã‚¡ (Structured Buffer) ã¨ UAV / SRV ã®ä½œæˆ
 	static HRESULT CreateStructuredBuffer(
 		ID3D11Device* device,
 		UINT elementSize,

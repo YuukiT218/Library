@@ -11,5 +11,6 @@ public:
 	// 指定範囲のランダム値を計算する
 	static float RandomRange(float min, float max);
 
-	static DirectX::XMFLOAT4& Color255ToNormalized(const DirectX::XMFLOAT4& color);
+	// 0~255のカラーの値を0~1に変換する
+	static DirectX::XMFLOAT4 Color255ToNormalized(const DirectX::XMFLOAT4& color);
 };

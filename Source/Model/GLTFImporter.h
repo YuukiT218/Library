@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <map>
 #include <filesystem>
@@ -16,29 +16,29 @@ private:
 public:
 	GLTFImporter(const char* filename);
 
-	// ƒm[ƒhƒf[ƒ^‚ğ“Ç‚İ‚İ
+	// ãƒãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
 	void LoadNodes(NodeList& nodes);
 
-	// ƒƒbƒVƒ…ƒf[ƒ^‚ğ“Ç‚İ‚İ
+	// ãƒ¡ãƒƒã‚·ãƒ¥ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
 	void LoadMeshes(MeshList& meshes, const NodeList& nodes);
 
-	// ƒ}ƒeƒŠƒAƒ‹ƒf[ƒ^‚ğ“Ç‚İ‚İ
+	// ãƒãƒ†ãƒªã‚¢ãƒ«ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
 	void LoadMaterials(MaterialList& materials, ID3D11Device* device = nullptr);
 
-	// ƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚ğ“Ç‚İ‚İ
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã‚’èª­ã¿è¾¼ã¿
 	void LoadAnimations(AnimationList& animations, const NodeList& nodes, float sampleRate = 60);
 
 private:
-	// gltfVector3 ¨ XMFLOAT3
+	// gltfVector3 â†’ XMFLOAT3
 	static DirectX::XMFLOAT3 gltfVector3ToXMFLOAT3(const std::vector<double>& gltfValue);
 
-	// gltfQuaternion ¨ XMFLOAT4
+	// gltfQuaternion â†’ XMFLOAT4
 	static DirectX::XMFLOAT4 gltfQuaternionToXMFLOAT4(const std::vector<double>& gltfValue);
 
-	// gltfMatrix ¨ XMFLOAT4X4
+	// gltfMatrix â†’ XMFLOAT4X4
 	static DirectX::XMFLOAT4X4 gltfMatrixToXMFLOAT4X4(const std::vector<double>& gltfValue);
 
-	// À•WŒn•ÏŠ·
+	// åº§æ¨™ç³»å¤‰æ›
 	static void ConvertPositionAxisSystem(DirectX::XMFLOAT3& v);
 	static void ConvertPositionAxisSystem(DirectX::XMFLOAT4& v);
 	static void ConvertRotationAxisSystem(DirectX::XMFLOAT4& q);
@@ -47,7 +47,7 @@ private:
 	static void ConvertMeshAxisSystem(ModelResource::Mesh& mesh);
 	static void ConvertAnimationAxisSystem(ModelResource::Animation& animation);
 
-	// ƒ^ƒ“ƒWƒFƒ“ƒgŒvZ
+	// ã‚¿ãƒ³ã‚¸ã‚§ãƒ³ãƒˆè¨ˆç®—
 	static void ComputeTangents(std::vector<ModelResource::Vertex>& vertices, const std::vector<uint32_t>& indices);
 
 private:

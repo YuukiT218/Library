@@ -1,12 +1,12 @@
-#include "System/Misc.h"
+ï»¿#include "System/Misc.h"
 #include "Audio.h"
 
-// ‰Šú‰»
+// åˆæœŸåŒ–
 void Audio::Initialize()
 {
 	HRESULT hr;
 
-	// COM‚Ì‰Šú‰»
+	// COMã®åˆæœŸåŒ–
 	hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
@@ -15,37 +15,37 @@ void Audio::Initialize()
 	//createFlags |= XAUDIO2_DEBUG_ENGINE;
 #endif
 
-	// XAudio‰Šú‰»
+	// XAudioåˆæœŸåŒ–
 	hr = XAudio2Create(&xaudio, createFlags);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	// ƒ}ƒXƒ^ƒŠƒ“ƒOƒ{ƒCƒX¶¬
+	// ãƒã‚¹ã‚¿ãƒªãƒ³ã‚°ãƒœã‚¤ã‚¹ç”Ÿæˆ
 	hr = xaudio->CreateMasteringVoice(&masteringVoice);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 }
 
-// I—¹‰»
+// çµ‚äº†åŒ–
 void Audio::Finalize()
 {
-	// ƒ}ƒXƒ^ƒŠƒ“ƒOƒ{ƒCƒX”jŠü
+	// ãƒã‚¹ã‚¿ãƒªãƒ³ã‚°ãƒœã‚¤ã‚¹ç ´æ£„
 	if (masteringVoice != nullptr)
 	{
 		masteringVoice->DestroyVoice();
 		masteringVoice = nullptr;
 	}
 
-	// XAudioI—¹‰»
+	// XAudioçµ‚äº†åŒ–
 	if (xaudio != nullptr)
 	{
 		xaudio->Release();
 		xaudio = nullptr;
 	}
 
-	// COMI—¹‰»
+	// COMçµ‚äº†åŒ–
 	CoUninitialize();
 }
 
-// ƒI[ƒfƒBƒIƒ\[ƒX“Ç‚İ‚İ
+// ã‚ªãƒ¼ãƒ‡ã‚£ã‚ªã‚½ãƒ¼ã‚¹èª­ã¿è¾¼ã¿
 AudioSource* Audio::LoadAudioSource(const char* filename)
 {
 	std::shared_ptr<AudioResource> resource = std::make_shared<AudioResource>(filename);

@@ -5,6 +5,7 @@
 #include "Character/Enemy/EnemyBoss.h"
 #include "Camera/CameraParam.h"
 #include <cmath>
+#include <algorithm>
 
 void BattleUI::Initialize()
 {
@@ -13,13 +14,17 @@ void BattleUI::Initialize()
     // ---------------------------------------------------
     //  スプライト読み込み
     // ---------------------------------------------------
-    lockonpoint = std::make_unique<Sprite>(device, "Data/Sprite/Lockon.png");
+    lockOnPoint = std::make_unique<Sprite>(device, "Data/Sprite/Lockon.png");
 
     // プレイヤー
     spritePlayerHP_Back = std::make_unique<Sprite>(device, "Data/Sprite/HPGauge.png");
     spritePlayerHP_Fill = std::make_unique<Sprite>(device, "Data/Sprite/HPBar.png");
     // マスク画像 (Spriteとしてロードするが、GetSRV()でテクスチャとして使う)
     spritePlayerHP_Mask = std::make_unique<Sprite>(device, "Data/Sprite/HPBarMask.png");
+
+    // ゲージに埋め込むキャラクターの立ち絵
+    portraitNormal = std::make_unique<Sprite>(device, "Data/Sprite/portrait_kohaku_01.png");
+    portraitDamage = std::make_unique<Sprite>(device, "Data/Sprite/portrait_kohaku_06.png");
 
     // ボス
     spriteBossHP_Back = std::make_unique<Sprite>(device, "Data/Sprite/BossHPGauge.png");
@@ -48,13 +53,89 @@ void BattleUI::Initialize()
     bd.CPUAccessFlags = 0;
     device->CreateBuffer(&bd, nullptr, gaugeConstantBuffer.GetAddressOf());
 
+    // ポートレート用定数バッファ作成
+    bd.ByteWidth = sizeof(PortraitConstants);
+    device->CreateBuffer(&bd, nullptr, portraitConstantBuffer.GetAddressOf());
+
     // カスタムピクセルシェーダー読み込み
     GpuResourceUtils::LoadPixelShader(device, "Data/Shader/GaugePS.cso", gaugePixelShader.GetAddressOf());
+    GpuResourceUtils::LoadPixelShader(device, "Data/Shader/PortraitPS.cso", portraitPixelShader.GetAddressOf());
+
+    // HPの遅延表示をリセット（最初の更新で現在値に合わせる）
+    playerHPTracker = HPTracker();
+    bossHPTracker = HPTracker();
+}
+
+// HPの遅延表示の更新
+void BattleUI::UpdateHPTracker(HPTracker& tracker, float currentHP, float maxHP, float elapsedTime)
+{
+    // 初回は現在のHPに合わせる
+    if (tracker.currentHP < 0.0f)
+    {
+        tracker.currentHP = currentHP;
+        tracker.displayHP = currentHP;
+        return;
+    }
+
+    if (currentHP < tracker.currentHP)
+    {
+        // 被弾したので、しばらく減少量を表示したままにする
+        tracker.holdTimer = damageGaugeHoldTime;
+        tracker.damageTimer = portraitDamageTime;
+    }
+    else if (currentHP > tracker.currentHP)
+    {
+        // 回復時は即座に追従させる
+        tracker.displayHP = currentHP;
+        tracker.holdTimer = 0.0f;
+    }
+    tracker.currentHP = currentHP;
+
+    if (tracker.displayHP > currentHP)
+    {
+        if (tracker.holdTimer > 0.0f)
+        {
+            tracker.holdTimer -= elapsedTime;
+        }
+        else
+        {
+            // 一定速度と、残差に比例した速度の速い方で追いつかせる
+            float speed = (std::max)(maxHP * damageGaugeDrainRate, (tracker.displayHP - currentHP) * 3.0f);
+            tracker.displayHP -= speed * elapsedTime;
+            if (tracker.displayHP < currentHP) tracker.displayHP = currentHP;
+        }
+    }
+    else
+    {
+        tracker.displayHP = currentHP;
+    }
+
+    if (tracker.damageTimer > 0.0f)
+    {
+        tracker.damageTimer -= elapsedTime;
+        if (tracker.damageTimer < 0.0f) tracker.damageTimer = 0.0f;
+    }
 }
 
 void BattleUI::Update(float elapsedTime)
 {
     isController = Input::Instance().GetIsLastGamePad();
+
+    // HPの遅延表示（ダメージ量の可視化）の更新
+    {
+        Player& player = Player::Instance();
+        UpdateHPTracker(playerHPTracker,
+            static_cast<float>(player.GetHealth()),
+            static_cast<float>(player.GetMaxHealth()),
+            elapsedTime);
+
+        EnemyBoss& boss = EnemyBoss::Instance();
+        UpdateHPTracker(bossHPTracker,
+            static_cast<float>(boss.GetHealth()),
+            static_cast<float>(boss.GetMaxHealth()),
+            elapsedTime);
+    }
+
     // ロックオン状態の更新
     lockonEnemy = CameraParam::Instance().GetLockOnEnemy();
 
@@ -134,33 +215,58 @@ void BattleUI::Render(float elapsedTime)
         float w = spritePlayerHP_Back->GetTextureWidth() * playerGaugeScale;
         float h = spritePlayerHP_Back->GetTextureHeight() * playerGaugeScale;
 
+        // 減少中のダメージ量を表す割合
+        float damageRatio = 0.0f;
+        if (maxHP > 0.0f) damageRatio = playerHPTracker.displayHP / maxHP;
+
         // 背景
         spritePlayerHP_Back->Render(dc, px, py, 0, w, h, 0, 1, 1, 1, 1.0f);
+
+        w = spritePlayerHP_Fill->GetTextureWidth() * playerGaugeScale;
+        h = spritePlayerHP_Fill->GetTextureHeight() * playerGaugeScale;
+
+        ID3D11ShaderResourceView* maskSRV = spritePlayerHP_Mask->GetSRV();
+        dc->PSSetShaderResources(1, 1, &maskSRV);
+        dc->PSSetConstantBuffers(0, 1, gaugeConstantBuffer.GetAddressOf());
+
+        // ダメージ量バー（緑バーより先に描いて、はみ出た分だけが見えるようにする）
+        if (damageRatio > ratio)
+        {
+            GaugeConstants cb{};
+            cb.hpRatio = damageRatio;
+            cb.tintStrength = 1.0f;
+            cb.useMask = 1.0f;
+            cb.tintColor = damageGaugeColor;
+            dc->UpdateSubresource(gaugeConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+
+            spritePlayerHP_Fill->Render(dc, px + 1, py + 3, 0, w, h, 0, 1, 1, 1, 1.0f,
+                nullptr,
+                gaugePixelShader.Get()
+            );
+        }
 
         // 緑バー
         if (currentHP > 0)
         {
-            GaugeConstants cb;
+            GaugeConstants cb{};
             cb.hpRatio = ratio;
+            cb.tintStrength = 0.0f;
+            cb.useMask = 1.0f;
+            cb.tintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
             dc->UpdateSubresource(gaugeConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
-
-            dc->PSSetConstantBuffers(0, 1, gaugeConstantBuffer.GetAddressOf());
-
-            w = spritePlayerHP_Fill->GetTextureWidth() * playerGaugeScale;
-            h = spritePlayerHP_Fill->GetTextureHeight() * playerGaugeScale;
-
-            ID3D11ShaderResourceView* maskSRV = spritePlayerHP_Mask->GetSRV();
-            dc->PSSetShaderResources(1, 1, &maskSRV);
 
             spritePlayerHP_Fill->Render(dc, px+1, py+3, 0, w, h, 0, 1, 1, 1, 1.0f,
                 nullptr,
                 gaugePixelShader.Get()
             );
-
-            // マスクテクスチャの解除
-            ID3D11ShaderResourceView* nullSRV = nullptr;
-            dc->PSSetShaderResources(1, 1, &nullSRV);
         }
+
+        // マスクテクスチャの解除
+        ID3D11ShaderResourceView* nullSRV = nullptr;
+        dc->PSSetShaderResources(1, 1, &nullSRV);
+
+        // キャラクターの立ち絵（ゲージに重ねるので最後に描画する）
+        RenderPlayerPortrait(dc);
     }
 
     // =================================================================
@@ -215,6 +321,34 @@ void BattleUI::Render(float elapsedTime)
         bh = spriteBossHP_Fill->GetTextureHeight() * bossGaugeScale;
         float fillRatio = currentBarVal / 100.0f;
         float fillWidth = bw * fillRatio;
+
+        // ダメージ量バー（現在のバーより長い分だけが見えるようにする）
+        // ストックをまたいだ場合はバーいっぱいまで伸ばす
+        float barBase = bossCurrentHP - currentBarVal;
+        float damageBarVal = bossHPTracker.displayHP - barBase;
+        if (damageBarVal > 100.0f) damageBarVal = 100.0f;
+        float damageRatio = damageBarVal / 100.0f;
+
+        if (damageRatio > fillRatio)
+        {
+            GaugeConstants cb{};
+            cb.hpRatio = 1.0f;
+            cb.tintStrength = 1.0f;
+            cb.useMask = 0.0f;  // ボスのバーは矩形なのでマスクは使わない
+            cb.tintColor = damageGaugeColor;
+            dc->UpdateSubresource(gaugeConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+            dc->PSSetConstantBuffers(0, 1, gaugeConstantBuffer.GetAddressOf());
+
+            spriteBossHP_Fill->Render(dc,
+                bx + 2, by + 2, 0,
+                bw * damageRatio, bh,
+                0, 0,
+                spriteBossHP_Fill->GetTextureWidth() * damageRatio,
+                spriteBossHP_Fill->GetTextureHeight(),
+                0, 1, 1, 1, 1.0f,
+                nullptr,
+                gaugePixelShader.Get());
+        }
 
         if (fillWidth > 0.0f)
         {
@@ -298,7 +432,7 @@ void BattleUI::Render(float elapsedTime)
 
             if (vScreen3.z < 1.0f)
             {
-                lockonpoint->Render(dc,
+                lockOnPoint->Render(dc,
                     screenPos.x - lockonScale.x * 0.5f,
                     screenPos.y - lockonScale.y * 0.5f,
                     0,
@@ -309,6 +443,77 @@ void BattleUI::Render(float elapsedTime)
             }
         }
     }
+}
+
+// プレイヤーの立ち絵をゲージの円に切り抜いて描画する
+void BattleUI::RenderPlayerPortrait(ID3D11DeviceContext* dc)
+{
+    // ゲージのグレー円をスクリーン座標へ変換
+    float scale = playerGaugeScale;
+    DirectX::XMFLOAT2 circleCenter =
+    {
+        playerGaugePos.x + portraitCircleCenter.x * scale,
+        playerGaugePos.y + portraitCircleCenter.y * scale
+    };
+    float circleRadius = portraitCircleRadius * scale;
+
+    // 被弾リアクションの進行度 (1.0 → 0.0)
+    float damageRate = 0.0f;
+    if (portraitDamageTime > 0.0f)
+    {
+        damageRate = playerHPTracker.damageTimer / portraitDamageTime;
+        if (damageRate < 0.0f) damageRate = 0.0f;
+        if (damageRate > 1.0f) damageRate = 1.0f;
+    }
+    bool isDamaged = damageRate > 0.0f;
+
+    // 切り抜き範囲を定数バッファへ（円は振動させずに立ち絵だけを揺らす）
+    PortraitConstants cb{};
+    cb.circleCenter = circleCenter;
+    cb.circleRadius = circleRadius;
+    cb.edgeSoftness = (std::max)(portraitEdgeSoftness, 0.01f);
+    cb.headCenter = { circleCenter.x, circleCenter.y + portraitHeadOffsetY * scale };
+    cb.headRadius = { portraitHeadRadius.x * scale, portraitHeadRadius.y * scale };
+    dc->UpdateSubresource(portraitConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
+    dc->PSSetConstantBuffers(0, 1, portraitConstantBuffer.GetAddressOf());
+
+    // 描画位置（被弾中は振動させる）
+    float dw = portraitSrcRect.z * portraitScale * scale;
+    float dh = portraitSrcRect.w * portraitScale * scale;
+    float dx = circleCenter.x + portraitOffset.x * scale;
+    float dy = circleCenter.y + portraitOffset.y * scale;
+
+    if (isDamaged)
+    {
+        float phase = playerHPTracker.damageTimer * portraitShakeSpeed;
+        float amplitude = portraitShakeAmplitude * damageRate * scale;
+        dx += sinf(phase) * amplitude;
+        dy += cosf(phase * 1.37f) * amplitude * 0.6f;
+    }
+
+    // 被弾中は赤くする
+    float r = 1.0f;
+    float g = 1.0f;
+    float b = 1.0f;
+    if (isDamaged)
+    {
+        g = 1.0f + (portraitDamageColor.y - 1.0f) * damageRate;
+        b = 1.0f + (portraitDamageColor.z - 1.0f) * damageRate;
+        r = 1.0f + (portraitDamageColor.x - 1.0f) * damageRate;
+    }
+
+    const Sprite* portrait = isDamaged ? portraitDamage.get() : portraitNormal.get();
+    if (portrait == nullptr) return;
+
+    portrait->Render(dc,
+        dx, dy, 0,
+        dw, dh,
+        portraitSrcRect.x, portraitSrcRect.y,
+        portraitSrcRect.z, portraitSrcRect.w,
+        0,
+        r, g, b, 1.0f,
+        nullptr,
+        portraitPixelShader.Get());
 }
 
 // ワールド座標からスクリーン座標へ変換する関数
@@ -345,6 +550,36 @@ void BattleUI::DrawDebugGUI()
         {
             ImGui::DragFloat2("PPosition", &playerGaugePos.x, 1.0f);
             ImGui::DragFloat("PScale", &playerGaugeScale, 0.01f, 0.1f, 5.0f);
+        }
+
+        if (ImGui::CollapsingHeader("Player Portrait", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::TextUnformatted("Clip Shape (HPGauge.png texel)");
+            ImGui::DragFloat2("Circle Center", &portraitCircleCenter.x, 0.5f);
+            ImGui::DragFloat("Circle Radius", &portraitCircleRadius, 0.5f, 1.0f, 400.0f);
+            ImGui::DragFloat("Head Offset Y", &portraitHeadOffsetY, 0.5f);
+            ImGui::DragFloat2("Head Radius", &portraitHeadRadius.x, 0.5f, 1.0f, 400.0f);
+            ImGui::DragFloat("Edge Softness", &portraitEdgeSoftness, 0.1f, 0.01f, 20.0f);
+
+            ImGui::TextUnformatted("Portrait");
+            ImGui::DragFloat4("Src Rect", &portraitSrcRect.x, 1.0f);
+            ImGui::DragFloat("Portrait Scale", &portraitScale, 0.001f, 0.001f, 2.0f);
+            ImGui::DragFloat2("Portrait Offset", &portraitOffset.x, 0.5f);
+
+            ImGui::TextUnformatted("Damage Reaction");
+            ImGui::DragFloat("Damage Time", &portraitDamageTime, 0.01f, 0.0f, 3.0f);
+            ImGui::DragFloat("Shake Amplitude", &portraitShakeAmplitude, 0.1f, 0.0f, 40.0f);
+            ImGui::DragFloat("Shake Speed", &portraitShakeSpeed, 0.5f, 0.0f, 300.0f);
+            ImGui::ColorEdit3("Damage Color", &portraitDamageColor.x);
+        }
+
+        if (ImGui::CollapsingHeader("Damage Gauge", ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            ImGui::DragFloat("Hold Time", &damageGaugeHoldTime, 0.01f, 0.0f, 3.0f);
+            ImGui::DragFloat("Drain Rate", &damageGaugeDrainRate, 0.01f, 0.01f, 10.0f);
+            ImGui::ColorEdit4("Damage Bar Color", &damageGaugeColor.x);
+            ImGui::Text("Player %.1f -> %.1f", playerHPTracker.displayHP, playerHPTracker.currentHP);
+            ImGui::Text("Boss   %.1f -> %.1f", bossHPTracker.displayHP, bossHPTracker.currentHP);
         }
 
         if (ImGui::CollapsingHeader("Boss Main Gauge", ImGuiTreeNodeFlags_DefaultOpen))

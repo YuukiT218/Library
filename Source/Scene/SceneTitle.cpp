@@ -1,4 +1,4 @@
-#include "Graphics/Graphics.h"
+ï»¿#include "Graphics/Graphics.h"
 #include "SceneTitle.h"
 #include "SceneGame.h"
 #include "SceneManager.h"
@@ -15,12 +15,12 @@
 #include "System/Audio/Audio.h"
 
 
-// ‰Šú‰»
+// åˆæœŸåŒ–
 void SceneTitle::Initialize()
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
-	// ƒXƒvƒ‰ƒCƒg‰Šú‰»
+	// ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆåˆæœŸåŒ–
 	TitleBack = std::make_unique<Sprite>(device, "Data/Sprite/Title_Back.png");
 	TitleName = std::make_unique<Sprite>(device, "Data/Sprite/TitleLogo.png");
 	AnyButton = std::make_unique<Sprite>(device, "Data/Sprite/PressAnyKey.png");
@@ -36,7 +36,7 @@ void SceneTitle::Initialize()
 
 	GpuResourceUtils::LoadTexture(device, "Data/Mask/dissolve_animation.png", mask_texture.GetAddressOf(), &mask_texture2dDesc);
 
-	// sprite—pƒfƒtƒHƒ‹ƒg•`‰æƒVƒF[ƒ_[
+	// spriteç”¨ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆæç”»ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 	D3D11_INPUT_ELEMENT_DESC input_element_desc[]
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -48,13 +48,13 @@ void SceneTitle::Initialize()
 	GpuResourceUtils::LoadPixelShader(device, "Data/Shader/SpriteDissolvePS.cso", sprite_pixel_shader.GetAddressOf());
 }
 
-// I—¹‰»
+// çµ‚äº†åŒ–
 void SceneTitle::Finalize()
 {
 	delete BGM;
 }
 
-// XVˆ—
+// æ›´æ–°å‡¦ç†
 void SceneTitle::Update(float elapsedTime)
 {
 	GamePad& gamePad = Input::Instance().GetGamePad();
@@ -62,7 +62,7 @@ void SceneTitle::Update(float elapsedTime)
 
 	BGM->Play(true, 0.5f);
 
-	// ‚È‚É‚©ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚½‚çƒ[ƒfƒBƒ“ƒOƒV[ƒ“‚ğ‹²‚ñ‚ÅƒQ[ƒ€ƒV[ƒ“‚ÖØ‚è‘Ö‚¦
+	// ãªã«ã‹ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ãŸã‚‰ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚·ãƒ¼ãƒ³ã‚’æŒŸã‚“ã§ã‚²ãƒ¼ãƒ ã‚·ãƒ¼ãƒ³ã¸åˆ‡ã‚Šæ›¿ãˆ
 	const GamePadButton anyButton =
 		GamePad::BTN_A
 		| GamePad::BTN_B
@@ -78,10 +78,10 @@ void SceneTitle::Update(float elapsedTime)
 
 	if (!isPause)
 	{
-		// Esc‚ª‰Ÿ‚³‚ê‚Ä‚½‚çƒXƒLƒbƒv
+		// EscãŒæŠ¼ã•ã‚Œã¦ãŸã‚‰ã‚¹ã‚­ãƒƒãƒ—
 		if (!isEscPressed)
 		{
-			if (NameAlpha >= 0.3f)
+			if (nameAlpha >= 0.3f)
 			{
 				if (Input::Instance().GetAnyButton() || (gamePad.GetButtonDown() & anyButton))
 				{
@@ -102,8 +102,8 @@ void SceneTitle::Update(float elapsedTime)
 			sePos.x = -285.0f;
 			if (gamePad.GetButtonDown() & GamePad::BTN_A_EMU || gamePad.GetButtonDown() & GamePad::BTN_A)
 			{
-				//ƒQ[ƒ€‚ğ—‚Æ‚·
-				PostQuitMessage(0);  // ƒƒCƒ“ƒ‹[ƒv‚ÅWM_QUIT‚ğó‚¯æ‚Á‚ÄI—¹‚·‚é
+				//ã‚²ãƒ¼ãƒ ã‚’è½ã¨ã™
+				PostQuitMessage(0);  // ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—ã§WM_QUITã‚’å—ã‘å–ã£ã¦çµ‚äº†ã™ã‚‹
 			}
 		}
 		else
@@ -136,30 +136,30 @@ void SceneTitle::Update(float elapsedTime)
 	timer += elapsedTime;
 	if (timer >= 1.f)
 	{
-		NameAlpha = Mathf::Lerp(NameAlpha, 1.0f, 0.3f * elapsedTime);
+		nameAlpha = Mathf::Lerp(nameAlpha, 1.0f, 0.3f * elapsedTime);
 
 		if (timer >= 3.f)
 		{
 			alphaTime += elapsedTime * alphaSpeed;
 
-			// ƒTƒCƒ“”g‚Å“§–¾“x‚ğ•Ï‰»‚³‚¹‚é
-			AnyAlpha = (std::sin(alphaTime - DirectX::XM_PIDIV2) * 0.5f) + 0.5f;
+			// ã‚µã‚¤ãƒ³æ³¢ã§é€æ˜åº¦ã‚’å¤‰åŒ–ã•ã›ã‚‹
+			anyAlpha = (std::sin(alphaTime - DirectX::XM_PIDIV2) * 0.5f) + 0.5f;
 		}
 	}
 
 	bool isController = Input::Instance().GetIsLastGamePad();
 
-	float lerpSpeed = 5.0f;  // ”’l‘å‚«‚¢‚Ù‚Ç‘¬‚¢i’²®‰Âj
+	float lerpSpeed = 5.0f;  // æ•°å€¤å¤§ãã„ã»ã©é€Ÿã„ï¼ˆèª¿æ•´å¯ï¼‰
 
 	if (isController)
 	{
-		// ƒQ[ƒ€ƒpƒbƒhg—p’†‚È‚Ì‚ÅAconAlpha‚ğ1‚É‹ß‚Ã‚¯AkeyAlpha‚ğ0‚É‹ß‚Ã‚¯‚é
+		// ã‚²ãƒ¼ãƒ ãƒ‘ãƒƒãƒ‰ä½¿ç”¨ä¸­ãªã®ã§ã€conAlphaã‚’1ã«è¿‘ã¥ã‘ã€keyAlphaã‚’0ã«è¿‘ã¥ã‘ã‚‹
 		keyAlpha = Mathf::Lerp(keyAlpha, 0.0f, elapsedTime * lerpSpeed);
 		conAlpha = Mathf::Lerp(conAlpha, 1.0f, elapsedTime * lerpSpeed);
 	}
 	else
 	{
-		// ƒL[ƒ{[ƒhg—p’†‚È‚Ì‚ÅAkeyAlpha‚ğ1‚É‹ß‚Ã‚¯AconAlpha‚ğ0‚É‹ß‚Ã‚¯‚é
+		// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ä½¿ç”¨ä¸­ãªã®ã§ã€keyAlphaã‚’1ã«è¿‘ã¥ã‘ã€conAlphaã‚’0ã«è¿‘ã¥ã‘ã‚‹
 		keyAlpha = Mathf::Lerp(keyAlpha, 1.0f, elapsedTime * lerpSpeed);
 		conAlpha = Mathf::Lerp(conAlpha, 0.0f, elapsedTime * lerpSpeed);
 	}
@@ -174,14 +174,14 @@ void SceneTitle::Update(float elapsedTime)
 	}
 }
 
-// •`‰æˆ—
+// æç”»å‡¦ç†
 void SceneTitle::Render(float elapsedTime)
 {
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
-	// ‰æ–ÊƒNƒŠƒA•ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgİ’è
-	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };	// RGBA(0.0`1.0);
+	// ç”»é¢ã‚¯ãƒªã‚¢ï¼†ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆè¨­å®š
+	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };	// RGBA(0.0ï½1.0);
 	std::map<FrameBufferId, FrameBuffer*> buffers;
 	for (int i = 0; i < static_cast<int>(FrameBufferId::EnumCount); i++)
 	{
@@ -201,7 +201,7 @@ void SceneTitle::Render(float elapsedTime)
 	FLOAT blendFactor[4] = { 1.0f,1.0f,1.0f,1.0f };
 	UINT sampleMask = 0xFFFFFFFF;
 
-	// ƒuƒŒƒ“ƒhƒXƒe[ƒg
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ã‚¹ãƒ†ãƒ¼ãƒˆ
 	dc->OMSetBlendState(
 		renderState->GetBlendState(BlendState::Transparency),
 		nullptr,
@@ -216,8 +216,8 @@ void SceneTitle::Render(float elapsedTime)
 	const float screenH = graphics.GetScreenHeight();
 
 	TitleBack->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, 1);
-	TitleName->Render(dc, 0, 0, 0, 1228, 819, 0, 0, 1536, 1024, 0, 1, 1, 1, NameAlpha);
-	AnyButton->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1920, 1080, 0, 1, 1, 1, AnyAlpha);
+	TitleName->Render(dc, 0, 0, 0, 1228, 819, 0, 0, 1536, 1024, 0, 1, 1, 1, nameAlpha);
+	AnyButton->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1920, 1080, 0, 1, 1, 1, anyAlpha);
 
 	EndKey->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, keyAlpha);
 	EndCon->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, conAlpha);
@@ -228,16 +228,16 @@ void SceneTitle::Render(float elapsedTime)
 		EndPause->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, pauseAlpha);
 		EndSele->Render(dc, sePos.x, sePos.y, sePos.z, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, pauseAlpha);
 
-		// ‘I‘ğ’†‚Í”’A”ñ‘I‘ğ‚Í•‚Å•`‰æ
+		// é¸æŠä¸­ã¯ç™½ã€éé¸æŠã¯é»’ã§æç”»
 		if (isYesSelected)
 		{
-			// Yes‚ª‘I‘ğ’†
+			// YesãŒé¸æŠä¸­
 			EndYes->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, pauseAlpha);
 			EndNo->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 0, 0, 0, pauseAlpha);
 		}
 		else
 		{
-			// No‚ª‘I‘ğ’†
+			// NoãŒé¸æŠä¸­
 			EndYes->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 0, 0, 0, pauseAlpha);
 			EndNo->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, pauseAlpha);
 		}
@@ -248,7 +248,7 @@ void SceneTitle::Render(float elapsedTime)
 #endif
 }
 
-// ƒfƒoƒbƒO—pGUI•`‰æ
+// ãƒ‡ãƒãƒƒã‚°ç”¨GUIæç”»
 void SceneTitle::DrawDebugGUI()
 {
 	ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
@@ -259,7 +259,7 @@ void SceneTitle::DrawDebugGUI()
 		// UI
 		if (ImGui::CollapsingHeader("UI", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			// ˆÊ’u
+			// ä½ç½®
 			ImGui::DragFloat2("UI_pos", &pos.x, 1.0f);
 		}
 
@@ -290,20 +290,20 @@ void SceneTitle::DrawDebugGUI()
 				break;
 			}
 
-			// n‚Ü‚è‚ÌŠÔ
+			// å§‹ã¾ã‚Šã®æ™‚é–“
 			ImGui::DragFloat("EasingTime", &easingData.time, 0.1f);
-			// I‚í‚è‚ÌŠÔ
+			// çµ‚ã‚ã‚Šã®æ™‚é–“
 			ImGui::DragFloat("EasingTotalTime", &easingData.totalTime, 0.1f);
-			// Å‘å‚Ì’l
+			// æœ€å¤§ã®å€¤
 			ImGui::DragFloat("EasingMaxValue", &easingData.maxValue, 0.1f);
-			// Å¬‚Ì’l
+			// æœ€å°ã®å€¤
 			ImGui::DragFloat("EasingMinValue", &easingData.minValue, 0.1f);
 
 		}
 		ImGui::DragFloat("amount", &amount, 0.01f, 0, 1);
 
-		ImGui::DragFloat("NameAlpha", &NameAlpha, 0.01f, 0, 1);
-		ImGui::DragFloat("AnyAlpha", &AnyAlpha, 0.01f, 0, 1);
+		ImGui::DragFloat("nameAlpha", &nameAlpha, 0.01f, 0, 1);
+		ImGui::DragFloat("anyAlpha", &anyAlpha, 0.01f, 0, 1);
 
 		ImGui::DragFloat3("Sepos", &sePos.x, 0.01f);
 		ImGui::DragFloat3("Sopos", &soPos.x, 1.0f);

@@ -208,7 +208,7 @@ PlayerCombo1State::PlayerCombo1State(Player* player)
     // 攻撃判定必要変数
     attackCollisionStartFrame = 0.26f;
     attackCollisionEndFrame = 0.49f;
-    attackDamage = 10.0f;
+    attackDamage = 10;
     invisibleTime = 0.5f;
 
     // コントローラーの振動変数
@@ -271,7 +271,7 @@ PlayerCombo2State::PlayerCombo2State(Player* player)
     // 攻撃判定必要変数
     attackCollisionStartFrame = 0.28f;
     attackCollisionEndFrame = 0.5f;
-    attackDamage = 10.0f;
+    attackDamage = 10;
     invisibleTime = 0.5f;
 
     // コントローラーの振動変数
@@ -331,7 +331,7 @@ PlayerCombo3State::PlayerCombo3State(Player* player)
     // 攻撃判定必要変数
     attackCollisionStartFrame = 0.45f;
     attackCollisionEndFrame = 0.65f;
-    attackDamage = 10.0f;
+    attackDamage = 10;
     invisibleTime = 0.5f;
 
     // コントローラーの振動変数
@@ -391,7 +391,7 @@ PlayerCombo4State::PlayerCombo4State(Player* player)
     // 攻撃判定必要変数
     attackCollisionStartFrame = 0.37f;
     attackCollisionEndFrame = 0.65f;
-    attackDamage = 10.0f;
+    attackDamage = 10;
     invisibleTime = 0.5f;
 
     // コントローラーの振動変数
@@ -451,7 +451,7 @@ PlayerCombo5State::PlayerCombo5State(Player* player)
     // 攻撃判定必要変数
     attackCollisionStartFrame = 0.37f;
     attackCollisionEndFrame = 0.65f;
-    attackDamage = 10.0f;
+    attackDamage = 10;
     invisibleTime = 0.5f;
 
     // コントローラーの振動変数
@@ -509,7 +509,7 @@ PlayerHeavyAttack1State::PlayerHeavyAttack1State(Player* player)
     // 攻撃判定必要変数
     attackCollisionStartFrame = 0.13f;
     attackCollisionEndFrame = 0.25f;
-    attackDamage = 10.0f;
+    attackDamage = 10;
     invisibleTime = 0.5f;
 
     // コントローラーの振動変数

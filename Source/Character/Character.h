@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <DirectXMath.h>
 #include <SimpleMath.h>
@@ -10,170 +10,174 @@
 #include "Input/Input.h"
 #include "Effect/Effect.h"
 
-// ƒm[ƒh‚Ì“–‚½‚è”»’è\‘¢‘Ì
+// ãƒãƒ¼ãƒ‰ã®å½“ãŸã‚Šåˆ¤å®šæ§‹é€ ä½“
 struct NodeHitSphere
 {
 	const char* nodeName;
 	float radius;
 };
 
-// ƒLƒƒƒ‰ƒNƒ^[
+// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼
 class Character
 {
 public:
 	Character() {}
 	virtual ~Character() {}
 
-	// s—ñXVˆ—
+	// è¡Œåˆ—æ›´æ–°å‡¦ç†
 	void UpdateTransform();
 
-	// s—ñXVˆ—
+	// è¡Œåˆ—æ›´æ–°å‡¦ç†
 	void UpdateTransform(DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 angle, DirectX::XMFLOAT3 position, DirectX::XMFLOAT4X4* transform);
 
-	// ˆÊ’uİ’èEæ“¾
+	// ä½ç½®è¨­å®šãƒ»å–å¾—
 	void SetPosition(const DirectX::XMFLOAT3& position) { this->position = position; }
 	const DirectX::XMFLOAT3& GetPosition() const { return position; }
 
-	// ‰ñ“]İ’èEæ“¾
+	// å›è»¢è¨­å®šãƒ»å–å¾—
 	void SetAngle(const DirectX::XMFLOAT3& angle) { this->angle = angle; }
 	const DirectX::XMFLOAT3& GetAngle() const { return angle; }
 
-	// ƒXƒP[ƒ‹İ’èEæ“¾
+	// ã‚¹ã‚±ãƒ¼ãƒ«è¨­å®šãƒ»å–å¾—
 	void SetScale(const DirectX::XMFLOAT3& scale) { this->scale = scale; }
 	const DirectX::XMFLOAT3& GetScale() const { return scale; }
 
-	// ‘¬—Íİ’èEæ“¾
+	// é€ŸåŠ›è¨­å®šãƒ»å–å¾—
 	void SetVelocity(const DirectX::XMFLOAT3& velocity) { this->velocity = velocity; }
 	const DirectX::XMFLOAT3& GetVelocity() const { return velocity; }
 
-	// ”¼Œaæ“¾
+	// åŠå¾„å–å¾—
 	float GetRadius() const { return radius; }
 
-	// “ü—Í’l‚©‚çƒ[ƒ‹ƒhƒxƒNƒgƒ‹‚ğæ“¾
+	// å…¥åŠ›å€¤ã‹ã‚‰ãƒ¯ãƒ¼ãƒ«ãƒ‰ãƒ™ã‚¯ãƒˆãƒ«ã‚’å–å¾—
 	DirectX::XMFLOAT3 ComputeWorldVec(const Camera& camera, float axisX, float axisY) const;
 
-	// ƒLƒƒƒ‰ƒNƒ^[‘O•ûŒüŒvZ
-	DirectX::XMFLOAT3 CharacterForward(DirectX::XMFLOAT3 angle);
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å‰æ–¹å‘è¨ˆç®—
+	static DirectX::XMFLOAT3 CharacterForward(DirectX::XMFLOAT3 angle);
 
-	// ƒLƒƒƒ‰ƒNƒ^[Œã‚ë•ûŒüŒvZ
-	DirectX::XMFLOAT3 CharacterBack(DirectX::XMFLOAT3 angle);
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å¾Œã‚æ–¹å‘è¨ˆç®—
+	static DirectX::XMFLOAT3 CharacterBack(DirectX::XMFLOAT3 angle);
 
-	// ƒLƒƒƒ‰ƒNƒ^[¶•ûŒüŒvZ
-	DirectX::XMFLOAT3 CharacterLeft(DirectX::XMFLOAT3 angle);
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å·¦æ–¹å‘è¨ˆç®—
+	static DirectX::XMFLOAT3 CharacterLeft(DirectX::XMFLOAT3 angle);
 
-	// ƒLƒƒƒ‰ƒNƒ^[‰E•ûŒüŒvZ
-	DirectX::XMFLOAT3 CharacterRight(DirectX::XMFLOAT3 angle);
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼å³æ–¹å‘è¨ˆç®—
+	static DirectX::XMFLOAT3 CharacterRight(DirectX::XMFLOAT3 angle);
 
-	// ’n–Ê‚ÉÚ‚µ‚Ä‚¢‚é‚©
+	// åœ°é¢ã«æ¥ã—ã¦ã„ã‚‹ã‹
 	bool IsGround() const { return isGround; }
 
-	// ‚‚³æ“¾
+	// é«˜ã•å–å¾—
 	float GetHeight() const { return height; }
 
-	// ’n–Ê‚Æ‚Ì‹——£‚ğæ“¾
+	// åœ°é¢ã¨ã®è·é›¢ã‚’å–å¾—
 	float GetDistanceFromGround();
 
-	// s—ñİ’èEæ“¾
+	// è¡Œåˆ—è¨­å®šãƒ»å–å¾—
 	void SetTransform(DirectX::XMFLOAT4X4 transform) { this->transform = transform; }
 	DirectX::XMFLOAT4X4 GetTransform() const { return transform; }
 
-	// c‚è‘Ì—Íİ’èEæ“¾
-	void SetHealth(float num) { health = num; }
+	// æ®‹ã‚Šä½“åŠ›è¨­å®šãƒ»å–å¾—
+	void SetHealth(int health) { this->health = health; }
 	int GetHealth() const { return health; }
 
-	// ‘Ì—ÍÅ‘å’lİ’èEæ“¾
-	void SetMaxHealth(float num) { maxHealth = num; }
-	int GetMaxHealth() const { return  maxHealth; }
+	// ä½“åŠ›æœ€å¤§å€¤è¨­å®šãƒ»å–å¾—
+	void SetMaxHealth(int maxHealth) { this->maxHealth = maxHealth; }
+	int GetMaxHealth() const { return maxHealth; }
 
-	// d—Í‚Ìİ’èEæ“¾
+	// é‡åŠ›ã®è¨­å®šãƒ»å–å¾—
 	void SetGravity(float gravity) { this->gravity = gravity; }
 	float GetGravity() const { return gravity; }
 
-	// ¶‘¶ó‘Ôİ’èEæ“¾
+	// ç”Ÿå­˜çŠ¶æ…‹è¨­å®šãƒ»å–å¾—
 	void SetDeathFlag(bool flag) { deathFlag = flag; }
 	bool IsDeathFlag() { return deathFlag; }
 
-	// ƒX[ƒp[ƒA[ƒ}[ó‘Ô‚Ìİ’èEæ“¾
+	// ã‚¹ãƒ¼ãƒ‘ãƒ¼ã‚¢ãƒ¼ãƒãƒ¼çŠ¶æ…‹ã®è¨­å®šãƒ»å–å¾—
 	void SetSuperArmor(bool armor) { isSuperArmor = armor; }
 	bool IsSuperArmor() const { return isSuperArmor; }
 
-	// –³“Gó‘Ô‚Ìİ’èEæ“¾
+	// ç„¡æ•µçŠ¶æ…‹ã®è¨­å®šãƒ»å–å¾—
 	void SetInvincible(bool flag) { isInvincible = flag; }
 	bool IsInvincible() const { return isInvincible; }
 
-	// –³“GŠÔæ“¾
+	// ç„¡æ•µæ™‚é–“å–å¾—
 	float GetInvincibleTimer() const { return invincibleTimer; }
 
-	// –¼‘Oæ“¾
+	// åå‰å–å¾—
 	virtual std::string GetName() = 0;
 
-	// ƒ_ƒ[ƒW‚ğ—^‚¦‚é
-	bool ApplyDamage(int damage, float invicibleTime, bool isState = true, DirectX::XMFLOAT3 HitPosition = {});
+	// ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’ä¸ãˆã‚‹
+	bool ApplyDamage(int damage, float invincibleTime, bool isState = true, DirectX::XMFLOAT3 hitPosition = {});
 
-	// ÕŒ‚‚ğ—^‚¦‚é
+	// è¡æ’ƒã‚’ä¸ãˆã‚‹
 	void AddImpulse(const DirectX::XMFLOAT3& impulse);
 
-	// ƒ^[ƒQƒbƒg‚Æ‚Ì‹——£‚ğŒvZ
-	float calcTargetDist(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 targetPosition);
+	// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¨ã®è·é›¢ã‚’è¨ˆç®—
+	static float CalcTargetDist(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 targetPosition);
 
-	// ƒ‚ƒfƒ‹æ“¾
+	// ãƒ¢ãƒ‡ãƒ«å–å¾—
 	virtual Model* GetModel() { return model.get(); }
+
+	// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿé€Ÿåº¦ã‚’åˆæœŸåŒ–
+	void InitAnimSpeed();
 
 	std::unordered_map<int, float> animSpeed;
 
-	void initAnimSpeed();
-
 protected:
-	// ˆÚ“®ˆ—
+	// ç§»å‹•å‡¦ç†
 	void Move(float vx, float vz, float speed);
 
-	// ù‰ñˆ—
+	// æ—‹å›å‡¦ç†
 	void Turn(float elapsedTime, float vx, float vz, float speed);
 
-	// ƒWƒƒƒ“ƒvˆ—
+	// ã‚¸ãƒ£ãƒ³ãƒ—å‡¦ç†
 	void Jump(float speed);
 
-	// ‘¬—ÍXVˆ—
+	// é€ŸåŠ›æ›´æ–°å‡¦ç†
 	void UpdateVelocity(float elapsedTime);
 
-	// ‘¬—ÍXVˆ—
+	// é€ŸåŠ›æ›´æ–°å‡¦ç†
 	void UpdateVelocity(DirectX::XMFLOAT3* position, DirectX::XMFLOAT3* angle, DirectX::XMFLOAT3* velocity, float elapsedTime);
 
-	// ’…’n‚µ‚½‚ÉŒÄ‚Î‚ê‚é
+	// ç€åœ°ã—ãŸæ™‚ã«å‘¼ã°ã‚Œã‚‹
 	virtual void OnLanding() {}
 
-	// ƒ_ƒ[ƒW‚ğó‚¯‚½‚ÉŒÄ‚Î‚ê‚é
+	// ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸæ™‚ã«å‘¼ã°ã‚Œã‚‹
 	virtual void OnDamaged() {}
 
-	// €–S‚µ‚½‚ÉŒÄ‚Î‚ê‚é
+	// æ­»äº¡ã—ãŸæ™‚ã«å‘¼ã°ã‚Œã‚‹
 	virtual void OnDead() {}
 
-	// –³“GŠÔXV
+	// ä½“åŠ›ãŒ0ã«ãªã‚‹ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ã¦ã‚‚ã€ä½“åŠ›1ã§è€ãˆã‚‹ã¹ãã‹
+	virtual bool ShouldSurviveLethalDamage() const { return false; }
+
+	// ç„¡æ•µæ™‚é–“æ›´æ–°
 	void UpdateInvincibleTimer(float elapsedTime);
 
-	// ‘Sg‚É“–‚½‚è”»’è‚ğ•t—^‚·‚é
+	// å…¨èº«ã«å½“ãŸã‚Šåˆ¤å®šã‚’ä»˜ä¸ã™ã‚‹
 	void AddCollisionSpheres(std::shared_ptr<Model> model, std::vector<NodeHitSphere> nodeHitSpheres);
 
-	// ƒGƒŠƒAŠO‚És‚¯‚È‚¢‚æ‚¤‚É‚·‚é
+	// ã‚¨ãƒªã‚¢å¤–ã«è¡Œã‘ãªã„ã‚ˆã†ã«ã™ã‚‹
 	void KeepAreaLimit(DirectX::XMFLOAT3& position);
 
 private:
-	// ‚’¼‘¬—ÍXVˆ—
+	// å‚ç›´é€ŸåŠ›æ›´æ–°å‡¦ç†
 	void UpdateVerticalVelocity(float elapsedTime);
 
-	// ‚’¼‘¬—ÍXVˆ—
+	// å‚ç›´é€ŸåŠ›æ›´æ–°å‡¦ç†
 	void UpdateVerticalVelocity(DirectX::XMFLOAT3* velocity, float elapsedTime);
 
-	// ‚’¼ˆÚ“®XVˆ—
+	// å‚ç›´ç§»å‹•æ›´æ–°å‡¦ç†
 	void UpdateVerticalMove(float elapsedTime);
 
-	// ‚’¼ˆÚ“®XVˆ—
+	// å‚ç›´ç§»å‹•æ›´æ–°å‡¦ç†
 	void UpdateVerticalMove(DirectX::XMFLOAT3* position, DirectX::XMFLOAT3* angle, DirectX::XMFLOAT3* velocity, float elapsedTime);
 
-	// …•½‘¬—ÍXVˆ—
+	// æ°´å¹³é€ŸåŠ›æ›´æ–°å‡¦ç†
 	void UpdateHorizontalVelocity(float elapsedTime);
 
-	// …•½ˆÚ“®XVˆ—
+	// æ°´å¹³ç§»å‹•æ›´æ–°å‡¦ç†
 	void UpdateHorizontalMove(float elapsedTime);
 
 protected:
@@ -195,25 +199,25 @@ protected:
 	int health = 1000000;
 	int maxHealth = 1000000;
 	bool isGround = true;
-	bool isSuperArmor = false;  // ƒX[ƒp[ƒA[ƒ}[ó‘Ôƒtƒ‰ƒO
+	bool isSuperArmor = false;  // ã‚¹ãƒ¼ãƒ‘ãƒ¼ã‚¢ãƒ¼ãƒãƒ¼çŠ¶æ…‹ãƒ•ãƒ©ã‚°
 	bool isInvincible = false;
-	bool deathFlag = false;	// ƒLƒƒƒ‰ƒNƒ^[‚ª€–S‚µ‚½‚çtrue‚É‚È‚é•Ï”
+	bool deathFlag = false;	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ãŒæ­»äº¡ã—ãŸã‚‰trueã«ãªã‚‹å¤‰æ•°
 	bool drawCollisionPrimitive = false;
 
-	// Šµ«ˆÚ“®
+	// æ…£æ€§ç§»å‹•
 	float acceleration = 1.0f;
 	float maxSpeed = 5.0f;
 	float moveVecX = 0.0f;
 	float moveVecZ = 0.0f;
 	float friction = 1.5f;
 
-	// ‹ó’†§Œä
+	// ç©ºä¸­åˆ¶å¾¡
 	float airControl = 0.3f;
 
 	float stepOffset = 1.0f;
 	float slopeRate = 1.0f;
 
-	// ƒLƒƒƒ‰ƒNƒ^[‚Ìs‚¯‚é”ÍˆÍ‚ğ§ŒÀ‚·‚é•Ï”
+	// ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®è¡Œã‘ã‚‹ç¯„å›²ã‚’åˆ¶é™ã™ã‚‹å¤‰æ•°
 	DirectX::XMFLOAT3 areaCenter = { 0.0f, -2.7f, 0.0f };
 	float areaSize = 10.0f;
 

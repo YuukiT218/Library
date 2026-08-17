@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <vector>
 #include <wrl.h>
@@ -11,18 +11,18 @@ class TrailRenderer
 public:
 	TrailRenderer(ID3D11Device* device);
 
-	// ’¸“_’Ç‰Á
+	// é ‚ç‚¹è¿½åŠ 
 	void AddVertex(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT4& color, const DirectX::XMFLOAT2& texcoord, float dissolve = 0);
 
 	void TrailRenderer::CreateIndexBuffer(ID3D11Device* device, size_t maxIndexCount);
 
-	// ²•`‰æ(D3D11_PRIMITIVE_TOPOLOGY_LINELIST)
+	// è»¸æç”»(D3D11_PRIMITIVE_TOPOLOGY_LINELIST)
 	void DrawAxis(const DirectX::XMFLOAT4X4& transform, const DirectX::XMFLOAT4& color);
 
-	// ƒOƒŠƒbƒh•`‰æ(D3D11_PRIMITIVE_TOPOLOGY_LINELIST)
+	// ã‚°ãƒªãƒƒãƒ‰æç”»(D3D11_PRIMITIVE_TOPOLOGY_LINELIST)
 	void DrawGrid(int subdivisions, float scale);
 
-	// •`‰æÀs
+	// æç”»å®Ÿè¡Œ
 	void Render(
 		ID3D11DeviceContext* dc,
 		const RenderContext& rc,
@@ -32,13 +32,13 @@ public:
 	void ImGui();
 
 private:
-	static const UINT VertexCapacity = 3 * 1024;
+	static const UINT VERTEX_CAPACITY = 3 * 1024;
 
 	struct CbScene
 	{
 		DirectX::XMFLOAT4X4		viewProjection;
-		DirectX::XMFLOAT2		 direction; //ƒfƒBƒ]ƒ‹ƒu‚ÌUVƒXƒNƒ[ƒ‹
-		float					 Timer; //UVƒXƒNƒ[ƒ‹—pƒ^ƒCƒ}[
+		DirectX::XMFLOAT2		 direction; //ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–ã®UVã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«
+		float					 Timer; //UVã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ç”¨ã‚¿ã‚¤ãƒãƒ¼
 		float					 dummy;
 		DirectX::XMFLOAT4 lightDirection;
 		DirectX::XMFLOAT4 lightColor;
@@ -59,12 +59,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		constantBuffer;
 
-	//	Œ•ƒgƒŒƒCƒ‹—pƒeƒNƒXƒ`ƒƒ
+	//	å‰£ãƒˆãƒ¬ã‚¤ãƒ«ç”¨ãƒ†ã‚¯ã‚¹ãƒãƒ£
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  TrailShaderResourceView;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  NormalShaderResourceView;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  DissolveShaderResourceView;
 
-	//ƒfƒBƒ]ƒ‹ƒuUVƒXƒNƒ[ƒ‹—p
+	//ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–UVã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ç”¨
 	DirectX::XMFLOAT2 ScrollDirection{};
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;

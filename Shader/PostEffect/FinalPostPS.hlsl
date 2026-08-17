@@ -173,7 +173,7 @@ float3 RadialBlur(float2 texcoord)
  
     float mask_radius = radialDatas.maskRadius / min(scene_map_size.x, scene_map_size.y);
     float mask_value = saturate(length(texcoord - radialDatas.center) / mask_radius);
-    return lerp(color, result_color / radialDatas.samplingCount, mask_value);
+    return lerp(color, result_color / radialDatas.samplingCount, mask_value).rgb;
 
 }
 
@@ -225,18 +225,19 @@ float3 RadialBlur(float2 texcoord)
 float3 Converginglines(float3 color, float2 texcoord)
 {
  //  集中線
+    float3 result = color;
     if (ConcentLineDatas.intensity > 0.0f)
     {
-        float angle = calculate_uv_angle(texcoord);
+        float angle = calculate_uv_angle(texcoord).x;
         float line_value = calculate_radial_line(angle);
         float circle = calculate_center_circle(texcoord);
         float result_line = saturate(line_value * circle);
         float smooth_alpha = smoothstep(ConcentLineDatas.edge.x, ConcentLineDatas.edge.y, result_line);
 
-        return lerp(color.rgb, ConcentLineDatas.color, smooth_alpha);
+        result = lerp(color.rgb, ConcentLineDatas.color.rgb, smooth_alpha);
     }
    
-    return color;
+    return result;
 }
 
 float3 Accelaration(float4 fragcolor, float2 texcoord)
@@ -263,7 +264,7 @@ float3 Accelaration(float4 fragcolor, float2 texcoord)
         int blur_sampling_count = 15;
 
         float4 result_color = colorMap.Sample(LinearSampler, texcoord);
-        result_color.rgb = float4(pow(result_color.rgb, 1.0f / GammaFactor), 1);
+        result_color.rgb = pow(result_color.rgb, 1.0f / GammaFactor);
 
         float2 blur_vector = (blur_center - texcoord);
         blur_vector *= (blur_radius / scene_map_size.xy) / blur_sampling_count;
@@ -297,7 +298,7 @@ float3 Accelaration(float4 fragcolor, float2 texcoord)
     ////  メッシュ属性に応じて適用を変える
     //weight *= 1 - 0.75f * (data.mesh_attribute == mesh_attribute_player || data.mesh_attribute == mesh_attribute_enemy);
     //return color.rgb;
-    return lerp(old_color, saturate(color), weight);
+    return lerp(old_color, saturate(color), weight).rgb;
 }
 
 float3 GrayScall(float3 color)
@@ -444,7 +445,7 @@ float4 main(VS_OUT pin) : SV_TARGET
     
     fragment_color.rgb = Vignette(fragment_color, pin.texcoord);
     
-    fragment_color.rgb = Flash(fragment_color, pin.texcoord);
+    fragment_color.rgb = Flash(fragment_color, pin.texcoord).rgb;
     
     fragment_color.rgb = Accelaration(float4(fragment_color, alpha), pin.texcoord);
     

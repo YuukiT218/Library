@@ -1,4 +1,4 @@
-#include <filesystem>
+ï»¿#include <filesystem>
 #include <fstream>
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
@@ -22,46 +22,46 @@ const std::vector<D3D11_INPUT_ELEMENT_DESC> Model::InputElementDescs =
 
 };
 
-// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 Model::Model(ID3D11Device* device, const char* filename, float scale) : scaling(scale)
 {
 	resource = ResourceManager::Instance().LoadModelResource(filename);
 
-	// ƒm[ƒh
+	// ãƒãƒ¼ãƒ‰
 	const std::vector<ModelResource::Node>& resNodes = resource->GetNodes();
 
 	nodes.resize(resNodes.size());
-	// ‚·‚×‚Ä‚Ìƒm[ƒh‚É‘Î‚µ‚Äƒ‹[ƒvÀs
+	// ã™ã¹ã¦ã®ãƒãƒ¼ãƒ‰ã«å¯¾ã—ã¦ãƒ«ãƒ¼ãƒ—å®Ÿè¡Œ
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
 	{
-		// ‘Î‰‚·‚éƒm[ƒhƒf[ƒ^‚ğresNodes‚©‚çæ“¾‚·‚é(ƒ\[ƒXƒm[ƒh)
+		// å¯¾å¿œã™ã‚‹ãƒãƒ¼ãƒ‰ãƒ‡ãƒ¼ã‚¿ã‚’resNodesã‹ã‚‰å–å¾—ã™ã‚‹(ã‚½ãƒ¼ã‚¹ãƒãƒ¼ãƒ‰)
 		auto&& src = resNodes.at(nodeIndex);
-		// ‘Î‰‚·‚éƒm[ƒh‚ğnodes‚©‚çæ“¾‚·‚é(‘ÎÛƒm[ƒh)
+		// å¯¾å¿œã™ã‚‹ãƒãƒ¼ãƒ‰ã‚’nodesã‹ã‚‰å–å¾—ã™ã‚‹(å¯¾è±¡ãƒãƒ¼ãƒ‰)
 		auto&& dst = nodes.at(nodeIndex);
 
-		// ƒm[ƒh–¼‚ğsrc‚©‚çdst‚ÉƒRƒs[
-		// name‚Ístd::string‚Æ‰¼’è‚µAc_str()‚ÅC•¶š—ñ‚ğæ“¾
+		// ãƒãƒ¼ãƒ‰åã‚’srcã‹ã‚‰dstã«ã‚³ãƒ”ãƒ¼
+		// nameã¯std::stringã¨ä»®å®šã—ã€c_str()ã§Cæ–‡å­—åˆ—ã‚’å–å¾—
 		dst.name = src.name.c_str();
 		nodeNames.push_back(src.name);
-		// src.parentIndex‚ª—LŒø(0ˆÈã)‚Å‚ ‚ê‚ÎAeƒm[ƒh‚ğİ’è
+		// src.parentIndexãŒæœ‰åŠ¹(0ä»¥ä¸Š)ã§ã‚ã‚Œã°ã€è¦ªãƒãƒ¼ãƒ‰ã‚’è¨­å®š
 		dst.parent = src.parentIndex >= 0 ? &nodes.at(src.parentIndex) : nullptr;
-		// ƒXƒP[ƒ‹‚Ì’l‚ğsrc‚©‚çdst‚ÉƒRƒs[
+		// ã‚¹ã‚±ãƒ¼ãƒ«ã®å€¤ã‚’srcã‹ã‚‰dstã«ã‚³ãƒ”ãƒ¼
 		dst.scale = src.scale;
-		// ‰ñ“]‚Ì’l‚ğsrc‚©‚çdst‚ÉƒRƒs[
+		// å›è»¢ã®å€¤ã‚’srcã‹ã‚‰dstã«ã‚³ãƒ”ãƒ¼
 		dst.rotation = src.rotation;
 		dst.position = src.position;
 
 		if (dst.parent != nullptr)
 		{
-			// eƒm[ƒh‚ª‘¶İ‚·‚éê‡A‚»‚Ìeƒm[ƒh‚ÌqƒŠƒXƒg‚ÉŒ»İ‚Ìƒm[ƒh‚ğ’Ç‰Á
+			// è¦ªãƒãƒ¼ãƒ‰ãŒå­˜åœ¨ã™ã‚‹å ´åˆã€ãã®è¦ªãƒãƒ¼ãƒ‰ã®å­ãƒªã‚¹ãƒˆã«ç¾åœ¨ã®ãƒãƒ¼ãƒ‰ã‚’è¿½åŠ 
 			dst.parent->children.emplace_back(&dst);
 		}
 	}
 
-	// ƒm[ƒhƒLƒƒƒbƒVƒ…
+	// ãƒãƒ¼ãƒ‰ã‚­ãƒ£ãƒƒã‚·ãƒ¥
 	nodePose.resize(nodes.size());
 
-	// s—ñ‰Šú‰»
+	// è¡Œåˆ—åˆæœŸåŒ–
 	DirectX::XMFLOAT4X4 worldTransform;
 	DirectX::XMStoreFloat4x4(&worldTransform, DirectX::XMMatrixIdentity());
 	UpdateTransform(worldTransform);
@@ -69,24 +69,24 @@ Model::Model(ID3D11Device* device, const char* filename, float scale) : scaling(
 
 Model::Node* Model::FindNode(const char* name)
 {
-	// ‘S‚Ä‚Ìƒm[ƒh‚ğ‘“–‚½‚è‚Å–¼‘O”äŠr‚·‚é
+	// å…¨ã¦ã®ãƒãƒ¼ãƒ‰ã‚’ç·å½“ãŸã‚Šã§åå‰æ¯”è¼ƒã™ã‚‹
 	int result;
 	for (auto& node : nodes)
 	{
-		// –¼‘O”äŠri–¼‘O‚ÍnullI’[•¶š—ñ‚Æ‚µ‚Äˆµ‚¤j
+		// åå‰æ¯”è¼ƒï¼ˆåå‰ã¯nullçµ‚ç«¯æ–‡å­—åˆ—ã¨ã—ã¦æ‰±ã†ï¼‰
 		result = strcmp(node.name.c_str(), name);
 		if (result == 0)
 		{
-			// ƒm[ƒh‚ªŒ©‚Â‚©‚Á‚½ê‡A‚»‚Ìƒ|ƒCƒ“ƒ^‚ğ•Ô‚·
+			// ãƒãƒ¼ãƒ‰ãŒè¦‹ã¤ã‹ã£ãŸå ´åˆã€ãã®ãƒã‚¤ãƒ³ã‚¿ã‚’è¿”ã™
 			return &node;
 		}
 	}
 
-	// Œ©‚Â‚©‚ç‚È‚©‚Á‚½
+	// è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸ
 	return nullptr;
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“ƒCƒ“ƒfƒbƒNƒXæ“¾
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹å–å¾—
 int Model::GetAnimationIndex(const char* name) const
 {
 	for (size_t animationIndex = 0; animationIndex < resource->GetAnimations().size(); ++animationIndex)
@@ -99,7 +99,7 @@ int Model::GetAnimationIndex(const char* name) const
 	return -1;
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“–¼æ“¾
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³åå–å¾—
 const char* Model::GetAnimationName(int animationIndex) const
 {
 	const ModelResource* modelResource = this->GetResource();
@@ -107,7 +107,7 @@ const char* Model::GetAnimationName(int animationIndex) const
 	return modelResource->GetAnimationName(animationIndex);
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“I—¹ƒtƒŒ[ƒ€æ“¾
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº†ãƒ•ãƒ¬ãƒ¼ãƒ å–å¾—
 float Model::GetAnimationLength(int animationIndex) const
 {
 	const ModelResource* modelResource = this->GetResource();
@@ -115,7 +115,7 @@ float Model::GetAnimationLength(int animationIndex) const
 	return modelResource->GetAnimationLength(animationIndex);
 }
 
-// ƒgƒ‰ƒ“ƒXƒtƒH[ƒ€XVˆ—
+// ãƒˆãƒ©ãƒ³ã‚¹ãƒ•ã‚©ãƒ¼ãƒ æ›´æ–°å‡¦ç†
 void Model::UpdateTransform(const DirectX::XMFLOAT4X4& worldTransform)
 {
 	DirectX::XMMATRIX ParentWorldTransform = DirectX::XMLoadFloat4x4(&worldTransform);
@@ -123,13 +123,13 @@ void Model::UpdateTransform(const DirectX::XMFLOAT4X4& worldTransform)
 
 	for (Node& node : nodes)
 	{
-		// ƒ[ƒJƒ‹s—ñZo
+		// ãƒ­ãƒ¼ã‚«ãƒ«è¡Œåˆ—ç®—å‡º
 		DirectX::XMMATRIX S = DirectX::XMMatrixScaling(node.scale.x, node.scale.y, node.scale.z);
 		DirectX::XMMATRIX R = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&node.rotation));
 		DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(node.position.x, node.position.y, node.position.z);
 		DirectX::XMMATRIX LocalTransform = S * R * T;
 
-		// ƒOƒ[ƒoƒ‹s—ñZo
+		// ã‚°ãƒ­ãƒ¼ãƒãƒ«è¡Œåˆ—ç®—å‡º
 		DirectX::XMMATRIX ParentGlobalTransform;
 		if (node.parent != nullptr)
 		{
@@ -141,18 +141,18 @@ void Model::UpdateTransform(const DirectX::XMFLOAT4X4& worldTransform)
 		}
 		DirectX::XMMATRIX GlobalTransform = LocalTransform * ParentGlobalTransform;
 
-		// ƒ[ƒ‹ƒhs—ñZo
+		// ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ç®—å‡º
 		//DirectX::XMMATRIX WorldTransform = GlobalTransform * ParentWorldTransform;
 		DirectX::XMMATRIX WorldTransform = GlobalTransform * CoordinateSystemTransform * ParentWorldTransform;
 
-		// ŒvZŒ‹‰Ê‚ğŠi”[
+		// è¨ˆç®—çµæœã‚’æ ¼ç´
 		DirectX::XMStoreFloat4x4(&node.localTransform, LocalTransform);
 		DirectX::XMStoreFloat4x4(&node.globalTransform, GlobalTransform);
 		DirectX::XMStoreFloat4x4(&node.worldTransform, WorldTransform);
 	}
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿ
 void Model::PlayAnimation(int index, bool loop, float blendSeconds)
 {
 	currentAnimationIndex = index;
@@ -160,12 +160,12 @@ void Model::PlayAnimation(int index, bool loop, float blendSeconds)
 	animationLoop = loop;
 	animationPlaying = true;
 
-	// ƒuƒŒƒ“ƒhƒpƒ‰ƒ[ƒ^
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 	animationBlending = blendSeconds > 0.0f;
 	currentAnimationBlendSeconds = 0.0f;
 	animationBlendSecondsLength = blendSeconds;
 
-	// Œ»İ‚Ìp¨‚ğƒLƒƒƒbƒVƒ…‚·‚é
+	// ç¾åœ¨ã®å§¿å‹¢ã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã™ã‚‹
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
 		const Node& src = nodes.at(i);
@@ -177,7 +177,7 @@ void Model::PlayAnimation(int index, bool loop, float blendSeconds)
 	}
 }
 
-// ƒ‹[ƒgƒAƒjƒ[ƒVƒ‡ƒ“Ä¶
+// ãƒ«ãƒ¼ãƒˆã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿ
 void Model::PlayRootMotion(int index, bool loop, bool bakeY, float blendSeconds, const char* rootName)
 {
 	currentAnimationIndex = index;
@@ -189,12 +189,12 @@ void Model::PlayRootMotion(int index, bool loop, bool bakeY, float blendSeconds,
 	isRootMotion = true;
 	animationPlaying = true;
 
-	// ƒuƒŒƒ“ƒhƒpƒ‰ƒ[ƒ^
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
 	animationBlending = blendSeconds > 0.0f;
 	currentAnimationBlendSeconds = 0.0f;
 	animationBlendSecondsLength = blendSeconds;
 
-	// Œ»İ‚Ìp¨‚ğƒLƒƒƒbƒVƒ…‚·‚é
+	// ç¾åœ¨ã®å§¿å‹¢ã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥ã™ã‚‹
 	for (size_t i = 0; i < nodes.size(); ++i)
 	{
 		const Node& src = nodes.at(i);
@@ -206,7 +206,7 @@ void Model::PlayRootMotion(int index, bool loop, bool bakeY, float blendSeconds,
 	}
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“Ä¶’†‚©
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å†ç”Ÿä¸­ã‹
 bool Model::IsPlayAnimation() const
 {
 	if (currentAnimationIndex < 0) return false;
@@ -214,7 +214,7 @@ bool Model::IsPlayAnimation() const
 	return animationPlaying;
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“XVˆ—
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ›´æ–°å‡¦ç†
 void Model::UpdateAnimation(float elapsedTime, Character* character)
 {
 	if (!animationPause)
@@ -256,94 +256,94 @@ void Model::UpdateAnimation(float elapsedTime, Character* character)
 	}
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“ŒvZˆ—
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨ˆç®—å‡¦ç†
 void Model::ComputeAnimation(float elapsedTime)
 {
 	if (!IsPlayAnimation()) return;
 
-	// w’è‚ÌƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚ğæ“¾
+	// æŒ‡å®šã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—
 	const ModelResource::Animation& animation = resource->GetAnimations().at(currentAnimationIndex);
 
-	// ƒm[ƒh–ˆ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“ˆ—
+	// ãƒãƒ¼ãƒ‰æ¯ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å‡¦ç†
 	for (size_t nodeIndex = 0; nodeIndex < animation.nodeAnims.size(); ++nodeIndex)
 	{
 		Node& node = nodes.at(nodeIndex);
 		const ModelResource::NodeAnim& nodeAnim = animation.nodeAnims.at(nodeIndex);
 
-		// ˆÊ’u
+		// ä½ç½®
 		for (size_t index = 0; index < nodeAnim.positionKeyframes.size() - 1; ++index)
 		{
-			// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©”»’è‚·‚é
+			// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹
 			const ModelResource::VectorKeyframe& keyframe0 = nodeAnim.positionKeyframes.at(index);
 			const ModelResource::VectorKeyframe& keyframe1 = nodeAnim.positionKeyframes.at(index + 1);
 			if (currentAnimationSeconds >= keyframe0.seconds && currentAnimationSeconds < keyframe1.seconds)
 			{
-				// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+				// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 				float rate = (currentAnimationSeconds - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-				// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+				// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 				DirectX::XMVECTOR V0 = DirectX::XMLoadFloat3(&keyframe0.value);
 				DirectX::XMVECTOR V1 = DirectX::XMLoadFloat3(&keyframe1.value);
 				DirectX::XMVECTOR V = DirectX::XMVectorLerp(V0, V1, rate);
-				// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+				// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 				DirectX::XMStoreFloat3(&node.position, V);
 			}
 		}
-		// ‰ñ“]
+		// å›è»¢
 		for (size_t index = 0; index < nodeAnim.rotationKeyframes.size() - 1; ++index)
 		{
-			// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©”»’f‚·‚é
+			// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹åˆ¤æ–­ã™ã‚‹
 			const ModelResource::QuaternionKeyframe& keyframe0 = nodeAnim.rotationKeyframes.at(index);
 			const ModelResource::QuaternionKeyframe& keyframe1 = nodeAnim.rotationKeyframes.at(index + 1);
 			if (currentAnimationSeconds >= keyframe0.seconds && currentAnimationSeconds < keyframe1.seconds)
 			{
-				// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+				// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 				float rate = (currentAnimationSeconds - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-				// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+				// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 				DirectX::XMVECTOR Q0 = DirectX::XMLoadFloat4(&keyframe0.value);
 				DirectX::XMVECTOR Q1 = DirectX::XMLoadFloat4(&keyframe1.value);
 				DirectX::XMVECTOR Q = DirectX::XMQuaternionSlerp(Q0, Q1, rate);
-				// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+				// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 				DirectX::XMStoreFloat4(&node.rotation, Q);
 			}
 		}
-		// ƒXƒP[ƒ‹
+		// ã‚¹ã‚±ãƒ¼ãƒ«
 		for (size_t index = 0; index < nodeAnim.scaleKeyframes.size() - 1; ++index)
 		{
-			// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©
+			// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹
 			const ModelResource::VectorKeyframe& keyframe0 = nodeAnim.scaleKeyframes.at(index);
 			const ModelResource::VectorKeyframe& keyframe1 = nodeAnim.scaleKeyframes.at(index + 1);
 			if (currentAnimationSeconds >= keyframe0.seconds && currentAnimationSeconds < keyframe1.seconds)
 			{
-				// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+				// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 				float rate = (currentAnimationSeconds - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-				// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+				// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 				DirectX::XMVECTOR V0 = DirectX::XMLoadFloat3(&keyframe0.value);
 				DirectX::XMVECTOR V1 = DirectX::XMLoadFloat3(&keyframe1.value);
 				DirectX::XMVECTOR V = DirectX::XMVectorLerp(V0, V1, rate);
-				// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+				// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 				DirectX::XMStoreFloat3(&node.scale, V);
 			}
 		}
 	}
 
-	// Œo‰ßŠÔ
+	// çµŒéæ™‚é–“
 	oldAnimationSeconds = currentAnimationSeconds;
 	currentAnimationSeconds += elapsedTime;
 
-	// Ä¶ŠÔ‚ªI’[ŠÔ‚ğ’´‚¦‚½‚ç
+	// å†ç”Ÿæ™‚é–“ãŒçµ‚ç«¯æ™‚é–“ã‚’è¶…ãˆãŸã‚‰
 	if (currentAnimationSeconds >= animation.secondsLength)
 	{
 		if (animationLoop)
 		{
-			// Ä¶ŠÔ‚ğŠª‚«–ß‚·
+			// å†ç”Ÿæ™‚é–“ã‚’å·»ãæˆ»ã™
 			currentAnimationSeconds -= animation.secondsLength;
 		}
 		else
 		{
-			// Ä¶I—¹ŠÔ‚É‚·‚é
+			// å†ç”Ÿçµ‚äº†æ™‚é–“ã«ã™ã‚‹
 			currentAnimationSeconds = animation.secondsLength;
 			animationPlaying = false;
 			isRootMotion = false;
@@ -361,22 +361,22 @@ void Model::ComputeRootAnimation(float elapsedTime, Character* character)
 		return;
 	}
 
-	// w’è‚ÌƒAƒjƒ[ƒVƒ‡ƒ“ƒf[ƒ^‚ğæ“¾
+	// æŒ‡å®šã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—
 	const ModelResource::Animation& animation = resource->GetAnimations().at(currentAnimationIndex);
 
-	// w’èŠÔ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚Ìp¨‚ğæ“¾
+	// æŒ‡å®šæ™‚é–“ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å§¿å‹¢ã‚’å–å¾—
 	ComputeAnimation(currentAnimationIndex, currentAnimationSeconds, nodePoses);
 
-	// ƒ‹[ƒgƒ‚[ƒVƒ‡ƒ“ƒm[ƒh”Ô†æ“¾
+	// ãƒ«ãƒ¼ãƒˆãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ãƒãƒ¼ãƒ‰ç•ªå·å–å¾—
 	const int rootMotionNodeIndex = resource->GetNodeIndex(rootNodeName);
 
-	// ‰‰ñA‘O‰ñA¡‰ñ‚Ìƒ‹[ƒgƒ‚[ƒVƒ‡ƒ“ƒm[ƒh‚Ìp¨æ“¾
+	// åˆå›ã€å‰å›ã€ä»Šå›ã®ãƒ«ãƒ¼ãƒˆãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ãƒãƒ¼ãƒ‰ã®å§¿å‹¢å–å¾—
 	//NodePose beginPose, oldPose, newPose;
 	ComputeAnimation(currentAnimationIndex, rootMotionNodeIndex, 0.0f, beginPose);
 	ComputeAnimation(currentAnimationIndex, rootMotionNodeIndex, oldAnimationSeconds, oldPose);
 	ComputeAnimation(currentAnimationIndex, rootMotionNodeIndex, currentAnimationSeconds, newPose);
 
-	// ƒ[ƒJƒ‹ˆÚ“®’l‚ğZo
+	// ãƒ­ãƒ¼ã‚«ãƒ«ç§»å‹•å€¤ã‚’ç®—å‡º
 	DirectX::XMFLOAT3 localTranslation;
 	if (oldAnimationSeconds > currentAnimationSeconds)
 	{
@@ -394,7 +394,7 @@ void Model::ComputeRootAnimation(float elapsedTime, Character* character)
 	}
 	DirectX::XMVECTOR LocalTranslation = DirectX::XMLoadFloat3(&localTranslation);
 
-	// ƒOƒ[ƒoƒ‹ˆÚ“®’l‚ğZo
+	// ã‚°ãƒ­ãƒ¼ãƒãƒ«ç§»å‹•å€¤ã‚’ç®—å‡º
 	Node& rootMotionNode = GetNodes().at(rootMotionNodeIndex);
 	DirectX::XMMATRIX ParentGlobalTransform;
 	DirectX::XMVECTOR GlobalTranslation;
@@ -403,16 +403,16 @@ void Model::ComputeRootAnimation(float elapsedTime, Character* character)
 
 	if (bakeMoveY)
 	{
-		// Y¬•ª‚ÌˆÚ“®’l‚ğ”²‚­
+		// Yæˆåˆ†ã®ç§»å‹•å€¤ã‚’æŠœã
 		GlobalTranslation = DirectX::XMVectorSetY(GlobalTranslation, 0.0f);
-		// ¡‰ñ‚Ìp¨‚ÌƒOƒ[ƒoƒ‹ˆÊ’u‚ğZo
+		// ä»Šå›ã®å§¿å‹¢ã®ã‚°ãƒ­ãƒ¼ãƒãƒ«ä½ç½®ã‚’ç®—å‡º
 		DirectX::XMVECTOR LocalPosition, GlobalPosition;
 		LocalPosition = DirectX::XMLoadFloat3(&newPose.position);
 		GlobalPosition = DirectX::XMVector3Transform(LocalPosition, ParentGlobalTransform);
-		// XZ¬•ª‚ğíœ
+		// XZæˆåˆ†ã‚’å‰Šé™¤
 		GlobalPosition = DirectX::XMVectorSetX(GlobalPosition, 0.0f);
 		GlobalPosition = DirectX::XMVectorSetZ(GlobalPosition, 0.0f);
-		// ƒOƒ[ƒoƒ‹‹óŠÔ‚©‚çƒ[ƒJƒ‹‹óŠÔ‚É•ÏŠ·‚·‚é
+		// ã‚°ãƒ­ãƒ¼ãƒãƒ«ç©ºé–“ã‹ã‚‰ãƒ­ãƒ¼ã‚«ãƒ«ç©ºé–“ã«å¤‰æ›ã™ã‚‹
 		DirectX::XMMATRIX InverseParentGlobalTransform;
 		InverseParentGlobalTransform = DirectX::XMMatrixInverse(nullptr, ParentGlobalTransform);
 		LocalPosition = DirectX::XMVector3Transform(GlobalPosition, InverseParentGlobalTransform);
@@ -420,11 +420,11 @@ void Model::ComputeRootAnimation(float elapsedTime, Character* character)
 	}
 	else
 	{
-		// ƒ‹[ƒgƒ‚[ƒVƒ‡ƒ“ƒm[ƒh‚ğ‰‰ñ‚Ìp¨‚É‚·‚é
+		// ãƒ«ãƒ¼ãƒˆãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³ãƒãƒ¼ãƒ‰ã‚’åˆå›ã®å§¿å‹¢ã«ã™ã‚‹
 		nodePoses[rootMotionNodeIndex].position = beginPose.position;
 	}
 
-	// ƒ[ƒ‹ƒhˆÚ“®’l‚ğZo
+	// ãƒ¯ãƒ¼ãƒ«ãƒ‰ç§»å‹•å€¤ã‚’ç®—å‡º
 	DirectX::XMMATRIX WorldTransform;
 	DirectX::XMVECTOR WorldTranslation;
 	WorldTransform = DirectX::XMLoadFloat4x4(&character->GetTransform());
@@ -433,26 +433,26 @@ void Model::ComputeRootAnimation(float elapsedTime, Character* character)
 										character->GetPosition().y + DirectX::XMVectorGetY(WorldTranslation),
 										character->GetPosition().z + DirectX::XMVectorGetZ(WorldTranslation), };
 
-	// ˆÊ’u‚ğXV
+	// ä½ç½®ã‚’æ›´æ–°
 	character->SetPosition(worldTranslation);
 
 	SetNodePoses(nodePoses);
 
-	// Œo‰ßŠÔ
+	// çµŒéæ™‚é–“
 	oldAnimationSeconds = currentAnimationSeconds;
 	currentAnimationSeconds += elapsedTime;
 
-	// Ä¶ŠÔ‚ªI’[ŠÔ‚ğ’´‚¦‚½‚ç
+	// å†ç”Ÿæ™‚é–“ãŒçµ‚ç«¯æ™‚é–“ã‚’è¶…ãˆãŸã‚‰
 	if (currentAnimationSeconds >= animation.secondsLength)
 	{
 		if (animationLoop)
 		{
-			// Ä¶ŠÔ‚ğŠª‚«–ß‚·
+			// å†ç”Ÿæ™‚é–“ã‚’å·»ãæˆ»ã™
 			currentAnimationSeconds -= animation.secondsLength;
 		}
 		else
 		{
-			// Ä¶I—¹ŠÔ‚É‚·‚é
+			// å†ç”Ÿçµ‚äº†æ™‚é–“ã«ã™ã‚‹
 			currentAnimationSeconds = animation.secondsLength;
 			animationPlaying = false;
 			isRootMotion = false;
@@ -461,7 +461,7 @@ void Model::ComputeRootAnimation(float elapsedTime, Character* character)
 	}
 }
 
-// ƒuƒŒƒ“ƒfƒBƒ“ƒOŒvZˆ—
+// ãƒ–ãƒ¬ãƒ³ãƒ‡ã‚£ãƒ³ã‚°è¨ˆç®—å‡¦ç†
 void Model::ComputeBlending(float elapsedTime)
 {
 	if (!animationBlending)
@@ -469,10 +469,10 @@ void Model::ComputeBlending(float elapsedTime)
 		return;
 	}
 
-	// ƒuƒŒƒ“ƒh—¦‚ÌŒvZ
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰ç‡ã®è¨ˆç®—
 	float rate = currentAnimationSeconds / animationBlendSecondsLength;
 
-	// ƒuƒŒƒ“ƒhŒvZ
+	// ãƒ–ãƒ¬ãƒ³ãƒ‰è¨ˆç®—
 	int count = static_cast<int>(nodes.size());
 	for (int i = 0; i < count; ++i)
 	{
@@ -495,7 +495,7 @@ void Model::ComputeBlending(float elapsedTime)
 		DirectX::XMStoreFloat3(&node.position, T);
 	}
 
-	// ŠÔŒo‰ß
+	// æ™‚é–“çµŒé
 	currentAnimationBlendSeconds += elapsedTime;
 	if (currentAnimationBlendSeconds >= animationBlendSecondsLength)
 	{
@@ -509,66 +509,66 @@ void Model::ComputeAnimation(int animationIndex, int nodeIndex, float time, Node
 	const ModelResource::Animation& animation = resource->GetAnimations().at(animationIndex);
 	const ModelResource::NodeAnim& nodeAnim = animation.nodeAnims.at(nodeIndex);
 
-	// ˆÊ’u
+	// ä½ç½®
 	for (size_t index = 0; index < nodeAnim.positionKeyframes.size() - 1; ++index)
 	{
-		// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©”»’è‚·‚é
+		// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹
 		const ModelResource::VectorKeyframe& keyframe0 = nodeAnim.positionKeyframes.at(index);
 		const ModelResource::VectorKeyframe& keyframe1 = nodeAnim.positionKeyframes.at(index + 1);
 		if (time >= keyframe0.seconds && time <= keyframe1.seconds)
 		{
-			// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+			// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 			float rate = (time - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-			// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+			// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 			DirectX::XMVECTOR V0 = DirectX::XMLoadFloat3(&keyframe0.value);
 			DirectX::XMVECTOR V1 = DirectX::XMLoadFloat3(&keyframe1.value);
 			DirectX::XMVECTOR V = DirectX::XMVectorLerp(V0, V1, rate);
-			// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+			// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 			DirectX::XMStoreFloat3(&nodePose.position, V);
 		}
 	}
-	// ‰ñ“]
+	// å›è»¢
 	for (size_t index = 0; index < nodeAnim.rotationKeyframes.size() - 1; ++index)
 	{
-		// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©”»’è‚·‚é
+		// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹
 		const ModelResource::QuaternionKeyframe& keyframe0 = nodeAnim.rotationKeyframes.at(index);
 		const ModelResource::QuaternionKeyframe& keyframe1 = nodeAnim.rotationKeyframes.at(index + 1);
 		if (time >= keyframe0.seconds && time <= keyframe1.seconds)
 		{
-			// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+			// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 			float rate = (time - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-			// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+			// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 			DirectX::XMVECTOR Q0 = DirectX::XMLoadFloat4(&keyframe0.value);
 			DirectX::XMVECTOR Q1 = DirectX::XMLoadFloat4(&keyframe1.value);
 			DirectX::XMVECTOR Q = DirectX::XMQuaternionSlerp(Q0, Q1, rate);
-			// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+			// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 			DirectX::XMStoreFloat4(&nodePose.rotation, Q);
 		}
 	}
-	// ƒXƒP[ƒ‹
+	// ã‚¹ã‚±ãƒ¼ãƒ«
 	for (size_t index = 0; index < nodeAnim.scaleKeyframes.size() - 1; ++index)
 	{
-		// Œ»İ‚ÌŠÔ‚ª‚Ç‚ÌƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚É‚¢‚é‚©”»’è‚·‚é
+		// ç¾åœ¨ã®æ™‚é–“ãŒã©ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®é–“ã«ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹
 		const ModelResource::VectorKeyframe& keyframe0 = nodeAnim.scaleKeyframes.at(index);
 		const ModelResource::VectorKeyframe& keyframe1 = nodeAnim.scaleKeyframes.at(index + 1);
 		if (time >= keyframe0.seconds && time <= keyframe1.seconds)
 		{
-			// Ä¶ŠÔ‚ÆƒL[ƒtƒŒ[ƒ€‚ÌŠÔ‚©‚ç•âŠ®—¦‚ğZo‚·‚é
+			// å†ç”Ÿæ™‚é–“ã¨ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“ã‹ã‚‰è£œå®Œç‡ã‚’ç®—å‡ºã™ã‚‹
 			float rate = (time - keyframe0.seconds) / (keyframe1.seconds - keyframe0.seconds);
 
-			// ‘O‚ÌƒL[ƒtƒŒ[ƒ€‚ÆŸ‚ÌƒL[ƒtƒŒ[ƒ€‚Ìp¨‚ğ•âŠ®
+			// å‰ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã¨æ¬¡ã®ã‚­ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ã®å§¿å‹¢ã‚’è£œå®Œ
 			DirectX::XMVECTOR V0 = DirectX::XMLoadFloat3(&keyframe0.value);
 			DirectX::XMVECTOR V1 = DirectX::XMLoadFloat3(&keyframe1.value);
 			DirectX::XMVECTOR V = DirectX::XMVectorLerp(V0, V1, rate);
-			// ŒvZŒ‹‰Ê‚ğƒm[ƒh‚ÉŠi”[
+			// è¨ˆç®—çµæœã‚’ãƒãƒ¼ãƒ‰ã«æ ¼ç´
 			DirectX::XMStoreFloat3(&nodePose.scale, V);
 		}
 	}
 }
 
-// ƒAƒjƒ[ƒVƒ‡ƒ“ŒvZ
+// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³è¨ˆç®—
 void Model::ComputeAnimation(int animationIndex, float time, std::vector<NodePose>& nodePoses) const
 {
 	if (nodePoses.size() != nodes.size())
@@ -581,7 +581,7 @@ void Model::ComputeAnimation(int animationIndex, float time, std::vector<NodePos
 	}
 }
 
-// ƒm[ƒhƒ|[ƒYİ’è
+// ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºè¨­å®š
 void Model::SetNodePoses(const std::vector<NodePose>& nodePoses)
 {
 	for (size_t nodeIndex = 0; nodeIndex < nodes.size(); ++nodeIndex)
@@ -595,7 +595,7 @@ void Model::SetNodePoses(const std::vector<NodePose>& nodePoses)
 	}
 }
 
-// ƒm[ƒhƒ|[ƒYæ“¾
+// ãƒãƒ¼ãƒ‰ãƒãƒ¼ã‚ºå–å¾—
 void Model::GetNodePoses(std::vector<NodePose>& nodePoses) const
 {
 	if (nodePoses.size() != nodes.size())
@@ -613,27 +613,27 @@ void Model::GetNodePoses(std::vector<NodePose>& nodePoses) const
 	}
 }
 
-void Model::DebugGui(const char* name)
+void Model::DebugGUI(const char* name)
 {
 
 	std::vector<ModelResource::Material> materials = resource->GetMaterials();
 	for (int i = 0; i < materials.size(); i++)
 	{
 		ModelResource::Material material = materials.at(i);
-		ImGui::PushID(i);  // ‚±‚±‚ÅIDƒXƒR[ƒv‚ğ•Ï‚¦‚é
+		ImGui::PushID(i);  // ã“ã“ã§IDã‚¹ã‚³ãƒ¼ãƒ—ã‚’å¤‰ãˆã‚‹
 
 		char textureID[128];
-		snprintf(textureID, sizeof(textureID), u8"ƒeƒNƒXƒ`ƒƒ@%i", i + 1);
+		snprintf(textureID, sizeof(textureID), u8"ãƒ†ã‚¯ã‚¹ãƒãƒ£ã€€%i", i + 1);
 
 		if (ImGui::CollapsingHeader(textureID, ImGuiTreeNodeFlags_Framed))
 		{
 
 			if (ImGui::CollapsingHeader("Albedo Map", ImGuiTreeNodeFlags_Framed))
 			{
-				if (!resource->GetMaterials().at(0).baseTextureFileName.empty()) {//ƒeƒNƒXƒ`ƒƒ‚ÌŠK‘w
+				if (!resource->GetMaterials().at(0).baseTextureFileName.empty()) {//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®éšå±¤
 					ImGui::Text("Albedo : %s", resource->GetMaterials().at(0).baseTextureFileName.c_str());
 				}
-				ImGui::Text("Albedo Texture:");//ƒeƒNƒXƒ`ƒƒ•\¦
+				ImGui::Text("Albedo Texture:");//ãƒ†ã‚¯ã‚¹ãƒãƒ£è¡¨ç¤º
 				if (resource->GetMaterials().at(0).baseMap) {
 					ImGui::Image(resource->GetMaterials().at(0).baseMap.Get(), ImVec2(128, 128));
 				}
@@ -685,12 +685,12 @@ void Model::DebugGui(const char* name)
 				}
 			}
 
-			// ‚»‚Ì‘¼‚ÌƒeƒNƒXƒ`ƒƒ‚ª‚ ‚ê‚Î’Ç‰Á
+			// ãã®ä»–ã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ãŒã‚ã‚Œã°è¿½åŠ 
 		}
 		ImGui::PopID();
 	}
 
-	// ƒ‰ƒxƒ‹•¶š—ñ‚Ìƒoƒbƒtƒ@‚ğ—pˆÓ
+	// ãƒ©ãƒ™ãƒ«æ–‡å­—åˆ—ã®ãƒãƒƒãƒ•ã‚¡ã‚’ç”¨æ„
 	char labelMetalness[128];
 	char labelRoughness[128];
 	char labelDissolve[128];
@@ -698,15 +698,15 @@ void Model::DebugGui(const char* name)
 	char labelAlpha[128];
 	char labelOverColor[128];
 
-	// ˆø”‚Ì name ‚ğ‘O‚É’Ç‰Á
-	snprintf(labelMetalness, sizeof(labelMetalness), u8"%s ‹à‘®¿", name);
-	snprintf(labelRoughness, sizeof(labelRoughness), u8"%s Ş¿‚Ì‘e‚³", name);
-	snprintf(labelDissolve, sizeof(labelDissolve), u8"%s ƒfƒBƒ]ƒ‹ƒu", name);
-	snprintf(labelEmissiveDissolve, sizeof(labelEmissiveDissolve), u8"%s ƒGƒ~ƒbƒVƒuƒfƒBƒ]ƒ‹ƒu", name);
-	snprintf(labelAlpha, sizeof(labelAlpha), u8"%s ƒAƒ‹ƒtƒ@", name);
-	snprintf(labelOverColor, sizeof(labelOverColor), u8"%s ƒI[ƒo[ƒJƒ‰[", name);
+	// å¼•æ•°ã® name ã‚’å‰ã«è¿½åŠ 
+	snprintf(labelMetalness, sizeof(labelMetalness), u8"%s é‡‘å±è³ª", name);
+	snprintf(labelRoughness, sizeof(labelRoughness), u8"%s æè³ªã®ç²—ã•", name);
+	snprintf(labelDissolve, sizeof(labelDissolve), u8"%s ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–", name);
+	snprintf(labelEmissiveDissolve, sizeof(labelEmissiveDissolve), u8"%s ã‚¨ãƒŸãƒƒã‚·ãƒ–ãƒ‡ã‚£ã‚¾ãƒ«ãƒ–", name);
+	snprintf(labelAlpha, sizeof(labelAlpha), u8"%s ã‚¢ãƒ«ãƒ•ã‚¡", name);
+	snprintf(labelOverColor, sizeof(labelOverColor), u8"%s ã‚ªãƒ¼ãƒãƒ¼ã‚«ãƒ©ãƒ¼", name);
 
-	// ImGui ‚É“n‚·
+	// ImGui ã«æ¸¡ã™
 	ImGui::DragFloat("Scale", &scaling, 0.01f, 0, 5.0f);
 	ImGui::DragFloat(labelMetalness, &adjustMetalness, 0.01f, 0, 1.0f);
 	ImGui::DragFloat(labelRoughness, &adjustRoughness, 0.01f, 0, 1.0f);

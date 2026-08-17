@@ -123,16 +123,25 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     }
 
 	//	自己発光色を取得
-    float3 emissive_color = emissiveColor;
+    float3 emissive_color = emissiveColor.rgb;
     {
-        float3 emissive = emissiveMap.Sample(anisotropic, pin.texcoord).rgb;
-        emissive.rgb = pow(emissive.rgb, GammaFactor);
-        float Factor = emissiveFactor * isEmissive;
-        emissive_color.rgb *= emissive.rgb * adjustColor.rgb * Factor * isEmissive;
+        //  エミッシブテクスチャを持たないマテリアルでは
+        //  白(1,1,1)として扱う。こうしないとサンプル結果の0が掛かり、
+        //  マテリアルに発光色があっても光らなくなる
+        float3 emissive = (float3) 1.0f;
+        if (hasEmissiveTexture > 0.5f)
+        {
+            emissive = emissiveMap.Sample(anisotropic, pin.texcoord).rgb;
+            emissive = pow(emissive, GammaFactor);
+        }
+
+        emissive_color.rgb *= emissive * adjustColor.rgb * emissiveFactor * isEmissive;
     }
 
 	//	法線/従法線/接線
     float3 N = normalize(pin.normal.xyz);
+    //  影のバイアス計算には法線マップ適用前の面の向きを使う
+    float3 geometricNormal = N;
     float3 T = normalize(pin.tangent.xyz);
     float sigma = 1.0;
     T = normalize(T - N * dot(N, T));
@@ -189,6 +198,9 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
 #endif  //  defined(_DEBUG)
 
     //	直接光のシェーディング
+    //  平行光源による影の減衰（間接光にも使う）
+    float3 shadowAtten = (float3) 1.0f;
+
     float3 total_diffuse = 0, total_specular = 0;
 	{
 	    // 平行光源の処理
@@ -199,9 +211,37 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
             DirectBDRF(diffuse_reflectance, F0, N, V, L,
 					   LightColor, roughness,diffuse, specular);
             {
-                float3 shadowAtten = ShadowMapFetchPCF(shadowMap, shadowSampler, 1, pin.shadow,
+                //  ワールド座標から所属するカスケードを求めて影を引く
+                //  面が光に対して寝ているほど自己遮蔽しやすいため
+                //  シャドウマップを引く位置を法線方向へ逃がす
+                //  まず素の位置で所属カスケードを決める
+                float3 shadowCoord;
+                int cascadeIndex = SelectShadowCascade(pin.position.xyz, ShadowBufferSize,
+                                       CascadeLightViewProjection, shadowCoord);
+
+                //  どのカスケードにも入らない遠景には影を落とさない
+                if (cascadeIndex >= 0)
+                {
+                    //  面が光に対して寝ているほど自己遮蔽しやすいので、
+                    //  シャドウマップを引く位置を法線方向へ逃がす
+                    //  ずらす量はそのカスケードのテクセル基準にする
+                    //  (ワールド固定量だと段によってテクセル数百個分ずれ、
+                    //   曲面の多いキャラクターで影の縁がとげ状になる)
+                    float NdotL = saturate(dot(geometricNormal, L));
+                    float slopeScale = min(sqrt(1.0f - NdotL * NdotL) / max(NdotL, 0.2f), 2.0f);
+                    float texelWorldSize = GetCascadeTexelWorldSize(cascadeTexelWorldSize, cascadeIndex);
+
+                    float3 offsetPosition = pin.position.xyz
+                         + geometricNormal * texelWorldSize * shadowNormalOffset * (1.0f + slopeScale);
+
+                    shadowCoord = ComputeShadowCoord(offsetPosition, CascadeLightViewProjection[cascadeIndex]);
+
+                    shadowAtten = ShadowMapFetchPCF(shadowMap, shadowSampler, cascadeIndex, shadowCoord,
                                        shadowColor, shadowAttenuation, shadowBias, 3.0f);
-                
+
+                    DebugShadowMapIndex = cascadeIndex;
+                }
+
                 diffuse *= shadowAtten;
                 specular *= shadowAtten;
             }
@@ -232,15 +272,25 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
         }
     }
     
-    //IBL処理
-    total_diffuse += DiffuseIBL(N, V, roughness, diffuse_reflectance, F0,
+    //IBL間接光
+    float3 indirect_diffuse = DiffuseIBL(N, V, roughness, diffuse_reflectance, F0,
               diffuseiem, linearSampler) * IBLDiffuseScale;
-    total_specular += SpecularIBL(N, V, roughness, F0, lut_ggx,
+    float3 indirect_specular = SpecularIBL(N, V, roughness, F0, lut_ggx,
                     specularpmrem, linearSampler) * IBLSpecularScale;
-    
-	//	遮蔽処理
-    total_diffuse = lerp(total_diffuse, total_diffuse * occlusion_factor, occlusion_strength);
-    total_specular = lerp(total_specular, total_specular * occlusion_factor, occlusion_strength);
+
+    //  影の中では間接光も落とす
+    //  ここを落とさないと、影の中でも法線マップの陰影が満額残り、
+    //  落ち影が起伏に埋もれて見えなくなる
+    float3 indirectShadow = lerp((float3) 1.0f, shadowAtten, indirectShadowStrength);
+    indirect_diffuse *= indirectShadow;
+    indirect_specular *= indirectShadow;
+
+    //  遮蔽は間接光にのみ適用する
+    indirect_diffuse = lerp(indirect_diffuse, indirect_diffuse * occlusion_factor, occlusion_strength);
+    indirect_specular = lerp(indirect_specular, indirect_specular * occlusion_factor, occlusion_strength);
+
+    total_diffuse += indirect_diffuse;
+    total_specular += indirect_specular;
    
     //	色生成
     float3 color = total_diffuse + total_specular + emissive_color;
@@ -251,11 +301,7 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     {
         if (DebugShadowMapIndex >= 0)
         {
-            float col = rcp((float) (DebugShadowMapIndex / 3 + 1));
-            float r = DebugShadowMapIndex % 3 == 0;
-            float g = DebugShadowMapIndex % 3 == 1;
-            float b = DebugShadowMapIndex % 3 == 2;
-            color.rgb = float3(r, g, b) * col;
+            color.rgb = GetCascadeDebugColor(DebugShadowMapIndex);
         }
         else
         {
@@ -270,15 +316,12 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
     float rimFactor = rimRange * rimIntensity; // 明るさ
     color.rgb += rimColor.rgb * rimFactor;
 
-    if (afterimageDarkness > 0.0 || afterimageAlpha < 0.99)
+    if (afterimageAlpha < 0.999f)
     {
-        // スペキュラ（反射）成分をカットする
-        color.rgb = base_color.rgb;
-
-        // 暗くする処理
-        float intensity = saturate(1.0 - afterimageDarkness);
-    	color.rgb *= intensity;
-        color.r *= 1.5;
+        //  残像はライティングせず、素の色に色味を掛けて光らせる
+        //  暗くして消すのではなくアルファだけで消すことで、
+        //  グレーのまま残らずに透けながら消えていく
+        color.rgb = base_color.rgb * afterimageColor.rgb * afterimageColor.a;
     }
 
     float4 finalColor = float4(color, base_color.a);

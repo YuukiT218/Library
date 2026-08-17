@@ -1,10 +1,12 @@
-#include "Projectile.h"
+ï»¿#include "Projectile.h"
 #include "Effect/EffectManager.h"
 #include "Graphics/Graphics.h"
 #include "Debug/ShapeRenderer.h"
 #include "Character/Player/Player.h"
 #include "Character/Enemy/EnemyBoss.h"
+#include "Graphics/Light.h"
 #include <cmath>
+#include <algorithm>
 
 
 #include <stdlib.h>
@@ -14,45 +16,88 @@
 Projectile::Projectile(const ProjectileInfo& info, std::shared_ptr<Effect> effectResource)
     : info(info), position(info.spawnPosition), effect(effectResource), ageTimer(0.0f)
 {
-    // ‘¬“xƒxƒNƒgƒ‹‚ğŒvZ (•ûŒü * ‘¬‚³)
+    // é€Ÿåº¦ãƒ™ã‚¯ãƒˆãƒ«ã‚’è¨ˆç®— (æ–¹å‘ * é€Ÿã•)
     velocity.x = info.direction.x * info.speed;
     velocity.y = info.direction.y * info.speed;
     velocity.z = info.direction.z * info.speed;
 
-    // is•ûŒü‚©‚ç‰ñ“]‚ğŒvZ
+    // é€²è¡Œæ–¹å‘ã‹ã‚‰å›è»¢ã‚’è¨ˆç®—
     CalculateRotationFromVelocity(true);
 
-    // ƒGƒtƒFƒNƒgÄ¶
+    // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆå†ç”Ÿ
     if (effect)
     {
-        // EffectƒNƒ‰ƒX‚ÌPlayƒƒ\ƒbƒh‚ğg—p
+        // Effectã‚¯ãƒ©ã‚¹ã®Playãƒ¡ã‚½ãƒƒãƒ‰ã‚’ä½¿ç”¨
         effectHandle = effect->Play(position, info.scale, rotation);
+    }
+
+    // ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã‚’ä½¿ã†è¨­å®šãªã‚‰1ã¤ç¢ºä¿ã™ã‚‹
+    if (info.pointLightRange > 0.0f && info.pointLightColor.w > 0.0f)
+    {
+        pointLightIndex = LightManager::Instance().AllocatePointLight();
+        UpdatePointLight();
     }
 }
 
 Projectile::~Projectile()
 {
-    // ƒGƒtƒFƒNƒg’â~
+    // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆåœæ­¢
     if (effect && effectHandle != -1)
     {
         effect->Stop(effectHandle);
     }
+
+    // ç¢ºä¿ã—ãŸãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã‚’è¿”å´ã™ã‚‹
+    if (pointLightIndex >= 0)
+    {
+        LightManager::Instance().FreePointLight(pointLightIndex);
+        pointLightIndex = -1;
+    }
+}
+
+// ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã®ä½ç½®ãƒ»æ˜ã‚‹ã•ã‚’æ›´æ–°ã™ã‚‹
+void Projectile::UpdatePointLight()
+{
+    if (pointLightIndex < 0) return;
+
+    // æ¶ˆãˆã‚‹é–“éš›ã«æ€¥ã«æš—ããªã‚‰ãªã„ã‚ˆã†ã€å¯¿å‘½ã®çµ‚ç›¤ã§æ˜ã‚‹ã•ã‚’è½ã¨ã™
+    constexpr float FADE_START_RATE = 0.7f;
+
+    float lifeRate = (info.lifeTime > 0.0f)
+        ? std::clamp(ageTimer / info.lifeTime, 0.0f, 1.0f)
+        : 1.0f;
+
+    float fade = (lifeRate < FADE_START_RATE)
+        ? 1.0f
+        : 1.0f - (lifeRate - FADE_START_RATE) / (1.0f - FADE_START_RATE);
+
+    float intensity = info.pointLightColor.w * fade;
+    DirectX::XMFLOAT4 color =
+    {
+        info.pointLightColor.x * intensity,
+        info.pointLightColor.y * intensity,
+        info.pointLightColor.z * intensity,
+        1.0f
+    };
+
+    LightManager::Instance().UpdatePointLight(
+        pointLightIndex, position, info.pointLightRange, color);
 }
 
 bool Projectile::Update(float elapsedTime)
 {
-    // õ–½ƒ`ƒFƒbƒN
+    // å¯¿å‘½ãƒã‚§ãƒƒã‚¯
     ageTimer += elapsedTime;
     if (ageTimer >= info.lifeTime)
     {
-        return false; // Á–Å
+        return false; // æ¶ˆæ»…
     }
 
-    // “®‚«‚Ìƒ^ƒCƒv‚É‚æ‚Á‚Ä•ªŠò
+    // å‹•ãã®ã‚¿ã‚¤ãƒ—ã«ã‚ˆã£ã¦åˆ†å²
     switch (info.moveType)
     {
     case MovementType::Stationary:
-        // “®‚©‚È‚¢ (ƒGƒtƒFƒNƒg‚ÌXV‚Ì‚İ)
+        // å‹•ã‹ãªã„ (ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®æ›´æ–°ã®ã¿)
         break;
 
     case MovementType::Linear:
@@ -66,16 +111,19 @@ bool Projectile::Update(float elapsedTime)
         break;
     }
 
-    // ƒGƒtƒFƒNƒg‚ÌˆÊ’uE‰ñ“]“¯Šú
-    // ‚±‚±‚ÅEffectƒNƒ‰ƒXŒo—R‚Å–ˆƒtƒŒ[ƒ€XV
+    // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ä½ç½®ãƒ»å›è»¢åŒæœŸ
+    // ã“ã“ã§Effectã‚¯ãƒ©ã‚¹çµŒç”±ã§æ¯ãƒ•ãƒ¬ãƒ¼ãƒ æ›´æ–°
     if (effect && effectHandle != -1)
     {
-        // ˆÊ’uXV
+        // ä½ç½®æ›´æ–°
         effect->SetPosition(effectHandle, position);
 
-        // ‰ñ“]XV (‚à‚µ—U“±’e‚È‚Ç‚ÅŒü‚«‚ª•Ï‚í‚éê‡‚Íd—v)
+        // å›è»¢æ›´æ–° (ã‚‚ã—èª˜å°å¼¾ãªã©ã§å‘ããŒå¤‰ã‚ã‚‹å ´åˆã¯é‡è¦)
         effect->SetRotation(effectHandle, rotation);
     }
+
+    // ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆã‚‚ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã«è¿½å¾“ã•ã›ã‚‹
+    UpdatePointLight();
 
     if (std::string(info.effectPath).find("LightPillar") != std::string::npos)
     {
@@ -83,10 +131,10 @@ bool Projectile::Update(float elapsedTime)
 
         for (int i = 0; i < emitCount; ++i)
         {
-            // ƒ‰ƒ“ƒ_ƒ€‚ÈŠp“x(0 ` 2PI)
+            // ãƒ©ãƒ³ãƒ€ãƒ ãªè§’åº¦(0 ï½ 2PI)
             float angle = ((float)rand() / RAND_MAX) * DirectX::XM_2PI;
 
-            // ƒ‰ƒ“ƒ_ƒ€‚È”¼Œa (’†S‚©‚ç info.radius ‚Ì”ÍˆÍ)
+            // ãƒ©ãƒ³ãƒ€ãƒ ãªåŠå¾„ (ä¸­å¿ƒã‹ã‚‰ info.radius ã®ç¯„å›²)
             float r = ((float)rand() / RAND_MAX) * info.radius;
 
             DirectX::XMFLOAT3 emitPos = {
@@ -95,42 +143,42 @@ bool Projectile::Update(float elapsedTime)
                 position.z + sinf(angle) * r
             };
 
-            // ”ò‚ÑU‚é‘¬“x
-            // XZ•½–Ê‚ÍŠp“x(angle)‚Ì•ûŒü‚ÖAY‚Í­‚µã‚ÖŒü‚©‚í‚¹‚é
-            float speed = 2.0f + ((float)rand() / RAND_MAX) * 3.0f; // ”ò‚ÑU‚é¨‚¢
+            // é£›ã³æ•£ã‚‹é€Ÿåº¦
+            // XZå¹³é¢ã¯è§’åº¦(angle)ã®æ–¹å‘ã¸ã€Yã¯å°‘ã—ä¸Šã¸å‘ã‹ã‚ã›ã‚‹
+            float speed = 2.0f + ((float)rand() / RAND_MAX) * 3.0f; // é£›ã³æ•£ã‚‹å‹¢ã„
             float vx = cosf(angle) * speed;
-            float vy = ((float)rand() / RAND_MAX) * 2.0f; // ­‚µã‚Ö
+            float vy = ((float)rand() / RAND_MAX) * 2.0f; // å°‘ã—ä¸Šã¸
             float vz = sinf(angle) * speed;
             DirectX::XMFLOAT3 velocity = { vx, vy, vz };
 
-            // F‚ÆƒTƒCƒY
-            DirectX::XMFLOAT4 color = { 1.0f, 0.9f, 0.4f, 1.0f }; // ƒS[ƒ‹ƒhŒn
+            // è‰²ã¨ã‚µã‚¤ã‚º
+            DirectX::XMFLOAT4 color = { 1.0f, 0.9f, 0.4f, 1.0f }; // ã‚´ãƒ¼ãƒ«ãƒ‰ç³»
             float size = 0.1f + ((float)rand() / RAND_MAX) * 0.2f;
-            float lifeTime = 0.2f + ((float)rand() / RAND_MAX) * 0.3f; // ’Z‚­’e‚¯‚ÄÁ‚¦‚é
+            float lifeTime = 0.2f + ((float)rand() / RAND_MAX) * 0.3f; // çŸ­ãå¼¾ã‘ã¦æ¶ˆãˆã‚‹
 
             EffectManager::Instance().EmitGpuParticle(emitPos, velocity, color, size, lifeTime, 1);
         }
     }
 
-    return true; // ¶‘¶
+    return true; // ç”Ÿå­˜
 }
 
-// —†ùEŠgUˆÚ“®‚ÌŒvZ
+// èºæ—‹ãƒ»æ‹¡æ•£ç§»å‹•ã®è¨ˆç®—
 void Projectile::UpdateSpiral(float elapsedTime)
 {
-    // Šp“xXV
+    // è§’åº¦æ›´æ–°
     info.currentAngle += info.angularSpeed * elapsedTime;
-    // ”¼ŒaXV (ŠO‚ÖL‚ª‚é)
+    // åŠå¾„æ›´æ–° (å¤–ã¸åºƒãŒã‚‹)
     info.currentRadius += info.radialSpeed * elapsedTime;
 
-    // V‚µ‚¢ˆÊ’u‚ğŒvZ (XZ•½–Ê‚Å‚Ì‰ñ“])
+    // æ–°ã—ã„ä½ç½®ã‚’è¨ˆç®— (XZå¹³é¢ã§ã®å›è»¢)
     float newX = info.centerPosition.x + cosf(info.currentAngle) * info.currentRadius;
     float newZ = info.centerPosition.z + sinf(info.currentAngle) * info.currentRadius;
 
-    // ‘¬“xƒxƒNƒgƒ‹‚ğ‹tZi“–‚½‚è”»’è‚â‰ñ“]ŒvZ‚Ì‚½‚ßj
+    // é€Ÿåº¦ãƒ™ã‚¯ãƒˆãƒ«ã‚’é€†ç®—ï¼ˆå½“ãŸã‚Šåˆ¤å®šã‚„å›è»¢è¨ˆç®—ã®ãŸã‚ï¼‰
     velocity.x = (newX - position.x) / elapsedTime;
     velocity.z = (newZ - position.z) / elapsedTime;
-    velocity.y = 0; // •K—v‚È‚ç‚‚³•Ï“®‚ğ“ü‚ê‚é
+    velocity.y = 0; // å¿…è¦ãªã‚‰é«˜ã•å¤‰å‹•ã‚’å…¥ã‚Œã‚‹
 
     position.x = newX;
     position.z = newZ;
@@ -138,14 +186,14 @@ void Projectile::UpdateSpiral(float elapsedTime)
     CalculateRotationFromVelocity(true);
 }
 
-// ƒ^[ƒQƒbƒg‚ÉŒü‚©‚Á‚Ä”­Ë (ƒxƒNƒgƒ‹ŒvZ)
+// ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã«å‘ã‹ã£ã¦ç™ºå°„ (ãƒ™ã‚¯ãƒˆãƒ«è¨ˆç®—)
 void Projectile::FireAt(const DirectX::XMFLOAT3& targetPos, float newSpeed, bool bakeY)
 {
-    // ’â~ó‘Ô‚È‚Ç‚ğ‰ğœ
+    // åœæ­¢çŠ¶æ…‹ãªã©ã‚’è§£é™¤
     info.moveType = MovementType::Linear;
     info.speed = newSpeed;
 
-    // ƒxƒNƒgƒ‹ŒvZ
+    // ãƒ™ã‚¯ãƒˆãƒ«è¨ˆç®—
     float dx = targetPos.x - position.x;
     float dy = targetPos.y - position.y;
     float dz = targetPos.z - position.z;
@@ -160,7 +208,7 @@ void Projectile::FireAt(const DirectX::XMFLOAT3& targetPos, float newSpeed, bool
         info.direction = { 0, 0, 1 };
     }
 
-    // ‘¬“xXV
+    // é€Ÿåº¦æ›´æ–°
     velocity.x = info.direction.x * info.speed;
     if (!bakeY)
         velocity.y = info.direction.y * info.speed;
@@ -174,22 +222,22 @@ void Projectile::StartSpiral(float angularSpd, float radialSpd)
     info.moveType = MovementType::Spiral;
     info.angularSpeed = angularSpd;
     info.radialSpeed = radialSpd;
-    // •K—v‚È‚ç lifeTime ‚ğ‰„’·‚·‚éˆ—‚ğ“ü‚ê‚Ä‚à—Ç‚¢
+    // å¿…è¦ãªã‚‰ lifeTime ã‚’å»¶é•·ã™ã‚‹å‡¦ç†ã‚’å…¥ã‚Œã¦ã‚‚è‰¯ã„
 }
 
 void Projectile::CalculateRotationFromVelocity(bool bakeY)
 {
-    // Y²‰ñ“] (Yaw)
+    // Yè»¸å›è»¢ (Yaw)
     rotation.y = atan2f(velocity.x, velocity.z);
 
-    // X²‰ñ“] (Pitch) - ã‰º•ûŒü‚ÌŒX‚«
+    // Xè»¸å›è»¢ (Pitch) - ä¸Šä¸‹æ–¹å‘ã®å‚¾ã
     if (!bakeY)
 	{
 		float horizontalLen = sqrtf(velocity.x * velocity.x + velocity.z * velocity.z);
     	rotation.x = -atan2f(velocity.y, horizontalLen);
 	}
 
-    // Z²‰ñ“] (Roll)
+    // Zè»¸å›è»¢ (Roll)
     rotation.z = 0.0f;
 }
 
@@ -197,22 +245,22 @@ bool Projectile::OnHit(Character* target)
 {
     if (!target || target == info.owner || target->IsDeathFlag()) return false;
 
-    // ƒ^[ƒQƒbƒg‚Ìî•ñ
+    // ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®æƒ…å ±
     DirectX::XMFLOAT3 tPos = target->GetPosition();
-    // “–‚½‚è”»’è”¼Œa (©g‚Ì”¼Œa + ‘Šè‚Ì”¼Œa–ÚˆÀ0.5)
+    // å½“ãŸã‚Šåˆ¤å®šåŠå¾„ (è‡ªèº«ã®åŠå¾„ + ç›¸æ‰‹ã®åŠå¾„ç›®å®‰0.5)
     float hitRadius = info.radius + 0.3f;
     float hitHeight = tPos.y + 1.0f;
     bool isHit = false;
 
     // ---------------------------------------------------------
-    // Œ`ó‚É‚æ‚é”»’è•ªŠò
+    // å½¢çŠ¶ã«ã‚ˆã‚‹åˆ¤å®šåˆ†å²
     // ---------------------------------------------------------
     if (info.shape == ProjectileShape::Sphere)
     {
-        // --- ‹…‘Ì”»’è (Sphere) ---
-        // ’Pƒ‚È3ŸŒ³‹——£ƒ`ƒFƒbƒN
+        // --- çƒä½“åˆ¤å®š (Sphere) ---
+        // å˜ç´”ãª3æ¬¡å…ƒè·é›¢ãƒã‚§ãƒƒã‚¯
         float dx = position.x - tPos.x;
-        float dy = position.y - (tPos.y + hitHeight * 0.5f); // ‘Šè‚Ì’†S•t‹ß‚ğ‘_‚¤•â³
+        float dy = position.y - (tPos.y + hitHeight * 0.5f); // ç›¸æ‰‹ã®ä¸­å¿ƒä»˜è¿‘ã‚’ç‹™ã†è£œæ­£
         float dz = position.z - tPos.z;
         float distSq = dx * dx + dy * dy + dz * dz;
 
@@ -224,8 +272,8 @@ bool Projectile::OnHit(Character* target)
     }
     else if (info.shape == ProjectileShape::Cylinder)
     {
-        // --- ‰~’Œ”»’è (Cylinder) ---
-        // 1. …•½•ûŒü(XZ)‚Ì‹——£ƒ`ƒFƒbƒN
+        // --- å††æŸ±åˆ¤å®š (Cylinder) ---
+        // 1. æ°´å¹³æ–¹å‘(XZ)ã®è·é›¢ãƒã‚§ãƒƒã‚¯
         float dx = position.x - tPos.x;
         float dz = position.z - tPos.z;
         float distSqXZ = dx * dx + dz * dz;
@@ -233,15 +281,15 @@ bool Projectile::OnHit(Character* target)
 
         if (distSqXZ < combinedRadius * combinedRadius)
         {
-            // 2. ‚’¼•ûŒü(Y)‚Ì‚‚³ƒ`ƒFƒbƒN
-            // ’e‚Ì’ê–Ê`ã–Ê ‚Æ ƒLƒƒƒ‰ƒNƒ^[‚Ì’ê–Ê`ã–Ê ‚ªd‚È‚Á‚Ä‚¢‚é‚©
-            float projBottom = position.y - (info.height * 0.5f); // ’e‚Ì‰º’[
-            float projTop = position.y + (info.height * 0.5f); // ’e‚Ìã’[
+            // 2. å‚ç›´æ–¹å‘(Y)ã®é«˜ã•ãƒã‚§ãƒƒã‚¯
+            // å¼¾ã®åº•é¢ï½ä¸Šé¢ ã¨ ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã®åº•é¢ï½ä¸Šé¢ ãŒé‡ãªã£ã¦ã„ã‚‹ã‹
+            float projBottom = position.y - (info.height * 0.5f); // å¼¾ã®ä¸‹ç«¯
+            float projTop = position.y + (info.height * 0.5f); // å¼¾ã®ä¸Šç«¯
 
-            float charBottom = tPos.y;              // ƒLƒƒƒ‰‚Ì‘«Œ³
-            float charTop = tPos.y + hitHeight;    // ƒLƒƒƒ‰‚Ì“ª’¸
+            float charBottom = tPos.y;              // ã‚­ãƒ£ãƒ©ã®è¶³å…ƒ
+            float charTop = tPos.y + hitHeight;    // ã‚­ãƒ£ãƒ©ã®é ­é ‚
 
-            // u’e‚ªƒLƒƒƒ‰‚æ‚èŠ®‘S‚Éã‚É‚¢‚év‚Ü‚½‚Íu’e‚ªƒLƒƒƒ‰‚æ‚èŠ®‘S‚É‰º‚É‚¢‚évˆÈŠO‚È‚çƒqƒbƒg
+            // ã€Œå¼¾ãŒã‚­ãƒ£ãƒ©ã‚ˆã‚Šå®Œå…¨ã«ä¸Šã«ã„ã‚‹ã€ã¾ãŸã¯ã€Œå¼¾ãŒã‚­ãƒ£ãƒ©ã‚ˆã‚Šå®Œå…¨ã«ä¸‹ã«ã„ã‚‹ã€ä»¥å¤–ãªã‚‰ãƒ’ãƒƒãƒˆ
             if (projBottom < charTop && projTop > charBottom)
             {
                 isHit = true;
@@ -273,7 +321,7 @@ bool Projectile::OnHit(Character* target)
         {
 	        EnemyBoss::Instance().SetDamage(true);
         }
-        target->ApplyDamage(info.damage, info.invincibleTime); // 0.5f‚Í–³“GŠÔ
+        target->ApplyDamage(info.damage, info.invincibleTime); // 0.5fã¯ç„¡æ•µæ™‚é–“
         return true;
     }
 

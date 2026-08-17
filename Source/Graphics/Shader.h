@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "RenderContext.h"
 #include "Model/Model.h"
@@ -9,16 +9,16 @@ public:
 	Shader() {}
 	virtual ~Shader() {}
 
-	// ŠJnˆ—
+	// é–‹å§‹å‡¦ç†
 	virtual void Begin(const RenderContext& rc) = 0;
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	virtual void Update(const RenderContext& rc, const ModelResource::Mesh& mesh, const std::shared_ptr<Model> model) = 0;
 
-	// I—¹ˆ—
+	// çµ‚äº†å‡¦ç†
 	virtual void End(const RenderContext& rc) = 0;
 
-	// ƒfƒoƒbƒO—pGUI
+	// ãƒ‡ãƒãƒƒã‚°ç”¨GUI
 	virtual void ImGui() = 0;
 protected:
 	void ClearShaderResourceViews(int startSlot, ID3D11DeviceContext* dc)
@@ -42,5 +42,5 @@ protected:
 		dc->CSSetShader(nullptr, nullptr, 0);
 	}
 
-	bool	IsDraw = false;
+	bool	isDraw = false;
 };

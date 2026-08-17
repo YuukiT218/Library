@@ -66,7 +66,7 @@ void SceneEdit::Initialize()
 	// ライト設定
 	DirectionalLight directionalLight;
 	directionalLight.direction = { direction };
-	directionalLight.color = { Directioncolor };
+	directionalLight.color = { directionColor };
 	lightManager.SetDirectionalLight(directionalLight);
 
 	skyBox = std::make_unique<SkyBox>(device);
@@ -226,7 +226,7 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 	//このEditだけUnity風にStyleChange
 	ImGuiSetStyle();
 
-	cameraController->DrawDebugGui();
+	cameraController->DrawDebugGUI();
 
 	ImGui::Begin("Game View", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
@@ -317,7 +317,7 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 				*out_text = characterNames[idx].c_str();
 				return true;
 			},
-			&characterNames, characterNames.size())) {
+			&characterNames, static_cast<int>(characterNames.size()))) {
 			// 選択されたキャラクターを設定
 			selectedCharacter = characterList[selectedIndex];
 		}

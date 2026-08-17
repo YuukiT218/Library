@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <DirectXMath.h>
 
 class Camera
@@ -14,63 +14,63 @@ public:
         return camera;
     }
 
-    // ƒNƒH[ƒ^ƒjƒIƒ“‚É‚æ‚é‰ñ“]İ’è
+    // ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã«ã‚ˆã‚‹å›è»¢è¨­å®š
     void SetRotation(const DirectX::XMFLOAT4& quaternion);
 
-    // ˆÊ’uİ’è
+    // ä½ç½®è¨­å®š
     void SetPosition(const DirectX::XMFLOAT3& position);
 
-    // ƒNƒH[ƒ^ƒjƒIƒ“‚ÆˆÊ’u‚©‚çs—ñ‚ğXV
+    // ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã¨ä½ç½®ã‹ã‚‰è¡Œåˆ—ã‚’æ›´æ–°
     void UpdateMatrices();
 
-    // ]—ˆ‚ÌŒİŠ·«‚Ì‚½‚ß‚ÌŠÖ”
+    // å¾“æ¥ã®äº’æ›æ€§ã®ãŸã‚ã®é–¢æ•°
     void SetLookAt(const DirectX::XMFLOAT3& eye, const DirectX::XMFLOAT3& focus, const DirectX::XMFLOAT3& up);
 
-    // ƒp[ƒXƒyƒNƒeƒBƒuİ’è
+    // ãƒ‘ãƒ¼ã‚¹ãƒšã‚¯ãƒ†ã‚£ãƒ–è¨­å®š
     void SetPerspectiveFov(float fovY, float aspect, float nearZ, float farZ);
 
-    // ƒrƒ…[s—ñæ“¾
+    // ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—å–å¾—
     const DirectX::XMFLOAT4X4& GetView() const { return view; }
 
-    // ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñæ“¾
+    // ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—å–å¾—
     const DirectX::XMFLOAT4X4& GetProjection() const { return projection; }
 
-    // ‹“_æ“¾Eİ’è
+    // è¦–ç‚¹å–å¾—ãƒ»è¨­å®š
     void SetEye(const DirectX::XMFLOAT3 Eye) { eye = Eye; }
     const DirectX::XMFLOAT3& GetEye() const { return eye; }
 
-    // ’‹“_æ“¾Eİ’è
+    // æ³¨è¦–ç‚¹å–å¾—ãƒ»è¨­å®š
     void SetFocus(const DirectX::XMFLOAT3 Focus) { focus = Focus; }
     const DirectX::XMFLOAT3& GetFocus() const { return focus; }
 
-    // •ûŒüƒxƒNƒgƒ‹æ“¾
+    // æ–¹å‘ãƒ™ã‚¯ãƒˆãƒ«å–å¾—
     const DirectX::XMFLOAT3& GetUp() const { return up; }
     const DirectX::XMFLOAT3& GetFront() const { return front; }
     const DirectX::XMFLOAT3& GetRight() const { return right; }
 
-    // ƒNƒH[ƒ^ƒjƒIƒ“æ“¾
+    // ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³å–å¾—
     const DirectX::XMFLOAT4& GetRotation() const { return rotation; }
 
-    // ‰æŠpİ’èEæ“¾
+    // ç”»è§’è¨­å®šãƒ»å–å¾—
     void SetFov(float Fov) { fov = Fov; }
     const float GetFov() const { return fov; }
 
-    // ƒvƒƒWƒFƒNƒVƒ‡ƒ“İ’èæ“¾
+    // ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¨­å®šå–å¾—
     float GetAspect() const { return aspect; }
     float GetNearZ() const { return nearZ; }
     float GetFarZ() const { return farZ; }
 
-    // ƒ[ƒ‹ƒhÀ•W‚ğƒXƒNƒŠ[ƒ“À•WiNDCj‚É•ÏŠ·
+    // ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã‚’ã‚¹ã‚¯ãƒªãƒ¼ãƒ³åº§æ¨™ï¼ˆNDCï¼‰ã«å¤‰æ›
     DirectX::XMFLOAT3 WorldToNDC(const DirectX::XMFLOAT3& worldPos) const;
 
-    // ƒ[ƒ‹ƒhÀ•W‚ª‰æŠp“à‚É‚ ‚é‚©ƒ`ƒFƒbƒN
+    // ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ãŒç”»è§’å†…ã«ã‚ã‚‹ã‹ãƒã‚§ãƒƒã‚¯
     bool IsInViewport(const DirectX::XMFLOAT3& worldPos, float margin = 0.0f) const;
 
-    // ƒtƒŠ[ƒJƒƒ‰ƒtƒ‰ƒO
+    // ãƒ•ãƒªãƒ¼ã‚«ãƒ¡ãƒ©ãƒ•ãƒ©ã‚°
     void SetFreeCameraFlag(bool freeFlag) { freeCameraFlag = freeFlag; }
     const bool GetFreeCameraFlag() const { return freeCameraFlag; }
 
-    // ƒJƒƒ‰ƒVƒFƒCƒN
+    // ã‚«ãƒ¡ãƒ©ã‚·ã‚§ã‚¤ã‚¯
     void SetCameraShakeSwitch(bool shake, float timer = 0.5f, float power = 1.0f)
     {
         shakeflag = shake;
@@ -81,7 +81,7 @@ public:
     float GetCameraShakeTimer() { return shaketimer; }
     float GetCameraShakePower() { return shakepower; }
 
-    // ‹‘ä‚Ì8‚Â‚Ì’¸“_‚ğƒ[ƒ‹ƒhÀ•W‚Åæ“¾
+    // è¦–éŒå°ã®8ã¤ã®é ‚ç‚¹ã‚’ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™ã§å–å¾—
     void GetFrustumCorners(float zNear, float zFar, DirectX::XMFLOAT3* corners) const;
 
 private:
@@ -93,7 +93,7 @@ private:
     DirectX::XMFLOAT3 front;
     DirectX::XMFLOAT3 right;
 
-    // ƒNƒH[ƒ^ƒjƒIƒ“
+    // ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³
     DirectX::XMFLOAT4 rotation = { 0, 0, 0, 1 };
 
     bool freeCameraFlag = false;

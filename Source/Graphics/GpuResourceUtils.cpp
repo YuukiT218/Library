@@ -1,10 +1,10 @@
-#include <filesystem>
+ï»¿#include <filesystem>
 #include <wrl.h>
 #include <DirectXTex.h>
 #include "System/Misc.h"
 #include "GpuResourceUtils.h"
 
-// ’¸“_ƒVƒF[ƒ_[“Ç‚İ‚İ
+// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 HRESULT GpuResourceUtils::LoadVertexShader(
 	ID3D11Device* device,
 	const char* filename,
@@ -13,26 +13,26 @@ HRESULT GpuResourceUtils::LoadVertexShader(
 	ID3D11InputLayout** inputLayout,
 	ID3D11VertexShader** vertexShader)
 {
-	// ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	FILE* fp = nullptr;
 	fopen_s(&fp, filename, "rb");
 	_ASSERT_EXPR_A(fp, "Vertex Shader File not found");
 
-	// ƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
 	fseek(fp, 0, SEEK_END);
 	long size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
-	// ƒƒ‚ƒŠã‚É’¸“_ƒVƒF[ƒ_[ƒf[ƒ^‚ğŠi”[‚·‚é—Ìˆæ‚ğ—pˆÓ‚·‚é
+	// ãƒ¡ãƒ¢ãƒªä¸Šã«é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹é ˜åŸŸã‚’ç”¨æ„ã™ã‚‹
 	std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
 	fread(data.get(), size, 1, fp);
 	fclose(fp);
 
-	// ’¸“_ƒVƒF[ƒ_[¶¬
+	// é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
 	HRESULT hr = device->CreateVertexShader(data.get(), size, nullptr, vertexShader);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	// “ü—ÍƒŒƒCƒAƒEƒg
+	// å…¥åŠ›ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ
 	if (inputLayout != nullptr)
 	{
 		hr = device->CreateInputLayout(inputElementDescs, inputElementCount, data.get(), size, inputLayout);
@@ -42,106 +42,106 @@ HRESULT GpuResourceUtils::LoadVertexShader(
 	return hr;
 }
 
-// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[“Ç‚İ‚İ
+// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 HRESULT GpuResourceUtils::LoadPixelShader(
 	ID3D11Device* device,
 	const char* filename,
 	ID3D11PixelShader** pixelShader)
 {
-	// ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	FILE* fp = nullptr;
 	fopen_s(&fp, filename, "rb");
 	_ASSERT_EXPR_A(fp, "Pixel Shader File not found");
 
-	// ƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
 	fseek(fp, 0, SEEK_END);
 	long size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
-	// ƒƒ‚ƒŠã‚É’¸“_ƒVƒF[ƒ_[ƒf[ƒ^‚ğŠi”[‚·‚é—Ìˆæ‚ğ—pˆÓ‚·‚é
+	// ãƒ¡ãƒ¢ãƒªä¸Šã«é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹é ˜åŸŸã‚’ç”¨æ„ã™ã‚‹
 	std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
 	fread(data.get(), size, 1, fp);
 	fclose(fp);
 
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[¶¬
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
 	HRESULT hr = device->CreatePixelShader(data.get(), size, nullptr, pixelShader);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	return hr;
 }
 
-// ƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[“Ç‚İ‚İ
+// ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 HRESULT GpuResourceUtils::LoadComputeShader(
 	ID3D11Device* device,
 	const char* filename,
 	ID3D11ComputeShader** computeShader)
 {
-	// ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	FILE* fp = nullptr;
 	fopen_s(&fp, filename, "rb");
 	_ASSERT_EXPR_A(fp, "Compute Shader File not found");
 
-	// ƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
 	fseek(fp, 0, SEEK_END);
 	long size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
-	// ƒƒ‚ƒŠã‚É’¸“_ƒVƒF[ƒ_[ƒf[ƒ^‚ğŠi”[‚·‚é—Ìˆæ‚ğ—pˆÓ‚·‚é
+	// ãƒ¡ãƒ¢ãƒªä¸Šã«é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹é ˜åŸŸã‚’ç”¨æ„ã™ã‚‹
 	std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
 	fread(data.get(), size, 1, fp);
 	fclose(fp);
 
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[¶¬
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
 	HRESULT hr = device->CreateComputeShader(data.get(), size, nullptr, computeShader);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	return hr;
 }
 
-// ƒWƒIƒƒgƒŠƒVƒF[ƒ_[“Ç‚İ‚İ
+// ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼èª­ã¿è¾¼ã¿
 HRESULT GpuResourceUtils::LoadGeometryShader(
 	ID3D11Device* device,
 	const char* filename,
 	ID3D11GeometryShader** geometryShader)
 {
-	// ƒtƒ@ƒCƒ‹‚ğŠJ‚­
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‹ã
 	FILE* fp = nullptr;
 	fopen_s(&fp, filename, "rb");
 	_ASSERT_EXPR_A(fp, "Geometry Shader File not found");
 
-	// ƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY‚ğ‹‚ß‚é
+	// ãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºã‚’æ±‚ã‚ã‚‹
 	fseek(fp, 0, SEEK_END);
 	long size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
-	// ƒƒ‚ƒŠã‚É’¸“_ƒVƒF[ƒ_[ƒf[ƒ^‚ğŠi”[‚·‚é—Ìˆæ‚ğ—pˆÓ‚·‚é
+	// ãƒ¡ãƒ¢ãƒªä¸Šã«é ‚ç‚¹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ‡ãƒ¼ã‚¿ã‚’æ ¼ç´ã™ã‚‹é ˜åŸŸã‚’ç”¨æ„ã™ã‚‹
 	std::unique_ptr<u_char[]> data = std::make_unique<u_char[]>(size);
 	fread(data.get(), size, 1, fp);
 	fclose(fp);
 
-	// ƒsƒNƒZƒ‹ƒVƒF[ƒ_[¶¬
+	// ãƒ”ã‚¯ã‚»ãƒ«ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ç”Ÿæˆ
 	HRESULT hr = device->CreateGeometryShader(data.get(), size, nullptr, geometryShader);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
 	return hr;
 }
 
-// ƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 HRESULT GpuResourceUtils::LoadTexture(
 	ID3D11Device* device,
 	const char* filename,
 	ID3D11ShaderResourceView** shaderResourceView,
 	D3D11_TEXTURE2D_DESC* texture2dDesc)
 {
-	// Šg’£q‚ğæ“¾
+	// æ‹¡å¼µå­ã‚’å–å¾—
 	std::filesystem::path filepath(filename);
 	std::string extension = filepath.extension().string();
-	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);	// ¬•¶š‰»
+	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);	// å°æ–‡å­—åŒ–
 
-	// ƒƒCƒh•¶š‚É•ÏŠ·
+	// ãƒ¯ã‚¤ãƒ‰æ–‡å­—ã«å¤‰æ›
 	std::wstring wfilename = filepath.wstring();
 
-	// ƒtƒH[ƒ}ƒbƒg–ˆ‚É‰æ‘œ“Ç‚İ‚İˆ—
+	// ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆæ¯ã«ç”»åƒèª­ã¿è¾¼ã¿å‡¦ç†
 	HRESULT hr;
 	DirectX::TexMetadata metadata;
 	DirectX::ScratchImage scratch_image;
@@ -178,12 +178,12 @@ HRESULT GpuResourceUtils::LoadTexture(
 		_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 	}
 
-	// ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[ì¬
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ä½œæˆ
 	hr = DirectX::CreateShaderResourceView(device, scratch_image.GetImages(), scratch_image.GetImageCount(),
 		metadata, shaderResourceView);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	// ƒeƒNƒXƒ`ƒƒî•ñæ“¾
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£æƒ…å ±å–å¾—
 	if (texture2dDesc != nullptr)
 	{
 		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
@@ -197,7 +197,7 @@ HRESULT GpuResourceUtils::LoadTexture(
 	return hr;
 }
 
-// ƒeƒNƒXƒ`ƒƒ“Ç‚İ‚İ
+// ãƒ†ã‚¯ã‚¹ãƒãƒ£èª­ã¿è¾¼ã¿
 HRESULT GpuResourceUtils::LoadTexture(
 	ID3D11Device* device,
 	const void* data,
@@ -205,7 +205,7 @@ HRESULT GpuResourceUtils::LoadTexture(
 	ID3D11ShaderResourceView** shaderResourceView,
 	D3D11_TEXTURE2D_DESC* texture2dDesc)
 {
-	// ƒtƒH[ƒ}ƒbƒg–ˆ‚É‰æ‘œ“Ç‚İ‚İˆ—
+	// ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆæ¯ã«ç”»åƒèª­ã¿è¾¼ã¿å‡¦ç†
 	HRESULT hr = E_FAIL;
 	DirectX::TexMetadata metadata;
 	DirectX::ScratchImage scratch_image;
@@ -249,12 +249,12 @@ HRESULT GpuResourceUtils::LoadTexture(
 		return hr;
 	}
 
-	// ƒVƒF[ƒ_[ƒŠƒ\[ƒXƒrƒ…[ì¬
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒªã‚½ãƒ¼ã‚¹ãƒ“ãƒ¥ãƒ¼ä½œæˆ
 	hr = DirectX::CreateShaderResourceView(device, scratch_image.GetImages(), scratch_image.GetImageCount(),
 		metadata, shaderResourceView);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	// ƒeƒNƒXƒ`ƒƒî•ñæ“¾
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£æƒ…å ±å–å¾—
 	if (texture2dDesc != nullptr)
 	{
 		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
@@ -268,7 +268,7 @@ HRESULT GpuResourceUtils::LoadTexture(
 	return hr;
 }
 
-// ƒ_ƒ~[ƒeƒNƒXƒ`ƒƒì¬
+// ãƒ€ãƒŸãƒ¼ãƒ†ã‚¯ã‚¹ãƒãƒ£ä½œæˆ
 HRESULT GpuResourceUtils::CreateDummyTexture(
 	ID3D11Device* device,
 	UINT color,
@@ -298,7 +298,7 @@ HRESULT GpuResourceUtils::CreateDummyTexture(
 	hr = device->CreateShaderResourceView(texture.Get(), nullptr, shaderResourceView);
 	_ASSERT_EXPR(SUCCEEDED(hr), HRTrace(hr));
 
-	// ƒeƒNƒXƒ`ƒƒî•ñæ“¾
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£æƒ…å ±å–å¾—
 	if (texture2dDesc != nullptr)
 	{
 		Microsoft::WRL::ComPtr<ID3D11Resource> resource;
@@ -313,7 +313,7 @@ HRESULT GpuResourceUtils::CreateDummyTexture(
 	return hr;
 }
 
-// ’è”ƒoƒbƒtƒ@ì¬
+// å®šæ•°ãƒãƒƒãƒ•ã‚¡ä½œæˆ
 HRESULT GpuResourceUtils::CreateConstantBuffer(
 	ID3D11Device* device,
 	UINT bufferSize,
@@ -333,7 +333,7 @@ HRESULT GpuResourceUtils::CreateConstantBuffer(
 	return hr;
 }
 
-// \‘¢‰»ƒoƒbƒtƒ@ (Structured Buffer) ‚Æ UAV / SRV ‚Ìì¬
+// æ§‹é€ åŒ–ãƒãƒƒãƒ•ã‚¡ (Structured Buffer) ã¨ UAV / SRV ã®ä½œæˆ
 HRESULT GpuResourceUtils::CreateStructuredBuffer(
 	ID3D11Device* device,
 	UINT elementSize,
@@ -345,11 +345,11 @@ HRESULT GpuResourceUtils::CreateStructuredBuffer(
 {
 	HRESULT hr = S_OK;
 
-	// ƒoƒbƒtƒ@–{‘Ì‚Ìì¬
-	// Compute Shader‚Å‚Ì“Ç‚İ‘‚«(UAV)‚ÆA•`‰æ‚Ì“Ç‚İæ‚è(SRV)‚Ì—¼•û‚ğ‹–‰Â‚µ‚Ü‚·
+	// ãƒãƒƒãƒ•ã‚¡æœ¬ä½“ã®ä½œæˆ
+	// Compute Shaderã§ã®èª­ã¿æ›¸ã(UAV)ã¨ã€æç”»æ™‚ã®èª­ã¿å–ã‚Š(SRV)ã®ä¸¡æ–¹ã‚’è¨±å¯ã—ã¾ã™
 	D3D11_BUFFER_DESC desc = {};
 	desc.ByteWidth = elementSize * elementCount;
-	desc.Usage = D3D11_USAGE_DEFAULT; // GPU‘¤‚Å‚‘¬‚É“Ç‚İ‘‚«‚·‚é‚½‚ßDEFAULT
+	desc.Usage = D3D11_USAGE_DEFAULT; // GPUå´ã§é«˜é€Ÿã«èª­ã¿æ›¸ãã™ã‚‹ãŸã‚DEFAULT
 	desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	desc.StructureByteStride = elementSize;
@@ -357,15 +357,15 @@ HRESULT GpuResourceUtils::CreateStructuredBuffer(
 	D3D11_SUBRESOURCE_DATA data = {};
 	data.pSysMem = initData;
 
-	// initData‚ªnullptr‚Ìê‡‚Í‰Šúƒf[ƒ^‚È‚µ‚Åƒoƒbƒtƒ@‚¾‚¯Šm•Û‚µ‚Ü‚·
+	// initDataãŒnullptrã®å ´åˆã¯åˆæœŸãƒ‡ãƒ¼ã‚¿ãªã—ã§ãƒãƒƒãƒ•ã‚¡ã ã‘ç¢ºä¿ã—ã¾ã™
 	hr = device->CreateBuffer(&desc, initData ? &data : nullptr, buffer);
 	if (FAILED(hr)) return hr;
 
-	// SRV (Shader Resource View) ‚Ìì¬
-	// ’¸“_/ƒWƒIƒƒgƒŠƒVƒF[ƒ_[‚Åƒp[ƒeƒBƒNƒ‹‚ÌˆÊ’u‚ğ“Ç‚İæ‚é‚½‚ß‚Ég‚¢‚Ü‚·
+	// SRV (Shader Resource View) ã®ä½œæˆ
+	// é ‚ç‚¹/ã‚¸ã‚ªãƒ¡ãƒˆãƒªã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®ä½ç½®ã‚’èª­ã¿å–ã‚‹ãŸã‚ã«ä½¿ã„ã¾ã™
 	if (srv) {
 		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		srvDesc.Format = DXGI_FORMAT_UNKNOWN; // \‘¢‰»ƒoƒbƒtƒ@‚Ìê‡‚ÍUNKNOWN‚ğw’è‚µ‚Ü‚·
+		srvDesc.Format = DXGI_FORMAT_UNKNOWN; // æ§‹é€ åŒ–ãƒãƒƒãƒ•ã‚¡ã®å ´åˆã¯UNKNOWNã‚’æŒ‡å®šã—ã¾ã™
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 		srvDesc.Buffer.FirstElement = 0;
 		srvDesc.Buffer.NumElements = elementCount;
@@ -373,8 +373,8 @@ HRESULT GpuResourceUtils::CreateStructuredBuffer(
 		if (FAILED(hr)) return hr;
 	}
 
-	// UAV (Unordered Access View) ‚Ìì¬
-	// ƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[‚Åƒp[ƒeƒBƒNƒ‹‚ÌŒvZŒ‹‰Ê‚ğ‘‚«‚Ş‚½‚ß‚Ég‚¢‚Ü‚·
+	// UAV (Unordered Access View) ã®ä½œæˆ
+	// ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã®è¨ˆç®—çµæœã‚’æ›¸ãè¾¼ã‚€ãŸã‚ã«ä½¿ã„ã¾ã™
 	if (uav) {
 		D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
 		uavDesc.Format = DXGI_FORMAT_UNKNOWN;

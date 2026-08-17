@@ -29,6 +29,10 @@ protected:
 	// デバッグ用GUI描画
 	void DrawDebugGUI() override;
 
+protected:
+	InputActionType nextInput;
+	bool nextShiftReady = false;
+
 private:
 	// アニメーションインデックス
 	struct DamageAnimations

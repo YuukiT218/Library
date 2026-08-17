@@ -1,6 +1,12 @@
 ﻿#include <stdlib.h>
 #include "Mathf.h"
 
+namespace
+{
+	// 8bitカラーの最大値
+	constexpr float COLOR_8BIT_MAX = 255.0f;
+}
+
 float Mathf::Lerp(float a, float b, float t)
 {
 	return a * (1.0f - t) + (b * t);
@@ -17,13 +23,13 @@ float Mathf::RandomRange(float min, float max)
 }
 
 //0~255のカラーの値を0~1に変換する処理
-DirectX::XMFLOAT4& Mathf::Color255ToNormalized(const DirectX::XMFLOAT4& color)
+DirectX::XMFLOAT4 Mathf::Color255ToNormalized(const DirectX::XMFLOAT4& color)
 {
 	return DirectX::XMFLOAT4
 	{
-		color.x / 255.0f,
-		color.y / 255.0f,
-		color.z / 255.0f,
-		color.w / 255.0f
+		color.x / COLOR_8BIT_MAX,
+		color.y / COLOR_8BIT_MAX,
+		color.z / COLOR_8BIT_MAX,
+		color.w / COLOR_8BIT_MAX
 	};
 }

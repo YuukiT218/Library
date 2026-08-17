@@ -44,7 +44,7 @@ protected:
 	// 攻撃判定必要変数
 	float attackCollisionStartFrame = 0.0f;
 	float attackCollisionEndFrame = 1.0f;
-	int	  attackDamage = 1.0f;
+	int	  attackDamage = 1;
 	float invisibleTime = 0.5f;
 
 	// コントローラーの振動変数

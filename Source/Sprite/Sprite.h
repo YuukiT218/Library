@@ -1,17 +1,17 @@
-#pragma once
+ï»¿#pragma once
 
 #include <wrl.h>
 #include <d3d11.h>
 #include <DirectXMath.h>
 
-// ƒXƒvƒ‰ƒCƒg
+// ã‚¹ãƒ—ãƒ©ã‚¤ãƒˆ
 class Sprite
 {
 public:
 	Sprite(ID3D11Device* device);
 	Sprite(ID3D11Device* device, const char* filename);
 
-	// ’¸“_ƒf[ƒ^
+	// é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿
 	struct Vertex
 	{
 		DirectX::XMFLOAT3	position;
@@ -20,24 +20,24 @@ public:
 	};
 
 	void Render(ID3D11DeviceContext* dc,
-		float dx, float dy,					// ¶ãˆÊ’u
-		float dz,							// ‰œs
-		float dw, float dh,					// •A‚‚³
-		float sx, float sy,					// ‰æ‘œØ‚è”²‚«ˆÊ’u
-		float sw, float sh,					// ‰æ‘œØ‚è”²‚«ƒTƒCƒY
-		float angle,						// Šp“x
-		float r, float g, float b, float a,	// F
+		float dx, float dy,					// å·¦ä¸Šä½ç½®
+		float dz,							// å¥¥è¡Œ
+		float dw, float dh,					// å¹…ã€é«˜ã•
+		float sx, float sy,					// ç”»åƒåˆ‡ã‚ŠæŠœãä½ç½®
+		float sw, float sh,					// ç”»åƒåˆ‡ã‚ŠæŠœãã‚µã‚¤ã‚º
+		float angle,						// è§’åº¦
+		float r, float g, float b, float a,	// è‰²
 		ID3D11VertexShader* vs = nullptr,
 		ID3D11PixelShader* ps = nullptr
 	) const;
 
-	// •`‰æˆ—iƒeƒNƒXƒ`ƒƒØ‚è”²‚«w’è‚È‚µj
+	// æç”»å‡¦ç†ï¼ˆãƒ†ã‚¯ã‚¹ãƒãƒ£åˆ‡ã‚ŠæŠœãæŒ‡å®šãªã—ï¼‰
 	void Render(ID3D11DeviceContext* dc,
-		float dx, float dy,					// ¶ãˆÊ’u
-		float dz,							// ‰œs
-		float dw, float dh,					// •A‚‚³
-		float angle,						// Šp“x
-		float r, float g, float b, float a,	// F
+		float dx, float dy,					// å·¦ä¸Šä½ç½®
+		float dz,							// å¥¥è¡Œ
+		float dw, float dh,					// å¹…ã€é«˜ã•
+		float angle,						// è§’åº¦
+		float r, float g, float b, float a,	// è‰²
 		ID3D11VertexShader* vs = nullptr,
 		ID3D11PixelShader* ps = nullptr
 	)const;

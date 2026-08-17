@@ -51,30 +51,30 @@ public:
 
     void SetRespawnEnable(bool flag) { respawnEnable = flag; }
 private:
-    int m_maxParticles = 0;
-    int m_emitIndex = 0;
-    float m_totalTime = 0.0f;
+    int maxParticles = 0;
+    int emitIndex = 0;
+    float totalTime = 0.0f;
     bool respawnEnable = false;
 
     // バッファとビュー
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_particleBuffer;
-    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> m_particleUAV;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_particleSRV;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> particleBuffer;
+    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> particleUAV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleSRV;
 
     // 定数バッファ (時間や重力などをCSに送る用)
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_cbUpdate;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_cbCamera;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> cbUpdate;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> cbCamera;
 
     // シェーダー
-    Microsoft::WRL::ComPtr<ID3D11ComputeShader> m_computeShader;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader> m_geometryShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+    Microsoft::WRL::ComPtr<ID3D11ComputeShader> computeShader;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
+    Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometryShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
 
     // 半透明描画などのためのステート
-    Microsoft::WRL::ComPtr<ID3D11BlendState>          m_blendStateAdd;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilState>   m_depthStencilState;
+    Microsoft::WRL::ComPtr<ID3D11BlendState>          blendStateAdd;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState>   depthStencilState;
 
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  m_texture;       // パーティクルの画像
-    Microsoft::WRL::ComPtr<ID3D11SamplerState>        m_samplerState;  // テクスチャのサンプラー
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  texture;       // パーティクルの画像
+    Microsoft::WRL::ComPtr<ID3D11SamplerState>        samplerState;  // テクスチャのサンプラー
 };

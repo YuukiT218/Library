@@ -90,7 +90,7 @@ private:
 	DirectX::XMFLOAT3 offsetPosition{ 0.0f, 3.0f, 0.0f };
 	float attenuation = 4.5f;
 	DirectX::XMFLOAT4 direction = { -1, -1, 0 ,1.0f };
-	DirectX::XMFLOAT4 Directioncolor = { 1, 1, 1 ,1.0f };
+	DirectX::XMFLOAT4 directionColor = { 1, 1, 1 ,1.0f };
 
 	//タイマー
 	float timer;

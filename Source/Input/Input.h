@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Input/GamePad.h"
 #include "Input/Mouse.h"
 
-// ƒCƒ“ƒvƒbƒg
+// ã‚¤ãƒ³ãƒ—ãƒƒãƒˆ
 class Input
 {
 public:
@@ -11,16 +11,16 @@ public:
 	~Input() {}
 
 public:
-	// ƒCƒ“ƒXƒ^ƒ“ƒXæ“¾
+	// ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹å–å¾—
 	static Input& Instance() { return *instance; }
 
-	// XVˆ—
+	// æ›´æ–°å‡¦ç†
 	void Update();
 
-	// ƒQ[ƒ€ƒpƒbƒhæ“¾
+	// ã‚²ãƒ¼ãƒ ãƒ‘ãƒƒãƒ‰å–å¾—
 	GamePad& GetGamePad() { return gamePad; }
 
-	// ƒ}ƒEƒXæ“¾
+	// ãƒã‚¦ã‚¹å–å¾—
 	Mouse& GetMouse() { return mouse; }
 
 	bool GetAnyButton() { return anyKeyPressed; }
@@ -28,8 +28,8 @@ public:
 	void OnKeyDown() { anyKeyPressed = true; }
 	void OnKeyUp() { anyKeyPressed = false; }
 
-	void SetIsLastGamePad(bool button) { PushGamePad = button; }
-	bool GetIsLastGamePad() { return PushGamePad; }
+	void SetIsLastGamePad(bool button) { pushGamePad = button; }
+	bool GetIsLastGamePad() { return pushGamePad; }
 
 
 	void IsThumbStickMoved();
@@ -39,6 +39,6 @@ private:
 	Mouse				mouse;
 
 private:
-	bool anyKeyPressed = false; // ‰½‚©‚ÌƒL[‚ª‰Ÿ‚³‚ê‚½‚©‚ğ¦‚·ƒtƒ‰ƒO
-	bool PushGamePad = false;
+	bool anyKeyPressed = false; // ä½•ã‹ã®ã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã‹ã‚’ç¤ºã™ãƒ•ãƒ©ã‚°
+	bool pushGamePad = false;
 };

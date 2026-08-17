@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <wrl.h>
 #include <d3d11.h>
@@ -11,13 +11,13 @@ public:
 
 	FrameBuffer(ID3D11Device* device, UINT width, UINT height);
 
-	// ƒJƒ‰[ƒ}ƒbƒvæ“¾
+	// ã‚«ãƒ©ãƒ¼ãƒãƒƒãƒ—å–å¾—
 	ID3D11ShaderResourceView* GetColorMap() const { return colorMap.Get(); }
 
-	// ƒNƒŠƒA
+	// ã‚¯ãƒªã‚¢
 	void Clear(ID3D11DeviceContext* dc, DirectX::XMFLOAT4 color);
 
-	// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒgİ’è
+	// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆè¨­å®š
 	void SetRenderTargets(ID3D11DeviceContext* dc);
 
 	void Resize(int width, int height);

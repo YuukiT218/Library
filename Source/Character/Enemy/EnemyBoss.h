@@ -64,7 +64,7 @@ public:
 	bool IsTurnToTarget(float vx, float vz);
 
 	// ゲームクリアシーン遷移可能フラグ
-	bool IsGameClear = false;
+	bool isGameClear = false;
 
 	// ターゲットポジション設定
 	void SetTargetPosition(DirectX::XMFLOAT3 position) { targetPosition = position; }
@@ -100,7 +100,7 @@ public:
 	void SubRevengeValue() { revengeValue -= 1; }
 
 	// 反撃値取得
-	float GetRevengeValue() { return revengeValue; }
+	int GetRevengeValue() const { return revengeValue; }
 
 	// 反撃許容値設定
 	void SetRevengeTolerance(int num) { revengeTolerance = num; }
