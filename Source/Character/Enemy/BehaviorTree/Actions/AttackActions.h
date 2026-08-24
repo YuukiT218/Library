@@ -927,9 +927,7 @@ public:
 		float frame = this->GetAnimationFrame();
 		AnimationConfig* config = this->GetCurrentAnimationConfig();
 		
-		this->owner->SetTargetPosition(this->PlayerPosition());
-		this->owner->SetSuperArmor(true);
-		
+		this->owner->SetTargetPosition(this->PlayerPosition());		
 		this->UpdateAttackCollision();
 
 		switch (this->step)
@@ -971,7 +969,6 @@ public:
 				this->step = 0;
 				this->owner->SetGravity(-0.3f);
 				this->owner->SetRevengeState(false);
-				this->owner->SetSuperArmor(false);
 				return State::Complete;
 			}
 			break;

@@ -73,15 +73,25 @@ public:
 	// カスケードを色分け表示するか
 	bool IsCascadeDebugView() const { return cascadeDebugView; }
 
+	// カスケードシャドウを使うか（offなら従来の1枚だけのシャドウマップ）
+	bool IsCascadeEnabled() const { return cascadeEnabled; }
+	void SetCascadeEnabled(bool enabled) { cascadeEnabled = enabled; }
+
+	// 実際に使用する段数。1枚モードなら1、カスケードならCASCADE_COUNT
+	int GetActiveCascadeCount() const { return cascadeEnabled ? CASCADE_COUNT : 1; }
+
 private:
 	struct CbScene
 	{
 		DirectX::XMFLOAT4X4 lightViewProjection;
 	};
 
+	// シェーダー側(Skinning.hlsli)のboneTransformsと数を合わせること
+	static constexpr int MAX_BONES = 256;
+
 	struct CbSkeleton
 	{
-		DirectX::XMFLOAT4X4 boneTransforms[256];
+		DirectX::XMFLOAT4X4 boneTransforms[MAX_BONES];
 	};
 
 	// カメラの視錐台から各カスケードのライト行列を求める
@@ -117,6 +127,11 @@ private:
 	float indirectShadowStrength = 0.75f;
 
 	bool cascadeDebugView = false;  // カスケードを色分け表示する
+
+	// カスケードシャドウの有効/無効
+	// offにすると視錐台全体を1枚のシャドウマップで覆う従来方式になる
+	// （比較用。手前の影の解像度が落ちるのが分かる）
+	bool cascadeEnabled = true;
 
 	DirectX::XMFLOAT4 shadowColor{ 0.1f, 0.1f, 0.1f, 0.0f };
 

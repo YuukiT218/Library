@@ -15,5 +15,9 @@ float4 main(
     // ここで計算されたZ値が深度テクスチャに保存される
     position = SkinningPosition(position, boneWeights, boneIndices);
      
-    return mul(float4(position.xyz, 1.0), lightViewProjection);
+    //  スキニング結果の w は「重みの合計」になる。
+    //  ここで w=1 に潰すと、重みの合計が1でない頂点が
+    //  ワールド原点方向へ引き寄せられ、影だけが伸びた形になる。
+    //  通常描画(PBRVS)と同じく w を保持し、同次座標の除算に任せる。
+    return mul(position, lightViewProjection);
 }

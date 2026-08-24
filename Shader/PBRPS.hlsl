@@ -216,7 +216,8 @@ float4 main(VS_OUT pin, bool isFrontFace : SV_IsFrontFace) : SV_TARGET
                 //  シャドウマップを引く位置を法線方向へ逃がす
                 //  まず素の位置で所属カスケードを決める
                 float3 shadowCoord;
-                int cascadeIndex = SelectShadowCascade(pin.position.xyz, ShadowBufferSize,
+                //  cascadeFlags.y = 実際に使う段数。1なら従来の1枚のシャドウマップ
+                int cascadeIndex = SelectShadowCascade(pin.position.xyz, (int) cascadeFlags.y,
                                        CascadeLightViewProjection, shadowCoord);
 
                 //  どのカスケードにも入らない遠景には影を落とさない

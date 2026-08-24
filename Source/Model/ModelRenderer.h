@@ -61,9 +61,12 @@ private:
 		DirectX::XMFLOAT4       targetPosition;
 	};
 
+	// シェーダー側(Skinning.hlsli)のboneTransformsと数を合わせること
+	static constexpr int MAX_BONES = 256;
+
 	struct CbSkeleton
 	{
-		DirectX::XMFLOAT4X4		boneTransforms[256];
+		DirectX::XMFLOAT4X4		boneTransforms[MAX_BONES];
 	};
 
 	struct CbTeleport

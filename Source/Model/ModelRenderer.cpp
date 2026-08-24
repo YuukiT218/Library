@@ -11,6 +11,7 @@
 
 
 
+
 // コンストラクタ
 ModelRenderer::ModelRenderer(ID3D11Device* device)
 {
@@ -318,10 +319,18 @@ void ModelRenderer::Render(const RenderContext& rc)
 		dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// スケルトン用定数バッファ更新
-		CbSkeleton cbSkeleton{};
+		// 未使用スロットはゼロ行列だと頂点が原点に潰れてしまうため単位行列で埋める
+		CbSkeleton cbSkeleton;
+		for (DirectX::XMFLOAT4X4& boneTransform : cbSkeleton.boneTransforms)
+		{
+			DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
+		}
+
 		if (mesh.bones.size() > 0)
 		{
-			for (size_t i = 0; i < mesh.bones.size(); ++i)
+			// 定数バッファの範囲を超えないように制限する
+			const size_t boneCount = (std::min)(mesh.bones.size(), static_cast<size_t>(MAX_BONES));
+			for (size_t i = 0; i < boneCount; ++i)
 			{
 				const ModelResource::Bone& bone = mesh.bones.at(i);
 				DirectX::XMMATRIX WorldTransform = DirectX::XMLoadFloat4x4(&nodes[bone.nodeIndex].worldTransform);
@@ -338,6 +347,13 @@ void ModelRenderer::Render(const RenderContext& rc)
 
 		// 更新
 		shader->Update(rc, mesh, model);
+
+		// ノイズテクスチャをt36にバインド
+		// Shader::End()で全スロットのシェーダーリソースが解除されるため、
+		// 描画直前に毎回張り直しておく
+		// (張り直さないと2つ目以降の描画予約でノイズが真っ黒になり、
+		//  ステージのディザ透過やディゾルブが効かなくなる)
+		dc->PSSetShaderResources(36, 1, noiseTextureSRV.GetAddressOf());
 
 		// 描画
 		dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
@@ -372,6 +388,9 @@ void ModelRenderer::Render(const RenderContext& rc)
 				transparencyDrawInfo.teleportData = drawInfo.teleportData;
 				transparencyDrawInfo.isAfterimage = drawInfo.isAfterimage;
 				transparencyDrawInfo.afterimageAlpha = drawInfo.afterimageAlpha;
+				transparencyDrawInfo.teleportMode = drawInfo.teleportMode;
+				// 半透明メッシュでも障害物のディザ透過を効かせる
+				transparencyDrawInfo.enableDither = drawInfo.enableDither;
 				// カメラとの距離を算出
 				DirectX::XMVECTOR Position = DirectX::XMVectorSet(
 					nodes[mesh.nodeIndex].worldTransform._41,

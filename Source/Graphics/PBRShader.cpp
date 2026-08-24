@@ -110,6 +110,8 @@ void PBRShader::Begin(const RenderContext& rc)
 		}
 		cbShadow.cascadeSplits = shadowMap->GetCascadeSplits();
 		cbShadow.cascadeFlags.x = shadowMap->IsCascadeDebugView() ? 1.0f : 0.0f;
+		// yに実際に使う段数を入れ、1枚モードでは0段目だけを参照させる
+		cbShadow.cascadeFlags.y = static_cast<float>(shadowMap->GetActiveCascadeCount());
 		cbShadow.shadowColor = shadowMap->GetColor();
 		cbShadow.shadowTexelSize = shadowMap->GetTexelSize();
 		cbShadow.shadowAttenuation = shadowMap->GetAttenuation();

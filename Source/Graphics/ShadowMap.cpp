@@ -15,6 +15,7 @@ namespace
 	constexpr float RADIUS_QUANTIZE_STEP = 16.0f;
 }
 
+
 // コンストラクタ
 ShadowMap::ShadowMap(ID3D11Device* device)
 {
@@ -138,19 +139,34 @@ void ShadowMap::UpdateCascades(const RenderContext& rc)
 	float nearZ = camera->GetNearZ();
 	float farZ = (std::min)(camera->GetFarZ(), shadowDistance);
 
-	// 分割位置を対数分割と均等分割の混合で求める
-	// 手前ほど細かく分割されるので、近くの影ほど解像度が高くなる
+	const int activeCount = GetActiveCascadeCount();
+
+	// 分割位置を求める
 	float splitDistances[CASCADE_COUNT + 1];
 	splitDistances[0] = nearZ;
-	for (int i = 1; i <= CASCADE_COUNT; ++i)
+
+	if (activeCount <= 1)
 	{
-		float ratio = static_cast<float>(i) / CASCADE_COUNT;
-		float logSplit = nearZ * powf(farZ / nearZ, ratio);
-		float uniformSplit = nearZ + (farZ - nearZ) * ratio;
-		splitDistances[i] = splitLambda * logSplit + (1.0f - splitLambda) * uniformSplit;
+		// 従来方式：1枚のシャドウマップで影の届く範囲すべてを覆う
+		for (int i = 1; i <= CASCADE_COUNT; ++i)
+		{
+			splitDistances[i] = farZ;
+		}
+	}
+	else
+	{
+		// 分割位置を対数分割と均等分割の混合で求める
+		// 手前ほど細かく分割されるので、近くの影ほど解像度が高くなる
+		for (int i = 1; i <= CASCADE_COUNT; ++i)
+		{
+			float ratio = static_cast<float>(i) / CASCADE_COUNT;
+			float logSplit = nearZ * powf(farZ / nearZ, ratio);
+			float uniformSplit = nearZ + (farZ - nearZ) * ratio;
+			splitDistances[i] = splitLambda * logSplit + (1.0f - splitLambda) * uniformSplit;
+		}
 	}
 
-	for (int i = 0; i < CASCADE_COUNT; ++i)
+	for (int i = 0; i < activeCount; ++i)
 	{
 		// この段が担当する視錐台の8頂点
 		DirectX::XMFLOAT3 corners[8];
@@ -179,11 +195,15 @@ void ShadowMap::UpdateCascades(const RenderContext& rc)
 		DirectX::XMMATRIX View = DirectX::XMMatrixLookAtLH(Eye, Center, Up);
 
 		// 影がテクセル単位で動くようにスナップする
-		// これをしないとカメラが少し動くだけで影の縁がちらつく
-		DirectX::XMVECTOR CenterLightSpace = DirectX::XMVector3TransformCoord(Center, View);
+		// 中心をライト空間へ移すと必ず原点になるため、
+		// スナップ量はワールド座標をライトの向きで測った値から求める
 		float texelSize = (radius * 2.0f) / textureSize;
-		float snapOffsetX = floorf(DirectX::XMVectorGetX(CenterLightSpace) / texelSize) * texelSize - DirectX::XMVectorGetX(CenterLightSpace);
-		float snapOffsetY = floorf(DirectX::XMVectorGetY(CenterLightSpace) / texelSize) * texelSize - DirectX::XMVectorGetY(CenterLightSpace);
+		DirectX::XMVECTOR Right = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(Up, LightDirection));
+		DirectX::XMVECTOR LightUp = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(LightDirection, Right));
+		float centerAlongRight = DirectX::XMVectorGetX(DirectX::XMVector3Dot(Center, Right));
+		float centerAlongUp = DirectX::XMVectorGetX(DirectX::XMVector3Dot(Center, LightUp));
+		float snapOffsetX = floorf(centerAlongRight / texelSize) * texelSize - centerAlongRight;
+		float snapOffsetY = floorf(centerAlongUp / texelSize) * texelSize - centerAlongUp;
 		View = DirectX::XMMatrixMultiply(View, DirectX::XMMatrixTranslation(snapOffsetX, snapOffsetY, 0.0f));
 
 		// 平行投影。視錐台より手前の影の落とし主も含めるため奥行きに余白を取る
@@ -194,6 +214,14 @@ void ShadowMap::UpdateCascades(const RenderContext& rc)
 
 		// シェーダー側で法線オフセットをテクセル基準で計算するために記録しておく
 		(&cascadeTexelWorldSize.x)[i] = texelSize;
+	}
+
+	// 使わない段には0段目と同じ設定を入れておく
+	// （シェーダー側が誤って参照しても破綻しないようにするため）
+	for (int i = activeCount; i < CASCADE_COUNT; ++i)
+	{
+		cascadeLightViewProjection[i] = cascadeLightViewProjection[0];
+		(&cascadeTexelWorldSize.x)[i] = cascadeTexelWorldSize.x;
 	}
 
 	// 各カスケードの終端距離をシェーダーへ渡すためにまとめる
@@ -287,10 +315,19 @@ void ShadowMap::DrawModel(const RenderContext& rc, const Model* model)
 		dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// スケルトン用定数バッファ更新
-		CbSkeleton cbSkeleton{};
+		// 未使用スロットはゼロ行列だと頂点が原点に潰れて
+		// 横に伸びた三角形になってしまうため、単位行列で埋めておく
+		CbSkeleton cbSkeleton;
+		for (DirectX::XMFLOAT4X4& boneTransform : cbSkeleton.boneTransforms)
+		{
+			DirectX::XMStoreFloat4x4(&boneTransform, DirectX::XMMatrixIdentity());
+		}
+
 		if (mesh.bones.size() > 0)
 		{
-			for (size_t i = 0; i < mesh.bones.size(); ++i)
+			// 定数バッファの範囲を超えないように制限する
+			const size_t boneCount = (std::min)(mesh.bones.size(), static_cast<size_t>(MAX_BONES));
+			for (size_t i = 0; i < boneCount; ++i)
 			{
 				const ModelResource::Bone& bone = mesh.bones.at(i);
 				DirectX::XMMATRIX WorldTransform = DirectX::XMLoadFloat4x4(&model->GetNodes()[bone.nodeIndex].worldTransform);
@@ -316,7 +353,8 @@ void ShadowMap::End(const RenderContext& rc)
 	ID3D11DeviceContext* dc = rc.deviceContext;
 
 	// カスケードごとに、登録されたモデルをすべて描画する
-	for (int i = 0; i < CASCADE_COUNT; ++i)
+	const int activeCount = GetActiveCascadeCount();
+	for (int i = 0; i < activeCount; ++i)
 	{
 		dc->OMSetRenderTargets(0, nullptr, depthStencilView[i].Get());
 
@@ -343,6 +381,11 @@ void ShadowMap::DrawDebugGUI()
 {
 	if (ImGui::CollapsingHeader("ShadowMap", ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		// ポートフォリオ用の比較スクリーンショット向けの切り替え
+		ImGui::Checkbox("CascadeShadow", &cascadeEnabled);
+		ImGui::SameLine();
+		ImGui::TextDisabled(cascadeEnabled ? "(4段カスケード)" : "(通常シャドウマップ1枚)");
+
 		ImGui::Checkbox("CascadeDebugView", &cascadeDebugView);
 
 		ImGui::ColorEdit4("ShadowColor", &shadowColor.x);

@@ -334,6 +334,10 @@ void EnemyBoss::Render(const RenderContext& rc, ShaderId shaderId)
 
 void EnemyBoss::ShadowRender(const RenderContext& rc, ShadowMap* shadowMap)
 {
+	// テレポート中はRender()側で本体を描画していないため、影も落とさない
+	// （落とすと、姿が無いのに影だけがステージ上を滑っていく状態になる）
+	if (GetTeleportPhase() != TeleportPhase::None) return;
+
 	shadowMap->Draw(rc, model.get());
 	shadowMap->Draw(rc, sword->GetModel().get());
 }
