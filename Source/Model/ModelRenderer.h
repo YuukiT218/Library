@@ -43,6 +43,14 @@ public:
 		float alpha, float darkness = 0.8f,
 		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
 
+	// 姿勢を止めたモデルをディゾルブで削り取りながら描く（粒子分解の本体側）
+	// 色は素のまま描き、削れ際だけ edgeColor で光らせる
+	void DrawDisintegration(ShaderId shaderId, std::shared_ptr<Model> model,
+		const std::vector<Model::Node>& nodes,
+		float dissolveProgress, float dissolveTime,
+		const DirectX::XMFLOAT3& edgeColor,
+		float edgeWidth = 0.12f);
+
 	void DrawWithAlpha(ShaderId shaderId, std::shared_ptr<Model> model, float alpha);
 
 	// 描画実行

@@ -179,6 +179,42 @@ void ModelRenderer::DrawAfterimage(ShaderId shaderId, std::shared_ptr<Model> mod
 	drawInfo.teleportData.enableDistortion = 0.0f;
 }
 
+// 粒子分解用の描画
+// 姿勢を固定して描く仕組みは残像と同じだが、
+// 残像のような色の塗り潰しはせず、モデルの見た目のままディゾルブで削っていく
+void ModelRenderer::DrawDisintegration(ShaderId shaderId, std::shared_ptr<Model> model,
+	const std::vector<Model::Node>& nodes,
+	float dissolveProgress, float dissolveTime,
+	const DirectX::XMFLOAT3& edgeColor,
+	float edgeWidth)
+{
+	DrawInfo& drawInfo = drawInfos.emplace_back();
+	drawInfo.shaderId = shaderId;
+	drawInfo.model = model;
+	drawInfo.hasTeleportEffect = false;
+	drawInfo.isAfterimage = true;
+	drawInfo.afterimageNodes = nodes;
+	DirectX::XMStoreFloat4x4(&drawInfo.afterimageTransform, DirectX::XMMatrixIdentity());
+
+	// アルファは1.0のまま。消えていくのはディゾルブの担当なので、
+	// ここを下げるとシェーダー側で残像の色に塗り替えられてしまう
+	drawInfo.afterimageAlpha = 1.0f;
+	drawInfo.afterimageColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	drawInfo.teleportData = {};
+	drawInfo.teleportData.teleportProgress = dissolveProgress;
+	drawInfo.teleportData.teleportTime = dissolveTime;
+	drawInfo.teleportData.dissolveEdgeWidth = edgeWidth;
+	drawInfo.teleportData.distortionIntensity = 0.0f;
+	drawInfo.teleportData.dissolveEdgeColor = edgeColor;
+	drawInfo.teleportData.teleportCenterY = 0.0f;
+	drawInfo.teleportData.afterimageAlpha = 1.0f;
+	drawInfo.teleportData.afterimageDarkness = 0.0f;
+	drawInfo.teleportData.afterimageColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	drawInfo.teleportData.enableDissolve = 1.0f;
+	drawInfo.teleportData.enableDistortion = 0.0f;
+}
+
 void ModelRenderer::DrawWithAlpha(ShaderId shaderId, std::shared_ptr<Model> model, float alpha)
 {
 	DrawInfo& drawInfo = drawInfos.emplace_back();
@@ -285,16 +321,13 @@ void ModelRenderer::Render(const RenderContext& rc)
 
 		if (isAfterimage)
 		{
-			// 残像の場合はエフェクトなし、アルファのみ設定
-			effectData.teleportProgress = 0.0f;
-			effectData.teleportTime = 0.0f;
-			effectData.dissolveEdgeWidth = 0.0f;
+			// 残像・粒子分解は姿勢を止めて描くだけなので、頂点を歪ませる処理は使わない
+			// ディゾルブ関係(teleportProgress / dissolveEdge*)は予約時の指定をそのまま使う
+			// （DrawAfterimageは0で予約しているので、これまでの残像の見た目は変わらない）
 			effectData.distortionIntensity = 0.0f;
-			effectData.dissolveEdgeColor = DirectX::XMFLOAT3(0.0f, 0.0f, 0.0f);
 			effectData.teleportCenterY = 0.0f;
 			effectData.afterimageAlpha = afterimageAlpha;  // アルファ値を設定
 			effectData.afterimageColor = afterimageColor;
-			effectData.enableDissolve = 0.0f;
 			effectData.enableDistortion = 0.0f;
 		}
 		else if (hasTeleport)

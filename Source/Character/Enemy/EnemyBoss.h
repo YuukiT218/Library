@@ -39,6 +39,9 @@ public:
 	//影描画処理
 	void ShadowRender(const RenderContext& rc, ShadowMap* shadowMap);
 
+	// テレポートの粒子分解に武器も巻き込む
+	std::vector<std::shared_ptr<Model>> GetAfterimageAttachments() const override;
+
 	// デバッグプリミティブ描画
 	void DrawDebugPrimitive() override;
 

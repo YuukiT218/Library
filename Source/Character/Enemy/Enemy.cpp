@@ -130,6 +130,8 @@ void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
 }
 
 // 現在の姿勢から残像を1つ生成する
+// 残像といっても薄い分身を残すのではなく、
+// この瞬間の姿のまま置き去りにした体を、その場で粒子に分解して消すための情報を作る
 void Enemy::SpawnAfterimage()
 {
     if (!model) return;
@@ -141,9 +143,183 @@ void Enemy::SpawnAfterimage()
     newAfterimage.alpha = 1.0f;
     newAfterimage.lifetime = afterimageDuration;
     newAfterimage.darkness = afterimageDarkness;
+    newAfterimage.dissolve = 0.0f;
 
     // 現在のボーン姿勢をコピー
-    newAfterimage.nodes = model->GetNodes();
+    // ここで固めてしまうことで、崩れている間はアニメーションが進まなくなる
+    newAfterimage.parts.push_back({ model, model->GetNodes() });
+
+    // 武器も一緒に崩さないと、本体だけ分解して武器が瞬間的に消えたように見える
+    for (const std::shared_ptr<Model>& attachment : GetAfterimageAttachments())
+    {
+        if (attachment == nullptr) continue;
+        newAfterimage.parts.push_back({ attachment, attachment->GetNodes() });
+    }
+
+    // 粒子の発生点を作る
+    CollectDisintegrationPoints(newAfterimage);
+}
+
+// モデル表面から粒子の発生点を拾う
+// 頂点をCPU側でスキニングして、崩れ始めた瞬間の見た目どおりの位置に粒子を置けるようにする
+void Enemy::CollectDisintegrationPoints(Afterimage& afterimage)
+{
+    afterimage.points.clear();
+    afterimage.emitCursor = 0;
+
+    // 何頂点に1つ拾うかを決める
+    // モデルの頂点数が変わっても、粒の数がだいたい揃うようにする
+    size_t totalVertexCount = 0;
+    for (const AfterimagePart& part : afterimage.parts)
+    {
+        const ModelResource* resource = part.model ? part.model->GetResource() : nullptr;
+        if (resource == nullptr) continue;
+
+        for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+        {
+            totalVertexCount += mesh.vertices.size();
+        }
+    }
+    if (totalVertexCount == 0) return;
+
+    const size_t targetCount = static_cast<size_t>((std::max)(disintegrateSampleCount, 1));
+    const size_t stride = (std::max)(totalVertexCount / targetCount, static_cast<size_t>(1));
+
+    afterimage.points.reserve(totalVertexCount / stride + 1);
+
+    for (const AfterimagePart& part : afterimage.parts)
+    {
+        const ModelResource* resource = part.model ? part.model->GetResource() : nullptr;
+        if (resource == nullptr) continue;
+
+        for (const ModelResource::Mesh& mesh : resource->GetMeshes())
+        {
+            if (mesh.nodeIndex >= static_cast<int>(part.nodes.size())) continue;
+
+            // ボーン行列を先に作っておく（描画時のスキニングと同じ組み立て方）
+            std::vector<DirectX::XMMATRIX> boneTransforms;
+            boneTransforms.reserve(mesh.bones.size());
+            for (const ModelResource::Bone& bone : mesh.bones)
+            {
+                if (bone.nodeIndex >= static_cast<int>(part.nodes.size())) break;
+
+                DirectX::XMMATRIX offsetTransform = DirectX::XMLoadFloat4x4(&bone.offsetTransform);
+                DirectX::XMMATRIX worldTransform = DirectX::XMLoadFloat4x4(&part.nodes[bone.nodeIndex].worldTransform);
+                boneTransforms.emplace_back(offsetTransform * worldTransform);
+            }
+
+            // ボーンを持たないメッシュはノードのワールド行列だけで位置が決まる
+            const DirectX::XMMATRIX rigidTransform = DirectX::XMLoadFloat4x4(&part.nodes[mesh.nodeIndex].worldTransform);
+
+            for (size_t i = 0; i < mesh.vertices.size(); i += stride)
+            {
+                const ModelResource::Vertex& vertex = mesh.vertices[i];
+
+                const DirectX::XMVECTOR localPosition = DirectX::XMLoadFloat3(&vertex.position);
+                const DirectX::XMVECTOR localNormal = DirectX::XMLoadFloat3(&vertex.normal);
+
+                DirectX::XMVECTOR worldPosition = DirectX::XMVectorZero();
+                DirectX::XMVECTOR worldNormal = DirectX::XMVectorZero();
+                float weightSum = 0.0f;
+
+                if (!boneTransforms.empty())
+                {
+                    const float weights[4] =
+                    {
+                        vertex.boneWeight.x, vertex.boneWeight.y,
+                        vertex.boneWeight.z, vertex.boneWeight.w
+                    };
+                    const uint32_t boneIndices[4] =
+                    {
+                        vertex.boneIndex.x, vertex.boneIndex.y,
+                        vertex.boneIndex.z, vertex.boneIndex.w
+                    };
+
+                    for (int b = 0; b < 4; ++b)
+                    {
+                        if (weights[b] <= 0.0f) continue;
+                        if (boneIndices[b] >= boneTransforms.size()) continue;
+
+                        const DirectX::XMMATRIX& boneTransform = boneTransforms[boneIndices[b]];
+                        worldPosition = DirectX::XMVectorAdd(worldPosition,
+                            DirectX::XMVectorScale(DirectX::XMVector3Transform(localPosition, boneTransform), weights[b]));
+                        worldNormal = DirectX::XMVectorAdd(worldNormal,
+                            DirectX::XMVectorScale(DirectX::XMVector3TransformNormal(localNormal, boneTransform), weights[b]));
+                        weightSum += weights[b];
+                    }
+                }
+
+                // ウェイトが無い頂点はノードの行列で動かす（原点に潰れるのを防ぐ）
+                if (weightSum <= 0.0f)
+                {
+                    worldPosition = DirectX::XMVector3Transform(localPosition, rigidTransform);
+                    worldNormal = DirectX::XMVector3TransformNormal(localNormal, rigidTransform);
+                }
+
+                DisintegrationPoint& point = afterimage.points.emplace_back();
+                DirectX::XMStoreFloat3(&point.position, worldPosition);
+
+                // 法線が潰れている頂点は真上に飛ばす（正規化でNaNになるのを避ける）
+                const float normalLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(worldNormal));
+                if (normalLength > 0.0001f)
+                {
+                    DirectX::XMStoreFloat3(&point.normal, DirectX::XMVector3Normalize(worldNormal));
+                }
+                else
+                {
+                    point.normal = { 0.0f, 1.0f, 0.0f };
+                }
+
+                // シェーダー側のディゾルブはノイズで削っていくので、
+                // こちらも点ごとにばらけたしきい値を持たせて、削れる歩調を合わせる
+                point.threshold = Mathf::RandomRange(0.0f, 1.0f);
+            }
+        }
+    }
+
+    // 進行度と比べながら先頭から消費できるように、しきい値の昇順に並べておく
+    std::sort(afterimage.points.begin(), afterimage.points.end(),
+        [](const DisintegrationPoint& lhs, const DisintegrationPoint& rhs)
+        {
+            return lhs.threshold < rhs.threshold;
+        });
+}
+
+// 削れた分だけ点を粒子に変える
+void Enemy::EmitDisintegrationParticles(Afterimage& afterimage)
+{
+    if (afterimage.points.empty()) return;
+
+    // 軌跡の粒子と同じ色にして、一連の演出としてつながって見えるようにする
+    const DirectX::XMFLOAT4 color =
+    {
+        afterimageColor.x * afterimageColor.w,
+        afterimageColor.y * afterimageColor.w,
+        afterimageColor.z * afterimageColor.w,
+        1.0f
+    };
+
+    while (afterimage.emitCursor < afterimage.points.size() &&
+        afterimage.points[afterimage.emitCursor].threshold <= afterimage.dissolve)
+    {
+        const DisintegrationPoint& point = afterimage.points[afterimage.emitCursor];
+        ++afterimage.emitCursor;
+
+        // 表面から剥がれるように法線方向へ弾いてから、ゆっくり昇らせる
+        const DirectX::XMFLOAT3 velocity =
+        {
+            point.normal.x * disintegrateBurstSpeed + Mathf::RandomRange(-0.3f, 0.3f),
+            point.normal.y * disintegrateBurstSpeed + disintegrateRiseSpeed + Mathf::RandomRange(-0.2f, 0.4f),
+            point.normal.z * disintegrateBurstSpeed + Mathf::RandomRange(-0.3f, 0.3f)
+        };
+
+        const float size = disintegrateParticleSize * Mathf::RandomRange(0.7f, 1.6f);
+        const float lifeTime = disintegrateParticleLife * Mathf::RandomRange(0.7f, 1.6f);
+
+        // behaviorType 1 は空気抵抗で急減速しながらふわりと昇るので、
+        // 崩れた破片が空気に溶けていくように見える
+        EffectManager::Instance().EmitGpuParticle(point.position, velocity, color, size, lifeTime, 1);
+    }
 }
 
 // テレポート更新
@@ -225,16 +401,26 @@ void Enemy::UpdateAfterimage(float elapsedTime)
     {
         it->lifetime -= elapsedTime;
 
-        // 透明度を時間経過で減衰させる
+        // 残り時間を1.0→0.0に正規化する
         // 持続時間で割ることで、持続時間を変えても必ず1.0から0.0へ落ちる
-        it->alpha = (afterimageDuration > 0.0f)
+        const float remain = (afterimageDuration > 0.0f)
             ? std::clamp(it->lifetime / afterimageDuration, 0.0f, 1.0f)
             : 0.0f;
+
+        // アルファは落とさない（1.0未満にするとシェーダー側で残像色に塗り潰され、
+        // モデルの見た目のまま崩したいのに、のっぺりした分身になってしまう）
+        // 姿が消えるのはディゾルブで削り切ったときだけにする
+
+        // 削れ具合を進める
+        // カーブを1未満にして、序盤に一気に崩れてから残りがゆっくり散るようにする
+        it->dissolve = powf(1.0f - remain, disintegrateCurve);
+
+        // 削れた分を粒子にする
+        EmitDisintegrationParticles(*it);
 
         // 寿命が尽きたら削除
         if (it->lifetime <= 0.0f)
         {
-            // デストラクタでClearNodesが呼ばれる
             it = afterimages.erase(it);
         }
         else

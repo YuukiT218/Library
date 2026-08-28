@@ -147,7 +147,26 @@ protected:
 
 	virtual void OnTeleportPhaseChanged(TeleportPhase newPhase) {}
 
-	// 残像用の変数
+	// 粒子分解に一緒に巻き込みたい追加モデル（武器など）を返す
+	virtual std::vector<std::shared_ptr<Model>> GetAfterimageAttachments() const { return {}; }
+
+	// 粒子分解で描くモデル1つ分の姿勢
+	// 本体だけだと武器が一瞬で消えてしまうので、武器なども1パーツとして持たせる
+	struct AfterimagePart
+	{
+		std::shared_ptr<Model> model;
+		std::vector<Model::Node> nodes;  // ボーン情報をコピー
+	};
+
+	// モデル表面から拾った、粒子になる点
+	struct DisintegrationPoint
+	{
+		DirectX::XMFLOAT3 position;  // ワールド座標
+		DirectX::XMFLOAT3 normal;    // ワールド法線（弾け飛ぶ向き）
+		float threshold;             // 分解の進行度がこれを超えたら粒子になる
+	};
+
+	// 置いていった体を粒子に分解しながら消すための情報
 	struct Afterimage
 	{
 		DirectX::XMFLOAT3 position;
@@ -155,22 +174,14 @@ protected:
 		DirectX::XMFLOAT4X4 transform;
 		float alpha;               // 透明度（1.0→0.0に減衰）
 		float lifetime;            // 残り時間
-		std::vector<Model::Node> nodes;  // ボーン情報をコピー
 		float darkness;
 
-		~Afterimage()
-		{
-			ClearNodes();
-		}
+		std::vector<AfterimagePart> parts;        // 本体＋武器などの姿勢
+		float dissolve = 0.0f;                    // 削れ具合（0→1で全部消える）
 
-		void ClearNodes()
-		{
-			if (!nodes.empty())
-			{
-				nodes.clear();
-				nodes.shrink_to_fit();
-			}
-		}
+		// しきい値の昇順に並べてある。emitCursorより手前は粒子にした後
+		std::vector<DisintegrationPoint> points;
+		size_t emitCursor = 0;
 	};
 
 	std::vector<Afterimage> afterimages;         // 残像
@@ -180,6 +191,29 @@ protected:
 	// 残像の色味(rgb)と明るさ(a)
 	// 1を超える明るさにするとブルームが乗って残像が光って見える
 	DirectX::XMFLOAT4 afterimageColor = { 0.65f, 0.35f, 1.0f, 2.0f };
+
+	// --- 粒子分解の設定 ---
+
+	// モデル表面から拾う点の数（そのまま粒子の数になる）
+	// 多いほど密になるが、1粒ずつGPUへ転送しているので上げすぎない
+	int disintegrateSampleCount = 1200;
+	// 削れ際を光らせる幅
+	float disintegrateEdgeWidth = 0.13f;
+	// 分解の速さのカーブ。1未満にすると序盤で一気に崩れる
+	// （テレポート先に本体が現れる頃には、すでに崩れかけて見えるようにする）
+	float disintegrateCurve = 0.55f;
+	// 表面から法線方向に弾ける速さ
+	float disintegrateBurstSpeed = 1.2f;
+	// 粒子が昇っていく速さ
+	float disintegrateRiseSpeed = 0.7f;
+	float disintegrateParticleSize = 0.05f;
+	float disintegrateParticleLife = 0.55f;
+
+	// モデル表面から粒子の発生点を拾う（テレポート開始時の姿勢で1回だけ行う）
+	void CollectDisintegrationPoints(Afterimage& afterimage);
+
+	// 削れた分だけ点を粒子に変える
+	void EmitDisintegrationParticles(Afterimage& afterimage);
 
 	// 1フレーム分の区間に並べるGPUパーティクルの数
 	// 多いほど軌跡の線が密になる
@@ -209,6 +243,17 @@ public:
 
 	// 現在の姿勢から残像を1つ生成する
 	void SpawnAfterimage();
+
+	// 削れ際を光らせる色（軌跡の粒子と揃えて同じ演出に見せる）
+	DirectX::XMFLOAT3 GetDisintegrationEdgeColor() const
+	{
+		return
+		{
+			afterimageColor.x * afterimageColor.w,
+			afterimageColor.y * afterimageColor.w,
+			afterimageColor.z * afterimageColor.w
+		};
+	}
 
 	// テレポートの軌跡をGPUパーティクルで撒く（区間の起点と終点を指定する）
 	void EmitTeleportTrail(const DirectX::XMFLOAT3& from, const DirectX::XMFLOAT3& to);
