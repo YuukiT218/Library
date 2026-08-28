@@ -3,6 +3,7 @@
 #include "Model/Model.h"
 #include "Character/Enemy/Enemy.h"
 #include "Character/Weapon/EnemySword.h"
+#include "Character/Enemy/BehaviorTree/BehaviorTreeAsset.h"
 
 template <typename ActorType>
 class BehaviorTree;
@@ -139,6 +140,30 @@ public:
 
 	std::string GetName() override { return "EnemyBoss"; }
 
+	//----------------------------------------------------------------
+	// ビヘイビアツリー（エディタから触る部分）
+	//----------------------------------------------------------------
+
+	// JSON からツリーを読み込んで組み立てる。
+	// ファイルが無い・壊れている場合は既定の構成にフォールバックする。
+	void LoadBehaviorTree();
+
+	// エディタで編集したアセットでツリーを作り直す。
+	// 失敗したら false を返し、それまでのツリーは壊れたままにならない。
+	bool ApplyBehaviorAsset(const BehaviorTreeAsset& asset, std::vector<std::string>& problems);
+
+	// 現在のツリー定義
+	const BehaviorTreeAsset& GetBehaviorAsset() const { return behaviorAsset; }
+
+	// 組み立て時に出た問題（エディタに表示する）
+	const std::vector<std::string>& GetBehaviorProblems() const { return behaviorProblems; }
+
+	// 今実行しているノードの元 ID。実行していなければ -1
+	int GetActiveNodeSourceId() const;
+
+	// 実行中の行動を中断してツリーの推論からやり直す
+	void ResetBehaviorState();
+
 	// ノード当たり判定半径配列
 	float nodeRadius[9] =
 	{
@@ -175,6 +200,9 @@ private:
 	int 				step = 0;
 	int 				revengeValue = 0;		// 反撃値
 	int					revengeTolerance = 30;	// 反撃許容値
+
+	BehaviorTreeAsset	behaviorAsset;
+	std::vector<std::string> behaviorProblems;
 
 	BehaviorTree<EnemyBoss>* aiTree = nullptr;
 	std::unique_ptr<BehaviorData<EnemyBoss>> behaviorData = nullptr;

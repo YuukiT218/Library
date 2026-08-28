@@ -338,11 +338,13 @@ typename EnemyActionBase<ActorType>::State CautiousWalkAction<ActorType>::Run(fl
 	switch (step)
 	{
 	case 0:
-		int randomIndex = Mathf::RandomRange(0, 1);
+	{
+		int randomIndex = static_cast<int>(Mathf::RandomRange(0.0f, 1.0f));
 		owner->GetModel()->PlayRootMotion(animationIndexes[randomIndex], true, true, owner->GetBlendSeconds(), "root");
 		owner->SetRunTimer(Mathf::RandomRange(2.0f, 4.0f));
 		step++;
 		break;
+	}
 	case 1:
 		runTimer = owner->GetRunTimer() - elapsedTime;
 		owner->SetRunTimer(runTimer);

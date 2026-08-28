@@ -14,6 +14,7 @@
 #include "UI/Pause.h"
 #include "Input/Input.h"
 #include "System/HitStop.h"
+#include "Editor/BehaviorTreeEditor.h"
 #include <map>
 
 
@@ -119,6 +120,10 @@ void SceneGame::Update(float elapsedTime)
 	GamePad& gamePad = Input::Instance().GetGamePad();
 	Mouse& mouse = Input::Instance().GetMouse();
 	BGM->Play(true, 0.4f);
+
+	// 行動エディタのホットリロード監視。
+	// ゲームを動かしたままスクリプトを直せるので、ここでも回しておく。
+	BehaviorTreeEditor::Instance().Update(elapsedTime, boss.get());
 
 	// --- 状態ごとの分岐 ---
 	switch (currentState)
@@ -364,6 +369,9 @@ void SceneGame::DrawDebugGUI()
 	}
 
 	ImGui::End();
+
+	// 敵の行動パターンエディタ
+	BehaviorTreeEditor::Instance().DrawGui(boss.get());
 
 	// プレイヤーデバッグ描画
 	player->DrawDebugGUI();

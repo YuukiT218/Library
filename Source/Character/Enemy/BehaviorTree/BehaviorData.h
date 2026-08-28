@@ -3,6 +3,8 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <string>
+#include <unordered_map>
 #include "BehaviorTree.h"
 
 

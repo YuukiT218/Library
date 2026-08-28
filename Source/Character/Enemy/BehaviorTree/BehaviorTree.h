@@ -65,11 +65,32 @@ public:
 		ActionBase<ActorType>* action,
 		StateBase<ActorType>* stateMachine = nullptr);
 
+	// ノード追加（親をポインタで直接指定する版）
+	//
+	// 名前引きの AddNode は同名ノードがあると最初に見つかった方に繋がってしまうため、
+	// エディタから組み立てるときはこちらを使う。追加したノードを返す。
+	NodeBase<ActorType>* AddNodeTo(
+		NodeBase<ActorType>* parentNode,
+		const std::string& entryName,
+		int priority,
+		SelectRule selectRule,
+		JudgmentBase<ActorType>* judgment,
+		ActionBase<ActorType>* action);
+
 	// 実行
 	NodeBase<ActorType>* Run(
 		NodeBase<ActorType>* actionNode,
 		BehaviorData<ActorType>* data,
 		float elapsedTime);
+
+	// ルートノード取得
+	NodeBase<ActorType>* GetRoot() const { return root; }
+
+	// ツリーを空にする（組み直しの前に呼ぶ）
+	void Clear();
+
+	// 所有者取得
+	ActorType* GetOwner() const { return owner; }
 
 private:
 	// ルートノードを削除する
@@ -139,6 +160,55 @@ void BehaviorTree<ActorType>::AddNode(
 		actionOwner.release());
 
 	parentNode->AddChild(std::move(addNode));
+}
+
+template <typename ActorType>
+NodeBase<ActorType>* BehaviorTree<ActorType>::AddNodeTo(
+	NodeBase<ActorType>* parentNode,
+	const std::string& entryName,
+	int priority,
+	SelectRule selectRule,
+	JudgmentBase<ActorType>* judgment,
+	ActionBase<ActorType>* action)
+{
+	// 追加できなかった場合も確実に解放されるように一時所有する。
+	std::unique_ptr<JudgmentBase<ActorType>> judgmentOwner(judgment);
+	std::unique_ptr<ActionBase<ActorType>> actionOwner(action);
+
+	if (parentNode == nullptr)
+	{
+		// 親がいない = ルート。すでにルートがあるなら追加しない。
+		if (root != nullptr) return nullptr;
+
+		root = new NodeBase<ActorType>(
+			entryName,
+			nullptr,
+			priority,
+			selectRule,
+			judgmentOwner.release(),
+			actionOwner.release());
+
+		return root;
+	}
+
+	auto addNode = std::make_unique<NodeBase<ActorType>>(
+		entryName,
+		parentNode,
+		priority,
+		selectRule,
+		judgmentOwner.release(),
+		actionOwner.release());
+
+	NodeBase<ActorType>* added = addNode.get();
+	parentNode->AddChild(std::move(addNode));
+	return added;
+}
+
+template <typename ActorType>
+void BehaviorTree<ActorType>::Clear()
+{
+	NodeAllClear(root);
+	root = nullptr;
 }
 
 template <typename ActorType>

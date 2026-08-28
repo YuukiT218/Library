@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "ActionBase.h"
+#include "Character/Enemy/StateMachine/StateBase.h"
 #include "Actions/AttackActions.h"
 #include "Actions/MoveActions.h"
 #include "Actions/DamageActions.h"

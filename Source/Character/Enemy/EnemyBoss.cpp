@@ -15,6 +15,8 @@
 #include "Character/Enemy/StateMachine/RandomState.h"
 #include "StateMachine/StateDerived.h"
 #include "System/AnimationConfigLoader.h"
+#include "Character/Enemy/BehaviorTree/EnemyBossBehavior.h"
+#include "Script/LuaScriptSystem.h"
 
 #include <stdlib.h>
 
@@ -71,67 +73,9 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	behaviorData = std::make_unique<BehaviorData<EnemyBoss>>();
 	aiTree = new BehaviorTree<EnemyBoss>();
 
-	// BehaviorTreeのルートノードを追加
-	aiTree->AddNode("", "Root", 0, BehaviorTree<EnemyBoss>::SelectRule::Priority, nullptr, nullptr);
-	{
-		aiTree->AddNode("Root", "Battle", 1, BehaviorTree<EnemyBoss>::SelectRule::Priority, new BattleJudgment(this), nullptr);
-		aiTree->AddNode("Battle", "Dead", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, new DeadJudgment(this), new DeadAction(this));
-		aiTree->AddNode("Battle", "Damage", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, new AnyDamageJudgment(this), new UnifiedDamageAction(this));
-		aiTree->AddNode("Battle", "Fall", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, new FallJudgment(this), new FallAction(this));
-		aiTree->AddNode("Battle", "Pursuit", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new PursuitAction(this));
-	}
-	{
-		aiTree->AddNode("Battle", "Attack", 2, BehaviorTree<EnemyBoss>::SelectRule::Random, new AttackJudgment(this), nullptr);
-		aiTree->AddNode("Attack", "SlashCombo", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SlashCombo1Action(this));
-		aiTree->AddNode("Attack", "TeleportCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TeleportCombo(this));
-		aiTree->AddNode("Attack", "TeleportAssault", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
-		aiTree->AddNode("Attack", "NormalTeleport", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new NormalTeleport(this));
-		aiTree->AddNode("Attack", "PillarSpiralConv", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, new DyingJudgment(this), new PillarSpiralConv(this));
-		{
-			aiTree->AddNode("Attack", "TeleportDashSlash", 4, BehaviorTree<EnemyBoss>::SelectRule::Sequence, nullptr, nullptr);
-			aiTree->AddNode("TeleportDashSlash", "NormalTeleport", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new NormalTeleport(this));
-			aiTree->AddNode("TeleportDashSlash", "DashSlash", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
-		}
-		{
-			aiTree->AddNode("Attack", "TeleportSlashWave", 4, BehaviorTree<EnemyBoss>::SelectRule::Sequence, nullptr, nullptr);
-			aiTree->AddNode("TeleportSlashWave", "NormalTeleport", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new NormalTeleport(this));
-			aiTree->AddNode("TeleportSlashWave", "SlashWave", 4, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SlashWave(this));
-		}
-	}
-	{
-		aiTree->AddNode("Battle", "LongRange", 2, BehaviorTree<EnemyBoss>::SelectRule::Random, new LongRangeJudgment(this), nullptr);
-		aiTree->AddNode("LongRange", "DashSlash", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
-		{
-			aiTree->AddNode("LongRange", "DashSlashCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Sequence, new DyingJudgment(this), nullptr);
-			aiTree->AddNode("DashSlashCombo", "DashSlash", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
-			aiTree->AddNode("DashSlashCombo", "DashSlash", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
-			aiTree->AddNode("DashSlashCombo", "DashSlash", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new DashSlashAction(this));
-		}
-		aiTree->AddNode("LongRange", "TripleTeleport", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TripleTeleportAction(this));
-		{
-			aiTree->AddNode("LongRange", "TripleTeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Sequence, nullptr, nullptr);
-			aiTree->AddNode("TripleTeleportAssault", "TeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
-			aiTree->AddNode("TripleTeleportAssault", "TeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
-			aiTree->AddNode("TripleTeleportAssault", "TeleportAssault", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TelePortAssault(this));
-		}
-		aiTree->AddNode("LongRange", "TeleportCombo", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new TeleportCombo(this));
-		aiTree->AddNode("LongRange", "SlashWave", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SlashWave(this));
-		aiTree->AddNode("LongRange", "PillarSpiralDiff", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new PillarSpiralDiff(this));
-		aiTree->AddNode("LongRange", "PillarSpiralConv", 3, BehaviorTree<EnemyBoss>::SelectRule::Non, new DyingJudgment(this), new PillarSpiralConv(this));
-	}
-	{
-		aiTree->AddNode("Battle", "Revenge", 1, BehaviorTree<EnemyBoss>::SelectRule::Random, new RevengeJudgment(this), nullptr);
-		aiTree->AddNode("Revenge", "RevengeDive", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new RevengeDive(this));
-		aiTree->AddNode("Revenge", "RevengeAssault", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new RevengeAssault(this));
-	}
-	{
-		aiTree->AddNode("Battle", "Special", 1, BehaviorTree<EnemyBoss>::SelectRule::Priority, new SpecialAttackJudgment(this), nullptr);
-		aiTree->AddNode("Special", "SpecialAttack", 1, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new SpecialAttack(this));
-	}
-	{
-		aiTree->AddNode("Root", "Scout", 2, BehaviorTree<EnemyBoss>::SelectRule::Priority, nullptr, nullptr);
-		aiTree->AddNode("Scout", "Idle", 2, BehaviorTree<EnemyBoss>::SelectRule::Non, nullptr, new IdleAction(this));
-	}
+	// ツリーの構成は Data/Json/BehaviorTree_EnemyBoss.json にある。
+	// エディタ（Behavior Tree ウィンドウ）で編集して、その場で組み直せる。
+	LoadBehaviorTree();
 
 	// 衝突判定用のノードを設定
 	nodeHitSpheres =
@@ -168,6 +112,74 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	}
 
 	areaSize = 21.0f;
+}
+
+// ビヘイビアツリー読み込み
+void EnemyBoss::LoadBehaviorTree()
+{
+	EnemyBossBehavior::RegisterBehaviors();
+
+	BehaviorTreeAsset asset;
+	std::string error;
+
+	if (!asset.Load(EnemyBossBehavior::GetTreeAssetPath(), error))
+	{
+		// まだ JSON が無い（初回起動）ので、これまでの構成を書き出しておく。
+		// 次回からはこのファイルを編集すれば行動を差し替えられる。
+		asset = EnemyBossBehavior::MakeDefaultTreeAsset();
+
+		std::string saveError;
+		asset.Save(EnemyBossBehavior::GetTreeAssetPath(), saveError);
+	}
+
+	std::vector<std::string> problems;
+	if (!ApplyBehaviorAsset(asset, problems))
+	{
+		// JSON が壊れていてもボスが棒立ちにならないよう、既定の構成へ戻す
+		LuaScriptSystem& lua = LuaScriptSystem::Instance();
+		for (const std::string& problem : problems)
+		{
+			lua.Log(LuaScriptSystem::LogEntry::Level::Error, "BehaviorTree: " + problem);
+		}
+
+		std::vector<std::string> fallbackProblems;
+		ApplyBehaviorAsset(EnemyBossBehavior::MakeDefaultTreeAsset(), fallbackProblems);
+	}
+}
+
+// エディタで編集したアセットを反映する
+bool EnemyBoss::ApplyBehaviorAsset(const BehaviorTreeAsset& asset, std::vector<std::string>& problems)
+{
+	if (aiTree == nullptr) aiTree = new BehaviorTree<EnemyBoss>();
+
+	// 実行中ノードは作り直しで消えるので、先に手放しておく
+	activeNode = nullptr;
+
+	const bool built = EnemyBossBehavior::BuildTree(*aiTree, this, asset, problems);
+
+	behaviorProblems = problems;
+
+	if (built)
+	{
+		behaviorAsset = asset;
+		EnemyBossBehavior::PreloadScripts(behaviorAsset);
+	}
+
+	ResetBehaviorState();
+	return built;
+}
+
+// 実行中のノード ID を返す
+int EnemyBoss::GetActiveNodeSourceId() const
+{
+	return activeNode != nullptr ? activeNode->GetSourceId() : -1;
+}
+
+// 推論をやり直す
+void EnemyBoss::ResetBehaviorState()
+{
+	activeNode = nullptr;
+	if (behaviorData != nullptr) behaviorData->Init();
 }
 
 // デストラクタ

@@ -39,6 +39,16 @@ public:
 	std::string GetName() const { return name; }
 	int GetPriority() const { return static_cast<int>(priority); }
 
+	typename BehaviorTree<ActorType>::SelectRule GetSelectRule() const { return selectRule; }
+
+	// このノードの元になった BehaviorTreeAsset のノード ID。
+	// エディタが「今どのノードが動いているか」を名前ではなく ID で特定するのに使う。
+	// （同じ名前のノードが複数あるツリーでも取り違えない）
+	int GetSourceId() const { return sourceId; }
+	void SetSourceId(int id) { sourceId = id; }
+
+	ActionBase<ActorType>* GetAction() const { return action.get(); }
+
 	void AddChild(std::unique_ptr<NodeBase> child)
 	{
 		children.emplace_back(std::move(child));
@@ -76,6 +86,7 @@ protected:
 	std::unique_ptr<ActionBase<ActorType>> action;
 	unsigned int priority;
 	int lastRandomIndex = -1;
+	int sourceId = -1;
 	NodeBase* parent;
 };
 

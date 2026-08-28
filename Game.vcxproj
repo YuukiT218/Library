@@ -69,7 +69,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\nlohmann;%(AdditionalIncludeDirectories);C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\imgui-node-editor;.\External\lua-5.4.7;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\nlohmann;%(AdditionalIncludeDirectories);C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -99,7 +99,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\nlohmann;%(AdditionalIncludeDirectories);C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\imgui-node-editor;.\External\lua-5.4.7;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\nlohmann;%(AdditionalIncludeDirectories);C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -582,6 +582,229 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Character\Enemy\BehaviorTree\BehaviorTreeAsset.cpp" />
+    <ClCompile Include="Source\Character\Enemy\BehaviorTree\EnemyBossBehavior.cpp" />
+    <ClCompile Include="Source\Character\Enemy\BehaviorTree\EnemyBossDefaultTree.cpp" />
+    <ClCompile Include="Source\Script\LuaScriptSystem.cpp" />
+    <ClCompile Include="Source\Script\LuaAction.cpp" />
+    <ClCompile Include="Source\Script\LuaBossBindings.cpp" />
+    <ClCompile Include="Source\Editor\BehaviorTreeEditor.cpp" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTreeAsset.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorRegistry.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTreeBuilder.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\EnemyBossBehavior.h" />
+    <ClInclude Include="Source\Script\LuaScriptSystem.h" />
+    <ClInclude Include="Source\Script\LuaAction.h" />
+    <ClInclude Include="Source\Script\LuaBossBindings.h" />
+    <ClInclude Include="Source\Editor\BehaviorTreeEditor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="External\imgui-node-editor\crude_json.cpp" />
+    <ClCompile Include="External\imgui-node-editor\imgui_canvas.cpp" />
+    <ClCompile Include="External\imgui-node-editor\imgui_node_editor.cpp" />
+    <ClCompile Include="External\imgui-node-editor\imgui_node_editor_api.cpp" />
+    <ClCompile Include="External\lua-5.4.7\lapi.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lauxlib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lbaselib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lcode.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lcorolib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lctype.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ldblib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ldebug.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ldo.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ldump.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lfunc.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lgc.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\linit.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\liolib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\llex.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lmathlib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lmem.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\loadlib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lobject.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lopcodes.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\loslib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lparser.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lstate.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lstring.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lstrlib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ltable.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ltablib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ltm.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lundump.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lutf8lib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lvm.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lzio.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="External\imgui-node-editor\crude_json.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_bezier_math.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_canvas.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_extra_math.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_node_editor.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_node_editor_internal.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="External\DirectXTex\DirectXTex_Desktop_2022.vcxproj">

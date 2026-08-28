@@ -1,6 +1,8 @@
 ﻿#pragma once
 
-#include "BehaviorTree/ActionBase.h"
+#include "Character/Enemy/BehaviorTree/ActionBase.h"
+#include "Character/Enemy/BehaviorTree/NodeBase.h"
+#include "Character/Enemy/BehaviorTree/BehaviorData.h"
 #include "Character/Player/Player.h"
 #include "Character/Projectile/ProjectileManager.h"
 #include "Math/Mathf.h"

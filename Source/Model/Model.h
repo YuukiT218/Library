@@ -313,6 +313,14 @@ public:
 	// アニメーションスピード設定
 	void SetAnimationSpeed(float animationSpeed) { this->animationSpeed = animationSpeed; }
 
+	// 基準アニメーションスピード設定
+	//
+	// animationSpeed は速度カーブ（AnimationConfig::speedCurve）が毎フレーム上書きするため、
+	// 行動側から「このモーションだけ 1.5 倍で流したい」といった倍率を掛けたい場合はこちらを使う。
+	// 最終的な再生速度は animationSpeed * baseAnimationSpeed になる。
+	void SetBaseAnimationSpeed(float speed) { this->baseAnimationSpeed = speed; }
+	float GetBaseAnimationSpeed() const { return baseAnimationSpeed; }
+
 	// アニメーション更新処理
 	void UpdateAnimation(float elapsedTime, Character* character);
 

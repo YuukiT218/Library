@@ -3,6 +3,7 @@
 #include "SceneManager.h"
 #include "SceneLoading.h"
 #include "SceneEdit.h"
+#include "Editor/BehaviorTreeEditor.h"
 #include "SceneClear.h"
 #include "Camera/CameraParam.h"
 #include "Stage/StageManager.h"
@@ -113,6 +114,9 @@ void SceneEdit::Update(float elapsedTime)
 	player->EditUpdate(elapsedTime);
 
 	boss->EditUpdate(elapsedTime);
+
+	// 行動エディタのホットリロード監視
+	BehaviorTreeEditor::Instance().Update(elapsedTime, boss.get());
 
 	// エフェクト更新処理
 	//EffectManager::Instance().Update(elapsedTime);
@@ -227,6 +231,9 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 	ImGuiSetStyle();
 
 	cameraController->DrawDebugGUI();
+
+	// 敵の行動パターンエディタ
+	BehaviorTreeEditor::Instance().DrawGui(boss.get());
 
 	ImGui::Begin("Game View", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
