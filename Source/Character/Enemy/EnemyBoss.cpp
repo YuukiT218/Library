@@ -299,21 +299,25 @@ void EnemyBoss::Render(const RenderContext& rc, ShaderId shaderId)
 {
 	ModelRenderer* modelRenderer = Graphics::Instance().GetModelRenderer();
 
-	// テレポート中かどうかで描画方法を切り替え
+	// テレポートで置いていった体を、その場で粒子に分解しながら消す
 	if (HasAfterimage())
 	{
 		const auto& afterimages = GetAfterimages(); // リストを取得
 		for (const auto& afterimage : afterimages)
 		{
-			modelRenderer->DrawAfterimage(
-				shaderId,
-				model,
-				afterimage.nodes,
-				afterimage.transform,
-				afterimage.alpha,
-				afterimage.darkness,
-				GetAfterimageColor()
-			);
+			// 本体と武器を同じ削れ具合で描く
+			for (const auto& part : afterimage.parts)
+			{
+				modelRenderer->DrawDisintegration(
+					shaderId,
+					part.model,
+					part.nodes,
+					afterimage.dissolve,
+					GetTotalGameTime(),
+					GetDisintegrationEdgeColor(),
+					disintegrateEdgeWidth
+				);
+			}
 		}
 	}
 
@@ -342,6 +346,14 @@ void EnemyBoss::Render(const RenderContext& rc, ShaderId shaderId)
 		modelRenderer->Draw(shaderId, model);
 		sword->Render(rc, shaderId);
 	}
+}
+
+// 粒子分解に巻き込む追加モデル
+std::vector<std::shared_ptr<Model>> EnemyBoss::GetAfterimageAttachments() const
+{
+	if (sword == nullptr) return {};
+
+	return { sword->GetModel() };
 }
 
 void EnemyBoss::ShadowRender(const RenderContext& rc, ShadowMap* shadowMap)
