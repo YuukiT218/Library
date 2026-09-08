@@ -1,0 +1,818 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Develop|x64">
+      <Configuration>Develop</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D22095F2-0FC3-424B-97D6-074B973AB293}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Game</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">
+    <PlatformToolset>v143</PlatformToolset>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\imgui-node-editor;.\External\lua-5.4.7;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;xinput.lib;xaudio2.lib;winmm.lib;SphereCast.lib;Effekseer.lib;EffekseerRendererDX11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\External\SphereCast\lib\vs2022\$(PlatformTarget)\MT\$(Configuration);.\External\Effekseer170e\lib\vs2022\MT\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>Data\Shader\%(Filename).cso</ObjectFileOutput>
+      <AssemblerOutput>
+      </AssemblerOutput>
+      <AssemblerOutputFile>Data\Shader\%(Filename).cod</AssemblerOutputFile>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>.\Source;.\External\imgui-docking;.\External\imgui-node-editor;.\External\lua-5.4.7;.\External\ImGuizmo;.\External\cereal\include;.\External\tinygltf;.\External\SphereCast\Include;.\External\DirectXTex;.\External\DirectXTK-main\Inc;.\External\DirectXTK-main\Src;.\External\Effekseer170e\include\Effekseer;.\External\Effekseer170e\include\EffekseerRendererDX11;.\External\nlohmann;%(AdditionalIncludeDirectories);C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;xinput.lib;xaudio2.lib;winmm.lib;SphereCast.lib;Effekseer.lib;EffekseerRendererDX11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\External\SphereCast\lib\vs2022\$(PlatformTarget)\MT\$(Configuration);.\External\Effekseer170e\lib\vs2022\MT\$(PlatformTarget)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+      <ObjectFileOutput>Data\Shader\%(Filename).cso</ObjectFileOutput>
+      <AssemblerOutput>
+      </AssemblerOutput>
+      <AssemblerOutputFile>Data\Shader\%(Filename).cod</AssemblerOutputFile>
+    </FxCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>;C:\Program Files (x86)\Visual Leak Detector\include</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\AttackActions.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\DamageActions.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\Actions\MoveActions.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerAttackStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerDamageStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerGuardStates.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerMoveStates.h" />
+    <ClInclude Include="Source\Character\Projectile\Projectile.h" />
+    <ClInclude Include="Source\Character\Projectile\ProjectileManager.h" />
+    <ClInclude Include="Source\Effect\Effect.h" />
+    <ClInclude Include="Source\Effect\EffectManager.h" />
+    <ClInclude Include="Source\Effect\GPUParticle.h" />
+    <ClInclude Include="Source\Effect\GPUParticleSystem.h" />
+    <ClInclude Include="Source\Graphics\Renderer\TrailRenderer.h" />
+    <ClInclude Include="Source\Scene\SceneGameOver.h" />
+    <ClInclude Include="Source\System\Audio\Audio.h" />
+    <ClInclude Include="Source\System\Audio\AudioResource.h" />
+    <ClInclude Include="Source\System\Audio\AudioSource.h" />
+    <ClInclude Include="Source\UI\BattleUI.h" />
+    <ClInclude Include="External\DirectXTK-main\Inc\WICTextureLoader.h" />
+    <ClInclude Include="External\imgui-docking\imconfig.h" />
+    <ClInclude Include="External\imgui-docking\imgui.h" />
+    <ClInclude Include="External\imgui-docking\imgui_impl_dx11.h" />
+    <ClInclude Include="External\imgui-docking\imgui_impl_win32.h" />
+    <ClInclude Include="External\imgui-docking\imgui_internal.h" />
+    <ClInclude Include="External\imgui-docking\imstb_rectpack.h" />
+    <ClInclude Include="External\imgui-docking\imstb_textedit.h" />
+    <ClInclude Include="External\imgui-docking\imstb_truetype.h" />
+    <ClInclude Include="External\ImGuizmo\ImCurveEdit.h" />
+    <ClInclude Include="External\ImGuizmo\ImGradient.h" />
+    <ClInclude Include="External\ImGuizmo\ImGuizmo.h" />
+    <ClInclude Include="External\ImGuizmo\ImSequencer.h" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\adl_serializer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\byte_container_with_subtype.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\abi_macros.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\conversions\from_json.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\conversions\to_chars.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\conversions\to_json.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\exceptions.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\hash.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\binary_reader.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\input_adapters.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\json_sax.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\lexer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\parser.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\input\position_t.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\internal_iterator.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\iteration_proxy.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\iterator_traits.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\iter_impl.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\json_reverse_iterator.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\iterators\primitive_iterator.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\json_custom_base_class.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\json_pointer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\json_ref.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\macro_scope.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\macro_unscope.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\call_std\begin.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\call_std\end.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\cpp_future.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\detected.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\identity_tag.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\is_sax.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\std_fs.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\type_traits.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\meta\void_t.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\output\binary_writer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\output\output_adapters.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\output\serializer.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\string_concat.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\string_escape.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\string_utils.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\detail\value_t.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\json.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\json_fwd.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\ordered_map.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\thirdparty\hedley\hedley.hpp" />
+    <ClInclude Include="External\json-develop\json-develop\include\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="External\SphereCast\Include\SphereCast.h" />
+    <ClInclude Include="Source\Camera\CameraController.h" />
+    <ClInclude Include="Source\Camera\CameraParam.h" />
+    <ClInclude Include="Source\Camera\EditCameraController.h" />
+    <ClInclude Include="Source\Character\Character.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\ActionBase.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\ActionDerived.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorData.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\JudgementBase.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\JudgementDerived.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\NodeBase.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\RandomState.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\SequenceState.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\StateBase.h" />
+    <ClInclude Include="Source\Character\Enemy\Enemy.h" />
+    <ClInclude Include="Source\Character\Enemy\EnemyBoss.h" />
+    <ClInclude Include="Source\Character\Enemy\StateMachine\StateDerived.h" />
+    <ClInclude Include="Source\Character\Player\Player.h" />
+    <ClInclude Include="Source\Character\Player\States\PlayerState.h" />
+    <ClInclude Include="Source\Character\Weapon\EnemySword.h" />
+    <ClInclude Include="Source\Character\Weapon\Sword.h" />
+    <ClInclude Include="Source\Character\Weapon\Weapon.h" />
+    <ClInclude Include="Source\Graphics\BasicShader.h" />
+    <ClInclude Include="Source\Camera\Camera.h" />
+    <ClInclude Include="Source\Graphics\FrameBuffer.h" />
+    <ClInclude Include="Source\Graphics\PBRShader.h" />
+    <ClInclude Include="Source\Graphics\PostEffect.h" />
+    <ClInclude Include="Source\Graphics\ShadowMap.h" />
+    <ClInclude Include="Source\Graphics\SkyBox.h" />
+    <ClInclude Include="Source\Input\GamePad.h" />
+    <ClInclude Include="Source\Input\Input.h" />
+    <ClInclude Include="Source\Input\Mouse.h" />
+    <ClInclude Include="Source\Math\Collision.h" />
+    <ClInclude Include="Source\Math\Easing.h" />
+    <ClInclude Include="Source\Math\Mathf.h" />
+    <ClInclude Include="Source\Model\ModelResource.h" />
+    <ClInclude Include="Source\Model\ResourceManager.h" />
+    <ClInclude Include="Source\nlohmann\adl_serializer.hpp" />
+    <ClInclude Include="Source\nlohmann\byte_container_with_subtype.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\abi_macros.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\conversions\from_json.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\conversions\to_chars.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\conversions\to_json.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\exceptions.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\hash.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\binary_reader.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\input_adapters.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\json_sax.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\lexer.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\parser.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\input\position_t.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\internal_iterator.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\iteration_proxy.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\iterator_traits.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\iter_impl.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\json_reverse_iterator.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\iterators\primitive_iterator.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\json_custom_base_class.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\json_pointer.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\json_ref.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\macro_scope.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\macro_unscope.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\call_std\begin.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\call_std\end.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\cpp_future.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\detected.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\identity_tag.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\is_sax.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\std_fs.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\type_traits.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\meta\void_t.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\output\binary_writer.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\output\output_adapters.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\output\serializer.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\string_concat.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\string_escape.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\string_utils.hpp" />
+    <ClInclude Include="Source\nlohmann\detail\value_t.hpp" />
+    <ClInclude Include="Source\nlohmann\json.hpp" />
+    <ClInclude Include="Source\nlohmann\json_fwd.hpp" />
+    <ClInclude Include="Source\nlohmann\ordered_map.hpp" />
+    <ClInclude Include="Source\nlohmann\thirdparty\hedley\hedley.hpp" />
+    <ClInclude Include="Source\nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="Source\Scene\SceneEdit.h" />
+    <ClInclude Include="Source\Scene\SceneGame.h" />
+    <ClInclude Include="Source\Scene\SceneLoading.h" />
+    <ClInclude Include="Source\Scene\SceneManager.h" />
+    <ClInclude Include="Source\Scene\SceneClear.h" />
+    <ClInclude Include="Source\Scene\SceneTitle.h" />
+    <ClInclude Include="Source\Stage\Stage.h" />
+    <ClInclude Include="Source\Stage\StageMain.h" />
+    <ClInclude Include="Source\Stage\StageManager.h" />
+    <ClInclude Include="Source\System\AnimationConfigLoader.h" />
+    <ClInclude Include="Source\System\Dialog.h" />
+    <ClInclude Include="Source\System\Framework.h" />
+    <ClInclude Include="Source\Camera\FreeCameraController.h" />
+    <ClInclude Include="Source\Graphics\Light.h" />
+    <ClInclude Include="Source\Model\ModelRenderer.h" />
+    <ClInclude Include="Source\Graphics\LambertShader.h" />
+    <ClInclude Include="Source\Debug\ShapeRenderer.h" />
+    <ClInclude Include="Source\Model\GLTFImporter.h" />
+    <ClInclude Include="Source\Graphics\GpuResourceUtils.h" />
+    <ClInclude Include="Source\Graphics\Graphics.h" />
+    <ClInclude Include="Source\System\HighResolutionTimer.h" />
+    <ClInclude Include="Source\Debug\ImGuiRenderer.h" />
+    <ClInclude Include="Source\System\HitStop.h" />
+    <ClInclude Include="Source\System\Misc.h" />
+    <ClInclude Include="Source\Model\Model.h" />
+    <ClInclude Include="Source\Debug\PrimitiveRenderer.h" />
+    <ClInclude Include="Source\Graphics\RenderContext.h" />
+    <ClInclude Include="Source\Graphics\RenderState.h" />
+    <ClInclude Include="Source\Scene\Scene.h" />
+    <ClInclude Include="Source\Graphics\Shader.h" />
+    <ClInclude Include="Source\Sprite\Sprite.h" />
+    <ClInclude Include="Source\Math\TransformUtils.h" />
+    <ClInclude Include="Source\UI\Pause.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Character\Player\States\PlayerAttackStates.cpp" />
+    <ClCompile Include="Source\Character\Player\States\PlayerDamageStates.cpp" />
+    <ClCompile Include="Source\Character\Player\States\PlayerGuardStates.cpp" />
+    <ClCompile Include="Source\Character\Player\States\PlayerMoveStates.cpp" />
+    <ClCompile Include="Source\Character\Projectile\Projectile.cpp" />
+    <ClCompile Include="Source\Character\Projectile\ProjectileManager.cpp" />
+    <ClCompile Include="Source\Effect\Effect.cpp" />
+    <ClCompile Include="Source\Effect\EffectManager.cpp" />
+    <ClCompile Include="Source\Effect\GPUParticleSystem.cpp" />
+    <ClCompile Include="Source\Graphics\Renderer\TrailRenderer.cpp" />
+    <ClCompile Include="Source\Scene\SceneGameOver.cpp" />
+    <ClCompile Include="Source\System\Audio\Audio.cpp" />
+    <ClCompile Include="Source\System\Audio\AudioResource.cpp" />
+    <ClCompile Include="Source\System\Audio\AudioSource.cpp" />
+    <ClCompile Include="Source\UI\BattleUI.cpp" />
+    <ClCompile Include="External\DirectXTK-main\Src\WICTextureLoader.cpp" />
+    <ClCompile Include="External\imgui-docking\imgui.cpp" />
+    <ClCompile Include="External\imgui-docking\imgui_demo.cpp" />
+    <ClCompile Include="External\imgui-docking\imgui_draw.cpp" />
+    <ClCompile Include="External\imgui-docking\imgui_impl_dx11.cpp" />
+    <ClCompile Include="External\imgui-docking\imgui_impl_win32.cpp" />
+    <ClCompile Include="External\imgui-docking\imgui_widgets.cpp" />
+    <ClCompile Include="External\ImGuizmo\ImCurveEdit.cpp" />
+    <ClCompile Include="External\ImGuizmo\ImGradient.cpp" />
+    <ClCompile Include="External\ImGuizmo\ImGuizmo.cpp" />
+    <ClCompile Include="External\ImGuizmo\ImSequencer.cpp" />
+    <ClCompile Include="Source\Camera\CameraController.cpp" />
+    <ClCompile Include="Source\Camera\EditCameraController.cpp" />
+    <ClCompile Include="Source\Character\Character.cpp" />
+    <ClCompile Include="Source\Character\Enemy\Enemy.cpp" />
+    <ClCompile Include="Source\Character\Enemy\EnemyBoss.cpp" />
+    <ClCompile Include="Source\Character\Player\Player.cpp" />
+    <ClCompile Include="Source\Character\Player\States\PlayerState.cpp" />
+    <ClCompile Include="Source\Character\Weapon\EnemySword.cpp" />
+    <ClCompile Include="Source\Character\Weapon\Sword.cpp" />
+    <ClCompile Include="Source\Character\Weapon\Weapon.cpp" />
+    <ClCompile Include="Source\Graphics\BasicShader.cpp" />
+    <ClCompile Include="Source\Camera\Camera.cpp" />
+    <ClCompile Include="Source\Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="Source\Graphics\PBRShader.cpp" />
+    <ClCompile Include="Source\Graphics\PostEffect.cpp" />
+    <ClCompile Include="Source\Graphics\ShadowMap.cpp" />
+    <ClCompile Include="Source\Graphics\SkyBox.cpp" />
+    <ClCompile Include="Source\Input\GamePad.cpp" />
+    <ClCompile Include="Source\Input\Input.cpp" />
+    <ClCompile Include="Source\Input\Mouse.cpp" />
+    <ClCompile Include="Source\Math\Collision.cpp" />
+    <ClCompile Include="Source\Math\Mathf.cpp" />
+    <ClCompile Include="Source\Model\ModelResource.cpp" />
+    <ClCompile Include="Source\Model\ResourceManager.cpp" />
+    <ClCompile Include="Source\Scene\SceneEdit.cpp" />
+    <ClCompile Include="Source\Scene\SceneGame.cpp" />
+    <ClCompile Include="Source\Scene\SceneLoading.cpp" />
+    <ClCompile Include="Source\Scene\SceneManager.cpp" />
+    <ClCompile Include="Source\Scene\SceneClear.cpp" />
+    <ClCompile Include="Source\Scene\SceneTitle.cpp" />
+    <ClCompile Include="Source\Stage\StageMain.cpp" />
+    <ClCompile Include="Source\Stage\StageManager.cpp" />
+    <ClCompile Include="Source\System\AnimationConfigLoader.cpp" />
+    <ClCompile Include="Source\System\Dialog.cpp" />
+    <ClCompile Include="Source\System\Framework.cpp" />
+    <ClCompile Include="Source\Camera\FreeCameraController.cpp" />
+    <ClCompile Include="Source\Model\ModelRenderer.cpp" />
+    <ClCompile Include="Source\Graphics\LambertShader.cpp" />
+    <ClCompile Include="Source\Debug\ShapeRenderer.cpp" />
+    <ClCompile Include="Source\Model\GLTFImporter.cpp" />
+    <ClCompile Include="Source\Graphics\GpuResourceUtils.cpp" />
+    <ClCompile Include="Source\Graphics\Graphics.cpp" />
+    <ClCompile Include="Source\Debug\ImGuiRenderer.cpp" />
+    <ClCompile Include="Source\System\HitStop.cpp" />
+    <ClCompile Include="Source\System\Main.cpp" />
+    <ClCompile Include="Source\Model\Model.cpp" />
+    <ClCompile Include="Source\Debug\PrimitiveRenderer.cpp" />
+    <ClCompile Include="Source\Graphics\RenderState.cpp" />
+    <ClCompile Include="Source\Sprite\Sprite.cpp" />
+    <ClCompile Include="Source\Math\TransformUtils.cpp" />
+    <ClCompile Include="Source\UI\Pause.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shader\Basic.hlsli" />
+    <None Include="Shader\FullScreenQuad\FullScreenQuad.hlsli" />
+    <None Include="Shader\GPUParticle.hlsli" />
+    <None Include="Shader\Lambert.hlsli" />
+    <None Include="Shader\PBR.hlsli" />
+    <None Include="Shader\PostEffect\PostEffect.hlsli" />
+    <None Include="Shader\PostEffect\PostShadingFunction.hlsli" />
+    <None Include="Shader\Scene.hlsli" />
+    <None Include="Shader\ShadingFunctions.hlsli" />
+    <None Include="Shader\ShadowMap.hlsli" />
+    <None Include="Shader\ShapeRenderer.hlsli" />
+    <None Include="Shader\PrimitiveRenderer.hlsli" />
+    <None Include="Shader\Skinning.hlsli" />
+    <None Include="Shader\SkyBox.hlsli" />
+    <None Include="Shader\Sprite.hlsli" />
+    <None Include="Shader\SpriteDissolve.hlsli" />
+    <None Include="Shader\TrailRenderer.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shader\BasicPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\BasicVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\FullScreenQuad\FullScreenQuadVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\GaugePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\GPUParticleCS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticleGS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticlePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\GpuParticleVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\LambertPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\LambertVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PBRPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PBRVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\BloomPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\ChromaticAberrationPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\FinalPostPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurDownSamplingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurHorizontalPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurUpSamplingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GaussianBlurVerticalPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\GlowExtractionPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\LuminanceExtractionPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\RadialBlurPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PostEffect\ToneMappingPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ShadowMapVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ShapeRendererPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\ShapeRendererVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PortraitPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PrimitiveRendererPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\PrimitiveRendererVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SilhouettePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SkyBoxVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SpriteDissolvePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SpriteDissolveVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SpritePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\SpriteVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\TrailRendererPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shader\TrailRendererVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Character\Enemy\BehaviorTree\BehaviorTreeAsset.cpp" />
+    <ClCompile Include="Source\Character\Enemy\BehaviorTree\EnemyBossBehavior.cpp" />
+    <ClCompile Include="Source\Character\Enemy\BehaviorTree\EnemyBossDefaultTree.cpp" />
+    <ClCompile Include="Source\Script\LuaScriptSystem.cpp" />
+    <ClCompile Include="Source\Script\LuaAction.cpp" />
+    <ClCompile Include="Source\Script\LuaBossBindings.cpp" />
+    <ClCompile Include="Source\Editor\BehaviorTreeEditor.cpp" />
+    <ClCompile Include="Source\Editor\EditorLayout.cpp" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTreeAsset.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorRegistry.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTreeBuilder.h" />
+    <ClInclude Include="Source\Character\Enemy\BehaviorTree\EnemyBossBehavior.h" />
+    <ClInclude Include="Source\Script\LuaScriptSystem.h" />
+    <ClInclude Include="Source\Script\LuaAction.h" />
+    <ClInclude Include="Source\Script\LuaBossBindings.h" />
+    <ClInclude Include="Source\Editor\BehaviorTreeEditor.h" />
+    <ClInclude Include="Source\Editor\EditorLayout.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="External\imgui-node-editor\crude_json.cpp" />
+    <ClCompile Include="External\imgui-node-editor\imgui_canvas.cpp" />
+    <ClCompile Include="External\imgui-node-editor\imgui_node_editor.cpp" />
+    <ClCompile Include="External\imgui-node-editor\imgui_node_editor_api.cpp" />
+    <ClCompile Include="External\lua-5.4.7\lapi.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lauxlib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lbaselib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lcode.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lcorolib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lctype.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ldblib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ldebug.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ldo.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ldump.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lfunc.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lgc.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\linit.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\liolib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\llex.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lmathlib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lmem.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\loadlib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lobject.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lopcodes.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\loslib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lparser.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lstate.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lstring.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lstrlib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ltable.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ltablib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\ltm.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lundump.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lutf8lib.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lvm.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="External\lua-5.4.7\lzio.c">
+      <CompileAs>CompileAsCpp</CompileAs>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="External\imgui-node-editor\crude_json.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_bezier_math.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_canvas.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_extra_math.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_node_editor.h" />
+    <ClInclude Include="External\imgui-node-editor\imgui_node_editor_internal.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="External\DirectXTex\DirectXTex_Desktop_2022.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
