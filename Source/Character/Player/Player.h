@@ -52,6 +52,11 @@ public:
 	// エディタ用更新処理
 	void EditUpdate(float elapsedTime);
 
+	// ImGui がマウス／キーボードを掴んでいても操作を受け付けるようにする。
+	// エディタの Game View にフォーカスがあるときに立てる。
+	void SetInputForced(bool forced) { inputForced = forced; }
+	bool IsInputForced() const { return inputForced; }
+
 	// 描画処理
 	void Render(const RenderContext& rc, ShaderId shaderId);
 
@@ -300,6 +305,9 @@ private:
 	float jumpSpeed = 20.0f;
 	int jumpCount = 0;
 	int jumpLimit = 2;
+	// エディタから操作を通したいときに立つ
+	bool inputForced = false;
+
 	bool isRolling = false;
 	bool isGuard = false;
 	bool isStandbyCounter = false;

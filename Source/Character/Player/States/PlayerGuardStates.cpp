@@ -214,6 +214,10 @@ void PlayerGuardCounter::Enter()
 
     player->SetPlayerRolling(true);
     player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
+
+    // 先行入力をリセット（前回のカウンター時の入力を持ち越さない）
+    nextShiftReady = false;
+    nextInput = InputActionType::None;
 }
 
 void PlayerGuardCounter::Update(float elapsedTime)
@@ -272,21 +276,30 @@ void PlayerGuardCounter::Update(float elapsedTime)
     {
         if (nextShiftReady)
         {
-            if (nextInput == InputActionType::LightAttack)
+            // 先行入力は一度きり。消費したらクリアしてから遷移する
+            InputActionType input = nextInput;
+            nextShiftReady = false;
+            nextInput = InputActionType::None;
+
+            if (input == InputActionType::LightAttack)
             {
                 ChangeState(PlayerStateId::Combo1);
+                return;
             }
-            else if (nextInput == InputActionType::HeavyAttack)
+            else if (input == InputActionType::HeavyAttack)
             {
                 ChangeState(PlayerStateId::Heavy1);
+                return;
             }
-            else if (nextInput == InputActionType::Dodge)
+            else if (input == InputActionType::Dodge)
             {
                 ChangeState(PlayerStateId::Dodge);
+                return;
             }
-            else if (nextInput == InputActionType::Guard)
+            else if (input == InputActionType::Guard)
             {
                 ChangeState(PlayerStateId::GuardIdle);
+                return;
             }
         }
     }
@@ -301,6 +314,10 @@ void PlayerGuardCounter::Update(float elapsedTime)
 void PlayerGuardCounter::Exit()
 {
     player->SetPlayerRolling(false);
+
+    // 先行入力をリセット
+    nextShiftReady = false;
+    nextInput = InputActionType::None;
 }
 
 // デバッグ用GUI描画

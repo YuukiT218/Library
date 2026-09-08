@@ -100,37 +100,20 @@ void Framework::Render(float elapsedTime)
 	// シーン描画処理
 	if (currentSceneType == SceneType::Edit)
 	{
-		ImVec2 size = ImGui::GetContentRegionAvail();
-		int width = static_cast<int>(size.x);
-		int height = static_cast<int>(size.y);
+		// エディットシーンは画面解像度のまま描き、Game View パネル側で縮小表示する。
+		// パネルに合わせて解像度を変えると、スプライトや UI の配置が崩れるため。
+		const int width = static_cast<int>(Graphics::Instance().GetScreenWidth());
+		const int height = static_cast<int>(Graphics::Instance().GetScreenHeight());
 
-		// サイズ変更（必要な場合のみ）
-		static int prevWidth = 0, prevHeight = 0;
-		if (width != prevWidth || height != prevHeight)
-		{
-			try
-			{
-				Graphics::Instance().ResizeFrameBuffer(FrameBufferId::Scene, width, height);
-				prevWidth = width;
-				prevHeight = height;
-			}
-			catch (const std::exception& e)
-			{
-				std::string msg = "Framebuffer resize failed:\n";
-				msg += e.what();
-				MessageBoxA(nullptr, msg.c_str(), "Error", MB_OK | MB_ICONERROR);
-			}
-		}
-
-		// Scene用にセット
-		Graphics::Instance().GetFrameBuffer(FrameBufferId::Scene)->SetRenderTargets(dc);
-		Graphics::Instance().GetFrameBuffer(FrameBufferId::Scene)->Clear(dc, DirectX::XMFLOAT4(0.2f, 0.2f, 0.25f, 1.0f));
-
-		// シーン描画
-		SceneManager::Instance().Render(elapsedTime);
+		// ローディング中などは SceneEdit ではないので、通常の描画に任せる
 		auto* editScene = dynamic_cast<SceneEdit*>(SceneManager::Instance().GetCurrentScene());
-		if (editScene) {
+		if (editScene != nullptr)
+		{
 			editScene->Render(elapsedTime, width, height);
+		}
+		else
+		{
+			SceneManager::Instance().Render(elapsedTime);
 		}
 	}
 	else

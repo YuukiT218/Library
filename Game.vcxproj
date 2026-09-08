@@ -591,6 +591,7 @@
     <ClCompile Include="Source\Script\LuaAction.cpp" />
     <ClCompile Include="Source\Script\LuaBossBindings.cpp" />
     <ClCompile Include="Source\Editor\BehaviorTreeEditor.cpp" />
+    <ClCompile Include="Source\Editor\EditorLayout.cpp" />
     <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTreeAsset.h" />
     <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorRegistry.h" />
     <ClInclude Include="Source\Character\Enemy\BehaviorTree\BehaviorTreeBuilder.h" />
@@ -599,6 +600,7 @@
     <ClInclude Include="Source\Script\LuaAction.h" />
     <ClInclude Include="Source\Script\LuaBossBindings.h" />
     <ClInclude Include="Source\Editor\BehaviorTreeEditor.h" />
+    <ClInclude Include="Source\Editor\EditorLayout.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="External\imgui-node-editor\crude_json.cpp" />

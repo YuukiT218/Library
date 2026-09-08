@@ -1265,7 +1265,7 @@
         },
         {
             "advanceInputEndFrame": 0.0,
-            "advanceInputStartFrame": 0.0,
+            "advanceInputStartFrame": 0.15000000596046448,
             "animationIndex": 26,
             "attributes": [
                 {

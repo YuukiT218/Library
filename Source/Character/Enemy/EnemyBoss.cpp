@@ -175,6 +175,12 @@ int EnemyBoss::GetActiveNodeSourceId() const
 	return activeNode != nullptr ? activeNode->GetSourceId() : -1;
 }
 
+// 実行中のノード名を返す
+std::string EnemyBoss::GetActiveNodeName() const
+{
+	return activeNode != nullptr ? activeNode->GetName() : std::string();
+}
+
 // 推論をやり直す
 void EnemyBoss::ResetBehaviorState()
 {

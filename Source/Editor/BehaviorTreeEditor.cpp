@@ -325,6 +325,20 @@ void BehaviorTreeEditor::DrawGui(EnemyBoss* boss)
 	DrawScriptWindow();
 }
 
+void BehaviorTreeEditor::ReapplyTo(EnemyBoss* boss)
+{
+	// まだ何も読み込んでいなければ、ボス側が読んだ内容をそのまま使う
+	if (boss == nullptr) return;
+
+	if (!assetLoaded)
+	{
+		LoadFromBoss(boss);
+		return;
+	}
+
+	Apply(boss);
+}
+
 void BehaviorTreeEditor::DrawGraphWindow(EnemyBoss* boss)
 {
 	if (!ImGui::Begin(u8"Behavior Tree", &isOpen, ImGuiWindowFlags_None))
@@ -1410,6 +1424,12 @@ void BehaviorTreeEditor::PullNodePositions()
 {
 	if (graphContext == nullptr) return;
 
+	// グラフ描画の外（ツールバーの「保存」など）からも呼ばれる。
+	// ax::NodeEditor の API は現在のエディタを無条件に参照するので、
+	// ここで対象を指定しておかないと nullptr 参照で落ちる。
+	ed::EditorContext* previousContext = ed::GetCurrentEditor();
+	ed::SetCurrentEditor(graphContext);
+
 	for (BehaviorNodeAsset& node : asset.nodes)
 	{
 		const ImVec2 position = ed::GetNodePosition(ed::NodeId(MakeNodeId(node.id)));
@@ -1424,16 +1444,24 @@ void BehaviorTreeEditor::PullNodePositions()
 			dirty = true;
 		}
 	}
+
+	ed::SetCurrentEditor(previousContext);
 }
 
 void BehaviorTreeEditor::PushNodePositions()
 {
 	if (graphContext == nullptr) return;
 
+	// Pull と同じ理由で、どこから呼ばれても動くようにしておく
+	ed::EditorContext* previousContext = ed::GetCurrentEditor();
+	ed::SetCurrentEditor(graphContext);
+
 	for (const BehaviorNodeAsset& node : asset.nodes)
 	{
 		ed::SetNodePosition(ed::NodeId(MakeNodeId(node.id)), ImVec2(node.editorX, node.editorY));
 	}
+
+	ed::SetCurrentEditor(previousContext);
 }
 
 //--------------------------------------------------------------------

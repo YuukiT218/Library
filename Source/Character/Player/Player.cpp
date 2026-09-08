@@ -179,8 +179,11 @@ void Player::Update(float elapsedTime)
     if (currentStateID != PlayerStateId::EnumCount)
     {
 #if _DEBUG
+        // エディタの Game View にフォーカスがあるときは、
+        // ImGui がマウスを掴んでいても操作を通す。
+        // （全画面ドックスペースではカーソルが常に ImGui 上にあるため）
         ImGuiIO& io = ImGui::GetIO();
-        if (!io.WantCaptureMouse && !io.WantCaptureKeyboard) {
+        if (inputForced || (!io.WantCaptureMouse && !io.WantCaptureKeyboard)) {
             GetState(currentStateID).Update(elapsedTime);
         }
 #else

@@ -30,7 +30,7 @@ private:
 	float timer = 0.0f;
 	bool isLoop = false;
 	AnimationConfig* config;
-	InputActionType nextInput;
+	InputActionType nextInput = InputActionType::None;
 };
 
 // ガードヒットステート
@@ -52,8 +52,8 @@ protected:
 private:
 	int guardHitAnimationIndex = -1;
 	float timer = 0.0f;
-	bool nextShiftReady;
-	InputActionType nextInput;
+	bool nextShiftReady = false;
+	InputActionType nextInput = InputActionType::None;
 };
 
 // ガードカウンターステート
@@ -82,7 +82,7 @@ private:
 	float guardParryAnimationSpeed = 1.0f;
 	float timer = 0.0f;
 
-	bool nextShiftReady;
-	InputActionType nextInput;
+	bool nextShiftReady = false;
+	InputActionType nextInput = InputActionType::None;
 	DirectX::XMFLOAT3 enemyPos;
 };

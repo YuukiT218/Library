@@ -2924,7 +2924,7 @@
         },
         {
             "advanceInputEndFrame": 1.0,
-            "advanceInputStartFrame": 0.25,
+            "advanceInputStartFrame": 0.10000000149011612,
             "animationIndex": 76,
             "attributes": [
                 {

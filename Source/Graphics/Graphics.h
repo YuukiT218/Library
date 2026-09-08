@@ -24,6 +24,10 @@ enum class FrameBufferId
 	RadialBlur,
 	Chromatic,
 
+	// エディタレイアウト時にゲーム画面を受け取るオフスクリーン。
+	// Display はバックバッファなので、パネルに貼るにはこちらへ描く必要がある。
+	GameView,
+
 	EnumCount
 };
 

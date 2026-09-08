@@ -4,6 +4,10 @@
 #include "SceneLoading.h"
 #include "SceneEdit.h"
 #include "Editor/BehaviorTreeEditor.h"
+#include "Editor/EditorLayout.h"
+#include "Character/Projectile/ProjectileManager.h"
+#include "Effect/EffectManager.h"
+#include "Graphics/Renderer/TrailRenderer.h"
 #include "SceneClear.h"
 #include "Camera/CameraParam.h"
 #include "Stage/StageManager.h"
@@ -59,6 +63,11 @@ void SceneEdit::Initialize()
 		{ 0, 1, 0 }		// 上ベクトル
 	);
 	cameraController = std::make_unique<EditCameraController>();
+	playCameraController = std::make_unique<CameraController>();
+
+	// ロックオン状態は持ち越さない
+	CameraParam::Instance().SetIsLockOn(false);
+	CameraParam::Instance().SetLockOnEnemy(nullptr);
 
 	freecameraController.SyncCameraToController(camera);
 
@@ -85,14 +94,35 @@ void SceneEdit::Finalize()
 
 void SceneEdit::Update(float elapsedTime)
 {
-	//// ヒットストップ更新処理
-	//HitStop::Instance().Update(elapsedTime);
-	//float gameTimeScale = HitStop::Instance().GetTimeScale();
+	// 描画中に押された再生ボタンをここで処理する。
+	// boss / player を差し替えるので、これらを参照するどの処理よりも先に行う。
+	ApplyPendingPlayRequests();
 
 	// カメラ更新処理
-	Character* targetCharacter = selectedCharacter; // ImGuiで選んだキャラ
-	if (targetCharacter) {
-		DirectX::XMFLOAT3 target = targetCharacter->GetPosition();
+	//
+	// 編集中は選んだキャラを回り込んで見られるエディットカメラ、
+	// プレイテスト中はゲーム本編と同じ追従カメラに切り替える。
+	if (isPlayTesting)
+	{
+		// ロックオン切り替え（Game View を操作しているときだけ受け付ける）
+		if (EditorLayout::Instance().IsGameViewFocused())
+		{
+			GamePad& gamePad = Input::Instance().GetGamePad();
+			Mouse& mouse = Input::Instance().GetMouse();
+
+			if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_SHOULDER ||
+				mouse.GetButtonDown() & Mouse::BTN_MIDDLE)
+			{
+				CameraParam::Instance().ReversLockOnSwitch();
+			}
+		}
+
+		playCameraController->SetTarget(player->GetPosition());
+		playCameraController->Update(elapsedTime);
+	}
+	else if (selectedCharacter != nullptr)
+	{
+		DirectX::XMFLOAT3 target = selectedCharacter->GetPosition();
 		target.y += 2;
 		cameraController->SetTarget(target);
 		cameraController->Update(elapsedTime);
@@ -106,26 +136,177 @@ void SceneEdit::Update(float elapsedTime)
 		freecameraController.SyncControllerToCamera(Camera::Instance());
 	}
 
-	// ステージ更新処理
-	StageManager::Instance().Update(elapsedTime);
-
-	// プレイヤー更新処理
-	//player->SetLockOnCamera(cameraController->GetRockOnEnemy());
-	player->EditUpdate(elapsedTime);
-
-	boss->EditUpdate(elapsedTime);
-
-	// 行動エディタのホットリロード監視
+	// 行動エディタのホットリロード監視（編集中でも再生中でも回す）
 	BehaviorTreeEditor::Instance().Update(elapsedTime, boss.get());
 
-	// エフェクト更新処理
-	//EffectManager::Instance().Update(elapsedTime);
+	if (isPlayTesting && !isPlayPaused)
+	{
+		// 再生中はゲームと同じ更新を回す。
+		// こうしないとビヘイビアツリーが動かず、行動を見ながら調整できない。
+		const float deltaTime = elapsedTime * playSpeedScale;
 
-	//combatUI->Update(elapsedTime);
+		// Game View をクリックしてフォーカスを当てている間だけ操作を通す。
+		// Player::Update は ImGui がマウスを掴んでいると入力を無視するが、
+		// 全画面ドックスペースではカーソルが常に ImGui 上にあるため、
+		// これが無いと永久に操作できない。
+		player->SetInputForced(EditorLayout::Instance().IsGameViewFocused());
+
+		HitStop::Instance().Update(deltaTime);
+
+		StageManager::Instance().Update(deltaTime);
+		player->Update(deltaTime * HitStop::Instance().GetPlayerTimeScale());
+		boss->Update(deltaTime);
+		ProjectileManager::Instance().Update(deltaTime);
+		EffectManager::Instance().Update(deltaTime);
+	}
+	else
+	{
+		// 編集中はアニメーションだけを進める（従来の挙動）
+		player->SetInputForced(false);
+
+		StageManager::Instance().Update(elapsedTime);
+		player->EditUpdate(elapsedTime);
+		boss->EditUpdate(elapsedTime);
+
+		// 止めている間もエフェクトの見た目は追従させたいので更新しておく
+		EffectManager::Instance().Update(elapsedTime);
+	}
 
 	LightManager& lightManager = LightManager::Instance();
 
 	timer += elapsedTime;
+}
+
+// 再生の開始・停止を要求する
+void SceneEdit::TogglePlay()
+{
+	playToggleRequested = true;
+}
+
+// 初期状態へ戻すことを要求する
+void SceneEdit::RequestPlayReset()
+{
+	playResetRequested = true;
+}
+
+// 描画中に受け付けた再生操作を、描画の外で処理する
+//
+// 再生ボタンは ImGui の描画中に押されるが、Framework::Render は
+// Graphics のミューテックスを握ったまま描画を行っている。
+// キャラクターを作り直すと Effect のコンストラクタが同じミューテックスを
+// 取りにいくため、その場で作り直すと二重ロックで例外になる。
+// そこで要求だけ覚えておき、実際の作り直しは Update（ロック外）で行う。
+void SceneEdit::ApplyPendingPlayRequests()
+{
+	if (playToggleRequested)
+	{
+		playToggleRequested = false;
+
+		isPlayTesting = !isPlayTesting;
+		isPlayPaused = false;
+
+		// 始めるときも止めるときも初期状態へ戻す。
+		// 前回の続きから動き出すと、何を見ているのか分からなくなるため。
+		playResetRequested = true;
+	}
+
+	if (playResetRequested)
+	{
+		playResetRequested = false;
+		ResetPlay();
+	}
+
+}
+
+// キャラクターを作り直して初期状態へ戻す
+void SceneEdit::ResetPlay()
+{
+	ID3D11Device* device = Graphics::Instance().GetDevice();
+
+	// ロックオンを解除する。
+	// CameraController はロックオン中に敵ポインタを持ち続けるので、
+	// これをしないとこの後で破棄するボスを次のフレームに参照してしまう。
+	CameraParam::Instance().SetIsLockOn(false);
+	CameraParam::Instance().SetLockOnEnemy(nullptr);
+
+	// 出しっぱなしの弾とエフェクトを片付ける
+	ProjectileManager::Instance().Clear();
+	EffectManager::Instance().StopAllEffects();
+
+	const bool bossWasSelected = (selectedCharacter == boss.get());
+
+	// 新しい方を先に作るので、モデルのリソースはキャッシュから再利用される
+	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
+	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Rogue/SK_ROGUE_F_02.gltf", 1.0f);
+
+	selectedCharacter = bossWasSelected
+		? static_cast<Character*>(boss.get())
+		: static_cast<Character*>(player.get());
+
+	// 作り直したボスは JSON から読み直した状態なので、
+	// エディタ側に未保存の編集があればそれを反映し直す。
+	BehaviorTreeEditor::Instance().ReapplyTo(boss.get());
+
+	// 今のカメラ位置から動き出すようにして、切り替えで画面が飛ばないようにする
+	playCameraController->InitCamera();
+}
+
+// ゲームビューの上に出す再生操作
+void SceneEdit::DrawPlayControls()
+{
+	if (ImGui::Button(isPlayTesting ? u8"停止" : u8"再生"))
+	{
+		TogglePlay();
+	}
+
+	ImGui::SameLine();
+
+	if (!isPlayTesting) ImGui::TextDisabled(u8"一時停止");
+	else if (ImGui::Button(isPlayPaused ? u8"再開" : u8"一時停止")) isPlayPaused = !isPlayPaused;
+
+	ImGui::SameLine();
+	if (ImGui::Button(u8"リセット")) RequestPlayReset();
+
+	ImGui::SameLine();
+	ImGui::SetNextItemWidth(140.0f);
+	ImGui::SliderFloat(u8"速度", &playSpeedScale, 0.05f, 2.0f, "%.2f x");
+
+	ImGui::SameLine();
+	if (ImGui::SmallButton(u8"配置リセット")) EditorLayout::Instance().RequestDefaultLayout();
+
+	ImGui::SameLine();
+	if (!isPlayTesting)     ImGui::TextDisabled(u8"編集中");
+	else if (isPlayPaused)  ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.3f, 1.0f), u8"一時停止中");
+	else                ImGui::TextColored(ImVec4(0.55f, 0.9f, 0.55f, 1.0f), u8"再生中");
+
+	// --- 状況表示 ---
+	//
+	// ボスは索敵範囲にプレイヤーが入るまで Battle に入らないため、
+	// 何も起きていないときに理由が分かるよう距離と状態を出しておく。
+	if (boss == nullptr || player == nullptr) return;
+
+	const DirectX::XMFLOAT3 bossPosition = boss->GetPosition();
+	const DirectX::XMFLOAT3 playerPosition = player->GetPosition();
+	const float dx = playerPosition.x - bossPosition.x;
+	const float dy = playerPosition.y - bossPosition.y;
+	const float dz = playerPosition.z - bossPosition.z;
+	const float distance = sqrtf(dx * dx + dy * dy + dz * dz);
+
+	const std::string activeNodeName = boss->GetActiveNodeName();
+
+	ImGui::TextDisabled(u8"実行ノード: %s  |  距離: %.1f  |  戦闘: %s  |  操作: %s",
+		activeNodeName.empty() ? u8"（なし）" : activeNodeName.c_str(),
+		distance,
+		boss->GetBattleState() ? u8"有" : u8"無",
+		EditorLayout::Instance().IsGameViewFocused() ? u8"有効" : u8"Game View をクリック");
+
+	ImGui::SameLine();
+	if (ImGui::SmallButton(u8"戦闘開始"))
+	{
+		// 索敵を待たずに戦闘状態へ入れて、攻撃行動をすぐ確認できるようにする
+		boss->SetBattleState(true);
+		boss->ResetBehaviorState();
+	}
 }
 
 // 描画処理
@@ -181,13 +362,21 @@ void SceneEdit::Render(float elapsedTime, int width, int height)
 		boss->Render(rc, ShaderId::PBR);
 	}
 
+	// トレイル描画（武器の軌跡）
+	{
+		TrailRenderer* trailRenderer = graphics.GetTrailRenderer();
+		trailRenderer->Render(dc, rc, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	}
+
 	// スカイボックス描画
 	skyBox->Begin(rc);
 	skyBox->Render(rc);
 	skyBox->End(rc);
 
-	// 3Dエフェクト描画
-	//EffectManager::Instance().Render(camera.GetView(), camera.GetProjection());
+	// 3Dエフェクト描画。
+	// ボスの行動はテレポートや光柱などエフェクト前提のものが多いので、
+	// これが無いと再生しても何が起きているか分からない。
+	EffectManager::Instance().Render(rc);
 
 	//ポストプロセス
 	{
@@ -201,13 +390,15 @@ void SceneEdit::Render(float elapsedTime, int width, int height)
 		buffers[FrameBufferId::Chromatic]->SetRenderTargets(dc);
 		posteffect->RadialBlur(rc, buffers[FrameBufferId::RadialBlur]->GetColorMap());
 
-		buffers[FrameBufferId::Display]->SetRenderTargets(dc);
+		// 最終画は Game View パネルに貼るのでオフスクリーンへ描く
+		buffers[FrameBufferId::GameView]->SetRenderTargets(dc);
 		posteffect->ChromaticAberration(rc, buffers[FrameBufferId::Chromatic]->GetColorMap());
 
 		posteffect->End(rc);
 	}
 
-	buffers[FrameBufferId::Scene]->SetRenderTargets(dc);
+	// デバッグ表示はポストエフェクトの影響を受けないよう、最終画の上に重ねる
+	buffers[FrameBufferId::GameView]->SetRenderTargets(dc);
 	// プレイヤーデバッグプリミティブ描画
 	player->DrawDebugPrimitive();
 
@@ -230,74 +421,24 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 	//このEditだけUnity風にStyleChange
 	ImGuiSetStyle();
 
-	cameraController->DrawDebugGUI();
+	EditorLayout& layout = EditorLayout::Instance();
+
+	// ドックスペースは他のどのウィンドウよりも先に敷く
+	layout.BeginDockSpace();
+
+	// ゲームビュー。上に再生操作を並べる。
+	layout.DrawGameView(
+		Graphics::Instance().GetFrameBuffer(FrameBufferId::GameView)->GetColorMap(),
+		Graphics::Instance().GetScreenWidth(),
+		Graphics::Instance().GetScreenHeight(),
+		[this]() { DrawPlayControls(); });
+
+	// 今動いている方のカメラ設定を出す
+	if (isPlayTesting) playCameraController->DrawDebugGUI();
+	else           cameraController->DrawDebugGUI();
 
 	// 敵の行動パターンエディタ
 	BehaviorTreeEditor::Instance().DrawGui(boss.get());
-
-	ImGui::Begin("Game View", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-	ImVec2 availSize = ImGui::GetContentRegionAvail();
-
-	// 安全チェック（ウィンドウが極端に小さい時は何もしない）
-	if (availSize.x < 10 || availSize.y < 10)
-	{
-		ImGui::Text("Game view too small");
-		ImGui::End();
-		return;
-	}
-
-	int width = static_cast<int>(availSize.x);
-	int height = static_cast<int>(availSize.y);
-
-	// FrameBufferリサイズ
-	static int prevWidth = 0, prevHeight = 0;
-	if (width != prevWidth || height != prevHeight)
-	{
-		Graphics::Instance().ResizeFrameBuffer(FrameBufferId::Scene, width, height);
-		prevWidth = width;
-		prevHeight = height;
-	}
-
-	// 描画に使うフレームバッファ
-	auto* fb = Graphics::Instance().GetFrameBuffer(FrameBufferId::Scene);
-	void* texID = (void*)fb->GetColorMap();
-
-	// アスペクト比維持計算 
-	float fbAspect = static_cast<float>(width) / static_cast<float>(height);
-	float winAspect = availSize.x / availSize.y;
-
-	// 描画サイズ初期値
-	ImVec2 drawSize = availSize;
-
-	if (fabsf(fbAspect - winAspect) > 0.01f)
-	{
-		if (winAspect > fbAspect)
-		{
-			// ウィンドウのほうが横長 → 高さ基準
-			drawSize.y = availSize.y;
-			drawSize.x = drawSize.y * fbAspect;
-		}
-		else
-		{
-			// ウィンドウのほうが縦長 → 幅基準
-			drawSize.x = availSize.x;
-			drawSize.y = drawSize.x / fbAspect;
-		}
-	}
-
-	// 中央配置
-	ImVec2 cursorPos = ImGui::GetCursorScreenPos();
-	ImVec2 offset = {
-		(availSize.x - drawSize.x) * 0.5f,
-		(availSize.y - drawSize.y) * 0.5f
-	};
-	ImGui::SetCursorScreenPos(ImVec2(cursorPos.x + offset.x, cursorPos.y + offset.y));
-
-	// Image描画
-	ImGui::Image(texID, drawSize, ImVec2(0, 0), ImVec2(1, 1));
-
-	ImGui::End();
 
 	// Debug Menuウィンドウを開始
 	if (ImGui::Begin("Animation", nullptr, ImGuiWindowFlags_None))
@@ -355,7 +496,17 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 			// 一度だけ状態を保存したかどうか
 			static bool hasSavedState = false;
 
-			if (hasInput) {
+			// プレイテスト中はアニメーションをゲーム側が動かすので、
+			// プレビュー用の再生制御には触らせない。
+			// （触らせると DrawAnimationControlUI が毎フレーム再生位置を固定してしまい、
+			//   被弾など非ループのアニメが終わった瞬間から動かなくなる）
+			if (isPlayTesting) {
+				// 編集モードへ戻ったときに停止状態が残らないようにしておく
+				isPlaying = true;
+				hasSavedState = false;
+				inputReleaseTimer = 0.0f;
+			}
+			else if (hasInput) {
 				// 一度だけ保存
 				if (!hasSavedState) {
 					wasPlaying = isPlaying;
@@ -400,7 +551,14 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 
 
 			//再生ボタン停止ボタンの読み込みと描画
-			DrawAnimationControlUI(model, isPlaying, animationIndex, animationLoop, animationSeconds, secondsLength);
+			if (!isPlayTesting)
+			{
+				DrawAnimationControlUI(model, isPlaying, animationIndex, animationLoop, animationSeconds, secondsLength);
+			}
+			else
+			{
+				ImGui::TextDisabled(u8"プレイテスト中はアニメーションをゲーム側が制御します");
+			}
 
 			if (ImGui::Button("Save", { 50,30 }))
 			{

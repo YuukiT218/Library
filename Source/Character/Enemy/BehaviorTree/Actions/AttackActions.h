@@ -28,7 +28,8 @@ public:
 	bool init = false;
 	float timer = 0.0f;
 	float duration = 1.0f;
-	Vector3 epsilon{ 2.5f, 1.0f, 2.5f };
+	// 4 段目を振り抜く間合い。
+	float finisherReach = EnemyActionBase<ActorType>::MELEE_REACH;
 
 	State Run(float elapsedTime) override
 	{
@@ -66,13 +67,20 @@ public:
 			float t = std::clamp(timer / duration, 0.0f, 1.0f);
 
 			this->owner->TurnToTarget(elapsedTime, TurnSpeed::INSTANT);
+
 			if (frame >= config->advanceInputStartFrame)
 			{
-				if (!this->IsNearPlayer(epsilon))
+				model->PauseAnimation(true);
+
+				if (this->IsWithinReach(finisherReach))
+				{
+					model->PauseAnimation(false);
+					this->step++;
+				}
+				else
 				{
 					this->LerpTowardPlayer(t);
 				}
-				else this->step++;
 			}
 			break;
 		}
@@ -82,7 +90,12 @@ public:
 			break;
 		}
 
-		if (this->IsInterrupted()) return this->ResetState(State::Failed);
+		if (this->IsInterrupted())
+		{
+			// 止めたまま抜けると、以降アニメーションが動かなくなる
+			model->PauseAnimation(false);
+			return this->ResetState(State::Failed);
+		}
 		return State::Run;
 	}
 
@@ -187,7 +200,9 @@ public:
 	bool init = false;
 	float timer = 0.0f;
 	float duration = 7.0f;
-	Vector3 epsilon{ 3.5f, 1.0f, 3.5f };
+
+	float approachReach = EnemyActionBase<ActorType>::MELEE_REACH;
+
 	Vector3 teleportPosition;
 
 	State Run(float elapsedTime) override
@@ -232,7 +247,7 @@ public:
 				this->LerpTowardPlayer(t);
 			}
 
-			if (this->IsNearPlayer(epsilon))
+			if (this->IsWithinReach(approachReach))
 			{
 				if (this->behaviorData->IsInSequenceAndNotLast() && !this->owner->IsTeleporting())
 				{
@@ -481,6 +496,8 @@ public:
 	Vector3 teleportPosition;
 	std::vector<Projectile*> spawnedProjectiles;
 
+	float teleportDistance = EnemyActionBase<ActorType>::MELEE_REACH;
+
 	State Run(float elapsedTime) override
 	{
 		auto* model = this->GetModel();
@@ -494,7 +511,7 @@ public:
 		switch (this->step)
 		{
 		case 0:
-			teleportPosition = this->owner->CalculateVisibleTeleportPos(3.0f);
+			teleportPosition = this->owner->CalculateVisibleTeleportPos(teleportDistance);
 			this->owner->SetGravity(-0.001f);
 			this->PlayRootMotion(animationIndexes[0], false);
 			this->step++;
@@ -995,6 +1012,9 @@ public:
 	Vector3 teleportPosition;
 	std::vector<Projectile*> spawnedProjectiles;
 
+	// テレポート先をプレイヤーからどれだけ離すか。
+	float teleportDistance = EnemyActionBase<ActorType>::MELEE_REACH;
+
 	State Run(float elapsedTime) override
 	{
 		auto* model = this->GetModel();
@@ -1009,7 +1029,7 @@ public:
 		switch (this->step)
 		{
 		case 0:
-			teleportPosition = this->owner->CalculateVisibleTeleportPos(3.0f);
+			teleportPosition = this->owner->CalculateVisibleTeleportPos(teleportDistance);
 			this->owner->SetGravity(0.0f);
 			this->PlayRootMotion(animationIndexes[0], false);
 			this->step++;

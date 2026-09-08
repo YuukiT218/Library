@@ -385,6 +385,42 @@ namespace
 	}
 
 	//----------------------------------------------------------------
+	// テレポート
+	//----------------------------------------------------------------
+
+	// プレイヤーの周囲 distance の位置から、画面内に入るものを 1 つ選んで返す。
+	// 第 2 引数を true にすると高さを自分の位置に合わせる（地面から浮かない）。
+	int Boss_CalculateTeleportPosition(lua_State* L)
+	{
+		EnemyBoss* boss = RequireBoss(L);
+
+		const float distance = OptFloat(L, 1, 3.0f);
+		const bool bakeY = OptBool(L, 2, true);
+
+		return PushVector3(L, boss->CalculateVisibleTeleportPos(distance, bakeY));
+	}
+
+	// 指定位置へテレポートを開始する。fadeSeconds は消えるまでの時間。
+	int Boss_StartTeleport(lua_State* L)
+	{
+		EnemyBoss* boss = RequireBoss(L);
+
+		const XMFLOAT3 target{
+			static_cast<float>(luaL_checknumber(L, 1)),
+			static_cast<float>(luaL_checknumber(L, 2)),
+			static_cast<float>(luaL_checknumber(L, 3)) };
+
+		boss->StartTeleport(target, OptFloat(L, 4, 0.3f));
+		return 0;
+	}
+
+	int Boss_IsTeleporting(lua_State* L)
+	{
+		lua_pushboolean(L, RequireBoss(L)->IsTeleporting() ? 1 : 0);
+		return 1;
+	}
+
+	//----------------------------------------------------------------
 	// 戦闘・状態
 	//----------------------------------------------------------------
 
@@ -742,6 +778,11 @@ namespace
 		{ "SetVerticalVelocity",	Boss_SetVerticalVelocity },
 		{ "SetWarpPosition",		Boss_SetWarpPosition },
 		// EnemyBoss::SetKnockBackPosition は宣言のみで実装が無いため公開していない
+
+		// テレポート
+		{ "CalculateTeleportPosition", Boss_CalculateTeleportPosition },
+		{ "StartTeleport",			Boss_StartTeleport },
+		{ "IsTeleporting",			Boss_IsTeleporting },
 
 		// 戦闘・状態
 		{ "UpdateAttackCollision",	Boss_UpdateAttackCollision },

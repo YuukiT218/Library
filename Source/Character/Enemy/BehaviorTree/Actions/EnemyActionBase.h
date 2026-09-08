@@ -8,6 +8,7 @@
 #include "Math/Mathf.h"
 
 #include <algorithm>
+#include <cmath>
 #include <vector>
 
 // 敵の行動クラスが共通して使う処理をまとめた基底クラス
@@ -85,6 +86,33 @@ protected:
 	{
 		this->owner->SetTargetPosition(PlayerPosition());
 		UpdateAttackCollision();
+	}
+
+	// 近接攻撃が届く距離の目安（XZ 平面）
+	//
+	// 剣の当たり判定球は柄元から 1.35 の位置まで並び、半径が 0.225 なので、
+	// 手元からのリーチはおよそ 1.6。踏み込みと互いの体の太さを見込んでこの値にしている。
+	static constexpr float MELEE_REACH = 2.2f;
+
+	// プレイヤーとの距離（XZ 平面）
+	//
+	// IsNearPlayer は軸ごとの判定なので、真横なら指定どおりでも、
+	// 斜めだとその約 1.4 倍離れていても「近い」と判定されてしまう。
+	// 間合いを測るときはこちらを使う。
+	float GetDistanceToPlayerXZ() const
+	{
+		const DirectX::XMFLOAT3 selfPosition = this->owner->GetPosition();
+		const DirectX::XMFLOAT3 playerPosition = PlayerPosition();
+
+		const float dx = playerPosition.x - selfPosition.x;
+		const float dz = playerPosition.z - selfPosition.z;
+		return std::sqrt(dx * dx + dz * dz);
+	}
+
+	// 攻撃が届く間合いに入っているか
+	bool IsWithinReach(float reach) const
+	{
+		return GetDistanceToPlayerXZ() <= reach;
 	}
 
 	// プレイヤーに十分近づいているか

@@ -8,6 +8,7 @@
 #include "Graphics/SkyBox.h"
 #include "Graphics/PostEffect.h"
 #include "Camera/EditCameraController.h"
+#include "Camera/CameraController.h"
 #include "Camera/FreeCameraController.h"
 //#include "BattleUI/CombatUIManager.h"
 
@@ -74,11 +75,37 @@ public:
 	void DrawCameraKeyframePoints(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex);
 
 	void DrawEventHandles(ImDrawList* draw_list, AnimationConfig* config, int animationIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength);
+
+	//----------------------------------------------------------------
+	// 再生（AI を実際に動かすモード）
+	//
+	// 編集中はアニメーションだけを更新し、再生中はゲームと同じ更新を回す。
+	// こうすると行動を目で見ながらツリーやスクリプトを直せる。
+	//----------------------------------------------------------------
+
+	// 再生の開始・停止を要求する（実処理は Update で行う）
+	void TogglePlay();
+
+	// 初期状態へ戻すことを要求する（実処理は Update で行う）
+	void RequestPlayReset();
+
+	// 描画中に受け付けた再生操作を、描画の外で処理する
+	void ApplyPendingPlayRequests();
+
+	// キャラクターを作り直して初期状態へ戻す。Update からのみ呼ぶこと。
+	void ResetPlay();
+
+	// ゲームビューの上に出す再生操作
+	void DrawPlayControls();
+
 private:
 	std::unique_ptr<Player> player;
 	std::unique_ptr<EnemyBoss> boss;
 
+	// 編集中は対象を回り込んで見るエディットカメラ、
+	// プレイテスト中はゲーム本編と同じ追従カメラを使う
 	std::unique_ptr<EditCameraController> cameraController;
+	std::unique_ptr<CameraController> playCameraController;
 	std::unique_ptr<SkyBox> skyBox;
 	FreeCameraController freecameraController;
 	Model::DissolveConstants enemysupport;
@@ -97,6 +124,15 @@ private:
 
 	Character* selectedCharacter = nullptr;
 	bool playerRenderEnabled = true;
+
+	// 再生状態
+	bool	isPlayTesting = false;
+	bool	isPlayPaused = false;
+	float	playSpeedScale = 1.0f;
+
+	// 描画中に押されたボタンを覚えておくための予約
+	bool	playToggleRequested = false;
+	bool	playResetRequested = false;
 
 	int									animationIndex = -1;
 	float								animationSeconds = 0.0f;

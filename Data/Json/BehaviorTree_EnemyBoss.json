@@ -640,6 +640,159 @@
 			"parentId": 39,
 			"priority": 2,
 			"selectRule": "Non"
+		},
+		{
+			"actionKind": "None",
+			"actionName": "",
+			"actionScript": "",
+			"clips": [],
+			"comment": "",
+			"editorX": 787.0,
+			"editorY": 2521.0,
+			"id": 41,
+			"judgment": "",
+			"name": "TeleportSlashCombo",
+			"params": [],
+			"parentId": 19,
+			"priority": 2,
+			"selectRule": "Sequence"
+		},
+		{
+			"actionKind": "Lua",
+			"actionName": "",
+			"actionScript": "Data/Script/Enemy/EnemyBoss/CloseTeleport.lua",
+			"clips": [
+				{
+					"blendSeconds": 0.10000000149011612,
+					"cancelEnd": -1.0,
+					"cancelStart": -1.0,
+					"clip": "Dodge_Combat_B_Seq_0",
+					"loop": false,
+					"rootMotion": true,
+					"speedScale": 1.0
+				}
+			],
+			"comment": "",
+			"editorX": 1011.0,
+			"editorY": 2633.0,
+			"id": 42,
+			"judgment": "",
+			"name": "CloseTeleport",
+			"params": [
+				{
+					"boolValue": false,
+					"floatValue": 3.0,
+					"intValue": 0,
+					"name": "distance",
+					"stringValue": "",
+					"type": "Float"
+				},
+				{
+					"boolValue": false,
+					"floatValue": 0.30000001192092896,
+					"intValue": 0,
+					"name": "fadeSeconds",
+					"stringValue": "",
+					"type": "Float"
+				},
+				{
+					"boolValue": true,
+					"floatValue": 0.0,
+					"intValue": 0,
+					"name": "turnAfter",
+					"stringValue": "",
+					"type": "Bool"
+				}
+			],
+			"parentId": 41,
+			"priority": 0,
+			"selectRule": "Non"
+		},
+		{
+			"actionKind": "Lua",
+			"actionName": "",
+			"actionScript": "Data/Script/Enemy/EnemyBoss/SlashCombo.lua",
+			"clips": [
+				{
+					"blendSeconds": 0.10000000149011612,
+					"cancelEnd": -1.0,
+					"cancelStart": -1.0,
+					"clip": "Combo_Attack_01_01_Seq_0",
+					"loop": false,
+					"rootMotion": true,
+					"speedScale": 1.0
+				},
+				{
+					"blendSeconds": 0.10000000149011612,
+					"cancelEnd": -1.0,
+					"cancelStart": -1.0,
+					"clip": "Combo_Attack_01_02_Seq_0",
+					"loop": false,
+					"rootMotion": true,
+					"speedScale": 1.0
+				},
+				{
+					"blendSeconds": 0.10000000149011612,
+					"cancelEnd": -1.0,
+					"cancelStart": -1.0,
+					"clip": "Combo_Attack_02_03_Seq_0",
+					"loop": false,
+					"rootMotion": true,
+					"speedScale": 1.0
+				},
+				{
+					"blendSeconds": 0.10000000149011612,
+					"cancelEnd": -1.0,
+					"cancelStart": -1.0,
+					"clip": "Combo_Attack_02_04_Seq_0",
+					"loop": false,
+					"rootMotion": true,
+					"speedScale": 1.0
+				}
+			],
+			"comment": "",
+			"editorX": 1011.0,
+			"editorY": 2761.0,
+			"id": 43,
+			"judgment": "",
+			"name": "SlashCombo",
+			"params": [
+				{
+					"boolValue": false,
+					"floatValue": 1.0,
+					"intValue": 0,
+					"name": "approachSeconds",
+					"stringValue": "",
+					"type": "Float"
+				},
+				{
+					"boolValue": false,
+					"floatValue": 2.0,
+					"intValue": 0,
+					"name": "nearX",
+					"stringValue": "",
+					"type": "Float"
+				},
+				{
+					"boolValue": false,
+					"floatValue": 1.0,
+					"intValue": 0,
+					"name": "nearY",
+					"stringValue": "",
+					"type": "Float"
+				},
+				{
+					"boolValue": false,
+					"floatValue": 2.0,
+					"intValue": 0,
+					"name": "nearZ",
+					"stringValue": "",
+					"type": "Float"
+				}
+			],
+			"parentId": 41,
+			"priority": 0,
+			"selectRule": "Non"
 		}
 	]
 }

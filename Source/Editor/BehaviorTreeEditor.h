@@ -39,6 +39,9 @@ public:
 	// ウィンドウ描画。ImGui のフレーム内で呼ぶ。
 	void DrawGui(EnemyBoss* boss);
 
+	// ボスを作り直したときに、編集中のツリーをもう一度反映させる
+	void ReapplyTo(EnemyBoss* boss);
+
 	bool IsOpen() const { return isOpen; }
 	void SetOpen(bool open) { isOpen = open; }
 

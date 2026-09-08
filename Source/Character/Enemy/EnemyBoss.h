@@ -164,6 +164,14 @@ public:
 	// 今実行しているノードの元 ID。実行していなければ -1
 	int GetActiveNodeSourceId() const;
 
+	// 今実行しているノードの名前。実行していなければ空
+	std::string GetActiveNodeName() const;
+
+	// 索敵を待たずに戦闘状態へ入れる。
+	// エディタで特定の行動をすぐ試したいときに使う。
+	void SetBattleState(bool battle) { isBattle = battle; }
+	bool GetBattleState() const { return isBattle; }
+
 	// 実行中の行動を中断してツリーの推論からやり直す
 	void ResetBehaviorState();
 
