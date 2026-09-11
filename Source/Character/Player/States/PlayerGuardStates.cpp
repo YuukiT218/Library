@@ -196,7 +196,7 @@ void PlayerGuardCounter::Enter()
     player->SetGravity(-0.3f);
 
     // 距離に応じたアニメーション分岐
-    if (dist > 5.0f)
+    if (dist > 4.0f)
     {
         // 遠距離：突進攻撃 (Run Attack)
         player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex2, false, true, 0.1f, "Character1_Hips");

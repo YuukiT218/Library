@@ -29,7 +29,7 @@ void PlayerComboState::Enter()
     // ダッシュ攻撃の判定と再生
     if (player->IsGround())
     {
-        if (targetDist > 2.0f && targetDist < 12.5f
+        if (targetDist > 1.75f && targetDist < 12.5f
             && comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
         {
             player->GetPlayerModel()->PlayRootMotion(dashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
