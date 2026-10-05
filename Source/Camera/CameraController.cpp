@@ -8,6 +8,7 @@
 #include "Camera/CameraParam.h"
 #include "Math/FastNoiseLite.h"
 #include "Character/Player/Player.h"
+#include "Debug/DebugToggles.h"
 
 
 #include <stdlib.h>
@@ -94,7 +95,10 @@ void CameraController::Update(float elapsedTime)
         float targetLengthOffset = 0.0f;
         float targetMaxLengthMultiplier = groundMaxLengthMultiplier;
 
-        if (!isPlayerGround && isEnemyGround)
+        const DebugToggles& toggles = DebugToggles::Instance();
+        const bool useAirState = toggles.IsCameraAirStateJudgeEnabled();
+
+        if (useAirState && !isPlayerGround && isEnemyGround)
         {
             // ① プレイヤーのみ空中
             targetBasePitchDeg = playerAirPitchDeg;
@@ -102,7 +106,7 @@ void CameraController::Update(float elapsedTime)
             targetLengthOffset = playerAirLengthOffset;
             targetMaxLengthMultiplier = airMaxLengthMultiplier;
         }
-        else if (isPlayerGround && !isEnemyGround)
+        else if (useAirState && isPlayerGround && !isEnemyGround)
         {
             // ② 敵のみ空中
             targetBasePitchDeg = enemyAirPitchDeg;
@@ -110,7 +114,7 @@ void CameraController::Update(float elapsedTime)
             targetLengthOffset = enemyAirLengthOffset;
             targetMaxLengthMultiplier = airMaxLengthMultiplier;
         }
-        else if (!isPlayerGround && !isEnemyGround)
+        else if (useAirState && !isPlayerGround && !isEnemyGround)
         {
             // ③ 両方空中
             targetBasePitchDeg = bothAirPitchDeg;
@@ -120,7 +124,7 @@ void CameraController::Update(float elapsedTime)
         }
         else
         {
-            // ④ 両方地上
+            // ④ 両方地上（接地判定を切っているときは常にここへ来る）
             targetBasePitchDeg = nearPitchDeg + (farPitchDeg - nearPitchDeg) * t;
             targetOffsetY = minOffsetTargetY + (maxOffsetTargetY - minOffsetTargetY) * t;
             targetLengthOffset = 0.0f;
@@ -138,7 +142,8 @@ void CameraController::Update(float elapsedTime)
         float currentOffsetY = currentLerpedOffsetY;
 
         // さらに高低差から、見上げる/見下ろすための補正角度を算出
-        float pitchCorrection = atan2f(-deltaY, distToEnemy);
+        const bool useHeightDiff = toggles.IsCameraHeightDiffJudgeEnabled();
+        float pitchCorrection = useHeightDiff ? atan2f(-deltaY, distToEnemy) : 0.0f;
         float targetPitch = basePitch + pitchCorrection;
 
         // ピッチ角が極端になりすぎないよう制限（-25度～60度の範囲）
@@ -151,7 +156,7 @@ void CameraController::Update(float elapsedTime)
         currentCameraLength += currentLerpedLengthOffset;
 
         // 高低差によるズームアウト加算
-        float heightZoomBonus = diffY * heightZoomMultiplier;
+        float heightZoomBonus = useHeightDiff ? diffY * heightZoomMultiplier : 0.0f;
         currentCameraLength += heightZoomBonus;
         currentCameraLength = (std::min)(currentCameraLength, lengthLimit[1] * currentLerpedMaxLengthMultiplier);
 
@@ -159,7 +164,7 @@ void CameraController::Update(float elapsedTime)
         DirectX::XMMATRIX Transform = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
         DirectX::XMVECTOR vCamForward = Transform.r[2];
 
-        float eyeBaseY = midY + currentOffsetY + (diffY * eyeBaseYMultiplier);
+        float eyeBaseY = midY + currentOffsetY + (useHeightDiff ? diffY * eyeBaseYMultiplier : 0.0f);
 
         DirectX::XMVECTOR vEyeTarget = DirectX::XMVectorSet(target.x, eyeBaseY, target.z, 0);
         vEyeTarget = DirectX::XMVectorSubtract(vEyeTarget, DirectX::XMVectorScale(vCamForward, currentCameraLength));
@@ -169,7 +174,12 @@ void CameraController::Update(float elapsedTime)
         float distEyeToEnemy = DirectX::XMVectorGetX(DirectX::XMVector3Length(DirectX::XMVectorSubtract(vEnemy, vEyeTarget)));
 
         DirectX::XMVECTOR vFocusTarget;
-        if (distEyeToPlayer <= distEyeToEnemy)
+        if (!toggles.IsCameraFocusOrderJudgeEnabled())
+        {
+            // 比較用：手前・奥を見ずに、単純に二人の中間を見る
+            vFocusTarget = DirectX::XMVectorLerp(vPlayer, vEnemy, 0.5f);
+        }
+        else if (distEyeToPlayer <= distEyeToEnemy)
         {
             vFocusTarget = DirectX::XMVectorLerp(vPlayer, vEnemy, playerFocusWeight);
         }

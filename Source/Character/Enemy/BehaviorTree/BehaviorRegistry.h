@@ -28,7 +28,7 @@ public:
 		return instance;
 	}
 
-	// 行動クラスを登録する。同じ名前で二度登録した場合は後勝ち。
+	// 行動クラスを登録する。同じ名前で二度登録した場合は上書き
 	void RegisterAction(const std::string& name, ActionFactory factory, const std::string& description = "")
 	{
 		if (actionFactories.find(name) == actionFactories.end())

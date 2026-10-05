@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include "BehaviorTree.h"
+#include "Debug/DebugToggles.h"
 
 
 #include <stdlib.h>
@@ -38,6 +39,7 @@ public:
 	// シーケンスの最後のノードかどうか判定
 	bool IsLastNodeInSequence() const;
 	// シーケンス中で、かつ最後ではないか判定
+	// （＝ここで行動を打ち切って次のノードへ繋ぐべきか）
 	bool IsInSequenceAndNotLast() const;
 	// 初期化
 	void Init();
@@ -139,6 +141,11 @@ bool BehaviorData<ActorType>::IsLastNodeInSequence() const
 template <typename ActorType>
 bool BehaviorData<ActorType>::IsInSequenceAndNotLast() const
 {
+	// 比較用にキャンセルを切っているときは、どのノードでも打ち切らせない。
+	// 行動側はこの否定を「最後まで再生してよいか」の条件に使っているので、
+	// ここで false を返すだけでシーケンス全体が通しの再生になる。
+	if (!DebugToggles::Instance().IsSequenceCancelEnabled()) return false;
+
 	return IsInSequence() && !IsLastNodeInSequence();
 }
 

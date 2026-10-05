@@ -305,6 +305,7 @@
     <ClInclude Include="Source\Graphics\Light.h" />
     <ClInclude Include="Source\Model\ModelRenderer.h" />
     <ClInclude Include="Source\Graphics\LambertShader.h" />
+    <ClInclude Include="Source\Debug\DebugToggles.h" />
     <ClInclude Include="Source\Debug\ShapeRenderer.h" />
     <ClInclude Include="Source\Model\GLTFImporter.h" />
     <ClInclude Include="Source\Graphics\GpuResourceUtils.h" />
@@ -388,6 +389,7 @@
     <ClCompile Include="Source\Camera\FreeCameraController.cpp" />
     <ClCompile Include="Source\Model\ModelRenderer.cpp" />
     <ClCompile Include="Source\Graphics\LambertShader.cpp" />
+    <ClCompile Include="Source\Debug\DebugToggles.cpp" />
     <ClCompile Include="Source\Debug\ShapeRenderer.cpp" />
     <ClCompile Include="Source\Model\GLTFImporter.cpp" />
     <ClCompile Include="Source\Graphics\GpuResourceUtils.cpp" />

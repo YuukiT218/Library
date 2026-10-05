@@ -249,12 +249,15 @@ public:
 
 			if (this->IsWithinReach(approachReach))
 			{
+				// シーケンス途中なら踏み込んだところで打ち切り、テレポートで次の行動へ繋ぐ
 				if (this->behaviorData->IsInSequenceAndNotLast() && !this->owner->IsTeleporting())
 				{
 					this->owner->StartTeleport(teleportPosition, 0.1f);
 					return this->ResetState(State::Complete);
 				}
-				if ((!this->behaviorData->IsInSequence() || this->behaviorData->IsLastNodeInSequence()) && !this->owner->IsTeleporting())
+				// 打ち切らないときはそのまま斬りまで通す
+				// （上の条件の裏返しなので、キャンセルを切ったときも必ずこちらへ入る）
+				if (!this->behaviorData->IsInSequenceAndNotLast() && !this->owner->IsTeleporting())
 				{
 					this->owner->attackSign->Play({ this->owner->GetPosition().x, this->owner->GetPosition().y + 1.0f, this->owner->GetPosition().z });
 					model->PauseAnimation(false);

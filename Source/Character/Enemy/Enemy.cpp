@@ -7,6 +7,7 @@
 #include <string>
 #include <Math/Mathf.h>
 #include "Effect/EffectManager.h"
+#include "Debug/DebugToggles.h"
 #include <algorithm>
 
 
@@ -111,6 +112,24 @@ void Enemy::UpdateTransform()
 // テレポート開始
 void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
 {
+    // 比較用の「演出なし」モード
+    // 消失・移動・出現のフェーズを踏まず、その場で目的地へ飛ぶ。
+    // 呼び出し側はどれも IsTeleporting() が false に戻るのを待って次へ進むので、
+    // ここで即座に終わらせても行動そのものは止まらない。
+    if (DebugToggles::Instance().IsTeleportInstant())
+    {
+        teleportPhase = TeleportPhase::None;
+        teleportPhaseTimer = 0.0f;
+
+        teleportStartPosition = targetPos;
+        teleportTargetPosition = targetPos;
+        position = targetPos;
+        logicalPosition = targetPos;
+        visualPosition = targetPos;
+        teleportTrailPreviousPosition = targetPos;
+        return;
+    }
+
     teleportPhase = TeleportPhase::FadeOut;
     teleportPhaseTimer = 0.0f;
     fadeOutDuration = fadeOutTime;
@@ -126,7 +145,10 @@ void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
     teleportTrailPreviousPosition = position;
 
     // テレポート開始地点に残像を1つだけ残す
-    SpawnAfterimage();
+    if (DebugToggles::Instance().IsTeleportParticleEnabled())
+    {
+        SpawnAfterimage();
+    }
 }
 
 // 現在の姿勢から残像を1つ生成する
@@ -435,6 +457,9 @@ void Enemy::UpdateAfterimage(float elapsedTime)
 // 同じ位置に固まらず1本の直線としてつながって見えるようにする
 void Enemy::EmitTeleportTrail(const DirectX::XMFLOAT3& from, const DirectX::XMFLOAT3& to)
 {
+    // 比較用に演出を切っているときは軌跡を撒かない（移動そのものは同じ時間で行う）
+    if (!DebugToggles::Instance().IsTeleportParticleEnabled()) return;
+
     // 線として見せたいので、散らす量は最小限にする
     constexpr float TRAIL_CENTER_HEIGHT = 1.0f;  // 体の中心あたりの高さ
     constexpr float TRAIL_SPREAD = 0.07f;        // 線の太さ
@@ -520,6 +545,13 @@ DirectX::XMFLOAT3 Enemy::CalculateVisibleTeleportPos(float distance, bool bakeY)
         // 地形制限（壁突き抜け防止）
         KeepAreaLimit(pos);
         availablePositions.push_back(pos);
+    }
+
+    // 比較用に画面内への限定を切っているときは、候補からそのままランダムに選ぶ
+    // （画面外へ飛んでボスを見失う状態を再現する）
+    if (!DebugToggles::Instance().IsTeleportDestinationOnScreenOnly())
+    {
+        return availablePositions[rand() % availablePositions.size()];
     }
 
     // 2. 画面内に入っている地点をフィルタリング

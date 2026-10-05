@@ -14,6 +14,7 @@
 #include "UI/Pause.h"
 #include "Input/Input.h"
 #include "System/HitStop.h"
+#include "Debug/DebugToggles.h"
 #include <map>
 
 
@@ -357,6 +358,9 @@ void SceneGame::DrawDebugGUI()
 	{
 		ImGui::Checkbox(u8"時を操るか", &isWorldTime);
 		ImGui::DragFloat(u8"時の進み具合", &worldTime, 0.01f, 0.0f, 10.0f);
+
+		// 比較動画の撮影用トグル
+		DebugToggles::Instance().DrawDebugGUI();
 
 		StageManager::Instance().DebugImGui();
 
