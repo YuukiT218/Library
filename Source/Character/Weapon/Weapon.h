@@ -41,6 +41,7 @@ public:
 	float GetTeleportProgress() const { return teleportProgress; }
 	float GetTeleportTime() const { return teleportTime; }
 	void ResetAttackState();
+
 public:
 	// 刃に沿って並べる当たり判定球の数
 	static constexpr int HIT_SPHERE_COUNT = 5;
@@ -58,13 +59,16 @@ protected:
 	// ヒットエフェクトと打撃音の読み込み（派生クラス共通）
 	void LoadCommonResources();
 
+	// ノックバックの種類に応じた打撃音を鳴らす
+	void PlayHitSE(KnockbackType knockbackType);
+
 	// 武器共通のデバッグGUI（位置・回転・スケール・当たり判定球）
 	void DrawCommonDebugGUI();
 
 protected:
-	DirectX::XMFLOAT3 position = { 0, 0, 0 };
-	DirectX::XMFLOAT3 angle = { 0, 0, 0 };
-	DirectX::XMFLOAT3 scale = { 1, 1, 1 };
+	DirectX::XMFLOAT3 position = { 0.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT3 angle = { 0.0f, 0.0f, 0.0f };
+	DirectX::XMFLOAT3 scale = { 1.0f, 1.0f, 1.0f };
 	DirectX::XMFLOAT4X4 transform = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 	std::shared_ptr<Model> model;
 	DirectX::XMFLOAT3 weaponHitOffset[HIT_SPHERE_COUNT];
@@ -77,9 +81,15 @@ protected:
 	float teleportTime = 0.0f;
 
 	// 武器トレイル関係
-	static const int MAX_POLYGON = 6 * 2;//何フレーム文を保存して描くか
-	DirectX::XMFLOAT3					trailPositions[2][MAX_POLYGON];//トレイル用頂点ポジション
-	DirectX::XMFLOAT3					trailOffset[2] =	//トレイル補正用 [0]根本 [1]先端
+	static constexpr int MAX_POLYGON = 6 * 2;	// 何フレーム分を保存して描くか
+
+	// トレイルの辺（根本と先端）を表すインデックス
+	static constexpr int TRAIL_ROOT = 0;
+	static constexpr int TRAIL_TIP = 1;
+	static constexpr int TRAIL_EDGE_COUNT = 2;
+
+	DirectX::XMFLOAT3					trailPositions[TRAIL_EDGE_COUNT][MAX_POLYGON];	// トレイル用頂点ポジション
+	DirectX::XMFLOAT3					trailOffset[TRAIL_EDGE_COUNT] =	// トレイル補正用 [0]根本 [1]先端
 	{
 		{0.0f, 0.0f, 0.5f},
 		{0.0f, 0.0f, 1.5f},

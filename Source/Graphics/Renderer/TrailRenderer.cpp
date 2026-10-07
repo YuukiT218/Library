@@ -37,11 +37,11 @@ TrailRenderer::TrailRenderer(ID3D11Device* device)
 	{//テクスチャ
 		D3D11_TEXTURE2D_DESC texture2dDesc{};
 		GpuResourceUtils::LoadTexture(device, "Data/Model/Weapon/Trail/Trail.png",
-			TrailShaderResourceView.GetAddressOf(), &texture2dDesc);
+			trailShaderResourceView.GetAddressOf(), &texture2dDesc);
 		//dissolve_animation2
 		//electric_noise_texture
 		GpuResourceUtils::LoadTexture(device, "Data/Mask/cloud_noise_texture.png",
-			DissolveShaderResourceView.GetAddressOf(), &texture2dDesc);
+			dissolveShaderResourceView.GetAddressOf(), &texture2dDesc);
 	}
 
 	// 頂点バッファ
@@ -190,8 +190,8 @@ void TrailRenderer::Render(
 	dc->IASetInputLayout(inputLayout.Get());
 
 	//テクスチャをピクセルシェーダーに送信
-	dc->PSSetShaderResources(0, 1, TrailShaderResourceView.GetAddressOf());
-	dc->PSSetShaderResources(1, 1, DissolveShaderResourceView.GetAddressOf());
+	dc->PSSetShaderResources(0, 1, trailShaderResourceView.GetAddressOf());
+	dc->PSSetShaderResources(1, 1, dissolveShaderResourceView.GetAddressOf());
 
 	// 定数バッファ設定
 	dc->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
@@ -215,7 +215,7 @@ void TrailRenderer::Render(
 	// 定数バッファ更新
 	CbScene cbScene;
 	DirectX::XMStoreFloat4x4(&cbScene.viewProjection, VP);
-	cbScene.direction = ScrollDirection;
+	cbScene.direction = scrollDirection;
 	cbScene.Timer = rc.timer;
 	dc->UpdateSubresource(constantBuffer.Get(), 0, 0, &cbScene, 0, 0);
 
@@ -262,7 +262,7 @@ void TrailRenderer::ImGui()
 {
 	if (ImGui::CollapsingHeader("TrailRenderer", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::DragFloat2("TrailScroll", &ScrollDirection.x, 0.1f);
+		ImGui::DragFloat2("TrailScroll", &scrollDirection.x, 0.1f);
 	}
 }
 

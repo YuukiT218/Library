@@ -17,7 +17,7 @@
 #include "Effect/EffectManager.h"
 
 // 垂直同期間隔設定
-static const int syncInterval = 1;
+static constexpr int SYNC_INTERVAL = 1;
 
 // コンストラクタ
 Framework::Framework(HWND hWnd)
@@ -171,7 +171,7 @@ void Framework::Render(float elapsedTime)
 	ImGuiRenderer::Render(dc);
 
 	// 画面表示
-	Graphics::Instance().Present(syncInterval);
+	Graphics::Instance().Present(SYNC_INTERVAL);
 }
 
 template<class T>
@@ -188,9 +188,13 @@ void Framework::SceneSelectGUI()
 {
 	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
 	ImVec2 pos = ImGui::GetMainViewport()->GetWorkPos();
-	float width = 210;
-	float height = 490;
-	ImGui::SetNextWindowPos(ImVec2(pos.x + displaySize.x - width - 10, pos.y + 10), ImGuiCond_Once);
+	// ウィンドウを画面右上に、少し余白を空けて置く
+	constexpr float WINDOW_WIDTH = 210.0f;
+	constexpr float WINDOW_HEIGHT = 490.0f;
+	constexpr float WINDOW_MARGIN = 10.0f;
+	const float width = WINDOW_WIDTH;
+	const float height = WINDOW_HEIGHT;
+	ImGui::SetNextWindowPos(ImVec2(pos.x + displaySize.x - width - WINDOW_MARGIN, pos.y + WINDOW_MARGIN), ImGuiCond_Once);
 	ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Once);
 }
 
@@ -201,15 +205,19 @@ void Framework::CalculateFrameStats()
 	// average time it takes to render one frame.  These stats 
 	// are appended to the window caption bar.
 	static int frames = 0;
-	static float time_tlapsed = 0.0f;
+	static float timeElapsed = 0.0f;
 
 	frames++;
 
+	// 何秒ごとに平均をとるか
+	constexpr float STATS_INTERVAL_SECONDS = 1.0f;
+	constexpr float MILLISECONDS_PER_SECOND = 1000.0f;
+
 	// Compute averages over one second period.
-	if ((timer.TimeStamp() - time_tlapsed) >= 1.0f)
+	if ((timer.TimeStamp() - timeElapsed) >= STATS_INTERVAL_SECONDS)
 	{
-		float fps = static_cast<float>(frames); // fps = frameCnt / 1
-		float mspf = 1000.0f / fps;
+		float fps = static_cast<float>(frames) / STATS_INTERVAL_SECONDS;
+		float mspf = MILLISECONDS_PER_SECOND / fps;
 		std::ostringstream outs;
 		outs.precision(6);
 		outs << "FPS : " << fps << " / " << "Frame Time : " << mspf << " (ms)";
@@ -217,7 +225,7 @@ void Framework::CalculateFrameStats()
 
 		// Reset for next average.
 		frames = 0;
-		time_tlapsed += 1.0f;
+		timeElapsed += STATS_INTERVAL_SECONDS;
 	}
 }
 
@@ -278,7 +286,7 @@ LRESULT CALLBACK Framework::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LP
 	case WM_KEYDOWN:
 		//if (wParam == VK_ESCAPE) PostMessage(hWnd, WM_CLOSE, 0, 0);
 		input.OnKeyDown();
-		input.SetIsLastGamePad(false);
+		input.SetLastGamePad(false);
 		break;
 	case WM_ENTERSIZEMOVE:
 		// WM_EXITSIZEMOVE is sent when the user grabs the resize bars.

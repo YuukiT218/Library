@@ -11,7 +11,37 @@
 
 #include <stdlib.h>
 
+namespace
+{
+    // 光柱のエフェクトかどうかを判別する文字列
+    constexpr const char* LIGHT_PILLAR_EFFECT_KEYWORD = "LightPillar";
 
+    // 光柱の足元から1フレームに撒く火花の数
+    constexpr int SPARK_EMIT_COUNT = 5;
+
+    // 火花の飛び散る速さ・上昇速度・色・大きさ・寿命
+    constexpr float SPARK_MIN_SPEED = 2.0f;
+    constexpr float SPARK_SPEED_RANGE = 3.0f;
+    constexpr float SPARK_RISE_SPEED = 2.0f;
+    constexpr DirectX::XMFLOAT4 SPARK_COLOR = { 1.0f, 0.9f, 0.4f, 1.0f };  // ゴールド系
+    constexpr float SPARK_MIN_SIZE = 0.1f;
+    constexpr float SPARK_SIZE_RANGE = 0.2f;
+    constexpr float SPARK_MIN_LIFE = 0.2f;
+    constexpr float SPARK_LIFE_RANGE = 0.3f;
+
+    // 方向ベクトルをゼロとみなす長さ
+    constexpr float DIRECTION_MIN_LENGTH = 0.0001f;
+
+    // 当たり判定で相手側に足す半径と、相手の体の高さ
+    constexpr float TARGET_HIT_RADIUS_MARGIN = 0.3f;
+    constexpr float TARGET_BODY_HEIGHT = 1.0f;
+
+    // 0.0～1.0 の乱数
+    float Random01()
+    {
+        return static_cast<float>(rand()) / RAND_MAX;
+    }
+}
 
 Projectile::Projectile(const ProjectileInfo& info, std::shared_ptr<Effect> effectResource)
     : info(info), position(info.spawnPosition), effect(effectResource), ageTimer(0.0f)
@@ -125,17 +155,15 @@ bool Projectile::Update(float elapsedTime)
     // ポイントライトもエフェクトに追従させる
     UpdatePointLight();
 
-    if (std::string(info.effectPath).find("LightPillar") != std::string::npos)
+    if (std::string(info.effectPath).find(LIGHT_PILLAR_EFFECT_KEYWORD) != std::string::npos)
     {
-        int emitCount = 5;
-
-        for (int i = 0; i < emitCount; ++i)
+        for (int i = 0; i < SPARK_EMIT_COUNT; ++i)
         {
             // ランダムな角度(0 ～ 2PI)
-            float angle = ((float)rand() / RAND_MAX) * DirectX::XM_2PI;
+            float angle = Random01() * DirectX::XM_2PI;
 
             // ランダムな半径 (中心から info.radius の範囲)
-            float r = ((float)rand() / RAND_MAX) * info.radius;
+            float r = Random01() * info.radius;
 
             DirectX::XMFLOAT3 emitPos = {
                 position.x + cosf(angle) * r,
@@ -145,18 +173,17 @@ bool Projectile::Update(float elapsedTime)
 
             // 飛び散る速度
             // XZ平面は角度(angle)の方向へ、Yは少し上へ向かわせる
-            float speed = 2.0f + ((float)rand() / RAND_MAX) * 3.0f; // 飛び散る勢い
+            float speed = SPARK_MIN_SPEED + Random01() * SPARK_SPEED_RANGE; // 飛び散る勢い
             float vx = cosf(angle) * speed;
-            float vy = ((float)rand() / RAND_MAX) * 2.0f; // 少し上へ
+            float vy = Random01() * SPARK_RISE_SPEED; // 少し上へ
             float vz = sinf(angle) * speed;
             DirectX::XMFLOAT3 velocity = { vx, vy, vz };
 
-            // 色とサイズ
-            DirectX::XMFLOAT4 color = { 1.0f, 0.9f, 0.4f, 1.0f }; // ゴールド系
-            float size = 0.1f + ((float)rand() / RAND_MAX) * 0.2f;
-            float lifeTime = 0.2f + ((float)rand() / RAND_MAX) * 0.3f; // 短く弾けて消える
+            // サイズと寿命（短く弾けて消える）
+            float size = SPARK_MIN_SIZE + Random01() * SPARK_SIZE_RANGE;
+            float lifeTime = SPARK_MIN_LIFE + Random01() * SPARK_LIFE_RANGE;
 
-            EffectManager::Instance().EmitGpuParticle(emitPos, velocity, color, size, lifeTime, 1);
+            EffectManager::Instance().EmitGpuParticle(emitPos, velocity, SPARK_COLOR, size, lifeTime, GpuParticleBehavior::Float);
         }
     }
 
@@ -178,7 +205,7 @@ void Projectile::UpdateSpiral(float elapsedTime)
     // 速度ベクトルを逆算（当たり判定や回転計算のため）
     velocity.x = (newX - position.x) / elapsedTime;
     velocity.z = (newZ - position.z) / elapsedTime;
-    velocity.y = 0; // 必要なら高さ変動を入れる
+    velocity.y = 0.0f; // 必要なら高さ変動を入れる
 
     position.x = newX;
     position.z = newZ;
@@ -199,13 +226,13 @@ void Projectile::FireAt(const DirectX::XMFLOAT3& targetPos, float newSpeed, bool
     float dz = targetPos.z - position.z;
 
     float len = sqrtf(dx * dx + dy * dy + dz * dz);
-    if (len > 0.0001f)
+    if (len > DIRECTION_MIN_LENGTH)
     {
         info.direction = { dx / len, dy / len, dz / len };
     }
     else
     {
-        info.direction = { 0, 0, 1 };
+        info.direction = { 0.0f, 0.0f, 1.0f };
     }
 
     // 速度更新
@@ -217,11 +244,11 @@ void Projectile::FireAt(const DirectX::XMFLOAT3& targetPos, float newSpeed, bool
     CalculateRotationFromVelocity(bakeY);
 }
 
-void Projectile::StartSpiral(float angularSpd, float radialSpd)
+void Projectile::StartSpiral(float angularSpeed, float radialSpeed)
 {
     info.moveType = MovementType::Spiral;
-    info.angularSpeed = angularSpd;
-    info.radialSpeed = radialSpd;
+    info.angularSpeed = angularSpeed;
+    info.radialSpeed = radialSpeed;
     // 必要なら lifeTime を延長する処理を入れても良い
 }
 
@@ -246,10 +273,10 @@ bool Projectile::OnHit(Character* target)
     if (!target || target == info.owner || target->IsDeathFlag()) return false;
 
     // ターゲットの情報
-    DirectX::XMFLOAT3 tPos = target->GetPosition();
-    // 当たり判定半径 (自身の半径 + 相手の半径目安0.5)
-    float hitRadius = info.radius + 0.3f;
-    float hitHeight = tPos.y + 1.0f;
+    DirectX::XMFLOAT3 targetPosition = target->GetPosition();
+    // 当たり判定半径 (自身の半径 + 相手側の余白)
+    float hitRadius = info.radius + TARGET_HIT_RADIUS_MARGIN;
+    float hitHeight = targetPosition.y + TARGET_BODY_HEIGHT;
     bool isHit = false;
 
     // ---------------------------------------------------------
@@ -259,9 +286,9 @@ bool Projectile::OnHit(Character* target)
     {
         // --- 球体判定 (Sphere) ---
         // 単純な3次元距離チェック
-        float dx = position.x - tPos.x;
-        float dy = position.y - (tPos.y + hitHeight * 0.5f); // 相手の中心付近を狙う補正
-        float dz = position.z - tPos.z;
+        float dx = position.x - targetPosition.x;
+        float dy = position.y - (targetPosition.y + hitHeight * 0.5f); // 相手の中心付近を狙う補正
+        float dz = position.z - targetPosition.z;
         float distSq = dx * dx + dy * dy + dz * dz;
 
         float combinedRadius = info.radius + hitRadius;
@@ -274,8 +301,8 @@ bool Projectile::OnHit(Character* target)
     {
         // --- 円柱判定 (Cylinder) ---
         // 1. 水平方向(XZ)の距離チェック
-        float dx = position.x - tPos.x;
-        float dz = position.z - tPos.z;
+        float dx = position.x - targetPosition.x;
+        float dz = position.z - targetPosition.z;
         float distSqXZ = dx * dx + dz * dz;
         float combinedRadius = info.radius + hitRadius;
 
@@ -286,8 +313,8 @@ bool Projectile::OnHit(Character* target)
             float projBottom = position.y - (info.height * 0.5f); // 弾の下端
             float projTop = position.y + (info.height * 0.5f); // 弾の上端
 
-            float charBottom = tPos.y;              // キャラの足元
-            float charTop = tPos.y + hitHeight;    // キャラの頭頂
+            float charBottom = targetPosition.y;              // キャラの足元
+            float charTop = targetPosition.y + hitHeight;    // キャラの頭頂
 
             // 「弾がキャラより完全に上にいる」または「弾がキャラより完全に下にいる」以外ならヒット
             if (projBottom < charTop && projTop > charBottom)
@@ -301,12 +328,12 @@ bool Projectile::OnHit(Character* target)
     {
         if (target == static_cast<Character*>(&Player::Instance()))
         {
-	        bool isPlayerRolling = Player::Instance().GetPlayerIsRolling();
+	        bool isPlayerRolling = Player::Instance().IsRolling();
         	if (isPlayerRolling || Player::Instance().GetInvincibleTimer() > 0.0f)
         	{
         		return false;
         	}
-        	else if (Player::Instance().GetPlayerIsGuard())
+        	else if (Player::Instance().IsGuard())
         	{
                 Player::Instance().ChangeState(PlayerStateId::GuardHit);
                 return false;
@@ -321,7 +348,7 @@ bool Projectile::OnHit(Character* target)
         {
 	        EnemyBoss::Instance().SetDamage(true);
         }
-        target->ApplyDamage(info.damage, info.invincibleTime); // 0.5fは無敵時間
+        target->ApplyDamage(info.damage, info.invincibleTime);
         return true;
     }
 

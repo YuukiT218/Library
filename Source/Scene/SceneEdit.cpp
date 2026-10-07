@@ -25,6 +25,27 @@
 
 using json = nlohmann::json;
 
+namespace
+{
+	// 使用するモデル
+	constexpr const char* PLAYER_MODEL_PATH = "Data/Model/unitychan/unitychan.gltf";
+	constexpr const char* BOSS_MODEL_PATH = "Data/Model/Rogue/SK_ROGUE_F_02.gltf";
+
+	// カメラの初期設定
+	constexpr float CAMERA_FOV_DEGREE = 45.0f;
+	constexpr float CAMERA_NEAR_Z = 0.1f;
+	constexpr float CAMERA_FAR_Z = 1000.0f;
+	const DirectX::XMFLOAT3 CAMERA_INITIAL_EYE = { 0.0f, 10.0f, 20.0f };
+	const DirectX::XMFLOAT3 CAMERA_INITIAL_FOCUS = { 0.0f, 0.0f, 0.0f };
+	const DirectX::XMFLOAT3 CAMERA_UP = { 0.0f, 1.0f, 0.0f };
+
+	// グラフ描画の線の太さと点の大きさ
+	constexpr float GRAPH_LINE_THICKNESS = 2.0f;
+	constexpr float GRAPH_MARKER_RADIUS = 6.0f;
+	constexpr float GRAPH_KEY_POINT_RADIUS = 4.0f;
+	constexpr float GRAPH_HANDLE_RADIUS = 3.0f;
+}
+
 DirectX::XMFLOAT3 DirectionToEuler(const DirectX::XMFLOAT3& dir)
 {
 	float pitch = std::asin(-dir.y);
@@ -45,31 +66,31 @@ void SceneEdit::Initialize()
 	float screenHeight = Graphics::Instance().GetScreenHeight();
 
 	// プレイヤー初期化
-	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Rogue/SK_ROGUE_F_02.gltf", 1.0f);
+	player = std::make_unique<Player>(device, PLAYER_MODEL_PATH);
+	boss = std::make_unique<EnemyBoss>(device, BOSS_MODEL_PATH, 1.0f);
 
 	Camera& camera = Camera::Instance();
 
 	// カメラ設定
 	camera.SetPerspectiveFov(
-		DirectX::XMConvertToRadians(45),	// 画角
+		DirectX::XMConvertToRadians(CAMERA_FOV_DEGREE),	// 画角
 		screenWidth / screenHeight,			// 画面アスペクト比
-		0.1f,								// ニアクリップ
-		1000.0f								// ファークリップ
+		CAMERA_NEAR_Z,						// ニアクリップ
+		CAMERA_FAR_Z						// ファークリップ
 	);
 	camera.SetLookAt(
-		{ 0, 10, 20 },	// 視点
-		{ 0, 0, 0 },	// 注視点
-		{ 0, 1, 0 }		// 上ベクトル
+		CAMERA_INITIAL_EYE,		// 視点
+		CAMERA_INITIAL_FOCUS,	// 注視点
+		CAMERA_UP				// 上ベクトル
 	);
 	cameraController = std::make_unique<EditCameraController>();
 	playCameraController = std::make_unique<CameraController>();
 
 	// ロックオン状態は持ち越さない
-	CameraParam::Instance().SetIsLockOn(false);
+	CameraParam::Instance().SetLockOn(false);
 	CameraParam::Instance().SetLockOnEnemy(nullptr);
 
-	freecameraController.SyncCameraToController(camera);
+	freeCameraController.SyncCameraToController(camera);
 
 	LightManager& lightManager = LightManager::Instance();
 
@@ -81,7 +102,7 @@ void SceneEdit::Initialize()
 
 	skyBox = std::make_unique<SkyBox>(device);
 
-	posteffect = std::make_unique<PostEffect>(device);
+	postEffect = std::make_unique<PostEffect>(device);
 	selectedCharacter = player.get();
 
 
@@ -113,7 +134,7 @@ void SceneEdit::Update(float elapsedTime)
 			if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_SHOULDER ||
 				mouse.GetButtonDown() & Mouse::BTN_MIDDLE)
 			{
-				CameraParam::Instance().ReversLockOnSwitch();
+				CameraParam::Instance().ToggleLockOn();
 			}
 		}
 
@@ -128,12 +149,12 @@ void SceneEdit::Update(float elapsedTime)
 		cameraController->Update(elapsedTime);
 	}
 
-	if (Camera::Instance().GetFreeCameraFlag())
+	if (Camera::Instance().IsFreeCamera())
 	{
 		// カメラを自由にマウスで動かしたいならこっちをつける
 		// カメラコントローラー更新処理
-		freecameraController.Update();
-		freecameraController.SyncControllerToCamera(Camera::Instance());
+		freeCameraController.Update();
+		freeCameraController.SyncControllerToCamera(Camera::Instance());
 	}
 
 	// 行動エディタのホットリロード監視（編集中でも再生中でも回す）
@@ -226,7 +247,7 @@ void SceneEdit::ResetPlay()
 	// ロックオンを解除する。
 	// CameraController はロックオン中に敵ポインタを持ち続けるので、
 	// これをしないとこの後で破棄するボスを次のフレームに参照してしまう。
-	CameraParam::Instance().SetIsLockOn(false);
+	CameraParam::Instance().SetLockOn(false);
 	CameraParam::Instance().SetLockOnEnemy(nullptr);
 
 	// 出しっぱなしの弾とエフェクトを片付ける
@@ -236,8 +257,8 @@ void SceneEdit::ResetPlay()
 	const bool bossWasSelected = (selectedCharacter == boss.get());
 
 	// 新しい方を先に作るので、モデルのリソースはキャッシュから再利用される
-	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Rogue/SK_ROGUE_F_02.gltf", 1.0f);
+	player = std::make_unique<Player>(device, PLAYER_MODEL_PATH);
+	boss = std::make_unique<EnemyBoss>(device, BOSS_MODEL_PATH, 1.0f);
 
 	selectedCharacter = bossWasSelected
 		? static_cast<Character*>(boss.get())
@@ -297,14 +318,14 @@ void SceneEdit::DrawPlayControls()
 	ImGui::TextDisabled(u8"実行ノード: %s  |  距離: %.1f  |  戦闘: %s  |  操作: %s",
 		activeNodeName.empty() ? u8"（なし）" : activeNodeName.c_str(),
 		distance,
-		boss->GetBattleState() ? u8"有" : u8"無",
+		boss->IsBattle() ? u8"有" : u8"無",
 		EditorLayout::Instance().IsGameViewFocused() ? u8"有効" : u8"Game View をクリック");
 
 	ImGui::SameLine();
 	if (ImGui::SmallButton(u8"戦闘開始"))
 	{
 		// 索敵を待たずに戦闘状態へ入れて、攻撃行動をすぐ確認できるようにする
-		boss->SetBattleState(true);
+		boss->SetBattle(true);
 		boss->ResetBehaviorState();
 	}
 }
@@ -380,21 +401,21 @@ void SceneEdit::Render(float elapsedTime, int width, int height)
 
 	//ポストプロセス
 	{
-		posteffect->Begin(rc);
+		postEffect->Begin(rc);
 
 		buffers[FrameBufferId::Luminance]->SetRenderTargets(dc);
-		posteffect->LuminanceExtraction(rc, buffers[FrameBufferId::Scene]->GetColorMap());
+		postEffect->LuminanceExtraction(rc, buffers[FrameBufferId::Scene]->GetColorMap());
 
-		posteffect->KawaseBloom(rc, buffers[FrameBufferId::Scene]->GetColorMap(), buffers[FrameBufferId::Luminance]->GetColorMap(), buffers[FrameBufferId::RadialBlur]);
+		postEffect->KawaseBloom(rc, buffers[FrameBufferId::Scene]->GetColorMap(), buffers[FrameBufferId::Luminance]->GetColorMap(), buffers[FrameBufferId::RadialBlur]);
 
 		buffers[FrameBufferId::Chromatic]->SetRenderTargets(dc);
-		posteffect->RadialBlur(rc, buffers[FrameBufferId::RadialBlur]->GetColorMap());
+		postEffect->RadialBlur(rc, buffers[FrameBufferId::RadialBlur]->GetColorMap());
 
 		// 最終画は Game View パネルに貼るのでオフスクリーンへ描く
 		buffers[FrameBufferId::GameView]->SetRenderTargets(dc);
-		posteffect->ChromaticAberration(rc, buffers[FrameBufferId::Chromatic]->GetColorMap());
+		postEffect->ChromaticAberration(rc, buffers[FrameBufferId::Chromatic]->GetColorMap());
 
-		posteffect->End(rc);
+		postEffect->End(rc);
 	}
 
 	// デバッグ表示はポストエフェクトの影響を受けないよう、最終画の上に重ねる
@@ -460,9 +481,9 @@ void SceneEdit::DrawDebugGUI(float elapsedTime)
 		// ImGuiのコンボボックスでキャラクター選択
 		static int selectedIndex = 0;
 		if (ImGui::Combo("Target Character", &selectedIndex,
-			[](void* data, int idx, const char** out_text) {
+			[](void* data, int idx, const char** outText) {
 				auto& characterNames = *reinterpret_cast<std::vector<std::string>*>(data);
-				*out_text = characterNames[idx].c_str();
+				*outText = characterNames[idx].c_str();
 				return true;
 			},
 			&characterNames, static_cast<int>(characterNames.size()))) {
@@ -795,11 +816,11 @@ void SceneEdit::DrawAnimationControlUI(Model* model, bool& isPlaying, int animat
 	}
 }
 
-void SceneEdit::DrawAnimationSpeedGraphBackground(ImDrawList* draw_list, ImVec2 graphStart, ImVec2 graphEnd, float secondsLength, float graphWidth, float graphHeight, float labelMargin)
+void SceneEdit::DrawAnimationSpeedGraphBackground(ImDrawList* drawList, ImVec2 graphStart, ImVec2 graphEnd, float secondsLength, float graphWidth, float graphHeight, float labelMargin)
 {
 	// 背景
-	draw_list->AddRectFilled(graphStart, graphEnd, IM_COL32(60, 60, 100, 100));
-	draw_list->AddRect(graphStart, graphEnd, IM_COL32(200, 200, 255, 255));
+	drawList->AddRectFilled(graphStart, graphEnd, IM_COL32(60, 60, 100, 100));
+	drawList->AddRect(graphStart, graphEnd, IM_COL32(200, 200, 255, 255));
 
 	// 0.1秒ごとに縦線を描画（実時間ベース）
 	const float tickInterval = 0.1f;
@@ -814,7 +835,7 @@ void SceneEdit::DrawAnimationSpeedGraphBackground(ImDrawList* draw_list, ImVec2 
 		// 色を変える（0.5秒ごとにやや濃いグレー）
 		ImU32 lineColor = (i % 5 == 0) ? IM_COL32(180, 180, 180, 150) : IM_COL32(120, 120, 120, 100);
 
-		draw_list->AddLine(ImVec2(x, graphStart.y), ImVec2(x, graphEnd.y), lineColor);
+		drawList->AddLine(ImVec2(x, graphStart.y), ImVec2(x, graphEnd.y), lineColor);
 	}
 
 	const float speedTickInterval = 0.5f;
@@ -827,12 +848,12 @@ void SceneEdit::DrawAnimationSpeedGraphBackground(ImDrawList* draw_list, ImVec2 
 
 		// 横線描画（0.0、1.5、3.0で色を変えるなども可能）
 		ImU32 lineColor = (i % 2 == 0) ? IM_COL32(180, 180, 180, 150) : IM_COL32(120, 120, 120, 100);
-		draw_list->AddLine(ImVec2(graphStart.x, y), ImVec2(graphEnd.x, y), lineColor);
+		drawList->AddLine(ImVec2(graphStart.x, y), ImVec2(graphEnd.x, y), lineColor);
 
 		// 数値ラベル（グラフの左に表示）
 		char label[16];
 		snprintf(label, sizeof(label), "%.1f", value);
-		draw_list->AddText(ImVec2(graphStart.x - labelMargin + 4, y - 6), IM_COL32(255, 255, 255, 200), label);
+		drawList->AddText(ImVec2(graphStart.x - labelMargin + 4, y - 6), IM_COL32(255, 255, 255, 200), label);
 	}
 
 	// マウスオーバー時に秒数表示
@@ -848,18 +869,18 @@ void SceneEdit::DrawAnimationSpeedGraphBackground(ImDrawList* draw_list, ImVec2 
 	}
 }
 
-void SceneEdit::DrawSpeedCurveEditor(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex, float secondsLength, Model* model)
+void SceneEdit::DrawSpeedCurveEditor(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex, float secondsLength, Model* model)
 {
-	DrawSpeedCurvePoints(config, draw_list, graphStart, graphEnd, graphWidth, graphHeight, selectedKeyIndex);
+	DrawSpeedCurvePoints(config, drawList, graphStart, graphEnd, graphWidth, graphHeight, selectedKeyIndex);
 
 	if (config->speedCurve.size() > 1)
 	{
-		DrawSpeedCurveLines(config, draw_list, graphStart, graphWidth, graphHeight);
-		DrawCurrentSpeedIndicator(config, draw_list, graphStart, graphWidth, graphHeight, secondsLength, model);
+		DrawSpeedCurveLines(config, drawList, graphStart, graphWidth, graphHeight);
+		DrawCurrentSpeedIndicator(config, drawList, graphStart, graphWidth, graphHeight, secondsLength, model);
 	}
 }
 
-void SceneEdit::DrawSpeedCurvePoints(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex)
+void SceneEdit::DrawSpeedCurvePoints(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex)
 {
 	// 点の描画 & 操作
 	for (size_t i = 0; i < config->speedCurve.size(); ++i)
@@ -878,7 +899,7 @@ void SceneEdit::DrawSpeedCurvePoints(AnimationConfig* config, ImDrawList* draw_l
 			selectedKeyIndex = static_cast<int>(i);
 		}
 
-		draw_list->AddCircleFilled(pt, 4.0f, IM_COL32(255, 255, 100, 255));
+		drawList->AddCircleFilled(pt, GRAPH_KEY_POINT_RADIUS, IM_COL32(255, 255, 100, 255));
 
 		if (selectedKeyIndex == static_cast<int>(i)) // 選択されたキーのみ処理
 		{
@@ -935,8 +956,8 @@ void SceneEdit::DrawSpeedCurvePoints(AnimationConfig* config, ImDrawList* draw_l
 
 				auto DrawHandle = [&](ImVec2& handlePos, float& tangent, bool isOut)
 					{
-						draw_list->AddLine(pt, handlePos, IM_COL32(200, 100, 255, 255), 2.0f);
-						draw_list->AddCircleFilled(handlePos, 3.0f, IM_COL32(255, 150, 255, 255));
+						drawList->AddLine(pt, handlePos, IM_COL32(200, 100, 255, 255), GRAPH_LINE_THICKNESS);
+						drawList->AddCircleFilled(handlePos, GRAPH_HANDLE_RADIUS, IM_COL32(255, 150, 255, 255));
 
 						ImGui::SetCursorScreenPos(ImVec2(handlePos.x - 6, handlePos.y - 6));
 						std::string handleLabel = isOut ? "##rightHandle" + std::to_string(i) : "##leftHandle" + std::to_string(i);
@@ -967,7 +988,7 @@ void SceneEdit::DrawSpeedCurvePoints(AnimationConfig* config, ImDrawList* draw_l
 	}
 }
 
-void SceneEdit::DrawSpeedCurveLines(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, float graphWidth, float graphHeight)
+void SceneEdit::DrawSpeedCurveLines(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, float graphWidth, float graphHeight)
 {
 	for (size_t i = 0; i < config->speedCurve.size() - 1; ++i)
 	{
@@ -1010,13 +1031,13 @@ void SceneEdit::DrawSpeedCurveLines(AnimationConfig* config, ImDrawList* draw_li
 				graphStart.y + (1.0f - interpV / 3.0f) * graphHeight
 			);
 
-			draw_list->AddLine(prev, current, IM_COL32(255, 255, 100, 255), 2.0f);
+			drawList->AddLine(prev, current, IM_COL32(255, 255, 100, 255), GRAPH_LINE_THICKNESS);
 			prev = current;
 		}
 	}
 }
 
-void SceneEdit::DrawCurrentSpeedIndicator(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, float graphWidth, float graphHeight, float secondsLength, Model* model)
+void SceneEdit::DrawCurrentSpeedIndicator(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, float graphWidth, float graphHeight, float secondsLength, Model* model)
 {
 	// 現在のアニメーション時間に基づくスピードを計算
 	float t = animationSeconds / secondsLength;  // アニメーション時間を[0, 1]にクランプ
@@ -1035,10 +1056,10 @@ void SceneEdit::DrawCurrentSpeedIndicator(AnimationConfig* config, ImDrawList* d
 	);
 
 	// 現在の点を描画
-	draw_list->AddCircleFilled(current, 6.0f, IM_COL32(255, 0, 0, 255));  // 赤い点
+	drawList->AddCircleFilled(current, GRAPH_MARKER_RADIUS, IM_COL32(255, 0, 0, 255));  // 赤い点
 }
 
-void SceneEdit::DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* config, int animIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength)
+void SceneEdit::DrawAttributeHandles(ImDrawList* drawList, AnimationConfig* config, int animIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength)
 {
 	for (size_t attrIndex = 0; attrIndex < config->attributes.size(); ++attrIndex)
 	{
@@ -1085,11 +1106,11 @@ void SceneEdit::DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* con
 			break;
 		}
 
-		draw_list->AddRectFilled(ImVec2(startX, graphStart.y), ImVec2(endX, graphEnd.y), fillColor);
-		draw_list->AddLine(startTop, startBottom, lineColor, 2.0f);
-		draw_list->AddLine(endTop, endBottom, lineColor, 2.0f);
-		draw_list->AddCircleFilled(startBottom, 6.0f, circleColor);
-		draw_list->AddCircleFilled(endBottom, 6.0f, circleColor);
+		drawList->AddRectFilled(ImVec2(startX, graphStart.y), ImVec2(endX, graphEnd.y), fillColor);
+		drawList->AddLine(startTop, startBottom, lineColor, GRAPH_LINE_THICKNESS);
+		drawList->AddLine(endTop, endBottom, lineColor, GRAPH_LINE_THICKNESS);
+		drawList->AddCircleFilled(startBottom, GRAPH_MARKER_RADIUS, circleColor);
+		drawList->AddCircleFilled(endBottom, GRAPH_MARKER_RADIUS, circleColor);
 
 		std::string startId = "startAttr##" + std::to_string(animIndex) + "_" + std::to_string(attrIndex);
 		ImGui::SetCursorScreenPos(ImVec2(startBottom.x - 6, startBottom.y - 6));
@@ -1127,12 +1148,12 @@ void SceneEdit::DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* con
 			ImVec2 atkEndTop = ImVec2(atkEndX, graphStart.y - handleOffset);
 			ImVec2 atkEndBottom = ImVec2(atkEndX, graphEnd.y + handleOffset);
 
-			draw_list->AddRectFilled(ImVec2(atkStartX, graphStart.y), ImVec2(atkEndX, graphEnd.y), attackFill);
+			drawList->AddRectFilled(ImVec2(atkStartX, graphStart.y), ImVec2(atkEndX, graphEnd.y), attackFill);
 
-			draw_list->AddLine(ImVec2(atkStartBottom.x, graphEnd.y), atkStartBottom, attackLine, 2.0f);
-			draw_list->AddLine(ImVec2(atkEndBottom.x, graphEnd.y), atkEndBottom, attackLine, 2.0f);
-			draw_list->AddCircleFilled(atkStartBottom, 6.0f, attackCircle);
-			draw_list->AddCircleFilled(atkEndBottom, 6.0f, attackCircle);
+			drawList->AddLine(ImVec2(atkStartBottom.x, graphEnd.y), atkStartBottom, attackLine, GRAPH_LINE_THICKNESS);
+			drawList->AddLine(ImVec2(atkEndBottom.x, graphEnd.y), atkEndBottom, attackLine, GRAPH_LINE_THICKNESS);
+			drawList->AddCircleFilled(atkStartBottom, GRAPH_MARKER_RADIUS, attackCircle);
+			drawList->AddCircleFilled(atkEndBottom, GRAPH_MARKER_RADIUS, attackCircle);
 
 			std::string atkStartIdBtm = "atkStartBtm##" + std::to_string(animIndex) + "_" + std::to_string(attrIndex);
 			ImGui::SetCursorScreenPos(ImVec2(atkStartBottom.x - 6, atkStartBottom.y - 6));
@@ -1188,7 +1209,7 @@ void SceneEdit::DrawAnimationEventsUI(AnimationConfig* config, Model* model, int
 	}
 }
 
-void SceneEdit::DrawEventHandles(ImDrawList* draw_list, AnimationConfig* config, int animationIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength)
+void SceneEdit::DrawEventHandles(ImDrawList* drawList, AnimationConfig* config, int animationIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength)
 {
 	for (size_t i = 0; i < config->events.size(); ++i)
 	{
@@ -1223,13 +1244,13 @@ void SceneEdit::DrawEventHandles(ImDrawList* draw_list, AnimationConfig* config,
 		}
 
 		// 塗りつぶし矩形（イベント期間）
-		draw_list->AddRectFilled(ImVec2(startX, graphStart.y), ImVec2(endX, graphEnd.y), fillColor);
+		drawList->AddRectFilled(ImVec2(startX, graphStart.y), ImVec2(endX, graphEnd.y), fillColor);
 
 		// 両端ラインとハンドル
-		draw_list->AddLine(startTop, startBottom, lineColor, 2.0f);
-		draw_list->AddLine(endTop, endBottom, lineColor, 2.0f);
-		draw_list->AddCircleFilled(startBottom, 6.0f, circleColor);
-		draw_list->AddCircleFilled(endBottom, 6.0f, circleColor);
+		drawList->AddLine(startTop, startBottom, lineColor, GRAPH_LINE_THICKNESS);
+		drawList->AddLine(endTop, endBottom, lineColor, GRAPH_LINE_THICKNESS);
+		drawList->AddCircleFilled(startBottom, GRAPH_MARKER_RADIUS, circleColor);
+		drawList->AddCircleFilled(endBottom, GRAPH_MARKER_RADIUS, circleColor);
 
 		// 開始ハンドル
 		std::string startId = "eventStart##" + std::to_string(animationIndex) + "_" + std::to_string(i);
@@ -1290,10 +1311,10 @@ void SceneEdit::DrawSpeedCurveUI(AnimationConfig* config, float secondsLength, f
 	graphStart.x += labelMargin;
 	ImVec2 graphEnd = ImVec2(graphStart.x + graphWidth, graphStart.y + graphHeight);
 
-	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
 
 	// グラフ背景描画
-	DrawAnimationSpeedGraphBackground(draw_list, graphStart, graphEnd, secondsLength, graphWidth, graphHeight, labelMargin);
+	DrawAnimationSpeedGraphBackground(drawList, graphStart, graphEnd, secondsLength, graphWidth, graphHeight, labelMargin);
 
 	// グラフサイズ変更用ドラッグハンドル
 	ImVec2 resizeHandleSize = ImVec2(10, 10);
@@ -1312,7 +1333,7 @@ void SceneEdit::DrawSpeedCurveUI(AnimationConfig* config, float secondsLength, f
 	}
 
 	// ドラッグハンドルの可視化（小さな三角形）
-	draw_list->AddTriangleFilled(
+	drawList->AddTriangleFilled(
 		{ resizeHandlePos.x, resizeHandlePos.y + resizeHandleSize.y },
 		{ resizeHandlePos.x + resizeHandleSize.x, resizeHandlePos.y + resizeHandleSize.y },
 		{ resizeHandlePos.x + resizeHandleSize.x, resizeHandlePos.y },
@@ -1327,12 +1348,12 @@ void SceneEdit::DrawSpeedCurveUI(AnimationConfig* config, float secondsLength, f
 	ImVec2 rightUIPos = ImVec2(graphEnd.x + spacing, graphStart.y);  // グラフと同じ高さから始める
 	ImGui::SetCursorScreenPos(rightUIPos);
 
-	DrawSpeedCurveEditor(config, draw_list, graphStart, graphEnd, graphWidth, graphHeight, selectedKeyIndex, secondsLength, model);
-	DrawCameraKeyframePoints(config, draw_list, graphStart, graphEnd, graphWidth, graphHeight, selectedCameraKeyIndex);
+	DrawSpeedCurveEditor(config, drawList, graphStart, graphEnd, graphWidth, graphHeight, selectedKeyIndex, secondsLength, model);
+	DrawCameraKeyframePoints(config, drawList, graphStart, graphEnd, graphWidth, graphHeight, selectedCameraKeyIndex);
 
 	// DrawAttributeHandles を animationIndex 付きで呼び出す
-	DrawAttributeHandles(draw_list, config, animationIndex, graphStart, graphEnd, graphWidth, secondsLength);
-	DrawEventHandles(draw_list, config, animationIndex, graphStart, graphEnd, graphWidth, secondsLength);
+	DrawAttributeHandles(drawList, config, animationIndex, graphStart, graphEnd, graphWidth, secondsLength);
+	DrawEventHandles(drawList, config, animationIndex, graphStart, graphEnd, graphWidth, secondsLength);
 
 	// イベントシーケンサー追加
 	ImGui::Dummy(ImVec2(0, 10)); // 少し余白
@@ -1779,7 +1800,7 @@ void SceneEdit::DrawSequencerTimeline(AnimationConfig* config, float secondsLeng
 	float currentX = canvasPos.x + timelineMargin + animationSeconds * pixelsPerSecond;
 	drawList->AddLine(ImVec2(currentX, canvasPos.y),
 		ImVec2(currentX, canvasPos.y + canvasSize.y),
-		IM_COL32(255, 0, 0, 255), 2.0f);
+		IM_COL32(255, 0, 0, 255), GRAPH_LINE_THICKNESS);
 	drawList->AddCircleFilled(ImVec2(currentX, canvasPos.y + 10), 5.0f, IM_COL32(255, 0, 0, 255));
 
 	// タイムラインクリックで時間移動
@@ -2077,7 +2098,7 @@ void SceneEdit::DrawAttributeEditPanel(AnimationConfig* config, int selectedAttr
 		ImGui::Spacing();
 
 		ImGui::DragInt(u8"攻撃ダメージ", &ap.attackDamage, 1, 0, 9999);
-		ImGui::DragFloat(u8"無敵時間", &ap.invisibleTime, 0.01f, 0.0f, 10.0f);
+		ImGui::DragFloat(u8"無敵時間", &ap.invincibleTime, 0.01f, 0.0f, 10.0f);
 		ImGui::DragInt(u8"リベンジ値蓄積量", &ap.revengeValue, 1, 0, 10);
 
 		ImGui::Spacing();
@@ -2117,7 +2138,7 @@ void SceneEdit::DrawAttributeEditPanel(AnimationConfig* config, int selectedAttr
 	ImGui::PopStyleColor();
 }
 
-void SceneEdit::DrawCameraKeyframePoints(AnimationConfig* config, ImDrawList* draw_list,
+void SceneEdit::DrawCameraKeyframePoints(AnimationConfig* config, ImDrawList* drawList,
 	ImVec2 graphStart, ImVec2 graphEnd,
 	float graphWidth, float graphHeight,
 	int& selectedKeyIndex)
@@ -2152,12 +2173,12 @@ void SceneEdit::DrawCameraKeyframePoints(AnimationConfig* config, ImDrawList* dr
 			? IM_COL32(150, 255, 255, 255)  // 明るいシアン
 			: IM_COL32(100, 255, 255, 255); // 通常のシアン
 
-		draw_list->AddCircleFilled(pt, 4.0f, color);
+		drawList->AddCircleFilled(pt, GRAPH_KEY_POINT_RADIUS, color);
 
 		float lineLength = graphHeight * 0.5f;
-		draw_list->AddLine(ImVec2(pt.x, pt.y - lineLength),
+		drawList->AddLine(ImVec2(pt.x, pt.y - lineLength),
 			ImVec2(pt.x, pt.y + lineLength),
-			color, 2.0f);
+			color, GRAPH_LINE_THICKNESS);
 		
 		// 選択中なら設定UIとドラッグ操作
 		if (selectedKeyIndex == static_cast<int>(i))

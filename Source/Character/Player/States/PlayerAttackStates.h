@@ -2,7 +2,7 @@
 #include "PlayerState.h"
 #include <DirectXMath.h>
 
-// コンボステート
+// コンボテート
 class PlayerComboState : public PlayerState
 {
 public:
@@ -17,6 +17,9 @@ protected:
 
 	// 更新処理
 	void Update(float elapsedTime) override;
+
+	// コンボ共通のデバッグ用GUI描画
+	void DrawComboDebugGUI(const char* label);
 
 protected:
 	PlayerStateId nextStateId = PlayerStateId::EnumCount;
@@ -45,7 +48,7 @@ protected:
 	float attackCollisionStartFrame = 0.0f;
 	float attackCollisionEndFrame = 1.0f;
 	int	  attackDamage = 1;
-	float invisibleTime = 0.5f;
+	float invincibleTime = 0.5f;
 
 	// コントローラーの振動変数
 	float attackLeftVibrate = 1.0f;
@@ -58,7 +61,7 @@ protected:
 	DirectX::XMFLOAT3 enemyPos;
 };
 
-// コンボス1ステート
+// コンボ1ステート
 class PlayerCombo1State : public PlayerComboState
 {
 public:
@@ -68,7 +71,7 @@ public:
 	void DrawDebugGUI() override;
 };
 
-// コンボス2ステート
+// コンボ2ステート
 class PlayerCombo2State : public PlayerComboState
 {
 public:
@@ -78,7 +81,7 @@ public:
 	void DrawDebugGUI() override;
 };
 
-// コンボス3ステート
+// コンボ3ステート
 class PlayerCombo3State : public PlayerComboState
 {
 public:
@@ -88,7 +91,7 @@ public:
 	void DrawDebugGUI() override;
 };
 
-// コンボス4ステート
+// コンボ4ステート
 class PlayerCombo4State : public PlayerComboState
 {
 public:

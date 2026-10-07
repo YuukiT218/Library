@@ -46,28 +46,26 @@ public:
 	};
 
 public:
-	D3D11_TEXTURE2D_DESC mask_texture2dDesc;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mask_texture;
+	D3D11_TEXTURE2D_DESC maskTexture2dDesc;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> maskTexture;
 
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> sprite_vertex_shader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> sprite_input_layout;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> sprite_pixel_shader;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> spriteVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> spriteInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> spritePixelShader;
 
 private:
-	std::unique_ptr<Sprite> TitleBack;
-	std::unique_ptr<Sprite> TitleName;
-	std::unique_ptr<Sprite> AnyButton;
+	std::unique_ptr<Sprite> titleBack;
+	std::unique_ptr<Sprite> titleName;
+	std::unique_ptr<Sprite> anyButton;
 
-	std::unique_ptr<Sprite> Sword;
+	std::unique_ptr<Sprite> endPause;
+	std::unique_ptr<Sprite> endKey;
+	std::unique_ptr<Sprite> endCon;
+	std::unique_ptr<Sprite> endYes;
+	std::unique_ptr<Sprite> endNo;
+	std::unique_ptr<Sprite> endSelect;
 
-	std::unique_ptr<Sprite> EndPause;
-	std::unique_ptr<Sprite> EndKey;
-	std::unique_ptr<Sprite> EndCon;
-	std::unique_ptr<Sprite> EndYes;
-	std::unique_ptr<Sprite> EndNo;
-	std::unique_ptr<Sprite> EndSele;
-
-	AudioSource* BGM = nullptr;
+	AudioSource* bgm = nullptr;
 
 	EasingData easingData;
 
@@ -93,5 +91,5 @@ private:
 
 	DirectX::XMFLOAT3 sePos{ 0,0,0 };
 	DirectX::XMFLOAT3 soPos{ 0,0,0 };
-	DirectX::XMFLOAT3 soscale{ 882,1664,0 };
+	DirectX::XMFLOAT3 soScale{ 882,1664,0 };
 };

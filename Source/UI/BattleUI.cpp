@@ -4,8 +4,53 @@
 #include "Character/Player/Player.h"
 #include "Character/Enemy/EnemyBoss.h"
 #include "Camera/CameraParam.h"
+#include "System/ScreenSize.h"
 #include <cmath>
 #include <algorithm>
+
+namespace
+{
+    // 全画面の1枚絵UIを描く大きさ
+    constexpr float FULL_SCREEN_WIDTH = static_cast<float>(ScreenSize::WIDTH);
+    constexpr float FULL_SCREEN_HEIGHT = static_cast<float>(ScreenSize::HEIGHT);
+
+    // ロックオンカーソルを表示するノード名
+    constexpr const char* LOCK_ON_TARGET_NODE_NAME = "spine_03";
+
+    // ロックオンカーソルの回転速度（度/秒）
+    constexpr float LOCK_ON_ROTATE_SPEED = 90.0f;
+
+    // ロックオンカーソルの大きさ（近距離で最大、遠距離で最小）
+    constexpr float LOCK_ON_NEAR_DISTANCE = 5.0f;
+    constexpr float LOCK_ON_FAR_DISTANCE = 30.0f;
+    constexpr float LOCK_ON_MAX_SCALE = 40.0f;
+    constexpr float LOCK_ON_MIN_SCALE = 30.0f;
+
+    // ロックオンカーソル画像の切り抜きサイズと不透明度
+    constexpr float LOCK_ON_TEXTURE_SIZE = 256.0f;
+    constexpr float LOCK_ON_ALPHA = 0.7f;
+
+    // 表示が遅れているダメージ量を、残差に比例して追いつかせる速さ
+    constexpr float DAMAGE_GAUGE_CATCH_UP_RATE = 3.0f;
+
+    // ボスのHPゲージ1本（ストック1つ）あたりのHP
+    constexpr float BOSS_HP_PER_STOCK = 100.0f;
+
+    // ちょうどストックの境目のHPを、前のストックとして数えるための補正
+    constexpr float BOSS_STOCK_BOUNDARY_EPSILON = 0.1f;
+
+    // 背景画像に対するゲージ本体の描画位置のずれ
+    const DirectX::XMFLOAT2 PLAYER_GAUGE_FILL_OFFSET = { 1.0f, 3.0f };
+    const DirectX::XMFLOAT2 BOSS_GAUGE_FILL_OFFSET = { 2.0f, 2.0f };
+    constexpr float BOSS_STOCK_FILL_OFFSET = 2.5f;
+
+    // 縁のぼかし幅の下限（0だとシェーダーで割り算できない）
+    constexpr float MIN_EDGE_SOFTNESS = 0.01f;
+
+    // 被弾時の立ち絵の揺れ（縦揺れの周期と大きさの倍率）
+    constexpr float PORTRAIT_SHAKE_Y_FREQUENCY_SCALE = 1.37f;
+    constexpr float PORTRAIT_SHAKE_Y_AMPLITUDE_SCALE = 0.6f;
+}
 
 void BattleUI::Initialize()
 {
@@ -17,24 +62,24 @@ void BattleUI::Initialize()
     lockOnPoint = std::make_unique<Sprite>(device, "Data/Sprite/Lockon.png");
 
     // プレイヤー
-    spritePlayerHP_Back = std::make_unique<Sprite>(device, "Data/Sprite/HPGauge.png");
-    spritePlayerHP_Fill = std::make_unique<Sprite>(device, "Data/Sprite/HPBar.png");
+    spritePlayerHPBack = std::make_unique<Sprite>(device, "Data/Sprite/HPGauge.png");
+    spritePlayerHPFill = std::make_unique<Sprite>(device, "Data/Sprite/HPBar.png");
     // マスク画像 (Spriteとしてロードするが、GetSRV()でテクスチャとして使う)
-    spritePlayerHP_Mask = std::make_unique<Sprite>(device, "Data/Sprite/HPBarMask.png");
+    spritePlayerHPMask = std::make_unique<Sprite>(device, "Data/Sprite/HPBarMask.png");
 
     // ゲージに埋め込むキャラクターの立ち絵
     portraitNormal = std::make_unique<Sprite>(device, "Data/Sprite/portrait_kohaku_01.png");
     portraitDamage = std::make_unique<Sprite>(device, "Data/Sprite/portrait_kohaku_06.png");
 
     // ボス
-    spriteBossHP_Back = std::make_unique<Sprite>(device, "Data/Sprite/BossHPGauge.png");
-    spriteBossHP_Fill = std::make_unique<Sprite>(device, "Data/Sprite/BossHPBar.png");
-    spriteBossStock_Back = std::make_unique<Sprite>(device, "Data/Sprite/HPStockGauge.png");
-    spriteBossStock_Fill = std::make_unique<Sprite>(device, "Data/Sprite/HPStockBar.png");
+    spriteBossHPBack = std::make_unique<Sprite>(device, "Data/Sprite/BossHPGauge.png");
+    spriteBossHPFill = std::make_unique<Sprite>(device, "Data/Sprite/BossHPBar.png");
+    spriteBossStockBack = std::make_unique<Sprite>(device, "Data/Sprite/HPStockGauge.png");
+    spriteBossStockFill = std::make_unique<Sprite>(device, "Data/Sprite/HPStockBar.png");
 
     // 操作説明
     padInstructionUI = std::make_unique<Sprite>(device, "Data/Sprite/PadInst.png");
-    keyMouInstructionUI = std::make_unique<Sprite>(device, "Data/Sprite/KeyMouInst.png");
+    keyMouseInstructionUI = std::make_unique<Sprite>(device, "Data/Sprite/KeyMouInst.png");
 
     // カウンターと打ち上げ攻撃が可能な状態を示す
     counter = std::make_unique<Sprite>(device, "Data/Sprite/Counter.png");
@@ -100,7 +145,7 @@ void BattleUI::UpdateHPTracker(HPTracker& tracker, float currentHP, float maxHP,
         else
         {
             // 一定速度と、残差に比例した速度の速い方で追いつかせる
-            float speed = (std::max)(maxHP * damageGaugeDrainRate, (tracker.displayHP - currentHP) * 3.0f);
+            float speed = (std::max)(maxHP * damageGaugeDrainRate, (tracker.displayHP - currentHP) * DAMAGE_GAUGE_CATCH_UP_RATE);
             tracker.displayHP -= speed * elapsedTime;
             if (tracker.displayHP < currentHP) tracker.displayHP = currentHP;
         }
@@ -119,7 +164,7 @@ void BattleUI::UpdateHPTracker(HPTracker& tracker, float currentHP, float maxHP,
 
 void BattleUI::Update(float elapsedTime)
 {
-    isController = Input::Instance().GetIsLastGamePad();
+    isController = Input::Instance().IsLastGamePad();
 
     // HPの遅延表示（ダメージ量の可視化）の更新
     {
@@ -137,49 +182,38 @@ void BattleUI::Update(float elapsedTime)
     }
 
     // ロックオン状態の更新
-    lockonEnemy = CameraParam::Instance().GetLockOnEnemy();
+    lockOnEnemy = CameraParam::Instance().GetLockOnEnemy();
 
-    if (lockonEnemy)
+    if (lockOnEnemy)
     {
         // ターゲット位置（spine_03）の取得
-        DirectX::XMFLOAT3 lockonEnemyPosition = lockonEnemy->GetPosition();
-        Model* model = lockonEnemy->GetModel();
+        DirectX::XMFLOAT3 lockOnEnemyPosition = lockOnEnemy->GetPosition();
+        Model* model = lockOnEnemy->GetModel();
         if (model)
         {
-            Model::Node* node = model->FindNode("spine_03");
+            Model::Node* node = model->FindNode(LOCK_ON_TARGET_NODE_NAME);
             if (node)
             {
-                lockonEnemyPosition = { node->worldTransform._41, node->worldTransform._42, node->worldTransform._43 };
+                lockOnEnemyPosition = { node->worldTransform._41, node->worldTransform._42, node->worldTransform._43 };
             }
         }
 
         // 距離計算
         DirectX::XMFLOAT3 playerPos = Player::Instance().GetPosition();
         DirectX::XMVECTOR pPos = DirectX::XMLoadFloat3(&playerPos);
-        DirectX::XMVECTOR ePos = DirectX::XMLoadFloat3(&lockonEnemyPosition);
+        DirectX::XMVECTOR ePos = DirectX::XMLoadFloat3(&lockOnEnemyPosition);
         DirectX::XMVECTOR distVec = DirectX::XMVectorSubtract(pPos, ePos);
         float distance = DirectX::XMVectorGetX(DirectX::XMVector3Length(distVec));
 
         // アングル回転
-        lockonAngle += elapsedTime * 90.0f;
+        lockOnAngle += elapsedTime * LOCK_ON_ROTATE_SPEED;
 
-        // 距離に基づいてスケールを変更 (元仕様)
-        if (distance <= 5.0f)
-        {
-            lockonScale.x = 40.0f; // 距離が5以下なら最大スケール
-            lockonScale.y = 40.0f;
-        }
-        else if (distance <= 30.0f)
-        {
-            // 距離が5〜30の間でスケールを線形補間
-            lockonScale.x = 40.0f - ((distance - 5.0f) / 25.0f) * (40.0f - 30.0f);
-            lockonScale.y = 40.0f - ((distance - 5.0f) / 25.0f) * (40.0f - 30.0f);
-        }
-        else
-        {
-            lockonScale.x = 30.0f; // 距離が30を超えるなら最小スケール
-            lockonScale.y = 30.0f;
-        }
+        // 距離に基づいてスケールを変更（近いほど大きく、遠いほど小さく）
+        float t = (distance - LOCK_ON_NEAR_DISTANCE) / (LOCK_ON_FAR_DISTANCE - LOCK_ON_NEAR_DISTANCE);
+        t = std::clamp(t, 0.0f, 1.0f);
+        float lockOnSize = LOCK_ON_MAX_SCALE - t * (LOCK_ON_MAX_SCALE - LOCK_ON_MIN_SCALE);
+        lockOnScale.x = lockOnSize;
+        lockOnScale.y = lockOnSize;
     }
 }
 
@@ -212,20 +246,20 @@ void BattleUI::Render(float elapsedTime)
         // ImGuiで調整可能な変数を使用
         float px = playerGaugePos.x;
         float py = playerGaugePos.y;
-        float w = spritePlayerHP_Back->GetTextureWidth() * playerGaugeScale;
-        float h = spritePlayerHP_Back->GetTextureHeight() * playerGaugeScale;
+        float w = spritePlayerHPBack->GetTextureWidth() * playerGaugeScale;
+        float h = spritePlayerHPBack->GetTextureHeight() * playerGaugeScale;
 
         // 減少中のダメージ量を表す割合
         float damageRatio = 0.0f;
         if (maxHP > 0.0f) damageRatio = playerHPTracker.displayHP / maxHP;
 
         // 背景
-        spritePlayerHP_Back->Render(dc, px, py, 0, w, h, 0, 1, 1, 1, 1.0f);
+        spritePlayerHPBack->Render(dc, px, py, 0, w, h, 0, 1, 1, 1, 1.0f);
 
-        w = spritePlayerHP_Fill->GetTextureWidth() * playerGaugeScale;
-        h = spritePlayerHP_Fill->GetTextureHeight() * playerGaugeScale;
+        w = spritePlayerHPFill->GetTextureWidth() * playerGaugeScale;
+        h = spritePlayerHPFill->GetTextureHeight() * playerGaugeScale;
 
-        ID3D11ShaderResourceView* maskSRV = spritePlayerHP_Mask->GetSRV();
+        ID3D11ShaderResourceView* maskSRV = spritePlayerHPMask->GetSRV();
         dc->PSSetShaderResources(1, 1, &maskSRV);
         dc->PSSetConstantBuffers(0, 1, gaugeConstantBuffer.GetAddressOf());
 
@@ -239,7 +273,7 @@ void BattleUI::Render(float elapsedTime)
             cb.tintColor = damageGaugeColor;
             dc->UpdateSubresource(gaugeConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
-            spritePlayerHP_Fill->Render(dc, px + 1, py + 3, 0, w, h, 0, 1, 1, 1, 1.0f,
+            spritePlayerHPFill->Render(dc, px + PLAYER_GAUGE_FILL_OFFSET.x, py + PLAYER_GAUGE_FILL_OFFSET.y, 0, w, h, 0, 1, 1, 1, 1.0f,
                 nullptr,
                 gaugePixelShader.Get()
             );
@@ -255,7 +289,7 @@ void BattleUI::Render(float elapsedTime)
             cb.tintColor = { 1.0f, 1.0f, 1.0f, 1.0f };
             dc->UpdateSubresource(gaugeConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
 
-            spritePlayerHP_Fill->Render(dc, px+1, py+3, 0, w, h, 0, 1, 1, 1, 1.0f,
+            spritePlayerHPFill->Render(dc, px + PLAYER_GAUGE_FILL_OFFSET.x, py + PLAYER_GAUGE_FILL_OFFSET.y, 0, w, h, 0, 1, 1, 1, 1.0f,
                 nullptr,
                 gaugePixelShader.Get()
             );
@@ -280,14 +314,14 @@ void BattleUI::Render(float elapsedTime)
 
         // ストック計算
         int maxStockCount = 0;
-        if (bossMaxHP > 100.0f) maxStockCount = static_cast<int>((bossMaxHP - 0.1f) / 100.0f);
+        if (bossMaxHP > BOSS_HP_PER_STOCK) maxStockCount = static_cast<int>((bossMaxHP - BOSS_STOCK_BOUNDARY_EPSILON) / BOSS_HP_PER_STOCK);
 
         int currentStockCount = 0;
-        if (bossCurrentHP > 100.0f) currentStockCount = static_cast<int>((bossCurrentHP - 0.1f) / 100.0f);
+        if (bossCurrentHP > BOSS_HP_PER_STOCK) currentStockCount = static_cast<int>((bossCurrentHP - BOSS_STOCK_BOUNDARY_EPSILON) / BOSS_HP_PER_STOCK);
 
         // 現在のバーの端数 (0-100)
-        float currentBarVal = std::fmod(bossCurrentHP, 100.0f);
-        if (currentBarVal == 0.0f && bossCurrentHP > 0.0f) currentBarVal = 100.0f;
+        float currentBarVal = std::fmod(bossCurrentHP, BOSS_HP_PER_STOCK);
+        if (currentBarVal == 0.0f && bossCurrentHP > 0.0f) currentBarVal = BOSS_HP_PER_STOCK;
         int emptyCount = maxStockCount - currentStockCount;
 
         // 最大ストック数分ループして描画
@@ -296,38 +330,38 @@ void BattleUI::Render(float elapsedTime)
             float sx = bossStockStartPos.x + (i * bossStockOffset);
             float sy = bossStockStartPos.y;
 
-            float sw = spriteBossStock_Back->GetTextureWidth() * bossStockScale;
-            float sh = spriteBossStock_Back->GetTextureHeight() * bossStockScale;
-            spriteBossStock_Back->Render(dc, sx, sy, 0, sw, sh, 0, 1, 1, 1, 1.0f);
+            float sw = spriteBossStockBack->GetTextureWidth() * bossStockScale;
+            float sh = spriteBossStockBack->GetTextureHeight() * bossStockScale;
+            spriteBossStockBack->Render(dc, sx, sy, 0, sw, sh, 0, 1, 1, 1, 1.0f);
 
             // i=0(一番左) < emptyCount なら描画しない
             if (i >= emptyCount)
             {
-                sw = spriteBossStock_Fill->GetTextureWidth() * bossStockScale;
-                sh = spriteBossStock_Fill->GetTextureHeight() * bossStockScale;
-                spriteBossStock_Fill->Render(dc, sx + 2.5f, sy + 2.5f, 0, sw, sh, 0, 1, 1, 1, 1.0f);
+                sw = spriteBossStockFill->GetTextureWidth() * bossStockScale;
+                sh = spriteBossStockFill->GetTextureHeight() * bossStockScale;
+                spriteBossStockFill->Render(dc, sx + BOSS_STOCK_FILL_OFFSET, sy + BOSS_STOCK_FILL_OFFSET, 0, sw, sh, 0, 1, 1, 1, 1.0f);
             }
         }
 
         // メインHPバー
         float bx = bossGaugePos.x;
         float by = bossGaugePos.y;
-        float bw = spriteBossHP_Back->GetTextureWidth() * bossGaugeScale;
-        float bh = spriteBossHP_Back->GetTextureHeight() * bossGaugeScale;
+        float bw = spriteBossHPBack->GetTextureWidth() * bossGaugeScale;
+        float bh = spriteBossHPBack->GetTextureHeight() * bossGaugeScale;
 
-        spriteBossHP_Back->Render(dc, bx, by, 0, bw, bh, 0, 1, 1, 1, 1.0f);
+        spriteBossHPBack->Render(dc, bx, by, 0, bw, bh, 0, 1, 1, 1, 1.0f);
 
-        bw = spriteBossHP_Fill->GetTextureWidth() * bossGaugeScale;
-        bh = spriteBossHP_Fill->GetTextureHeight() * bossGaugeScale;
-        float fillRatio = currentBarVal / 100.0f;
+        bw = spriteBossHPFill->GetTextureWidth() * bossGaugeScale;
+        bh = spriteBossHPFill->GetTextureHeight() * bossGaugeScale;
+        float fillRatio = currentBarVal / BOSS_HP_PER_STOCK;
         float fillWidth = bw * fillRatio;
 
         // ダメージ量バー（現在のバーより長い分だけが見えるようにする）
         // ストックをまたいだ場合はバーいっぱいまで伸ばす
         float barBase = bossCurrentHP - currentBarVal;
         float damageBarVal = bossHPTracker.displayHP - barBase;
-        if (damageBarVal > 100.0f) damageBarVal = 100.0f;
-        float damageRatio = damageBarVal / 100.0f;
+        if (damageBarVal > BOSS_HP_PER_STOCK) damageBarVal = BOSS_HP_PER_STOCK;
+        float damageRatio = damageBarVal / BOSS_HP_PER_STOCK;
 
         if (damageRatio > fillRatio)
         {
@@ -339,12 +373,12 @@ void BattleUI::Render(float elapsedTime)
             dc->UpdateSubresource(gaugeConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
             dc->PSSetConstantBuffers(0, 1, gaugeConstantBuffer.GetAddressOf());
 
-            spriteBossHP_Fill->Render(dc,
-                bx + 2, by + 2, 0,
+            spriteBossHPFill->Render(dc,
+                bx + BOSS_GAUGE_FILL_OFFSET.x, by + BOSS_GAUGE_FILL_OFFSET.y, 0,
                 bw * damageRatio, bh,
                 0, 0,
-                spriteBossHP_Fill->GetTextureWidth() * damageRatio,
-                spriteBossHP_Fill->GetTextureHeight(),
+                spriteBossHPFill->GetTextureWidth() * damageRatio,
+                spriteBossHPFill->GetTextureHeight(),
                 0, 1, 1, 1, 1.0f,
                 nullptr,
                 gaugePixelShader.Get());
@@ -352,12 +386,12 @@ void BattleUI::Render(float elapsedTime)
 
         if (fillWidth > 0.0f)
         {
-            spriteBossHP_Fill->Render(dc,
-                bx+2, by+2, 0,
+            spriteBossHPFill->Render(dc,
+                bx + BOSS_GAUGE_FILL_OFFSET.x, by + BOSS_GAUGE_FILL_OFFSET.y, 0,
                 fillWidth, bh,
                 0, 0,
-                spriteBossHP_Fill->GetTextureWidth() * fillRatio,
-                spriteBossHP_Fill->GetTextureHeight(),
+                spriteBossHPFill->GetTextureWidth() * fillRatio,
+                spriteBossHPFill->GetTextureHeight(),
                 0, 1, 1, 1, 1.0f);
         }
     }
@@ -367,9 +401,9 @@ void BattleUI::Render(float elapsedTime)
     // =================================================================
     {
         if (isController)
-            padInstructionUI->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+            padInstructionUI->Render(dc, 0, 0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT, 0, 1, 1, 1, 1.0f);
         else
-            keyMouInstructionUI->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+            keyMouseInstructionUI->Render(dc, 0, 0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT, 0, 1, 1, 1, 1.0f);
     }
 
     // =================================================================
@@ -382,36 +416,36 @@ void BattleUI::Render(float elapsedTime)
         {
             // 画面全体に描画
             if (isController)
-                launcher->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+                launcher->Render(dc, 0, 0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT, 0, 1, 1, 1, 1.0f);
             else
-                launcherPC->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+                launcherPC->Render(dc, 0, 0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT, 0, 1, 1, 1, 1.0f);
         }
 
         // Counter描画 (ガードカウンター待機状態)
-        if (player.GetPlayerIsCounter())
+        if (player.IsStandbyCounter())
         {
             if (isController)
-                counter->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+                counter->Render(dc, 0, 0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT, 0, 1, 1, 1, 1.0f);
             else
-                counterPC->Render(dc, 0, 0, 0, 1920, 1080, 0, 1, 1, 1, 1.0f);
+                counterPC->Render(dc, 0, 0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT, 0, 1, 1, 1, 1.0f);
         }
     }
 
     // =================================================================
     // ロックオンカーソル
     // =================================================================
-    if (CameraParam::Instance().GetIsLockOn())
+    if (CameraParam::Instance().IsLockOn())
     {
-        lockonEnemy = CameraParam::Instance().GetLockOnEnemy();
+        lockOnEnemy = CameraParam::Instance().GetLockOnEnemy();
 
-        if (lockonEnemy)
+        if (lockOnEnemy)
         {
             // 敵の位置取得 (Updateで更新されたscaleを使用)
-            DirectX::XMFLOAT3 targetPos = lockonEnemy->GetPosition();
-            Model* model = lockonEnemy->GetModel();
+            DirectX::XMFLOAT3 targetPos = lockOnEnemy->GetPosition();
+            Model* model = lockOnEnemy->GetModel();
             if (model)
             {
-                Model::Node* node = model->FindNode("spine_03");
+                Model::Node* node = model->FindNode(LOCK_ON_TARGET_NODE_NAME);
                 if (node) targetPos = { node->worldTransform._41, node->worldTransform._42, node->worldTransform._43 };
             }
 
@@ -433,13 +467,13 @@ void BattleUI::Render(float elapsedTime)
             if (vScreen3.z < 1.0f)
             {
                 lockOnPoint->Render(dc,
-                    screenPos.x - lockonScale.x * 0.5f,
-                    screenPos.y - lockonScale.y * 0.5f,
+                    screenPos.x - lockOnScale.x * 0.5f,
+                    screenPos.y - lockOnScale.y * 0.5f,
                     0,
-                    lockonScale.x, lockonScale.y,
-                    0, 0, 256, 256, // 元のテクスチャ切り抜き指定
-                    lockonAngle,
-                    1, 1, 1, 0.7f); // 元の色・透明度
+                    lockOnScale.x, lockOnScale.y,
+                    0, 0, LOCK_ON_TEXTURE_SIZE, LOCK_ON_TEXTURE_SIZE,
+                    lockOnAngle,
+                    1, 1, 1, LOCK_ON_ALPHA);
             }
         }
     }
@@ -471,7 +505,7 @@ void BattleUI::RenderPlayerPortrait(ID3D11DeviceContext* dc)
     PortraitConstants cb{};
     cb.circleCenter = circleCenter;
     cb.circleRadius = circleRadius;
-    cb.edgeSoftness = (std::max)(portraitEdgeSoftness, 0.01f);
+    cb.edgeSoftness = (std::max)(portraitEdgeSoftness, MIN_EDGE_SOFTNESS);
     cb.headCenter = { circleCenter.x, circleCenter.y + portraitHeadOffsetY * scale };
     cb.headRadius = { portraitHeadRadius.x * scale, portraitHeadRadius.y * scale };
     dc->UpdateSubresource(portraitConstantBuffer.Get(), 0, nullptr, &cb, 0, 0);
@@ -488,7 +522,7 @@ void BattleUI::RenderPlayerPortrait(ID3D11DeviceContext* dc)
         float phase = playerHPTracker.damageTimer * portraitShakeSpeed;
         float amplitude = portraitShakeAmplitude * damageRate * scale;
         dx += sinf(phase) * amplitude;
-        dy += cosf(phase * 1.37f) * amplitude * 0.6f;
+        dy += cosf(phase * PORTRAIT_SHAKE_Y_FREQUENCY_SCALE) * amplitude * PORTRAIT_SHAKE_Y_AMPLITUDE_SCALE;
     }
 
     // 被弾中は赤くする
@@ -597,7 +631,7 @@ void BattleUI::DrawDebugGUI()
 
         if (ImGui::CollapsingHeader("LockOn UI"))
         {
-            ImGui::DragFloat2("Scale", &lockonScale.x, 1.0f);
+            ImGui::DragFloat2("Scale", &lockOnScale.x, 1.0f);
         }
 
         if (ImGui::CollapsingHeader("Instruction UI", ImGuiTreeNodeFlags_DefaultOpen))

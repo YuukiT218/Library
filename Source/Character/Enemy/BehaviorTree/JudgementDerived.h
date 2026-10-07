@@ -1,6 +1,19 @@
 ﻿#pragma once
 #include "JudgementBase.h"
 
+// 判定に使う閾値
+namespace JudgmentThreshold
+{
+	// 体力が「半分」とみなす割合
+	constexpr float HALF_HEALTH_RATE = 0.5f;
+
+	// 攻撃範囲にこれを足した距離までなら突進を選ぶ
+	constexpr float TACKLE_EXTRA_RANGE = 15.0f;
+
+	// 地面からこれ以上離れていれば落下中とみなす
+	constexpr float FALL_MIN_HEIGHT = 0.5f;
+}
+
 //-------------------------------------------------------------
 // 判定クラス宣言
 //-------------------------------------------------------------
@@ -215,7 +228,7 @@ bool TackleJudgment<ActorType>::Judgment()
 	float vz = targetPosition.z - position.z;
 	float dist = sqrtf(vx * vx + vy * vy + vz * vz);
 	// XZ平面での距離を算出
-	if (dist < owner->GetAttackRange() + 15.0f)
+	if (dist < owner->GetAttackRange() + JudgmentThreshold::TACKLE_EXTRA_RANGE)
 	{
 		// TackleNodeへ遷移できる
 		return true;
@@ -270,7 +283,7 @@ bool DeadJudgment<ActorType>::Judgment()
 template <typename ActorType>
 bool FineJudgment<ActorType>::Judgment()
 {
-	if (owner->GetHealth() > (owner->GetMaxHealth() * 0.5))
+	if (owner->GetHealth() > (owner->GetMaxHealth() * JudgmentThreshold::HALF_HEALTH_RATE))
 	{
 		return true;
 	}
@@ -281,7 +294,7 @@ bool FineJudgment<ActorType>::Judgment()
 template <typename ActorType>
 bool DyingJudgment<ActorType>::Judgment()
 {
-	if (owner->GetHealth() <= (owner->GetMaxHealth() * 0.5))
+	if (owner->GetHealth() <= (owner->GetMaxHealth() * JudgmentThreshold::HALF_HEALTH_RATE))
 	{
 		return true;
 	}
@@ -297,8 +310,8 @@ bool FallJudgment<ActorType>::Judgment()
 	// 地面に接地していない
 	if (!owner->IsGround())
 	{
-		// 地面との距離が 0.5m 以上離れている場合のみ落下とみなす
-		if (owner->GetDistanceFromGround() > 0.5f)
+		// 地面との距離が一定以上離れている場合のみ落下とみなす
+		if (owner->GetDistanceFromGround() > JudgmentThreshold::FALL_MIN_HEIGHT)
 		{
 			return true;
 		}
@@ -309,7 +322,7 @@ bool FallJudgment<ActorType>::Judgment()
 template<typename ActorType>
 bool RevengeJudgment<ActorType>::Judgment()
 {
-	if (owner->GetRevengeState())
+	if (owner->IsRevenge())
 	{
 		return true;
 	}
@@ -321,7 +334,7 @@ bool RevengeJudgment<ActorType>::Judgment()
 template<typename ActorType>
 bool SpecialAttackJudgment<ActorType>::Judgment()
 {
-	if (owner->GetHealth() <= owner->GetMaxHealth() * 0.5 && owner->GetSpecialReady())
+	if (owner->GetHealth() <= owner->GetMaxHealth() * JudgmentThreshold::HALF_HEALTH_RATE && owner->IsSpecialReady())
 	{
 		return true;
 	}

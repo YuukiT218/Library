@@ -76,9 +76,9 @@ protected:
 	void DrawDebugGUI() override;
 
 private:
-	int guardParryAnimationIndex = -1;
-	int guardParryAnimationIndex1 = -1;
-	int guardParryAnimationIndex2 = -1;
+	int counterMiddleAnimationIndex = -1;
+	int counterCloseAnimationIndex = -1;
+	int counterRushAnimationIndex = -1;
 	float guardParryAnimationSpeed = 1.0f;
 	float timer = 0.0f;
 

@@ -2,6 +2,7 @@
 #include "GpuResourceUtils.h"
 #include "RenderContext.h"
 #include "ShadowMap.h"
+#include "ShaderSlot.h"
 #include "Camera/Camera.h"
 
 #include <algorithm>
@@ -169,7 +170,7 @@ void ShadowMap::UpdateCascades(const RenderContext& rc)
 	for (int i = 0; i < activeCount; ++i)
 	{
 		// この段が担当する視錐台の8頂点
-		DirectX::XMFLOAT3 corners[8];
+		DirectX::XMFLOAT3 corners[Camera::FRUSTUM_CORNER_COUNT];
 		camera->GetFrustumCorners(splitDistances[i], splitDistances[i + 1], corners);
 
 		// 視錐台を包む境界球を求める
@@ -242,13 +243,13 @@ void ShadowMap::Begin(const RenderContext& rc, const DirectX::XMFLOAT3& position
 	dc->OMGetRenderTargets(1, cachedRenderTargetView.ReleaseAndGetAddressOf(), cachedDepthStencilView.ReleaseAndGetAddressOf());
 
 	// シャドウマップをシェーダーリソースから外しておく
-	ID3D11ShaderResourceView* clear_shader_resource_view[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
-	dc->VSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-	dc->HSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-	dc->DSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-	dc->GSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-	dc->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-	dc->CSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
+	ID3D11ShaderResourceView* clearShaderResourceViews[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
+	dc->VSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+	dc->HSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+	dc->DSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+	dc->GSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+	dc->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+	dc->CSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
 
 	// カスケードごとのライト行列を計算する
 	UpdateCascades(rc);
@@ -287,7 +288,7 @@ void ShadowMap::Begin(const RenderContext& rc, const DirectX::XMFLOAT3& position
 		skeletonConstantBuffer.Get(),
 		sceneConstantBuffer.Get(),
 	};
-	dc->VSSetConstantBuffers(6, _countof(constantBuffers), constantBuffers);
+	dc->VSSetConstantBuffers(ShaderSlot::SKELETON_CONSTANT_BUFFER, _countof(constantBuffers), constantBuffers);
 }
 
 // 影を落とすモデルを登録する

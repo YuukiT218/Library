@@ -4,6 +4,14 @@
 #include <DirectXMath.h>
 #include "Graphics/RenderContext.h"
 
+// GPUパーティクルの挙動タイプ（GPUParticleCS.hlsl の分岐と対応させる）
+enum class GpuParticleBehavior : UINT
+{
+    Spark = 0,  // 重力の影響を受けて放物線を描いて落ちる
+    Float = 1,  // 空気抵抗で急減速しつつ、ゆっくり上に昇る
+    Drift = 2,  // 揺らぎながらその場を漂う
+};
+
 struct GpuParticleData {
     DirectX::XMFLOAT3 position;
     float lifeTime;
@@ -11,7 +19,7 @@ struct GpuParticleData {
     float maxLifeTime;
     DirectX::XMFLOAT4 color;
     float size;
-    UINT behaviorType = 1;
+    UINT behaviorType = static_cast<UINT>(GpuParticleBehavior::Float);
     DirectX::XMFLOAT2 padding;
 };
 
@@ -47,7 +55,7 @@ public:
 
     void Emit(ID3D11DeviceContext* context, const DirectX::XMFLOAT3& position,
         const DirectX::XMFLOAT3& velocity, const DirectX::XMFLOAT4& color,
-        float size, float lifeTime, UINT behaviorType);
+        float size, float lifeTime, GpuParticleBehavior behavior);
 
     void SetRespawnEnable(bool flag) { respawnEnable = flag; }
 private:

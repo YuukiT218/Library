@@ -7,12 +7,58 @@
 #include "Math/Easing.h"
 #include "Graphics/GpuResourceUtils.h"
 #include "Math/Mathf.h"
-
-
 #include <stdlib.h>
-
-
 #include "System/Audio/Audio.h"
+
+namespace
+{
+	// BGM
+	constexpr const char* BGM_PATH = "Data/Sound/BGM/Dearly in Dreams.wav";
+	constexpr float BGM_VOLUME = 0.5f;
+
+	// 画面クリア色
+	const DirectX::XMFLOAT4 CLEAR_COLOR = { 0.2f, 0.2f, 0.2f, 1.0f };
+
+	// タイトル画面の1枚絵を描く大きさ（横は画面より少し広く描いている）
+	constexpr float TITLE_DRAW_WIDTH = 1980.0f;
+	constexpr float TITLE_DRAW_HEIGHT = 1080.0f;
+
+	// 「何かボタンを押してください」画像の大きさ
+	constexpr float ANY_BUTTON_TEXTURE_WIDTH = 1920.0f;
+	constexpr float ANY_BUTTON_TEXTURE_HEIGHT = 1080.0f;
+
+	// タイトルロゴの描画サイズと画像サイズ
+	constexpr float LOGO_DRAW_WIDTH = 1228.0f;
+	constexpr float LOGO_DRAW_HEIGHT = 819.0f;
+	constexpr float LOGO_TEXTURE_WIDTH = 1536.0f;
+	constexpr float LOGO_TEXTURE_HEIGHT = 1024.0f;
+
+	// 終了確認ダイアログの画像サイズ
+	constexpr float END_DIALOG_WIDTH = 1280.0f;
+	constexpr float END_DIALOG_HEIGHT = 720.0f;
+
+	// 「はい」を選んでいるときの選択カーソルの位置
+	constexpr float YES_CURSOR_OFFSET_X = -285.0f;
+
+	// ロゴがこの不透明度になるまではボタン入力を受け付けない
+	constexpr float START_INPUT_ALPHA_THRESHOLD = 0.3f;
+
+	// ロゴと「何かボタンを押してください」を出し始める時間
+	constexpr float LOGO_FADE_START_SECONDS = 1.0f;
+	constexpr float ANY_BUTTON_BLINK_START_SECONDS = 3.0f;
+
+	// ロゴがフェードインする速さ
+	constexpr float LOGO_FADE_SPEED = 0.3f;
+
+	// イージングの時間を進める速さ（1秒あたりのフレーム数）
+	constexpr float EASING_FRAMES_PER_SECOND = 60.0f;
+
+	// 入力表示やダイアログの不透明度を切り替える速さ
+	constexpr float ALPHA_LERP_SPEED = 5.0f;
+
+	// これ以下の不透明度なら描画しない
+	constexpr float MIN_VISIBLE_ALPHA = 0.01f;
+}
 
 
 // 初期化
@@ -21,37 +67,37 @@ void SceneTitle::Initialize()
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
 	// スプライト初期化
-	TitleBack = std::make_unique<Sprite>(device, "Data/Sprite/Title_Back.png");
-	TitleName = std::make_unique<Sprite>(device, "Data/Sprite/TitleLogo.png");
-	AnyButton = std::make_unique<Sprite>(device, "Data/Sprite/PressAnyKey.png");
+	titleBack = std::make_unique<Sprite>(device, "Data/Sprite/Title_Back.png");
+	titleName = std::make_unique<Sprite>(device, "Data/Sprite/TitleLogo.png");
+	anyButton = std::make_unique<Sprite>(device, "Data/Sprite/PressAnyKey.png");
 
-	EndPause = std::make_unique<Sprite>(device, "Data/Sprite/EndPause.png");
-	EndKey = std::make_unique<Sprite>(device, "Data/Sprite/EndKey.png");
-	EndCon = std::make_unique<Sprite>(device, "Data/Sprite/EndCon.png");
-	EndYes = std::make_unique<Sprite>(device, "Data/Sprite/EndYes.png");
-	EndNo = std::make_unique<Sprite>(device, "Data/Sprite/EndNo.png");
-	EndSele = std::make_unique<Sprite>(device, "Data/Sprite/EndSele.png");
+	endPause = std::make_unique<Sprite>(device, "Data/Sprite/EndPause.png");
+	endKey = std::make_unique<Sprite>(device, "Data/Sprite/EndKey.png");
+	endCon = std::make_unique<Sprite>(device, "Data/Sprite/EndCon.png");
+	endYes = std::make_unique<Sprite>(device, "Data/Sprite/EndYes.png");
+	endNo = std::make_unique<Sprite>(device, "Data/Sprite/EndNo.png");
+	endSelect = std::make_unique<Sprite>(device, "Data/Sprite/EndSele.png");
 
-	BGM = Audio::Instance().LoadAudioSource("Data/Sound/BGM/Dearly in Dreams.wav");
+	bgm = Audio::Instance().LoadAudioSource(BGM_PATH);
 
-	GpuResourceUtils::LoadTexture(device, "Data/Mask/dissolve_animation.png", mask_texture.GetAddressOf(), &mask_texture2dDesc);
+	GpuResourceUtils::LoadTexture(device, "Data/Mask/dissolve_animation.png", maskTexture.GetAddressOf(), &maskTexture2dDesc);
 
 	// sprite用デフォルト描画シェーダー
-	D3D11_INPUT_ELEMENT_DESC input_element_desc[]
+	D3D11_INPUT_ELEMENT_DESC inputElementDesc[]
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	GpuResourceUtils::LoadVertexShader(device, "Data/Shader/SpriteDissolveVS.cso", input_element_desc, _countof(input_element_desc), sprite_input_layout.GetAddressOf(), sprite_vertex_shader.GetAddressOf());
-	GpuResourceUtils::LoadPixelShader(device, "Data/Shader/SpriteDissolvePS.cso", sprite_pixel_shader.GetAddressOf());
+	GpuResourceUtils::LoadVertexShader(device, "Data/Shader/SpriteDissolveVS.cso", inputElementDesc, _countof(inputElementDesc), spriteInputLayout.GetAddressOf(), spriteVertexShader.GetAddressOf());
+	GpuResourceUtils::LoadPixelShader(device, "Data/Shader/SpriteDissolvePS.cso", spritePixelShader.GetAddressOf());
 }
 
 // 終了化
 void SceneTitle::Finalize()
 {
-	delete BGM;
+	delete bgm;
 }
 
 // 更新処理
@@ -60,10 +106,10 @@ void SceneTitle::Update(float elapsedTime)
 	GamePad& gamePad = Input::Instance().GetGamePad();
 	Mouse& mouse = Input::Instance().GetMouse();
 
-	BGM->Play(true, 0.5f);
+	bgm->Play(true, BGM_VOLUME);
 
 	// なにかボタンを押したらローディングシーンを挟んでゲームシーンへ切り替え
-	const GamePadButton anyButton =
+	const GamePadButton anyButtonMask =
 		GamePad::BTN_A
 		| GamePad::BTN_B
 		| GamePad::BTN_X
@@ -81,9 +127,9 @@ void SceneTitle::Update(float elapsedTime)
 		// Escが押されてたらスキップ
 		if (!isEscPressed)
 		{
-			if (nameAlpha >= 0.3f)
+			if (nameAlpha >= START_INPUT_ALPHA_THRESHOLD)
 			{
-				if (Input::Instance().GetAnyButton() || (gamePad.GetButtonDown() & anyButton))
+				if (Input::Instance().IsAnyButtonPressed() || (gamePad.GetButtonDown() & anyButtonMask))
 				{
 					SceneLoading* loadingScene = new SceneLoading(new SceneGame());
 					SceneManager::Instance().ChangeScene(loadingScene);
@@ -99,7 +145,7 @@ void SceneTitle::Update(float elapsedTime)
 		}
 		if (isYesSelected)
 		{
-			sePos.x = -285.0f;
+			sePos.x = YES_CURSOR_OFFSET_X;
 			if (gamePad.GetButtonDown() & GamePad::BTN_A_EMU || gamePad.GetButtonDown() & GamePad::BTN_A)
 			{
 				//ゲームを落とす
@@ -108,7 +154,7 @@ void SceneTitle::Update(float elapsedTime)
 		}
 		else
 		{
-			sePos.x = 0;
+			sePos.x = 0.0f;
 			if (gamePad.GetButtonDown() & GamePad::BTN_A_EMU)
 			{
 				isPause = !isPause;
@@ -125,7 +171,7 @@ void SceneTitle::Update(float elapsedTime)
 
 	if (easingData.startFlag)
 	{
-		easingData.time += 60.0f * elapsedTime;
+		easingData.time += EASING_FRAMES_PER_SECOND * elapsedTime;
 	}
 
 	if (easingData.time >= easingData.totalTime)
@@ -134,11 +180,11 @@ void SceneTitle::Update(float elapsedTime)
 	}
 
 	timer += elapsedTime;
-	if (timer >= 1.f)
+	if (timer >= LOGO_FADE_START_SECONDS)
 	{
-		nameAlpha = Mathf::Lerp(nameAlpha, 1.0f, 0.3f * elapsedTime);
+		nameAlpha = Mathf::Lerp(nameAlpha, 1.0f, LOGO_FADE_SPEED * elapsedTime);
 
-		if (timer >= 3.f)
+		if (timer >= ANY_BUTTON_BLINK_START_SECONDS)
 		{
 			alphaTime += elapsedTime * alphaSpeed;
 
@@ -147,9 +193,9 @@ void SceneTitle::Update(float elapsedTime)
 		}
 	}
 
-	bool isController = Input::Instance().GetIsLastGamePad();
+	bool isController = Input::Instance().IsLastGamePad();
 
-	float lerpSpeed = 5.0f;  // 数値大きいほど速い（調整可）
+	const float lerpSpeed = ALPHA_LERP_SPEED;
 
 	if (isController)
 	{
@@ -181,12 +227,11 @@ void SceneTitle::Render(float elapsedTime)
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
 	// 画面クリア＆レンダーターゲット設定
-	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };	// RGBA(0.0～1.0);
 	std::map<FrameBufferId, FrameBuffer*> buffers;
 	for (int i = 0; i < static_cast<int>(FrameBufferId::EnumCount); i++)
 	{
 		buffers[static_cast<FrameBufferId>(i)] = Graphics::Instance().GetFrameBuffer(static_cast<FrameBufferId>(i));
-		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, color);
+		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, CLEAR_COLOR);
 	}
 	buffers[FrameBufferId::Display]->SetRenderTargets(dc);
 
@@ -210,37 +255,28 @@ void SceneTitle::Render(float elapsedTime)
 	dc->OMSetDepthStencilState(renderState->GetDepthStencilState(DepthState::NoTestNoWrite), 0);
 	dc->RSSetState(renderState->GetRasterizerState(RasterizerState::SolidCullNone));
 
-	dc->PSSetShaderResources(1, 1, mask_texture.GetAddressOf());
+	dc->PSSetShaderResources(1, 1, maskTexture.GetAddressOf());
 
 	const float screenW = graphics.GetScreenWidth();
 	const float screenH = graphics.GetScreenHeight();
 
-	TitleBack->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, 1);
-	TitleName->Render(dc, 0, 0, 0, 1228, 819, 0, 0, 1536, 1024, 0, 1, 1, 1, nameAlpha);
-	AnyButton->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1920, 1080, 0, 1, 1, 1, anyAlpha);
+	titleBack->Render(dc, 0, 0, 0, TITLE_DRAW_WIDTH, TITLE_DRAW_HEIGHT, 0, 0, TITLE_DRAW_WIDTH, TITLE_DRAW_HEIGHT, 0, 1, 1, 1, 1);
+	titleName->Render(dc, 0, 0, 0, LOGO_DRAW_WIDTH, LOGO_DRAW_HEIGHT, 0, 0, LOGO_TEXTURE_WIDTH, LOGO_TEXTURE_HEIGHT, 0, 1, 1, 1, nameAlpha);
+	anyButton->Render(dc, 0, 0, 0, TITLE_DRAW_WIDTH, TITLE_DRAW_HEIGHT, 0, 0, ANY_BUTTON_TEXTURE_WIDTH, ANY_BUTTON_TEXTURE_HEIGHT, 0, 1, 1, 1, anyAlpha);
 
-	EndKey->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, keyAlpha);
-	EndCon->Render(dc, 0, 0, 0, 1980, 1080, 0, 0, 1980, 1080, 0, 1, 1, 1, conAlpha);
+	endKey->Render(dc, 0, 0, 0, TITLE_DRAW_WIDTH, TITLE_DRAW_HEIGHT, 0, 0, TITLE_DRAW_WIDTH, TITLE_DRAW_HEIGHT, 0, 1, 1, 1, keyAlpha);
+	endCon->Render(dc, 0, 0, 0, TITLE_DRAW_WIDTH, TITLE_DRAW_HEIGHT, 0, 0, TITLE_DRAW_WIDTH, TITLE_DRAW_HEIGHT, 0, 1, 1, 1, conAlpha);
 
-
-	if (pauseAlpha > 0.01f)
+	if (pauseAlpha > MIN_VISIBLE_ALPHA)
 	{
-		EndPause->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, pauseAlpha);
-		EndSele->Render(dc, sePos.x, sePos.y, sePos.z, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, pauseAlpha);
+		endPause->Render(dc, 0, 0, 0, END_DIALOG_WIDTH, END_DIALOG_HEIGHT, 0, 0, END_DIALOG_WIDTH, END_DIALOG_HEIGHT, 0, 1, 1, 1, pauseAlpha);
+		endSelect->Render(dc, sePos.x, sePos.y, sePos.z, END_DIALOG_WIDTH, END_DIALOG_HEIGHT, 0, 0, END_DIALOG_WIDTH, END_DIALOG_HEIGHT, 0, 1, 1, 1, pauseAlpha);
 
 		// 選択中は白、非選択は黒で描画
-		if (isYesSelected)
-		{
-			// Yesが選択中
-			EndYes->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, pauseAlpha);
-			EndNo->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 0, 0, 0, pauseAlpha);
-		}
-		else
-		{
-			// Noが選択中
-			EndYes->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 0, 0, 0, pauseAlpha);
-			EndNo->Render(dc, 0, 0, 0, 1280, 720, 0, 0, 1280, 720, 0, 1, 1, 1, pauseAlpha);
-		}
+		const float yesBrightness = isYesSelected ? 1.0f : 0.0f;
+		const float noBrightness = isYesSelected ? 0.0f : 1.0f;
+		endYes->Render(dc, 0, 0, 0, END_DIALOG_WIDTH, END_DIALOG_HEIGHT, 0, 0, END_DIALOG_WIDTH, END_DIALOG_HEIGHT, 0, yesBrightness, yesBrightness, yesBrightness, pauseAlpha);
+		endNo->Render(dc, 0, 0, 0, END_DIALOG_WIDTH, END_DIALOG_HEIGHT, 0, 0, END_DIALOG_WIDTH, END_DIALOG_HEIGHT, 0, noBrightness, noBrightness, noBrightness, pauseAlpha);
 	}
 
 #ifdef _DEBUG
@@ -281,11 +317,11 @@ void SceneTitle::DrawDebugGUI()
 
 			switch (easingData.mode)
 			{
-			case 0:
+			case OutBounce:
 				pos.x = Easing::OutBounce(easingData.time, easingData.totalTime, easingData.maxValue, easingData.minValue);
 				break;
 
-			case 1:
+			case OutSine:
 				pos.x = Easing::OutCubic(easingData.time, easingData.totalTime, easingData.maxValue, easingData.minValue);
 				break;
 			}
@@ -307,7 +343,7 @@ void SceneTitle::DrawDebugGUI()
 
 		ImGui::DragFloat3("Sepos", &sePos.x, 0.01f);
 		ImGui::DragFloat3("Sopos", &soPos.x, 1.0f);
-		ImGui::DragFloat3("Sosca", &soscale.x, 1.0f);
+		ImGui::DragFloat3("Sosca", &soScale.x, 1.0f);
 	}
 	ImGui::End();
 }

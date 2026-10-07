@@ -4,6 +4,33 @@
 #include "Camera/CameraParam.h"
 #include "Math/Mathf.h"
 
+namespace
+{
+    // ダッシュ攻撃に派生する敵との距離範囲（地上）
+    constexpr float DASH_ATTACK_MIN_DISTANCE = 1.75f;
+    constexpr float DASH_ATTACK_MAX_DISTANCE = 12.5f;
+
+    // ダッシュ攻撃に派生する敵との距離範囲（空中）
+    constexpr float AIR_DASH_ATTACK_MIN_DISTANCE = 2.0f;
+    constexpr float AIR_DASH_ATTACK_MAX_DISTANCE = 12.5f;
+
+    // ダッシュ攻撃に派生するコンボ1段目のアニメーション名
+    constexpr const char* DASH_ATTACK_TRIGGER_ANIMATION = "Combo_Attack_04_01_Seq_0";
+    constexpr const char* AIR_DASH_ATTACK_TRIGGER_ANIMATION = "Combo_Attack_Air_06_01_Seq_0";
+
+    // ダッシュ攻撃中、敵にこれ以上離れていれば吸い寄せる
+    constexpr float DASH_HOMING_MIN_DISTANCE = 6.0f;
+
+    // ダッシュ攻撃中の水平方向の吸い寄せ速度
+    constexpr float DASH_HOMING_LERP_SPEED_XZ = 5.0f;
+
+    // 空中攻撃中、敵とのY座標差がこれより大きく下回っていれば高さを合わせない
+    constexpr float HEIGHT_CORRECTION_LIMIT = -2.0f;
+
+    // 空中攻撃中の高さ合わせの速度
+    constexpr float HEIGHT_CORRECTION_LERP_SPEED = 10.0f;
+}
+
 //-------------------------------------------------------------
 // コンボステート
 //-------------------------------------------------------------
@@ -29,29 +56,29 @@ void PlayerComboState::Enter()
     // ダッシュ攻撃の判定と再生
     if (player->IsGround())
     {
-        if (targetDist > 1.75f && targetDist < 12.5f
-            && comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
+        if (targetDist > DASH_ATTACK_MIN_DISTANCE && targetDist < DASH_ATTACK_MAX_DISTANCE
+            && comboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex(DASH_ATTACK_TRIGGER_ANIMATION) && CameraParam::Instance().IsLockOn())
         {
-            player->GetPlayerModel()->PlayRootMotion(dashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
+            player->GetPlayerModel()->PlayRootMotion(dashAttackAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
         }
         else
         {
-            player->GetPlayerModel()->PlayRootMotion(comboAnimationIndex, false, isBakeY, 0.1f, "Character1_Hips");
+            player->GetPlayerModel()->PlayRootMotion(comboAnimationIndex, false, isBakeY, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
         }
     }
     else
     {
-        player->SetGravity(-0.0001f);
-        player->SetHorizonVelocity(0);
-        player->SetVerticalVelocity(0);
-        if (targetDist > 2.0f && targetDist < 12.5f
-            && airComboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_01_Seq_0") && CameraParam::Instance().GetIsLockOn())
+        player->SetGravity(HOVER_GRAVITY);
+        player->SetHorizonVelocity(0.0f);
+        player->SetVerticalVelocity(0.0f);
+        if (targetDist > AIR_DASH_ATTACK_MIN_DISTANCE && targetDist < AIR_DASH_ATTACK_MAX_DISTANCE
+            && airComboAnimationIndex == player->GetPlayerModel()->GetAnimationIndex(AIR_DASH_ATTACK_TRIGGER_ANIMATION) && CameraParam::Instance().IsLockOn())
         {
-            player->GetPlayerModel()->PlayRootMotion(airDashAttackAnimationIndex, false, true, 0.1f, "Character1_Hips");
+            player->GetPlayerModel()->PlayRootMotion(airDashAttackAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
         }
         else
         {
-            player->GetPlayerModel()->PlayRootMotion(airComboAnimationIndex, false, isBakeY, 0.1f, "Character1_Hips");
+            player->GetPlayerModel()->PlayRootMotion(airComboAnimationIndex, false, isBakeY, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
         }
     }
 }
@@ -59,7 +86,7 @@ void PlayerComboState::Enter()
 // 終了処理
 void PlayerComboState::Exit()
 {
-    player->SetGravity(-0.3f);
+    player->SetGravity(Character::DEFAULT_GRAVITY);
     nextShiftReady = false;
 }
 
@@ -69,9 +96,9 @@ void PlayerComboState::Update(float elapsedTime)
     float frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
     int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
 
-    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig(ANIMATION_CONFIG_OWNER, index);
 
-    if (CameraParam::Instance().GetIsLockOn())
+    if (CameraParam::Instance().IsLockOn())
     {
         if (!player->IsTurnCompleted())
         {
@@ -92,9 +119,9 @@ void PlayerComboState::Update(float elapsedTime)
             // ダッシュ攻撃（地上・空中）の場合のホーミング処理
             if (index == dashAttackAnimationIndex || index == airDashAttackAnimationIndex)
             {
-                if (dist >= 6.0f)
+                if (dist >= DASH_HOMING_MIN_DISTANCE)
                 {
-                    float lerpRateXZ = 5.0f * elapsedTime;
+                    float lerpRateXZ = DASH_HOMING_LERP_SPEED_XZ * elapsedTime;
                     playerPos.x = Mathf::Lerp(playerPos.x, enemyPos.x, lerpRateXZ);
                     playerPos.z = Mathf::Lerp(playerPos.z, enemyPos.z, lerpRateXZ);
                     isUpdated = true;
@@ -105,13 +132,11 @@ void PlayerComboState::Update(float elapsedTime)
             if (!player->IsGround() || index == airDashAttackAnimationIndex || index == airComboAnimationIndex)
             {
                 float yDiff = EnemyBoss::Instance().GetPosition().y - playerPos.y;
-                float heightLimit = -2.0f;
-
-                bool isTooHigh = (yDiff > heightLimit);
+                bool isTooHigh = (yDiff > HEIGHT_CORRECTION_LIMIT);
 
                 if (!isTooHigh)
                 {
-                    float lerpRateY = 10.0f * elapsedTime;
+                    float lerpRateY = HEIGHT_CORRECTION_LERP_SPEED * elapsedTime;
                     playerPos.y = Mathf::Lerp(playerPos.y, EnemyBoss::Instance().GetPosition().y, lerpRateY);
                     isUpdated = true;
                 }
@@ -176,8 +201,30 @@ void PlayerComboState::Update(float elapsedTime)
 
     else if (!player->IsGround() && frame >= endFrame || !player->GetPlayerModel()->IsPlayAnimation())
     {
-        player->SetGravity(-0.3f);
+        player->SetGravity(Character::DEFAULT_GRAVITY);
         ChangeState(PlayerStateId::Fall);
+    }
+}
+
+// コンボ共通のデバッグ用GUI描画
+void PlayerComboState::DrawComboDebugGUI(const char* label)
+{
+    ImGui::Separator();
+
+    if (ImGui::TreeNode(label))
+    {
+        ImGui::Checkbox(u8"先行入力しているか", &nextShiftReady);
+        ImGui::DragFloat(u8"攻撃スピード", &comboAttackSpeed, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat(u8"構えスピード", &comboPoseSpeed, 0.01f, 0.0f, 5.0f);
+        ImGui::DragFloat(u8"先行入力受付開始フレーム", &nextShiftFrame, 0.01f, 0.0f);
+        ImGui::DragFloat(u8"先行入力受付終了フレーム", &endFrame, 0.01f, 0.0f);
+        ImGui::DragFloat(u8"前移動開始フレーム", &forwardFrame, 0.01f, 0.0f);
+        ImGui::DragFloat(u8"前移動値", &forwardPower, 0.01f, 0.0f);
+        ImGui::DragFloat(u8"コントローラーの左振動の強さ", &attackLeftVibrate, 0.01f, 0.0f);
+        ImGui::DragFloat(u8"コントローラーの右振動の強さ", &attackRightVibrate, 0.01f, 0.0f);
+        ImGui::DragFloat(u8"攻撃がヒットした時に何秒間止めるか", &attackHitStopTime, 0.01f, 0.0f);
+        ImGui::DragFloat(u8"攻撃がヒットした時にどれぐらいの速さにするか", &attackHitStopSpeed, 0.01f, 0.0f);
+        ImGui::TreePop();
     }
 }
 
@@ -188,8 +235,8 @@ void PlayerComboState::Update(float elapsedTime)
 PlayerCombo1State::PlayerCombo1State(Player* player)
     : PlayerComboState(player)
 {
-    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_04_01_Seq_0");
-    airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Air_06_01_Seq_0");
+    comboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex(DASH_ATTACK_TRIGGER_ANIMATION);
+    airComboAnimationIndex = player->GetPlayerModel()->GetAnimationIndex(AIR_DASH_ATTACK_TRIGGER_ANIMATION);
     dashAttackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Run_Attack_01_Seq_0");
     airDashAttackAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Dash_Air_Attack_Seq_0");
     isBakeY = true;
@@ -209,7 +256,7 @@ PlayerCombo1State::PlayerCombo1State(Player* player)
     attackCollisionStartFrame = 0.26f;
     attackCollisionEndFrame = 0.49f;
     attackDamage = 10;
-    invisibleTime = 0.5f;
+    invincibleTime = 0.5f;
 
     // コントローラーの振動変数
     attackLeftVibrate = 1.0f;
@@ -226,23 +273,7 @@ PlayerCombo1State::PlayerCombo1State(Player* player)
 // デバッグ用GUI描画
 void PlayerCombo1State::DrawDebugGUI()
 {
-    ImGui::Separator();
-
-    if (ImGui::TreeNode(u8"コンボ1"))
-    {
-    	ImGui::Checkbox(u8"先行入力しているか", &nextShiftReady);
-        ImGui::DragFloat(u8"攻撃スピード", &comboAttackSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"構えスピード", &comboPoseSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"先行入力受付開始フレーム", &nextShiftFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"先行入力受付終了フレーム", &endFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動開始フレーム", &forwardFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動値", &forwardPower, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの左振動の強さ", &attackLeftVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの右振動の強さ", &attackRightVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時に何秒間止めるか", &attackHitStopTime, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時にどれぐらいの速さにするか", &attackHitStopSpeed, 0.01f, 0.0f);
-        ImGui::TreePop();
-    }
+    DrawComboDebugGUI(u8"コンボ1");
 }
 
 //-------------------------------------------------------------
@@ -272,7 +303,7 @@ PlayerCombo2State::PlayerCombo2State(Player* player)
     attackCollisionStartFrame = 0.28f;
     attackCollisionEndFrame = 0.5f;
     attackDamage = 10;
-    invisibleTime = 0.5f;
+    invincibleTime = 0.5f;
 
     // コントローラーの振動変数
     attackLeftVibrate = 1.0f;
@@ -286,23 +317,7 @@ PlayerCombo2State::PlayerCombo2State(Player* player)
 // デバッグ用GUI描画
 void PlayerCombo2State::DrawDebugGUI()
 {
-    ImGui::Separator();
-
-    if (ImGui::TreeNode(u8"コンボ２"))
-    {
-        ImGui::Checkbox(u8"先行入力しているか", &nextShiftReady);
-        ImGui::DragFloat(u8"攻撃スピード", &comboAttackSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"構えスピード", &comboPoseSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"先行入力受付開始フレーム", &nextShiftFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"先行入力受付終了フレーム", &endFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動開始フレーム", &forwardFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動値", &forwardPower, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの左振動の強さ", &attackLeftVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの右振動の強さ", &attackRightVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時に何秒間止めるか", &attackHitStopTime, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時にどれぐらいの速さにするか", &attackHitStopSpeed, 0.01f, 0.0f);
-        ImGui::TreePop();
-    }
+    DrawComboDebugGUI(u8"コンボ２");
 }
 
 //-------------------------------------------------------------
@@ -332,7 +347,7 @@ PlayerCombo3State::PlayerCombo3State(Player* player)
     attackCollisionStartFrame = 0.45f;
     attackCollisionEndFrame = 0.65f;
     attackDamage = 10;
-    invisibleTime = 0.5f;
+    invincibleTime = 0.5f;
 
     // コントローラーの振動変数
     attackLeftVibrate = 1.0f;
@@ -346,23 +361,7 @@ PlayerCombo3State::PlayerCombo3State(Player* player)
 // デバッグ用GUI描画
 void PlayerCombo3State::DrawDebugGUI()
 {
-    ImGui::Separator();
-
-    if (ImGui::TreeNode(u8"コンボ3"))
-    {
-        ImGui::Checkbox(u8"先行入力しているか", &nextShiftReady);
-        ImGui::DragFloat(u8"攻撃スピード", &comboAttackSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"構えスピード", &comboPoseSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"先行入力受付開始フレーム", &nextShiftFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"先行入力受付終了フレーム", &endFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動開始フレーム", &forwardFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動値", &forwardPower, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの左振動の強さ", &attackLeftVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの右振動の強さ", &attackRightVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時に何秒間止めるか", &attackHitStopTime, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時にどれぐらいの速さにするか", &attackHitStopSpeed, 0.01f, 0.0f);
-        ImGui::TreePop();
-    }
+    DrawComboDebugGUI(u8"コンボ3");
 }
 
 //-------------------------------------------------------------
@@ -392,7 +391,7 @@ PlayerCombo4State::PlayerCombo4State(Player* player)
     attackCollisionStartFrame = 0.37f;
     attackCollisionEndFrame = 0.65f;
     attackDamage = 10;
-    invisibleTime = 0.5f;
+    invincibleTime = 0.5f;
 
     // コントローラーの振動変数
     attackLeftVibrate = 1.0f;
@@ -406,23 +405,7 @@ PlayerCombo4State::PlayerCombo4State(Player* player)
 // デバッグ用GUI描画
 void PlayerCombo4State::DrawDebugGUI()
 {
-    ImGui::Separator();
-
-    if (ImGui::TreeNode(u8"コンボ4"))
-    {
-        ImGui::Checkbox(u8"先行入力しているか", &nextShiftReady);
-        ImGui::DragFloat(u8"攻撃スピード", &comboAttackSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"構えスピード", &comboPoseSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"先行入力受付開始フレーム", &nextShiftFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"先行入力受付終了フレーム", &endFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動開始フレーム", &forwardFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動値", &forwardPower, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの左振動の強さ", &attackLeftVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの右振動の強さ", &attackRightVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時に何秒間止めるか", &attackHitStopTime, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時にどれぐらいの速さにするか", &attackHitStopSpeed, 0.01f, 0.0f);
-        ImGui::TreePop();
-    }
+    DrawComboDebugGUI(u8"コンボ4");
 }
 
 //-------------------------------------------------------------
@@ -452,7 +435,7 @@ PlayerCombo5State::PlayerCombo5State(Player* player)
     attackCollisionStartFrame = 0.37f;
     attackCollisionEndFrame = 0.65f;
     attackDamage = 10;
-    invisibleTime = 0.5f;
+    invincibleTime = 0.5f;
 
     // コントローラーの振動変数
     attackLeftVibrate = 1.0f;
@@ -466,23 +449,7 @@ PlayerCombo5State::PlayerCombo5State(Player* player)
 // デバッグ用GUI描画
 void PlayerCombo5State::DrawDebugGUI()
 {
-    ImGui::Separator();
-
-    if (ImGui::TreeNode(u8"コンボ4"))
-    {
-        ImGui::Checkbox(u8"先行入力しているか", &nextShiftReady);
-        ImGui::DragFloat(u8"攻撃スピード", &comboAttackSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"構えスピード", &comboPoseSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"先行入力受付開始フレーム", &nextShiftFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"先行入力受付終了フレーム", &endFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動開始フレーム", &forwardFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動値", &forwardPower, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの左振動の強さ", &attackLeftVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの右振動の強さ", &attackRightVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時に何秒間止めるか", &attackHitStopTime, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時にどれぐらいの速さにするか", &attackHitStopSpeed, 0.01f, 0.0f);
-        ImGui::TreePop();
-    }
+    DrawComboDebugGUI(u8"コンボ5");
 }
 
 //-------------------------------------------------------------
@@ -510,7 +477,7 @@ PlayerHeavyAttack1State::PlayerHeavyAttack1State(Player* player)
     attackCollisionStartFrame = 0.13f;
     attackCollisionEndFrame = 0.25f;
     attackDamage = 10;
-    invisibleTime = 0.5f;
+    invincibleTime = 0.5f;
 
     // コントローラーの振動変数
     attackLeftVibrate = 1.0f;
@@ -523,21 +490,5 @@ PlayerHeavyAttack1State::PlayerHeavyAttack1State(Player* player)
 
 void PlayerHeavyAttack1State::DrawDebugGUI()
 {
-    ImGui::Separator();
-
-    if (ImGui::TreeNode(u8"強攻撃1"))
-    {
-        ImGui::Checkbox(u8"先行入力しているか", &nextShiftReady);
-        ImGui::DragFloat(u8"攻撃スピード", &comboAttackSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"構えスピード", &comboPoseSpeed, 0.01f, 0.0f, 5.0f);
-        ImGui::DragFloat(u8"先行入力受付開始フレーム", &nextShiftFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"先行入力受付終了フレーム", &endFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動開始フレーム", &forwardFrame, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"前移動値", &forwardPower, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの左振動の強さ", &attackLeftVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"コントローラーの右振動の強さ", &attackRightVibrate, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時に何秒間止めるか", &attackHitStopTime, 0.01f, 0.0f);
-        ImGui::DragFloat(u8"攻撃がヒットした時にどれぐらいの速さにするか", &attackHitStopSpeed, 0.01f, 0.0f);
-        ImGui::TreePop();
-    }
+    DrawComboDebugGUI(u8"強攻撃1");
 }

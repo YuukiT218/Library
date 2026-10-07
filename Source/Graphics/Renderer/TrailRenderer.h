@@ -60,12 +60,12 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		constantBuffer;
 
 	//	剣トレイル用テクスチャ
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  TrailShaderResourceView;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  NormalShaderResourceView;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  DissolveShaderResourceView;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  trailShaderResourceView;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  normalShaderResourceView;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>  dissolveShaderResourceView;
 
 	//ディゾルブUVスクロール用
-	DirectX::XMFLOAT2 ScrollDirection{};
+	DirectX::XMFLOAT2 scrollDirection{};
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 	std::vector<uint32_t> indices;

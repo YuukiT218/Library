@@ -1,9 +1,11 @@
 ﻿#include "Camera.h"
-
-
 #include <stdlib.h>
 
-
+namespace
+{
+    // クォータニオンから向きを決めるときに、注視点をカメラ前方のどこに置くか
+    constexpr float FOCUS_DISTANCE = 10.0f;
+}
 
 // クォータニオンによる回転設定
 void Camera::SetRotation(const DirectX::XMFLOAT4& quaternion)
@@ -26,11 +28,11 @@ void Camera::UpdateMatrices()
 
     // 方向ベクトルを計算
     DirectX::XMVECTOR rightVec = DirectX::XMVector3TransformNormal(
-        DirectX::XMVectorSet(1, 0, 0, 0), rotMatrix);
+        DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), rotMatrix);
     DirectX::XMVECTOR upVec = DirectX::XMVector3TransformNormal(
-        DirectX::XMVectorSet(0, 1, 0, 0), rotMatrix);
+        DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), rotMatrix);
     DirectX::XMVECTOR frontVec = DirectX::XMVector3TransformNormal(
-        DirectX::XMVectorSet(0, 0, 1, 0), rotMatrix);
+        DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), rotMatrix);
 
     DirectX::XMStoreFloat3(&right, rightVec);
     DirectX::XMStoreFloat3(&up, upVec);
@@ -39,7 +41,7 @@ void Camera::UpdateMatrices()
     // 注視点を計算（カメラ位置 + 前方向 * 距離）
     DirectX::XMVECTOR eyeVec = DirectX::XMLoadFloat3(&eye);
     DirectX::XMVECTOR focusVec = DirectX::XMVectorAdd(eyeVec,
-        DirectX::XMVectorScale(frontVec, 10.0f));
+        DirectX::XMVectorScale(frontVec, FOCUS_DISTANCE));
     DirectX::XMStoreFloat3(&focus, focusVec);
 
     // ビュー行列を作成
@@ -118,7 +120,7 @@ bool Camera::IsInViewport(const DirectX::XMFLOAT3& worldPos, float margin) const
 {
     DirectX::XMFLOAT3 ndc = WorldToNDC(worldPos);
 
-    // NDC座標でチェック（-1?1の範囲、マージン考慮）
+    // NDC座標でチェック（-1～1の範囲、マージン考慮）
     return (ndc.x >= -1.0f + margin && ndc.x <= 1.0f - margin &&
         ndc.y >= -1.0f + margin && ndc.y <= 1.0f - margin &&
         ndc.z >= 0.0f && ndc.z <= 1.0f);
@@ -134,7 +136,7 @@ void Camera::GetFrustumCorners(float zNear, float zFar, DirectX::XMFLOAT3* corne
     DirectX::XMMATRIX InvViewProj = DirectX::XMMatrixInverse(nullptr, ViewProj);
 
     // NDC（正規化デバイス座標系）における8つの頂点
-    DirectX::XMVECTOR ndcCorners[8] = {
+    DirectX::XMVECTOR ndcCorners[FRUSTUM_CORNER_COUNT] = {
         DirectX::XMVectorSet(-1.0f, -1.0f, 0.0f, 1.0f), // Near 左下
         DirectX::XMVectorSet(1.0f, -1.0f, 0.0f, 1.0f), // Near 右下
         DirectX::XMVectorSet(-1.0f,  1.0f, 0.0f, 1.0f), // Near 左上
@@ -146,7 +148,7 @@ void Camera::GetFrustumCorners(float zNear, float zFar, DirectX::XMFLOAT3* corne
     };
 
     // NDCからワールド空間へ逆変換
-    for (int i = 0; i < 8; ++i)
+    for (int i = 0; i < FRUSTUM_CORNER_COUNT; ++i)
     {
         DirectX::XMVECTOR worldPos = DirectX::XMVector4Transform(ndcCorners[i], InvViewProj);
         worldPos = DirectX::XMVectorScale(worldPos, 1.0f / DirectX::XMVectorGetW(worldPos));

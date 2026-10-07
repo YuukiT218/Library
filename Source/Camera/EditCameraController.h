@@ -14,7 +14,7 @@ public:
     void Update(float elapsedTime);
 
     // カメラ操作（マウスやキー入力による制御処理）
-    void ControllUpdate(float elapsedTime);
+    void ControlUpdate(float elapsedTime);
 
     // カメラが注視するターゲットの位置を設定
     void SetTarget(const DirectX::XMFLOAT3& target) { this->target = target; }
@@ -79,7 +79,7 @@ private:
 
     bool isFirstRangeFrame = true;
 private:
-    void RangeOnryEvent(AnimationConfig* config, float animationSeconds, float secondsLength);
+    void RangeOnlyEvent(AnimationConfig* config, float animationSeconds, float secondsLength);
     void HandleCameraEvent(AnimationConfig* config, float animationSeconds, float secondsLength, float currentCharacterYaw);
 };
 

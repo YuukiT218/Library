@@ -143,12 +143,12 @@ private:
 	int dodgeAnimationIndex = -1;
 	float dodgeBackAnimationSpeed = 1.0f;
 	float dodgeBackAnimationTime = 0.7f;
-	int dodgeBackMovePow = 2;
+	int dodgeBackMovePower = 2;
 	int airDodgeAnimationIndex = -1;
 	float rollingFrontAnimationSpeed = 1.0f;
 	float dodgeAnimationTime = 1.333f;
 	float airDodgeAnimationTime = 0.583f;
-	int rollingFrontMovePow = 3;
+	int rollingFrontMovePower = 3;
 	float timer = 0.0f;
 	bool isDodgeBack = false;
 	InputActionType nextInput;

@@ -1,6 +1,7 @@
 ﻿#include "System/Misc.h"
 #include "GpuResourceUtils.h"
 #include "PBRShader.h"
+#include "ShaderSlot.h"
 #include <imgui.h>
 
 
@@ -134,7 +135,7 @@ void PBRShader::Begin(const RenderContext& rc)
 	dc->VSSetConstantBuffers(0, _countof(constantBuffers), constantBuffers);
 	// ピクセルシェーダーにも定数バッファを設定する
 	dc->PSSetConstantBuffers(0, _countof(constantBuffers), constantBuffers);
-	dc->PSSetConstantBuffers(8, 1, rimLightConstantBuffer.GetAddressOf());
+	dc->PSSetConstantBuffers(ShaderSlot::RIM_LIGHT_CONSTANT_BUFFER, 1, rimLightConstantBuffer.GetAddressOf());
 
 	// サンプラーステート設定
 	ID3D11SamplerState* samplerStates[] =
@@ -146,15 +147,15 @@ void PBRShader::Begin(const RenderContext& rc)
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
 
 	// レンダーステート設定
-	const float blend_factor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), blend_factor, 0xFFFFFFFF);
+	const float blendFactor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	dc->OMSetBlendState(rc.renderState->GetBlendState(BlendState::Transparency), blendFactor, 0xFFFFFFFF);
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
 	dc->RSSetState(rc.renderState->GetRasterizerState(RasterizerState::SolidCullBack));
 
 	//IBLテクスチャを設定
-	dc->PSSetShaderResources(33, 1, diffuseIemShaderResourceView.GetAddressOf());
-	dc->PSSetShaderResources(34, 1, specularPmremShaderResourceView.GetAddressOf());
-	dc->PSSetShaderResources(35, 1, lutGgxShaderResourceView.GetAddressOf());
+	dc->PSSetShaderResources(ShaderSlot::DIFFUSE_IEM_TEXTURE, 1, diffuseIemShaderResourceView.GetAddressOf());
+	dc->PSSetShaderResources(ShaderSlot::SPECULAR_PMREM_TEXTURE, 1, specularPmremShaderResourceView.GetAddressOf());
+	dc->PSSetShaderResources(ShaderSlot::LUT_GGX_TEXTURE, 1, lutGgxShaderResourceView.GetAddressOf());
 }
 
 // 描画

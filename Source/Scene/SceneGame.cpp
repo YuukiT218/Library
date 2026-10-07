@@ -16,12 +16,73 @@
 #include "System/HitStop.h"
 #include "Debug/DebugToggles.h"
 #include <map>
-
-
 #include <stdlib.h>
-
-
 #include "System/Audio/Audio.h"
+
+namespace
+{
+	// 使用するアセット
+	constexpr const char* PLAYER_MODEL_PATH = "Data/Model/unitychan/unitychan.gltf";
+	constexpr const char* BOSS_MODEL_PATH = "Data/Model/Rogue/SK_ROGUE_F_02.gltf";
+	constexpr const char* BGM_PATH = "Data/Sound/BGM/Fight to the Death.wav";
+	constexpr const char* WHITE_OUT_SPRITE_PATH = "Data/Sprite/White.png";
+
+	// BGMの音量
+	constexpr float BGM_VOLUME = 0.4f;
+
+	// カメラの初期設定
+	const DirectX::XMFLOAT3 CAMERA_UP = { 0.0f, 1.0f, 0.0f };
+	constexpr float CAMERA_NEAR_Z = 0.1f;
+	constexpr float CAMERA_FAR_Z = 1000.0f;
+
+	// 画面クリア色
+	const DirectX::XMFLOAT4 CLEAR_COLOR = { 0.2f, 0.2f, 0.2f, 1.0f };
+
+	// ポーズを解除してから操作を受け付けるまでの時間
+	constexpr float PAUSE_RESUME_LAG_SECONDS = 0.3f;
+
+	// 壁の透過判定に使う、プレイヤーの体の中心の高さ
+	constexpr float PLAYER_CENTER_HEIGHT = 1.0f;
+
+	// ボスの索敵範囲（戦闘開始時）
+	constexpr float BATTLE_SEARCH_RANGE = 25.0f;
+
+	// 開幕演出の各カットの終了時間
+	constexpr float INTRO_PLAYER_CUT_END = 2.0f;
+	constexpr float INTRO_BOSS_CUT_END = 4.0f;
+	constexpr float INTRO_END = 5.5f;
+
+	// 開幕演出で胸元に寄るカメラの設定
+	constexpr float INTRO_PLAYER_CHEST_HEIGHT = 1.3f;
+	constexpr float INTRO_PLAYER_EYE_DROP = 0.3f;
+	constexpr float INTRO_PLAYER_FOCUS_SHIFT = -0.4f;
+	constexpr float INTRO_BOSS_CHEST_HEIGHT = 1.6f;
+	constexpr float INTRO_BOSS_EYE_DROP = 0.4f;
+	constexpr float INTRO_BOSS_FOCUS_SHIFT = 0.4f;
+	constexpr float INTRO_CAMERA_ANGLE_DEGREE = 25.0f;
+	constexpr float INTRO_CAMERA_DISTANCE = 1.0f;
+
+	// 決着演出のスローモーションの速さ
+	constexpr float ENDING_SLOW_SCALE = 0.1f;
+
+	// 決着演出でカメラアングルを切り替える間隔と、切り替えを続ける時間
+	constexpr float ENDING_CAMERA_SWITCH_INTERVAL = 1.5f;
+	constexpr float ENDING_CAMERA_SWITCH_DURATION = 5.0f;
+
+	// 決着演出のカメラ（倒れたキャラクターの中心からの位置）
+	constexpr int ENDING_CAMERA_ANGLE_COUNT = 3;
+	constexpr float ENDING_TARGET_HEIGHT = 1.0f;
+	constexpr float ENDING_CAMERA_DISTANCE = 4.0f;
+	constexpr float ENDING_LOW_ANGLE_HEIGHT = -0.5f;
+	constexpr float ENDING_SIDE_ANGLE_HEIGHT = 1.0f;
+	constexpr float ENDING_TOP_ANGLE_HEIGHT_SCALE = 1.5f;
+	constexpr float ENDING_TOP_ANGLE_Z_OFFSET = 0.1f;  // 真上すぎるとLookAt計算でおかしくなる対策
+
+	// ホワイトアウトを始める時間とかける時間、シーンを切り替える時間
+	constexpr float WHITE_OUT_START = 4.0f;
+	constexpr float WHITE_OUT_DURATION = 1.0f;
+	constexpr float ENDING_END = 6.0f;
+}
 
 
 // 初期化
@@ -38,15 +99,15 @@ void SceneGame::Initialize()
 	float screenHeight = Graphics::Instance().GetScreenHeight();
 
 	// プレイヤー初期化
- 	player = std::make_unique<Player>(device, "Data/Model/unitychan/unitychan.gltf");
-	boss = std::make_unique<EnemyBoss>(device, "Data/Model/Rogue/SK_ROGUE_F_02.gltf", 1.0f);
+ 	player = std::make_unique<Player>(device, PLAYER_MODEL_PATH);
+	boss = std::make_unique<EnemyBoss>(device, BOSS_MODEL_PATH, 1.0f);
 
-	BGM = Audio::Instance().LoadAudioSource("Data/Sound/BGM/Fight to the Death.wav");
+	bgm = Audio::Instance().LoadAudioSource(BGM_PATH);
 
 	Camera& camera = Camera::Instance();
 
 	// ロックオン状態の初期化（前回のシーンの状態を持ち越さない）
-	CameraParam::Instance().SetIsLockOn(false);
+	CameraParam::Instance().SetLockOn(false);
 	CameraParam::Instance().SetLockOnEnemy(nullptr);
 
 	camera.SetEye({ 0.0f,2.0f,-20.0f });
@@ -56,13 +117,13 @@ void SceneGame::Initialize()
 	camera.SetPerspectiveFov(
 		camera.GetFov(),	// 画角
 		screenWidth / screenHeight,			// 画面アスペクト比
-		0.1f,								// ニアクリップ
-		1000.0f								// ファークリップ
+		CAMERA_NEAR_Z,						// ニアクリップ
+		CAMERA_FAR_Z						// ファークリップ
 	);
 	camera.SetLookAt(
 		{ 0.f, 10.0f, 10.0f },	// 視点
 		{ 0.f, 0.0f, 0.f },	// 注視点
-		{ 0.f, 1.f, 0.f }		// 上ベクトル
+		CAMERA_UP				// 上ベクトル
 	);
 
 	cameraController = std::make_unique<CameraController>();
@@ -78,7 +139,7 @@ void SceneGame::Initialize()
 	lightManager.SetDirectionalLight(directionalLight);
 
 	skyBox = std::make_unique<SkyBox>(device);
-	posteffect = std::make_unique<PostEffect>(device);
+	postEffect = std::make_unique<PostEffect>(device);
 
 	///HPUI初期化
 	BattleUI::Instance().Initialize();
@@ -88,7 +149,7 @@ void SceneGame::Initialize()
 	currentState = GameState::Intro;
 	eventTimer = 0.0f;
 
-	whiteOutSprite = std::make_unique<Sprite>(Graphics::Instance().GetDevice(), "Data/Sprite/White.png");
+	whiteOutSprite = std::make_unique<Sprite>(Graphics::Instance().GetDevice(), WHITE_OUT_SPRITE_PATH);
 	whiteOutAlpha = 0.0f;
 
 	lagTimer = 0.0f;
@@ -99,19 +160,18 @@ void SceneGame::Finalize()
 	Input::Instance().GetGamePad().Vibrate(0.0f, 0.0f);
 	EffectManager::Instance().StopAllEffects();
 	ProjectileManager::Instance().Clear();
-	delete BGM;
+	delete bgm;
 
 	StageManager::Instance().Clear();
 
 	Graphics& graphics = Graphics::Instance();
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 	// 画面クリア＆レンダーターゲット設定
-	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };	// RGBA(0.0～1.0);
 	std::map<FrameBufferId, FrameBuffer*> buffers;
 	for (int i = 0; i < static_cast<int>(FrameBufferId::EnumCount); i++)
 	{
 		buffers[static_cast<FrameBufferId>(i)] = Graphics::Instance().GetFrameBuffer(static_cast<FrameBufferId>(i));
-		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, color);
+		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, CLEAR_COLOR);
 	}
 }
 
@@ -119,7 +179,7 @@ void SceneGame::Update(float elapsedTime)
 {
 	GamePad& gamePad = Input::Instance().GetGamePad();
 	Mouse& mouse = Input::Instance().GetMouse();
-	BGM->Play(true, 0.4f);
+	bgm->Play(true, BGM_VOLUME);
 
 	// --- 状態ごとの分岐 ---
 	switch (currentState)
@@ -142,16 +202,16 @@ void SceneGame::Update(float elapsedTime)
 			Pause::Instance().Update(elapsedTime);
 
 		// ポーズ中は他のUpdateを通さない。
-		if (Pause::Instance().GetIsPause())
+		if (Pause::Instance().IsPause())
 		{
 			//ラグの時間
 			gamePad.Vibrate(0.0f, 0.0f);
-			lagTimer = 0.3f;
+			lagTimer = PAUSE_RESUME_LAG_SECONDS;
 			return;
 		}
 
 		// ポーズを解除したときに一瞬ラグを持たせる
-		if (lagTimer > 0)
+		if (lagTimer > 0.0f)
 		{
 			lagTimer -= elapsedTime;
 			return;
@@ -162,7 +222,7 @@ void SceneGame::Update(float elapsedTime)
 
 		// カメラ更新 (通常)
 		SelectedCamera(elapsedTime);
-		if (Camera::Instance().GetFreeCameraFlag()) {
+		if (Camera::Instance().IsFreeCamera()) {
 			freeCameraController.Update();
 			freeCameraController.SyncControllerToCamera(Camera::Instance());
 		}
@@ -172,7 +232,7 @@ void SceneGame::Update(float elapsedTime)
 		{
 			if (gamePad.GetButtonDown() & GamePad::BTN_RIGHT_SHOULDER || mouse.GetButtonDown() & Mouse::BTN_MIDDLE)
 			{
-				CameraParam::Instance().ReversLockOnSwitch();
+				CameraParam::Instance().ToggleLockOn();
 			}
 		}
 
@@ -203,7 +263,7 @@ void SceneGame::Update(float elapsedTime)
 		isWallTransparencyEnabled = false;
 		// 死亡演出更新
 		// どちらが死んだか判定して渡す
-		Character* target = player->IsDeathFlag() ? (Character*)player.get() : (Character*)boss.get();
+		Character* target = player->IsDeathFlag() ? static_cast<Character*>(player.get()) : static_cast<Character*>(boss.get());
 		UpdateEndingCamera(elapsedTime, target);
 		break;
 	}
@@ -212,7 +272,7 @@ void SceneGame::Update(float elapsedTime)
 
 	timer += elapsedTime;
 
-	posteffect->SetUp(elapsedTime);
+	postEffect->SetUp(elapsedTime);
 }
 
 // 描画処理
@@ -222,12 +282,11 @@ void SceneGame::Render(float elapsedTime)
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
 	// 画面クリア＆レンダーターゲット設定
-	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };	// RGBA(0.0～1.0);
 	std::map<FrameBufferId, FrameBuffer*> buffers;
 	for (int i = 0; i < static_cast<int>(FrameBufferId::EnumCount); i++)
 	{
 		buffers[static_cast<FrameBufferId>(i)] = Graphics::Instance().GetFrameBuffer(static_cast<FrameBufferId>(i));
-		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, color);
+		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, CLEAR_COLOR);
 	}
 
 	buffers[FrameBufferId::Scene]->SetRenderTargets(dc);
@@ -251,7 +310,7 @@ void SceneGame::Render(float elapsedTime)
 	rc.shadowMap = shadowMap;
 	rc.timer = timer;
 	DirectX::XMFLOAT3 pPos = player->GetPosition();
-	rc.targetPosition = DirectX::XMFLOAT3(pPos.x, pPos.y + 1.0f, pPos.z);
+	rc.targetPosition = DirectX::XMFLOAT3(pPos.x, pPos.y + PLAYER_CENTER_HEIGHT, pPos.z);
 	rc.enableWallTransparency = isWallTransparencyEnabled;
 
 	//シャドウマップ描画
@@ -287,20 +346,20 @@ void SceneGame::Render(float elapsedTime)
 
 	//ポストプロセス
 	{
-		posteffect->Begin(rc);
+		postEffect->Begin(rc);
 
 		buffers[FrameBufferId::Luminance]->SetRenderTargets(dc);
-		posteffect->LuminanceExtraction(rc, buffers[FrameBufferId::Scene]->GetColorMap());
+		postEffect->LuminanceExtraction(rc, buffers[FrameBufferId::Scene]->GetColorMap());
 
-		posteffect->KawaseBloom(rc, buffers[FrameBufferId::Scene]->GetColorMap(), buffers[FrameBufferId::Luminance]->GetColorMap(), buffers[FrameBufferId::RadialBlur]);
+		postEffect->KawaseBloom(rc, buffers[FrameBufferId::Scene]->GetColorMap(), buffers[FrameBufferId::Luminance]->GetColorMap(), buffers[FrameBufferId::RadialBlur]);
 
 		buffers[FrameBufferId::Chromatic]->SetRenderTargets(dc);
-		posteffect->RadialBlur(rc, buffers[FrameBufferId::RadialBlur]->GetColorMap());
+		postEffect->RadialBlur(rc, buffers[FrameBufferId::RadialBlur]->GetColorMap());
 
 		buffers[FrameBufferId::Display]->SetRenderTargets(dc);
-		posteffect->ChromaticAberration(rc, buffers[FrameBufferId::Chromatic]->GetColorMap());
+		postEffect->ChromaticAberration(rc, buffers[FrameBufferId::Chromatic]->GetColorMap());
 
-		posteffect->End(rc);
+		postEffect->End(rc);
 	}
 
 	// プレイヤーデバッグプリミティブ描画
@@ -314,7 +373,7 @@ void SceneGame::Render(float elapsedTime)
 	//プレイヤー体力ゲージ描画処理
 	if (currentState == GameState::Battle)
 	{
-		if (!Pause::Instance().GetIsPause())
+		if (!Pause::Instance().IsPause())
 			BattleUI::Instance().Render(elapsedTime);
 
 		Pause::Instance().Render(elapsedTime, dc);
@@ -377,7 +436,7 @@ void SceneGame::DrawDebugGUI()
 
 	if (ImGui::Begin("Graphics Menu", nullptr, ImGuiWindowFlags_None))
 	{
-		posteffect->DrawDebugGUI();
+		postEffect->DrawDebugGUI();
 
 		Shader* PBR = Graphics::Instance().GetShader(ShaderId::PBR);
 		PBR->ImGui();
@@ -406,11 +465,6 @@ void SceneGame::DrawDebugGUI()
 
 		if (ImGui::CollapsingHeader("PointLight", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			// ImGui に渡す
-			float emissivedissolve = -0.1f;//エミッシブテクスチャ用ディゾルブ
-			float dissolve = -0.1f;	//ディゾルブ
-			float alphaFactor = 1.0f;//アルファ値調整
-			DirectX::XMFLOAT4 OverwriteColor = { 1.0f,1.0f,1.0f,1.0f };//モデルの色を変化
 			ImGui::ColorEdit4("pointColor", &pointColor.x);
 			ImGui::DragFloat3("offsetPosition", &offsetPosition.x, 0.1f);
 			ImGui::DragFloat("attenuation", &attenuation, 0.1f);
@@ -449,106 +503,60 @@ void SceneGame::SelectedCamera(float elapsedTime)
 	cameraController->Update(elapsedTime);
 }
 
-DirectX::XMFLOAT3 SceneGame::GetRandomPosition()
+// キャラクターの胸元に寄ったカメラを設定する
+void SceneGame::SetCloseUpCamera(const Character& character, float chestHeight, float angleOffsetDegree, float eyeDrop, float focusShift)
 {
-	float x = 0;
-	// ステージの高さに合わせる
-	float y = -2.7f; // Yの値はそのまま
-	float z = 25.0f;
-	return DirectX::XMFLOAT3(x, y, z);
+	// 基準となる「胸」の位置
+	DirectX::XMFLOAT3 baseTarget = character.GetPosition();
+	baseTarget.y += chestHeight;
+
+	// カメラの位置決定
+	float cameraAngle = character.GetAngle().y + DirectX::XMConvertToRadians(angleOffsetDegree);
+
+	DirectX::XMFLOAT3 eye = {
+		baseTarget.x + sinf(cameraAngle) * INTRO_CAMERA_DISTANCE,
+		baseTarget.y - eyeDrop,
+		baseTarget.z + cosf(cameraAngle) * INTRO_CAMERA_DISTANCE
+	};
+
+	// 注視点を横にずらして、キャラクターを画面の端に寄せる
+	float dx = baseTarget.x - eye.x;
+	float dz = baseTarget.z - eye.z;
+	DirectX::XMFLOAT3 rightVec = { -dz, 0.0f, dx }; // 右ベクトル
+
+	// 正規化
+	float len = sqrtf(rightVec.x * rightVec.x + rightVec.z * rightVec.z);
+	if (len > 0.0f) {
+		rightVec.x /= len;
+		rightVec.z /= len;
+	}
+
+	DirectX::XMFLOAT3 finalFocus = {
+		baseTarget.x + rightVec.x * focusShift,
+		baseTarget.y,
+		baseTarget.z + rightVec.z * focusShift
+	};
+
+	Camera::Instance().SetLookAt(eye, finalFocus, CAMERA_UP);
 }
 
 void SceneGame::UpdateIntroCamera(float elapsedTime)
 {
 	eventTimer += elapsedTime;
-	Camera& camera = Camera::Instance();
 
-	// プレイヤーの顔アップ
-	if (eventTimer < 2.0f)
+	// プレイヤーの顔アップ（距離が近いのでずらす量は控えめにしないと画面外に出る）
+	if (eventTimer < INTRO_PLAYER_CUT_END)
 	{
-		// 基準となる「胸」の位置
-		DirectX::XMFLOAT3 baseTarget = player->GetPosition();
-		baseTarget.y += 1.3f;
-
-		// カメラの位置決定
-		float playerAngle = player->GetAngle().y;
-		float camAngle = playerAngle + DirectX::XMConvertToRadians(25.0f);
-
-		float dist = 1.0f;
-
-		DirectX::XMFLOAT3 eye = {
-			baseTarget.x + sinf(camAngle) * dist,
-			baseTarget.y - 0.3f,
-			baseTarget.z + cosf(camAngle) * dist
-		};
-
-		// 注視点をずらす
-		float dx = baseTarget.x - eye.x;
-		float dz = baseTarget.z - eye.z;
-		DirectX::XMFLOAT3 rightVec = { -dz, 0.0f, dx }; // 右ベクトル
-
-		// 正規化
-		float len = sqrtf(rightVec.x * rightVec.x + rightVec.z * rightVec.z);
-		if (len > 0.0f) {
-			rightVec.x /= len;
-			rightVec.z /= len;
-		}
-
-		// 距離が近いのでオフセット量は控えめにしないと画面外に出る
-		float offsetAmount = -0.4f;
-
-		DirectX::XMFLOAT3 finalFocus = {
-			baseTarget.x + rightVec.x * offsetAmount,
-			baseTarget.y,
-			baseTarget.z + rightVec.z * offsetAmount
-		};
-
-		camera.SetLookAt(eye, finalFocus, { 0, 1, 0 });
+		SetCloseUpCamera(*player, INTRO_PLAYER_CHEST_HEIGHT, INTRO_CAMERA_ANGLE_DEGREE, INTRO_PLAYER_EYE_DROP, INTRO_PLAYER_FOCUS_SHIFT);
 	}
-	else if (eventTimer < 4.0f)
+	// ボスの顔アップ（右斜め下から。画面右に配置するため左を見る）
+	else if (eventTimer < INTRO_BOSS_CUT_END)
 	{
-		// 基準となる「胸」の位置
-		DirectX::XMFLOAT3 baseTarget = boss->GetPosition();
-		baseTarget.y += 1.6f;
-
-		// カメラの位置決定 (右斜め下)
-		float bossAngle = boss->GetAngle().y;
-		float camAngle = bossAngle - DirectX::XMConvertToRadians(25.0f);
-
-		// ボスのサイズに合わせて詰める
-		float dist = 1.0f;
-
-		DirectX::XMFLOAT3 eye = {
-			baseTarget.x + sinf(camAngle) * dist,
-			baseTarget.y - 0.4f,
-			baseTarget.z + cosf(camAngle) * dist
-		};
-
-		// 注視点をずらす (画面右に配置するため、左を見る)
-		float dx = baseTarget.x - eye.x;
-		float dz = baseTarget.z - eye.z;
-		DirectX::XMFLOAT3 rightVec = { -dz, 0.0f, dx };
-
-		float len = sqrtf(rightVec.x * rightVec.x + rightVec.z * rightVec.z);
-		if (len > 0.0f) {
-			rightVec.x /= len;
-			rightVec.z /= len;
-		}
-
-		// 左方向へオフセット
-		float offsetAmount = 0.4f;
-
-		DirectX::XMFLOAT3 finalFocus = {
-			baseTarget.x + rightVec.x * offsetAmount,
-			baseTarget.y,
-			baseTarget.z + rightVec.z * offsetAmount
-		};
-
-		camera.SetLookAt(eye, finalFocus, { 0, 1, 0 });
+		SetCloseUpCamera(*boss, INTRO_BOSS_CHEST_HEIGHT, -INTRO_CAMERA_ANGLE_DEGREE, INTRO_BOSS_EYE_DROP, INTRO_BOSS_FOCUS_SHIFT);
 	}
-	// 戦闘開始直前の通常カメラフェーズ 
+	// 戦闘開始直前の通常カメラフェーズ
 	// ここでカメラをプレイヤー背面に戻すが、まだ currentState は Intro のまま
-	else if (eventTimer < 5.5f)
+	else if (eventTimer < INTRO_END)
 	{
 		SelectedCamera(elapsedTime);
 	}
@@ -556,16 +564,15 @@ void SceneGame::UpdateIntroCamera(float elapsedTime)
 	else
 	{
 		currentState = GameState::Battle;
-		CameraParam::Instance().SetIsLockOn(true);
-		boss->SetSearchRange(25.0f);
+		CameraParam::Instance().SetLockOn(true);
+		boss->SetSearchRange(BATTLE_SEARCH_RANGE);
 	}
 }
 
 void SceneGame::UpdateEndingCamera(float elapsedTime, Character* deadCharacter)
 {
 	// ゲーム進行速度を遅くする (スローモーション)
-	float slowScale = 0.1f;
-	float scaledTime = elapsedTime * slowScale;
+	float scaledTime = elapsedTime * ENDING_SLOW_SCALE;
 
 	// キャラクター等の更新はスローで行う
 	player->Update(scaledTime);
@@ -576,9 +583,8 @@ void SceneGame::UpdateEndingCamera(float elapsedTime, Character* deadCharacter)
 	eventTimer += elapsedTime;      // 全体の経過時間
 	cameraSwitchTimer += elapsedTime; // アングル切り替え用タイマー
 
-	float switchInterval = 1.5f; // 1.5秒ごとにアングル変更
-
-	if (cameraSwitchTimer > switchInterval && eventTimer < 5.0f) // 5秒間演出
+	// 一定時間ごとにアングル変更
+	if (cameraSwitchTimer > ENDING_CAMERA_SWITCH_INTERVAL && eventTimer < ENDING_CAMERA_SWITCH_DURATION)
 	{
 		cameraSwitchTimer = 0.0f;
 		cameraAngleIndex++;
@@ -586,40 +592,38 @@ void SceneGame::UpdateEndingCamera(float elapsedTime, Character* deadCharacter)
 
 	Camera& camera = Camera::Instance();
 	DirectX::XMFLOAT3 targetPos = deadCharacter->GetPosition();
-	targetPos.y += 1.0f; // 中心座標補正
+	targetPos.y += ENDING_TARGET_HEIGHT; // 中心座標補正
 
 	// ランダムあるいは定義されたアングル位置
 	// ここでは簡易的に周りを回るような3視点
 	DirectX::XMFLOAT3 eyePos = targetPos;
-	float dist = 4.0f; // 距離
 
-	switch (cameraAngleIndex % 3)
+	switch (cameraAngleIndex % ENDING_CAMERA_ANGLE_COUNT)
 	{
 	case 0: // 正面下からあおり
-		eyePos.z -= dist;
-		eyePos.y -= 0.5f;
+		eyePos.z -= ENDING_CAMERA_DISTANCE;
+		eyePos.y += ENDING_LOW_ANGLE_HEIGHT;
 		break;
 	case 1: // 横から
-		eyePos.x += dist;
-		eyePos.y += 1.0f;
+		eyePos.x += ENDING_CAMERA_DISTANCE;
+		eyePos.y += ENDING_SIDE_ANGLE_HEIGHT;
 		break;
 	case 2: // 真上から
-		eyePos.y += dist * 1.5f;
-		eyePos.z += 0.1f; // 真上すぎるとLookAt計算でおかしくなる対策
+		eyePos.y += ENDING_CAMERA_DISTANCE * ENDING_TOP_ANGLE_HEIGHT_SCALE;
+		eyePos.z += ENDING_TOP_ANGLE_Z_OFFSET;
 		break;
 	}
 
-	camera.SetLookAt(eyePos, targetPos, { 0, 1, 0 });
+	camera.SetLookAt(eyePos, targetPos, CAMERA_UP);
 
-	// ホワイトアウト処理 (最後の1.5秒くらいでフェードイン)
-	if (eventTimer > 4.0f)
+	// ホワイトアウト処理（アルファを0->1に）
+	if (eventTimer > WHITE_OUT_START)
 	{
-		// 4.0秒時点から1.0秒かけてアルファを0->1に
-		whiteOutAlpha = (eventTimer - 4.0f) / 1.0f;
+		whiteOutAlpha = (eventTimer - WHITE_OUT_START) / WHITE_OUT_DURATION;
 	}
 
 	// シーン遷移
-	if (eventTimer > 6.0f) // 演出終了
+	if (eventTimer > ENDING_END) // 演出終了
 	{
 		EffectManager::Instance().StopAllEffects();
 		ProjectileManager::Instance().Clear();

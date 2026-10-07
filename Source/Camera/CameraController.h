@@ -22,7 +22,7 @@ public:
     }
 
     // ロックオン位置設定
-    void SetLockonPoint();
+    void SetLockOnPoint();
 
     // カメラシェイク
     void CameraShake(float elapsedTime);
@@ -55,15 +55,15 @@ private:
     DirectX::XMFLOAT3 currentCameraPosition = { 0, 0, 0 };
 
     // 基本操作パラメータ
-    float rollSpeed = DirectX::XMConvertToRadians(200);
-    float mouseRollSpeed = DirectX::XMConvertToRadians(10);
+    float rollSpeed = DirectX::XMConvertToRadians(200.0f);
+    float mouseRollSpeed = DirectX::XMConvertToRadians(10.0f);
     float range = 8.0f;
-    float maxAngleX = DirectX::XMConvertToRadians(80);
-    float minAngleX = DirectX::XMConvertToRadians(3);
+    float maxAngleX = DirectX::XMConvertToRadians(80.0f);
+    float minAngleX = DirectX::XMConvertToRadians(3.0f);
 
-    DirectX::XMFLOAT3 offsetTarget = { 0, 1.5, 0 };
+    DirectX::XMFLOAT3 offsetTarget = { 0.0f, 1.5f, 0.0f };
 
-    DirectX::XMFLOAT3 newEye{ 0, 2, -20 };
+    DirectX::XMFLOAT3 newEye{ 0.0f, 2.0f, -20.0f };
     DirectX::XMFLOAT3 newTarget = { 0, 0, 0 };
 
     float lerpSpeed = 5.5f;
@@ -75,10 +75,11 @@ private:
 
     // カメラシェイク
     float cameraShakeRange = 0.03f;
-    float shakeTime = 0.f;
+    float shakeTime = 0.0f;
 
     // 距離に応じた自動調整パラメータ
-    float lengthLimit[2] = { 5.0, 3.0f };
+    float nearCameraLength = 5.0f;   // 近距離時のカメラ距離
+    float farCameraLength = 3.0f;    // 遠距離時のカメラ距離
     float distanceParamMin = 5.0f;
     float distanceParamMax = 15.0f;
     float minOffsetTargetY = -1.0f;

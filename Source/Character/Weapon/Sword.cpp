@@ -2,13 +2,14 @@
 #include "Math/Mathf.h"
 #include "Graphics/Graphics.h"
 #include <imgui.h>
-
-
 #include <stdlib.h>
-
-
 #include "System/Audio/Audio.h"
 
+namespace
+{
+	// 刃に沿って並べる当たり判定球の半径
+	constexpr float BLADE_HIT_SPHERE_RADIUS = 0.25f;
+}
 
 Sword::Sword(ID3D11Device* device, const char* filename)
 {
@@ -21,7 +22,7 @@ Sword::Sword(ID3D11Device* device, const char* filename)
 	model->SetAdRoughness(0.0f);
 	
 	//当たり判定用初期設定
-	SetupBladeHitSpheres(0.25f);
+	SetupBladeHitSpheres(BLADE_HIT_SPHERE_RADIUS);
 
 	//炎トレイル用ポイントライト
 	attenuation = 1.1f;

@@ -13,7 +13,32 @@
 
 #include <stdlib.h>
 
+namespace
+{
+    // テレポートの出現演出にかける時間
+    constexpr float TELEPORT_FADE_IN_SECONDS = 0.1f;
 
+    // スキニングで1頂点に影響するボーンの最大数
+    constexpr int MAX_BONE_INFLUENCES = 4;
+
+    // 法線をゼロベクトルとみなす長さ
+    constexpr float NORMAL_MIN_LENGTH = 0.0001f;
+
+    // 分解粒子の初速に加えるばらつき
+    constexpr float DISINTEGRATE_JITTER_XZ = 0.3f;
+    constexpr float DISINTEGRATE_JITTER_Y_MIN = -0.2f;
+    constexpr float DISINTEGRATE_JITTER_Y_MAX = 0.4f;
+
+    // 分解粒子の大きさ・寿命に掛けるばらつきの範囲
+    constexpr float DISINTEGRATE_VARIATION_MIN = 0.7f;
+    constexpr float DISINTEGRATE_VARIATION_MAX = 1.6f;
+
+    // 画面内判定でNDCの端から取る余白（この値の内側を画面内とする）
+    constexpr float SCREEN_VISIBLE_NDC_LIMIT = 0.7f;
+
+    // テレポート先候補を何方向に作るか
+    constexpr int TELEPORT_CANDIDATE_COUNT = 36;
+}
 
 // デバッグプリミティブ描画
 void Enemy::DrawDebugPrimitive()
@@ -99,14 +124,7 @@ void Enemy::UpdateTransform()
     DirectX::XMFLOAT3 renderPosition = isTeleporting ? visualPosition : position;
 
     // モデルのトランスフォームを更新（見た目の位置で）
-    DirectX::XMMATRIX S = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
-    DirectX::XMMATRIX X = DirectX::XMMatrixRotationX(angle.x);
-    DirectX::XMMATRIX Y = DirectX::XMMatrixRotationY(angle.y);
-    DirectX::XMMATRIX Z = DirectX::XMMatrixRotationZ(angle.z);
-    DirectX::XMMATRIX R = Y * X * Z;
-	DirectX::XMMATRIX T = DirectX::XMMatrixTranslation(renderPosition.x, renderPosition.y, renderPosition.z);
-    DirectX::XMMATRIX W = S * R * T;
-    DirectX::XMStoreFloat4x4(&transform, W);
+    Character::UpdateTransform(scale, angle, renderPosition, &transform);
 }
 
 // テレポート開始
@@ -133,7 +151,7 @@ void Enemy::StartTeleport(const DirectX::XMFLOAT3& targetPos, float fadeOutTime)
     teleportPhase = TeleportPhase::FadeOut;
     teleportPhaseTimer = 0.0f;
     fadeOutDuration = fadeOutTime;
-    fadeInDuration = 0.1f;
+    fadeInDuration = TELEPORT_FADE_IN_SECONDS;
 
     teleportStartPosition = position;
     teleportTargetPosition = targetPos;
@@ -246,18 +264,18 @@ void Enemy::CollectDisintegrationPoints(Afterimage& afterimage)
 
                 if (!boneTransforms.empty())
                 {
-                    const float weights[4] =
+                    const float weights[MAX_BONE_INFLUENCES] =
                     {
                         vertex.boneWeight.x, vertex.boneWeight.y,
                         vertex.boneWeight.z, vertex.boneWeight.w
                     };
-                    const uint32_t boneIndices[4] =
+                    const uint32_t boneIndices[MAX_BONE_INFLUENCES] =
                     {
                         vertex.boneIndex.x, vertex.boneIndex.y,
                         vertex.boneIndex.z, vertex.boneIndex.w
                     };
 
-                    for (int b = 0; b < 4; ++b)
+                    for (int b = 0; b < MAX_BONE_INFLUENCES; ++b)
                     {
                         if (weights[b] <= 0.0f) continue;
                         if (boneIndices[b] >= boneTransforms.size()) continue;
@@ -283,7 +301,7 @@ void Enemy::CollectDisintegrationPoints(Afterimage& afterimage)
 
                 // 法線が潰れている頂点は真上に飛ばす（正規化でNaNになるのを避ける）
                 const float normalLength = DirectX::XMVectorGetX(DirectX::XMVector3Length(worldNormal));
-                if (normalLength > 0.0001f)
+                if (normalLength > NORMAL_MIN_LENGTH)
                 {
                     DirectX::XMStoreFloat3(&point.normal, DirectX::XMVector3Normalize(worldNormal));
                 }
@@ -330,24 +348,24 @@ void Enemy::EmitDisintegrationParticles(Afterimage& afterimage)
         // 表面から剥がれるように法線方向へ弾いてから、ゆっくり昇らせる
         const DirectX::XMFLOAT3 velocity =
         {
-            point.normal.x * disintegrateBurstSpeed + Mathf::RandomRange(-0.3f, 0.3f),
-            point.normal.y * disintegrateBurstSpeed + disintegrateRiseSpeed + Mathf::RandomRange(-0.2f, 0.4f),
-            point.normal.z * disintegrateBurstSpeed + Mathf::RandomRange(-0.3f, 0.3f)
+            point.normal.x * disintegrateBurstSpeed + Mathf::RandomRange(-DISINTEGRATE_JITTER_XZ, DISINTEGRATE_JITTER_XZ),
+            point.normal.y * disintegrateBurstSpeed + disintegrateRiseSpeed + Mathf::RandomRange(DISINTEGRATE_JITTER_Y_MIN, DISINTEGRATE_JITTER_Y_MAX),
+            point.normal.z * disintegrateBurstSpeed + Mathf::RandomRange(-DISINTEGRATE_JITTER_XZ, DISINTEGRATE_JITTER_XZ)
         };
 
-        const float size = disintegrateParticleSize * Mathf::RandomRange(0.7f, 1.6f);
-        const float lifeTime = disintegrateParticleLife * Mathf::RandomRange(0.7f, 1.6f);
+        const float size = disintegrateParticleSize * Mathf::RandomRange(DISINTEGRATE_VARIATION_MIN, DISINTEGRATE_VARIATION_MAX);
+        const float lifeTime = disintegrateParticleLife * Mathf::RandomRange(DISINTEGRATE_VARIATION_MIN, DISINTEGRATE_VARIATION_MAX);
 
-        // behaviorType 1 は空気抵抗で急減速しながらふわりと昇るので、
+        // Float は空気抵抗で急減速しながらふわりと昇るので、
         // 崩れた破片が空気に溶けていくように見える
-        EffectManager::Instance().EmitGpuParticle(point.position, velocity, color, size, lifeTime, 1);
+        EffectManager::Instance().EmitGpuParticle(point.position, velocity, color, size, lifeTime, GpuParticleBehavior::Float);
     }
 }
 
 // テレポート更新
 void Enemy::UpdateTeleport(float elapsedTime)
 {
-if (teleportPhase == TeleportPhase::None) return;
+    if (teleportPhase == TeleportPhase::None) return;
     
     teleportPhaseTimer += elapsedTime;
     
@@ -503,7 +521,7 @@ void Enemy::EmitTeleportTrail(const DirectX::XMFLOAT3& from, const DirectX::XMFL
         float size = TRAIL_MIN_SIZE + Mathf::RandomRange(0.0f, 1.0f) * TRAIL_SIZE_RANGE;
         float lifeTime = TRAIL_MIN_LIFETIME + Mathf::RandomRange(0.0f, 1.0f) * TRAIL_LIFETIME_RANGE;
 
-        EffectManager::Instance().EmitGpuParticle(particlePosition, velocity, color, size, lifeTime, 2);
+        EffectManager::Instance().EmitGpuParticle(particlePosition, velocity, color, size, lifeTime, GpuParticleBehavior::Drift);
     }
 }
 
@@ -519,10 +537,9 @@ bool Enemy::IsPositionVisible(const DirectX::XMFLOAT3& worldPos)
     DirectX::XMFLOAT3 ndc;
     DirectX::XMStoreFloat3(&ndc, screenPos);
 
-    // 画面の端すぎると見切れるため、0.8f 程度のマージンを持たせる
-    const float margin = 0.7f;
-    return (ndc.x >= -margin && ndc.x <= margin &&
-        ndc.y >= -margin && ndc.y <= margin &&
+    // 画面の端すぎると見切れるため、マージンを持たせる
+    return (ndc.x >= -SCREEN_VISIBLE_NDC_LIMIT && ndc.x <= SCREEN_VISIBLE_NDC_LIMIT &&
+        ndc.y >= -SCREEN_VISIBLE_NDC_LIMIT && ndc.y <= SCREEN_VISIBLE_NDC_LIMIT &&
         ndc.z >= 0.0f && ndc.z <= 1.0f);
 }
 
@@ -531,10 +548,10 @@ DirectX::XMFLOAT3 Enemy::CalculateVisibleTeleportPos(float distance, bool bakeY)
     DirectX::XMFLOAT3 playerPos = Player::Instance().GetPosition();
     std::vector<DirectX::XMFLOAT3> availablePositions;
 
-    // 1. 候補地点 (availablePositions) をプレイヤーの周囲 8 方向に生成
-    for (int i = 0; i < 36; ++i)
+    // 1. 候補地点 (availablePositions) をプレイヤーの周囲に等間隔で生成
+    for (int i = 0; i < TELEPORT_CANDIDATE_COUNT; ++i)
     {
-        float angle = DirectX::XMConvertToRadians(i * 10.0f);
+        float angle = DirectX::XM_2PI * static_cast<float>(i) / TELEPORT_CANDIDATE_COUNT;
         DirectX::XMFLOAT3 pos = playerPos;
         pos.x += cosf(angle) * distance;
         pos.z += sinf(angle) * distance;

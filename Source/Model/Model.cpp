@@ -11,7 +11,7 @@
 #include "ResourceManager.h"
 #include "Character/Character.h"
 
-const std::vector<D3D11_INPUT_ELEMENT_DESC> Model::InputElementDescs =
+const std::vector<D3D11_INPUT_ELEMENT_DESC> Model::INPUT_ELEMENT_DESCS =
 {
 	{ "POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT,    0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	{ "BONE_WEIGHTS", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -622,10 +622,10 @@ void Model::DebugGUI(const char* name)
 		ModelResource::Material material = materials.at(i);
 		ImGui::PushID(i);  // ここでIDスコープを変える
 
-		char textureID[128];
-		snprintf(textureID, sizeof(textureID), u8"テクスチャ　%i", i + 1);
+		char textureId[128];
+		snprintf(textureId, sizeof(textureId), u8"テクスチャ　%i", i + 1);
 
-		if (ImGui::CollapsingHeader(textureID, ImGuiTreeNodeFlags_Framed))
+		if (ImGui::CollapsingHeader(textureId, ImGuiTreeNodeFlags_Framed))
 		{
 
 			if (ImGui::CollapsingHeader("Albedo Map", ImGuiTreeNodeFlags_Framed))
@@ -711,9 +711,9 @@ void Model::DebugGUI(const char* name)
 	ImGui::DragFloat(labelMetalness, &adjustMetalness, 0.01f, 0, 1.0f);
 	ImGui::DragFloat(labelRoughness, &adjustRoughness, 0.01f, 0, 1.0f);
 	ImGui::DragFloat(labelDissolve, &dissolveConstants.dissolve, 0.01f, -0.1f, 1.0f);
-	ImGui::DragFloat(labelEmissiveDissolve, &dissolveConstants.emissivedissolve, 0.01f, -0.1f, 1.0f);
+	ImGui::DragFloat(labelEmissiveDissolve, &dissolveConstants.emissiveDissolve, 0.01f, -0.1f, 1.0f);
 	ImGui::DragFloat(labelAlpha, &dissolveConstants.alphaFactor, 0.01f, 0.0f, 1.0f);
-	ImGui::ColorEdit4(labelOverColor, &dissolveConstants.OverwriteColor.x);
+	ImGui::ColorEdit4(labelOverColor, &dissolveConstants.overwriteColor.x);
 
 	ImGui::DragFloat("RimPower", &rimLightConstants.rimPower, 0.01f, -1.0f, 1.0f);
 	ImGui::DragFloat("RimIntensity", &rimLightConstants.rimIntensity, 0.001f, -1.0f, 1.0f);

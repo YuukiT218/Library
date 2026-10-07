@@ -97,7 +97,7 @@ enum class KnockbackType
 	Light,
 	Heavy,
 	Launch,
-	KnockDown
+	Knockdown
 };
 
 // enum <-> string 変換のための定義
@@ -106,7 +106,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(KnockbackType, {
 	{KnockbackType::Light, "Light"},
 	{KnockbackType::Heavy, "Heavy"},
 	{KnockbackType::Launch, "Launch"},
-	{KnockbackType::KnockDown, "KnockDown"}
+	{KnockbackType::Knockdown, "KnockDown"}
 	})
 
 struct AttackAnimParam
@@ -122,7 +122,7 @@ struct AttackAnimParam
 
 	// 攻撃判定必要変数
 	int   attackDamage = 1;
-	float invisibleTime = 0.5f;
+	float invincibleTime = 0.5f;
 
 	// コントローラーの振動変数
 	float attackLeftVibrate = 1.0f;
@@ -141,7 +141,7 @@ struct AttackAnimParam
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(AttackAnimParam,
 	moveRate, turnRate,
 	forwardPower, forwardFrame, forwarded,
-	attackDamage, invisibleTime,
+	attackDamage, invincibleTime,
 	attackLeftVibrate, attackRightVibrate,
 	attackHitStopTime, attackHitStopSpeed,
 	knockbackType, revengeValue)
@@ -205,7 +205,7 @@ class Model
 public:
 	Model(ID3D11Device* device, const char* filename, float scale);
 
-	static const std::vector<D3D11_INPUT_ELEMENT_DESC> InputElementDescs;
+	static const std::vector<D3D11_INPUT_ELEMENT_DESC> INPUT_ELEMENT_DESCS;
 
 	struct Node
 	{
@@ -242,10 +242,10 @@ public:
 
 	struct  DissolveConstants
 	{
-		float emissivedissolve = -0.1f;//エミッシブテクスチャ用ディゾルブ
+		float emissiveDissolve = -0.1f;//エミッシブテクスチャ用ディゾルブ
 		float dissolve = -0.1f;	//ディゾルブ
 		float alphaFactor = 1.0f;//アルファ値調整
-		DirectX::XMFLOAT4 OverwriteColor = { 1.0f,1.0f,1.0f,1.0f };//モデルの色を変化
+		DirectX::XMFLOAT4 overwriteColor = { 1.0f,1.0f,1.0f,1.0f };//モデルの色を変化
 	};
 
 	struct RimLightConstants
@@ -358,7 +358,7 @@ public:
 	float GetAdRoughness() const { return adjustRoughness;; }
 
 	//ディゾルブ
-	void SetEmissiveDissolve(const float emidissolve) { this->dissolveConstants.emissivedissolve = emidissolve; }
+	void SetEmissiveDissolve(const float emissiveDissolve) { this->dissolveConstants.emissiveDissolve = emissiveDissolve; }
 	void SetEmissiveConstants(const DissolveConstants dissolveConstants) { this->dissolveConstants = dissolveConstants; }
 	DissolveConstants GetEmissiveConstants() const { return dissolveConstants; }
 

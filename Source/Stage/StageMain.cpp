@@ -1,18 +1,30 @@
 ﻿#include "StageMain.h"
 #include "Graphics/Graphics.h"
 #include <execution>
-
-
 #include <stdlib.h>
 
+namespace
+{
+	// ステージのモデルとその縮尺
+	constexpr const char* STAGE_MODEL_PATH = "Data/Model/boss_fight_arena/BattleArena.gltf";
+	constexpr float STAGE_MODEL_SCALE = 0.15f;
 
+	// 当たり判定用に、XZ平面を分割するセルの大きさ
+	constexpr int COLLISION_CELL_SIZE = 4;
+
+	// 1セルに含まれる三角形のおおよその数（メモリの事前確保用）
+	constexpr size_t EXPECTED_TRIANGLES_PER_CELL = 200;
+
+	// 三角形の頂点数
+	constexpr int TRIANGLE_VERTEX_COUNT = 3;
+}
 
 // コンストラクタ
 StageMain::StageMain()
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
-	model = std::make_unique<Model>(device, "Data/Model/boss_fight_arena/BattleArena.gltf", 0.15f);
+	model = std::make_unique<Model>(device, STAGE_MODEL_PATH, STAGE_MODEL_SCALE);
 	model->SetAdMetalness(1.0f);
 	model->SetAdRoughness(1.0f);
 
@@ -25,7 +37,7 @@ StageMain::StageMain()
 		const Model::Node& node = model->GetNodes().at(mesh.nodeIndex);
 		DirectX::XMMATRIX WorldTransform = DirectX::XMLoadFloat4x4(&node.worldTransform);
 		//DirectX::XMMATRIX WorldTransform = DirectX::XMMatrixIdentity();
-		for (size_t i = 0; i < mesh.indices.size(); i += 3)
+		for (size_t i = 0; i < mesh.indices.size(); i += TRIANGLE_VERTEX_COUNT)
 		{
 			// 頂点データをワールド空間変換
 				//ステージがFBXのため左手系(DirectX基準)で描画するために右手系を左手系に変換している
@@ -74,7 +86,7 @@ StageMain::StageMain()
 
 	// モデル全体のAABBからXZ平面に指定のサイズで分割されたコリジョンエリアを作成する
 	{
-		const int cellSize = 4;
+		const int cellSize = COLLISION_CELL_SIZE;
 		for (float x = volumeMin.x; x < volumeMax.x; x += cellSize)
 		{
 			for (float z = volumeMin.z; z < volumeMax.z; z += cellSize)
@@ -90,13 +102,13 @@ StageMain::StageMain()
 		std::for_each(std::execution::par, collisionMesh.areas.begin(), collisionMesh.areas.end(), [&](CollisionMesh::Area& area)
 			{
 				std::vector<int> localTriangleIndices;
-				localTriangleIndices.reserve(200); // 予測される三角形の数に合わせて調整
+				localTriangleIndices.reserve(EXPECTED_TRIANGLES_PER_CELL);
 
 				for (int i = 0; i < collisionMesh.triangles.size(); ++i)
 				{
 					const auto& triangle = collisionMesh.triangles[i];
 					DirectX::BoundingBox triangleBox;
-					DirectX::BoundingBox::CreateFromPoints(triangleBox, 3, triangle.positions, sizeof(DirectX::XMFLOAT3));
+					DirectX::BoundingBox::CreateFromPoints(triangleBox, TRIANGLE_VERTEX_COUNT, triangle.positions, sizeof(DirectX::XMFLOAT3));
 
 					if (area.boundingBox.Intersects(triangleBox))
 					{

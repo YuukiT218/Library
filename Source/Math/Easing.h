@@ -56,14 +56,14 @@ private:
     }
 
     template<typename Ty>
-    [[nodiscard]] static inline bool AdjEqual(const Ty epsilon_num, const Ty num)
+    [[nodiscard]] static inline bool AdjEqual(const Ty epsilonValue, const Ty num)
     {
         constexpr auto Fabs{ [](const Ty num) constexpr {
             if (num > _0<Ty>) return num; else return -num;
         } };
 
         static constexpr auto Epsilon{ std::numeric_limits<Ty>::epsilon() };
-        auto dis{ Fabs(epsilon_num - num) };
+        auto dis{ Fabs(epsilonValue - num) };
 
         return (dis <= Epsilon);
     }

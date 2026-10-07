@@ -27,16 +27,39 @@ namespace
 	// アセットのノード ID（1 以上）から重ならないように振り分ける。
 	//----------------------------------------------------------------
 
-	int MakeNodeId(int assetId) { return assetId * 4 + 1; }
-	int MakeInputPinId(int assetId) { return assetId * 4 + 2; }
-	int MakeOutputPinId(int assetId) { return assetId * 4 + 3; }
-	int MakeLinkId(int childAssetId) { return childAssetId * 4 + 4; }
+	// 1つのアセットノードが使う ID の数と、その中での種類ごとのずれ
+	constexpr int IDS_PER_ASSET = 4;
+	constexpr int NODE_ID_OFFSET = 1;
+	constexpr int INPUT_PIN_ID_OFFSET = 2;
+	constexpr int OUTPUT_PIN_ID_OFFSET = 3;
+	constexpr int LINK_ID_OFFSET = 4;
 
-	int AssetIdFromNodeId(int nodeId) { return (nodeId - 1) / 4; }
-	int AssetIdFromPinId(int pinId) { return (pinId - 2) / 4; }
-	int AssetIdFromLinkId(int linkId) { return (linkId - 4) / 4; }
+	int MakeNodeId(int assetId) { return assetId * IDS_PER_ASSET + NODE_ID_OFFSET; }
+	int MakeInputPinId(int assetId) { return assetId * IDS_PER_ASSET + INPUT_PIN_ID_OFFSET; }
+	int MakeOutputPinId(int assetId) { return assetId * IDS_PER_ASSET + OUTPUT_PIN_ID_OFFSET; }
+	int MakeLinkId(int childAssetId) { return childAssetId * IDS_PER_ASSET + LINK_ID_OFFSET; }
 
-	bool IsInputPin(int pinId) { return (pinId % 4) == 2; }
+	int AssetIdFromNodeId(int nodeId) { return (nodeId - NODE_ID_OFFSET) / IDS_PER_ASSET; }
+	int AssetIdFromPinId(int pinId) { return (pinId - INPUT_PIN_ID_OFFSET) / IDS_PER_ASSET; }
+	int AssetIdFromLinkId(int linkId) { return (linkId - LINK_ID_OFFSET) / IDS_PER_ASSET; }
+
+	bool IsInputPin(int pinId) { return (pinId % IDS_PER_ASSET) == INPUT_PIN_ID_OFFSET; }
+
+	// スクリプトのホットリロードを確認する間隔
+	constexpr float HOT_RELOAD_CHECK_INTERVAL = 0.25f;
+
+	// ステータスメッセージを表示しておく時間（通常・エラー）
+	constexpr float STATUS_DISPLAY_SECONDS = 4.0f;
+	constexpr float ERROR_STATUS_DISPLAY_SECONDS = 8.0f;
+
+	// ノードエディタがまだ配置していないノードの座標とみなす値
+	constexpr float UNPLACED_NODE_POSITION = 1.0e6f;
+
+	// アニメーションの長さが分からないときのスライダーの上限
+	constexpr float DEFAULT_MAX_CLIP_SECONDS = 10.0f;
+
+	// アニメーション設定の所有者名
+	constexpr const char* ANIMATION_CONFIG_OWNER = "EnemyBoss";
 
 	//----------------------------------------------------------------
 	// ImGui の小さな補助
@@ -269,7 +292,7 @@ void BehaviorTreeEditor::Update(float elapsedTime, EnemyBoss* boss)
 	// 毎フレーム更新時刻を見に行くほどではないので、少し間隔を空ける
 	hotReloadTimer -= elapsedTime;
 	if (hotReloadTimer > 0.0f) return;
-	hotReloadTimer = 0.25f;
+	hotReloadTimer = HOT_RELOAD_CHECK_INTERVAL;
 
 	LuaScriptSystem& lua = LuaScriptSystem::Instance();
 	if (lua.IsReady())
@@ -984,7 +1007,7 @@ void BehaviorTreeEditor::DrawClipDetail(BehaviorClip& clip, int clipIndex, Model
 
 	if (overrideCancel)
 	{
-		const float maxSeconds = (animationLength > 0.0f) ? animationLength : 10.0f;
+		const float maxSeconds = (animationLength > 0.0f) ? animationLength : DEFAULT_MAX_CLIP_SECONDS;
 
 		if (ImGui::SliderFloat(u8"開始", &clip.cancelStart, 0.0f, maxSeconds, "%.3f s")) dirty = true;
 		if (ImGui::SliderFloat(u8"終了", &clip.cancelEnd, 0.0f, maxSeconds, "%.3f s")) dirty = true;
@@ -1435,7 +1458,7 @@ void BehaviorTreeEditor::PullNodePositions()
 		const ImVec2 position = ed::GetNodePosition(ed::NodeId(MakeNodeId(node.id)));
 
 		// まだ配置されていないノードは (FLT_MAX, FLT_MAX) が返るので触らない
-		if (position.x > 1.0e6f || position.y > 1.0e6f) continue;
+		if (position.x > UNPLACED_NODE_POSITION || position.y > UNPLACED_NODE_POSITION) continue;
 
 		if (position.x != node.editorX || position.y != node.editorY)
 		{
@@ -1497,12 +1520,12 @@ AnimationConfig* BehaviorTreeEditor::FindAnimationConfig(Model* model, const std
 	const int index = model->GetAnimationIndex(clipName.c_str());
 	if (index < 0) return nullptr;
 
-	return model->GetAnimationConfig("EnemyBoss", index);
+	return model->GetAnimationConfig(ANIMATION_CONFIG_OWNER, index);
 }
 
 void BehaviorTreeEditor::SetStatus(const std::string& message, bool isError)
 {
 	statusMessage = message;
 	statusIsError = isError;
-	statusTimer = isError ? 8.0f : 4.0f;
+	statusTimer = isError ? ERROR_STATUS_DISPLAY_SECONDS : STATUS_DISPLAY_SECONDS;
 }

@@ -74,7 +74,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> constantBuffer;
 
 	// ガウスフィルター
-#define KERNEL_MAX 25
+	static constexpr int KERNEL_MAX = 25;
 	struct CbGaussianFilter
 	{
 		DirectX::XMFLOAT4 weights[KERNEL_MAX * KERNEL_MAX]{};
@@ -131,7 +131,7 @@ private:
 	VignetteSetData vignetteSetData;
 
 	//ビネット　減光処理
-	struct VigenetteDatas
+	struct VignetteDatas
 	{
 		DirectX::XMFLOAT4 vignetteColor{ 0.0f,0.0f,0.0f,1.0f };
 		DirectX::XMFLOAT2 vignetteCenter{ 0.5f,0.5f };
@@ -174,20 +174,20 @@ private:
 
 		ConcentratedLineDatas concentratedLineDatas{};
 
-		VigenetteDatas vignetteData{};
+		VignetteDatas vignetteData{};
 	};
 	CbFpost cbFpost;
 
 	bool isParryFlash = false;
-	bool Acceleration = false;
+	bool isAcceleration = false;
 
 	float flashTimer = 0;
 	float accelTimer = 0;
 
 	float radialRadius = 0;
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> gaussianconstantBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> cbFpostconstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> gaussianConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> cbFpostConstantBuffer;
 
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> bloomPS;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> gaussianPS;
@@ -196,11 +196,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>  upSamplePS;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>  horizontalPS;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>  verticalPS;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>  FinalPostPS;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>  RadialBlurPS;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>  ChromaticPS;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>  finalPostPS;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>  radialBlurPS;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>  chromaticPS;
 
-	static const size_t downsampled_count = 6;
-	std::unique_ptr<FrameBuffer> gaussian_blur[downsampled_count][2];
-	std::unique_ptr<FrameBuffer> glow_extraction;
+	static constexpr size_t DOWNSAMPLED_COUNT = 6;
+	std::unique_ptr<FrameBuffer> gaussianBlur[DOWNSAMPLED_COUNT][2];
+	std::unique_ptr<FrameBuffer> glowExtraction;
 };

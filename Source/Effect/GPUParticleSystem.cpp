@@ -1,6 +1,15 @@
 ﻿
 #include "GpuParticleSystem.h"
 #include "Graphics/GpuResourceUtils.h"
+
+namespace
+{
+    // コンピュートシェーダーの1スレッドグループあたりのスレッド数（GPUParticleCS.hlsl の numthreads と合わせる）
+    constexpr UINT THREAD_GROUP_SIZE = 256;
+
+    // パーティクルにかかる重力
+    const DirectX::XMFLOAT3 PARTICLE_GRAVITY = { 0.0f, -0.1f, 0.0f };
+}
 #include <vector>
 #include <fstream>
 
@@ -94,7 +103,7 @@ void GpuParticleSystem::Update(ID3D11DeviceContext* context, float deltaTime)
     CbGpuParticleUpdate cbData;
     cbData.deltaTime = deltaTime;
     cbData.totalTime = totalTime;
-    cbData.gravity = { 0.0f, -0.1f, 0.0f };
+    cbData.gravity = PARTICLE_GRAVITY;
     cbData.isRespawn = respawnEnable ? 1 : 0;
     context->UpdateSubresource(cbUpdate.Get(), 0, nullptr, &cbData, 0, 0);
 
@@ -103,8 +112,8 @@ void GpuParticleSystem::Update(ID3D11DeviceContext* context, float deltaTime)
     context->CSSetConstantBuffers(0, 1, cbUpdate.GetAddressOf());
     context->CSSetUnorderedAccessViews(0, 1, particleUAV.GetAddressOf(), nullptr);
 
-    // GPUに計算を命令 (1スレッドグループあたり256パーティクルを処理すると仮定)
-    UINT threadGroupsX = (maxParticles + 255) / 256;
+    // GPUに計算を命令（切り上げて全パーティクルを覆うグループ数にする）
+    UINT threadGroupsX = (maxParticles + THREAD_GROUP_SIZE - 1) / THREAD_GROUP_SIZE;
     context->Dispatch(threadGroupsX, 1, 1);
 
     // UAVのバインド解除 (これをしないと次の描画処理でSRVとして読み込めない)
@@ -160,7 +169,7 @@ void GpuParticleSystem::Render(ID3D11DeviceContext* context, const RenderContext
 
 void GpuParticleSystem::Emit(ID3D11DeviceContext* context, const DirectX::XMFLOAT3& position,
     const DirectX::XMFLOAT3& velocity, const DirectX::XMFLOAT4& color,
-    float size, float lifeTime, UINT behaviorType)
+    float size, float lifeTime, GpuParticleBehavior behavior)
 {
     if (!particleBuffer) return;
 
@@ -172,7 +181,7 @@ void GpuParticleSystem::Emit(ID3D11DeviceContext* context, const DirectX::XMFLOA
     newData.size = size;
     newData.lifeTime = lifeTime;
     newData.maxLifeTime = lifeTime;
-    newData.behaviorType = behaviorType;
+    newData.behaviorType = static_cast<UINT>(behavior);
     newData.padding = { 0.0f, 0.0f };
 
     // バッファ内のどの部分（何バイト目）を更新するかを指定する

@@ -74,9 +74,9 @@ public:
 	void DrawDebugGUI();
 
 public:
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> sprite_vertex_shader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> sprite_input_layout;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> sprite_pixel_shader;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> spriteVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> spriteInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> spritePixelShader;
 
 private:
 	std::unordered_map<std::string, SpriteDataLoad> sprite;
@@ -100,8 +100,9 @@ private:
 	DirectX::XMFLOAT3 hint1MidPos{ 0.0f, 552.0f, 0.0f };
 	DirectX::XMFLOAT3 hint1EndPos{ -560.0f, 552.0f, 0.0f };
 
-	const float moveDuration = 1.0f;
-	const float waitDuration = 3.0f;
+	// ヒント文が画面に出入りする時間と、表示し続ける時間
+	static constexpr float HINT_MOVE_DURATION = 1.0f;
+	static constexpr float HINT_WAIT_DURATION = 3.0f;
 
 	void MoveHintText(float elapsedTime);
 };

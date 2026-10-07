@@ -119,10 +119,10 @@ DialogResult Dialog::SaveFileName(char* filepath, int size, const char* filter, 
 	ofn.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY;
 
 	// カレントディレクトリ取得
-	char current_dir[MAX_PATH];
-	if (!::GetCurrentDirectoryA(MAX_PATH, current_dir))
+	char currentDirectory[MAX_PATH];
+	if (!::GetCurrentDirectoryA(MAX_PATH, currentDirectory))
 	{
-		current_dir[0] = '\0';
+		currentDirectory[0] = '\0';
 	}
 
 	// ダイアログオープン
@@ -132,9 +132,9 @@ DialogResult Dialog::SaveFileName(char* filepath, int size, const char* filter, 
 	}
 
 	// カレントディレクトリ復帰
-	if (current_dir[0] != '\0')
+	if (currentDirectory[0] != '\0')
 	{
-		::SetCurrentDirectoryA(current_dir);
+		::SetCurrentDirectoryA(currentDirectory);
 	}
 
 	// 最終パスを記憶

@@ -27,14 +27,14 @@ public:
 	void DrawDebugGUI();
 
 public:
-	D3D11_TEXTURE2D_DESC mask_texture2dDesc;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mask_texture;
+	D3D11_TEXTURE2D_DESC maskTexture2dDesc;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> maskTexture;
 
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> sprite_vertex_shader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> sprite_input_layout;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> sprite_pixel_shader;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> spriteVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> spriteInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> spritePixelShader;
 private:
-	std::unique_ptr<Sprite> Result;
+	std::unique_ptr<Sprite> resultSprite;
 
-	float timer = 0;
+	float timer = 0.0f;
 };

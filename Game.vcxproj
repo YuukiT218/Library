@@ -314,6 +314,8 @@
     <ClInclude Include="Source\Debug\ImGuiRenderer.h" />
     <ClInclude Include="Source\System\HitStop.h" />
     <ClInclude Include="Source\System\Misc.h" />
+    <ClInclude Include="Source\System\ScreenSize.h" />
+    <ClInclude Include="Source\Graphics\ShaderSlot.h" />
     <ClInclude Include="Source\Model\Model.h" />
     <ClInclude Include="Source\Debug\PrimitiveRenderer.h" />
     <ClInclude Include="Source\Graphics\RenderContext.h" />

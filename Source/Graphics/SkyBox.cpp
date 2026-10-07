@@ -1,4 +1,6 @@
 ﻿#include "SkyBox.h"
+#include "System/ScreenSize.h"
+#include "ShaderSlot.h"
 #include "GpuResourceUtils.h"
 #include "Camera/Camera.h"
 #include "System/Misc.h"
@@ -58,7 +60,7 @@ void SkyBox::Begin(const RenderContext& rc)
 	rc.deviceContext->VSSetConstantBuffers(1, 1, sceneConstantBuffer.GetAddressOf());
 	rc.deviceContext->PSSetConstantBuffers(1, 1, sceneConstantBuffer.GetAddressOf());
 
-	rc.deviceContext->PSSetShaderResources(34, 1, specular_pmrem_shader_resource_view.GetAddressOf());
+	rc.deviceContext->PSSetShaderResources(ShaderSlot::SPECULAR_PMREM_TEXTURE, 1, specularPmremShaderResourceView.GetAddressOf());
 }
 
 void SkyBox::Render(const RenderContext& rc)
@@ -85,7 +87,7 @@ void SkyBox::Render(const RenderContext& rc)
 	rc.deviceContext->PSSetShader(skyBoxPixelShader.Get(), nullptr, 0);
 
 	// 描画
-	skyBoxRenderSprite->Render(rc.deviceContext, 0.0f, 0.0f, 0.0f, 1920, 1080, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, skyBoxVertexShader.Get(), skyBoxPixelShader.Get());
+	skyBoxRenderSprite->Render(rc.deviceContext, 0.0f, 0.0f, 0.0f, static_cast<float>(ScreenSize::WIDTH), static_cast<float>(ScreenSize::HEIGHT), 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, skyBoxVertexShader.Get(), skyBoxPixelShader.Get());
 }
 
 void SkyBox::End(const RenderContext& rc)

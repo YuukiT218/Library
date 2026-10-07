@@ -2,13 +2,14 @@
 #include "Math/Mathf.h"
 #include "Graphics/Graphics.h"
 #include <imgui.h>
-
-
 #include <stdlib.h>
-
-
 #include "System/Audio/Audio.h"
 
+namespace
+{
+	// 刃に沿って並べる当たり判定球の半径
+	constexpr float BLADE_HIT_SPHERE_RADIUS = 0.225f;
+}
 
 EnemySword::EnemySword(ID3D11Device* device, const char* filename)
 {
@@ -22,7 +23,7 @@ EnemySword::EnemySword(ID3D11Device* device, const char* filename)
 	colors.emissiveFactor = 4.0f;
 
 	//当たり判定用初期設定
-	SetupBladeHitSpheres(0.225f);
+	SetupBladeHitSpheres(BLADE_HIT_SPHERE_RADIUS);
 
 	//炎トレイル用ポイントライト
 	attenuation = 1.1f;

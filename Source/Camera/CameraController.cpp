@@ -13,7 +13,22 @@
 
 #include <stdlib.h>
 
+namespace
+{
+    // カメラの上方向
+    const DirectX::XMFLOAT3 CAMERA_UP = { 0.0f, 1.0f, 0.0f };
 
+    // 地面からこの高さ以下なら敵が接地しているとみなす
+    constexpr float ENEMY_GROUND_HEIGHT_THRESHOLD = 0.5f;
+
+    // ロックオン中のピッチ角の制限（度）
+    constexpr float LOCK_ON_MIN_PITCH_DEGREE = -25.0f;
+    constexpr float LOCK_ON_MAX_PITCH_DEGREE = 60.0f;
+
+    // カメラシェイクに使うノイズの周波数と、時間の進む速さ
+    constexpr float SHAKE_NOISE_FREQUENCY = 2.0f;
+    constexpr float SHAKE_NOISE_TIME_SCALE = 5.0f;
+}
 
 void CameraController::Update(float elapsedTime)
 {
@@ -24,7 +39,7 @@ void CameraController::Update(float elapsedTime)
         };
 
     oldLockOnFlag = isLockOn;
-    isLockOn = CameraParam::Instance().GetIsLockOn();
+    isLockOn = CameraParam::Instance().IsLockOn();
 
     // 通常カメラ操作（ロックオンしていない時）
     {
@@ -34,7 +49,7 @@ void CameraController::Update(float elapsedTime)
         float speed = rollSpeed * elapsedTime;
 
         if (ax) angle.y += ax * speed;
-        if (ay) angle.x += (Input::Instance().GetIsLastGamePad() ? -ay : ay) * speed;
+        if (ay) angle.x += (Input::Instance().IsLastGamePad() ? -ay : ay) * speed;
 
 #if !_DEBUG
         {
@@ -78,7 +93,7 @@ void CameraController::Update(float elapsedTime)
 
         // 接地判定の取得
         bool isPlayerGround = Player::Instance().IsGround();
-        bool isEnemyGround = closestEnemy->GetDistanceFromGround() <= 0.5f;
+        bool isEnemyGround = closestEnemy->GetDistanceFromGround() <= ENEMY_GROUND_HEIGHT_THRESHOLD;
 
         // カメラ操作の自動補正(Yaw: 左右の角度)
         float targetYaw = atan2f(DirectX::XMVectorGetX(vDiff), DirectX::XMVectorGetZ(vDiff));
@@ -146,19 +161,19 @@ void CameraController::Update(float elapsedTime)
         float pitchCorrection = useHeightDiff ? atan2f(-deltaY, distToEnemy) : 0.0f;
         float targetPitch = basePitch + pitchCorrection;
 
-        // ピッチ角が極端になりすぎないよう制限（-25度～60度の範囲）
-        targetPitch = std::clamp(targetPitch, DirectX::XMConvertToRadians(-25.0f), DirectX::XMConvertToRadians(60.0f));
+        // ピッチ角が極端になりすぎないよう制限
+        targetPitch = std::clamp(targetPitch, DirectX::XMConvertToRadians(LOCK_ON_MIN_PITCH_DEGREE), DirectX::XMConvertToRadians(LOCK_ON_MAX_PITCH_DEGREE));
 
         angle.x += (targetPitch - angle.x) * autoAimPitchSpeed * elapsedTime;
 
         // 距離と高低差に応じたレングスの補間
-        float currentCameraLength = lengthLimit[0] + (lengthLimit[1] - lengthLimit[0]) * t;
+        float currentCameraLength = nearCameraLength + (farCameraLength - nearCameraLength) * t;
         currentCameraLength += currentLerpedLengthOffset;
 
         // 高低差によるズームアウト加算
         float heightZoomBonus = useHeightDiff ? diffY * heightZoomMultiplier : 0.0f;
         currentCameraLength += heightZoomBonus;
-        currentCameraLength = (std::min)(currentCameraLength, lengthLimit[1] * currentLerpedMaxLengthMultiplier);
+        currentCameraLength = (std::min)(currentCameraLength, farCameraLength * currentLerpedMaxLengthMultiplier);
 
         // カメラ位置(Eye)の計算
         DirectX::XMMATRIX Transform = DirectX::XMMatrixRotationRollPitchYaw(angle.x, angle.y, angle.z);
@@ -166,7 +181,7 @@ void CameraController::Update(float elapsedTime)
 
         float eyeBaseY = midY + currentOffsetY + (useHeightDiff ? diffY * eyeBaseYMultiplier : 0.0f);
 
-        DirectX::XMVECTOR vEyeTarget = DirectX::XMVectorSet(target.x, eyeBaseY, target.z, 0);
+        DirectX::XMVECTOR vEyeTarget = DirectX::XMVectorSet(target.x, eyeBaseY, target.z, 0.0f);
         vEyeTarget = DirectX::XMVectorSubtract(vEyeTarget, DirectX::XMVectorScale(vCamForward, currentCameraLength));
 
         // 手前・奥の判別と注視点(Focus)の計算
@@ -216,12 +231,12 @@ void CameraController::Update(float elapsedTime)
         }
 
         Camera& camera = Camera::Instance();
-        camera.SetLookAt(eye, smoothedFocusTarget, DirectX::XMFLOAT3(0, 1, 0));
+        camera.SetLookAt(eye, smoothedFocusTarget, CAMERA_UP);
     }
     else
     {
         // 常に索敵を行い、次回ロックオン可能な敵を探しておく
-        SetLockonPoint();
+        SetLockOnPoint();
 
         angle.y = normalizeAngle(angle.y);
 
@@ -262,39 +277,29 @@ void CameraController::Update(float elapsedTime)
 
         // カメラに設定を適用
         Camera& camera = Camera::Instance();
-        camera.SetLookAt(eye, target, DirectX::XMFLOAT3(0, 1, 0));
+        camera.SetLookAt(eye, target, CAMERA_UP);
     }
 
-    if (freeCameraFlag)
-    {
-        Camera::Instance().SetFreeCameraFlag(true);
-    }
-    else
-    {
-        Camera::Instance().SetFreeCameraFlag(false);
-    }
+    Camera::Instance().SetFreeCameraFlag(freeCameraFlag);
 
     CameraShake(elapsedTime);
 }
 
-void CameraController::SetLockonPoint()
+void CameraController::SetLockOnPoint()
 {
     EnemyBoss& boss = EnemyBoss::Instance();
 
-    closestEnemy = nullptr;
+    closestEnemy = dynamic_cast<Enemy*>(&boss);
 
-    closestEnemy = dynamic_cast<Enemy*>(&boss); // Use dynamic_cast to convert EnemyBoss to Enemy  
-
-    if (closestEnemy)  
-    {  
-        DirectX::XMFLOAT3 enemyPosition = closestEnemy->GetPosition();  
-        lockOnPoint = enemyPosition;  
-        CameraParam::Instance().SetLockOnEnemy(closestEnemy);  
-    }  
-    else  
-    {  
-        CameraParam::Instance().SetIsLockOn(false);  
-    }  
+    if (closestEnemy)
+    {
+        lockOnPoint = closestEnemy->GetPosition();
+        CameraParam::Instance().SetLockOnEnemy(closestEnemy);
+    }
+    else
+    {
+        CameraParam::Instance().SetLockOn(false);
+    }
 }
 
 // カメラシェイク
@@ -302,22 +307,22 @@ void CameraController::CameraShake(float elapsedTime)
 {
     Camera& camera = Camera::Instance();
 
-    if (!camera.GetCameraShakeSwitch()) return;
+    if (!camera.IsCameraShaking()) return;
 
     if (shakeTime < camera.GetCameraShakeTimer())
     {
         shakeTime = camera.GetCameraShakeTimer();
-        camera.SetCameraShakeSwitch(true, 0, camera.GetCameraShakePower());
+        camera.SetCameraShakeSwitch(true, 0.0f, camera.GetCameraShakePower());
     }
 
     // シンプレックスノイズを使用
     static FastNoiseLite noiseGenerator;
     noiseGenerator.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    noiseGenerator.SetFrequency(2.0f);  // 周波数（細かさ調整）
+    noiseGenerator.SetFrequency(SHAKE_NOISE_FREQUENCY);  // 周波数（細かさ調整）
 
     // 時間を利用してスムーズな変化を作る
     static float timeOffset = 0.0f;
-    timeOffset += elapsedTime * 5.0f; // 時間を少しずつ進める（速度調整）
+    timeOffset += elapsedTime * SHAKE_NOISE_TIME_SCALE; // 時間を少しずつ進める（速度調整）
 
     // カメラの揺れの強さ
     float shakePower = camera.GetCameraShakePower() * cameraShakeRange;
@@ -338,9 +343,9 @@ void CameraController::CameraShake(float elapsedTime)
 
     shakeTime -= elapsedTime;
 
-    if (shakeTime < 0)
+    if (shakeTime < 0.0f)
     {
-        camera.SetCameraShakeSwitch(false, 0);
+        camera.SetCameraShakeSwitch(false, 0.0f);
     }
 }
 
@@ -348,8 +353,8 @@ void CameraController::CameraShake(float elapsedTime)
 void CameraController::MouseCameraController(float elapsedTime)
 {
     Mouse& mouse = Input::Instance().GetMouse();
-    float bx = static_cast<float>(mouse.GetPositionX());
-    float by = static_cast<float>(mouse.GetPositionY());
+    float mouseX = static_cast<float>(mouse.GetPositionX());
+    float mouseY = static_cast<float>(mouse.GetPositionY());
 
     // 移動量（delta）の計算
     float dx = 0.0f;
@@ -358,10 +363,10 @@ void CameraController::MouseCameraController(float elapsedTime)
 #ifdef _DEBUG
     // 【Debugモード】
     // カーソルは固定されないため、Inputクラスが記録した「前回位置」との差分を使用
-    float oldbx = static_cast<float>(mouse.GetOldPositionX());
-    float oldby = static_cast<float>(mouse.GetOldPositionY());
-    dx = bx - oldbx;
-    dy = by - oldby;
+    float oldMouseX = static_cast<float>(mouse.GetOldPositionX());
+    float oldMouseY = static_cast<float>(mouse.GetOldPositionY());
+    dx = mouseX - oldMouseX;
+    dy = mouseY - oldMouseY;
 #else
     // 【Releaseモード】
     // Framework側で毎フレーム中央にリセットされるため、「ウィンドウ中央」からの差分を計算
@@ -374,8 +379,8 @@ void CameraController::MouseCameraController(float elapsedTime)
         float centerY = (rect.bottom - rect.top) * 0.5f;
 
         // Inputはクライアント座標を返すと仮定して計算
-        dx = bx - centerX;
-        dy = by - centerY;
+        dx = mouseX - centerX;
+        dy = mouseY - centerY;
     }
 #endif
 
@@ -384,16 +389,8 @@ void CameraController::MouseCameraController(float elapsedTime)
     // ベクトルの長さが0でない場合のみ計算（ゼロ除算防止）
     if (dx != 0.0f || dy != 0.0f)
     {
-        DirectX::XMFLOAT2 direction;
-        direction.x = dx;
-        direction.y = dy;
-
-        DirectX::XMVECTOR dir = DirectX::XMLoadFloat2(&direction);
-
-        DirectX::XMStoreFloat2(&direction, dir);
-
-        angle.y += direction.x * mouseSpeed;
-        angle.x += direction.y * mouseSpeed;
+        angle.y += dx * mouseSpeed;
+        angle.x += dy * mouseSpeed;
     }
 }
 
@@ -425,8 +422,8 @@ void CameraController::DrawDebugGUI()
             ImGui::DragFloat("Distance Max", &distanceParamMax, 0.5f, distanceParamMin + 1.0f, 50.0f);
             ImGui::DragFloat("Min Offset Y (Near)", &minOffsetTargetY, 0.1f, -5.0f, maxOffsetTargetY);
             ImGui::DragFloat("Max Offset Y (Far)", &maxOffsetTargetY, 0.1f, minOffsetTargetY, 5.0f);
-            ImGui::DragFloat("lengthLimit Min", &lengthLimit[0], 0.1f, -10.0f, lengthLimit[1]);
-            ImGui::DragFloat("lengthLimit Max", &lengthLimit[1], 0.1f, lengthLimit[0], 500.0f);
+            ImGui::DragFloat("lengthLimit Min", &nearCameraLength, 0.1f, -10.0f, farCameraLength);
+            ImGui::DragFloat("lengthLimit Max", &farCameraLength, 0.1f, nearCameraLength, 500.0f);
 
             ImGui::Separator();
             ImGui::Text("=== Height & Distance Tuning ===");
@@ -475,7 +472,6 @@ void CameraController::DrawDebugGUI()
 
 void CameraController::DrawDebugPrimitive()
 {
-
 }
 
 void CameraController::InitCamera()

@@ -1,6 +1,7 @@
 ﻿#include <algorithm>
 #include "System/Misc.h"
 #include "Graphics/GpuResourceUtils.h"
+#include "Graphics/ShaderSlot.h"
 #include "ModelRenderer.h"
 #include "Graphics/BasicShader.h"
 #include "Graphics/LambertShader.h"
@@ -42,10 +43,31 @@ ModelRenderer::ModelRenderer(ID3D11Device* device)
 	GenerateNoiseTexture(device);
 }
 
+namespace
+{
+	// ディゾルブ用ノイズテクスチャの大きさ
+	constexpr int NOISE_TEXTURE_SIZE = 256;
+
+	// ノイズに重ねる成分（ランダム成分の割合と、縦横の縞模様の周波数・振幅）
+	constexpr float NOISE_RANDOM_WEIGHT = 0.5f;
+	constexpr float NOISE_STRIPE_FREQUENCY_X = 4.0f;
+	constexpr float NOISE_STRIPE_FREQUENCY_Y = 3.0f;
+	constexpr float NOISE_STRIPE_AMPLITUDE = 0.25f;
+
+	// テレポート演出の見た目
+	constexpr float TELEPORT_DISSOLVE_EDGE_WIDTH = 0.1f;
+	constexpr float TELEPORT_DISTORTION_INTENSITY = 0.5f;
+	const DirectX::XMFLOAT3 TELEPORT_DISSOLVE_EDGE_COLOR = { 0.8f, 0.3f, 1.0f };
+	constexpr float TELEPORT_AFTERIMAGE_DARKNESS = 0.8f;
+
+	// テレポート演出の中心の高さ（ルートノードからのオフセット）
+	constexpr float TELEPORT_CENTER_HEIGHT = 1.0f;
+}
+
 void ModelRenderer::GenerateNoiseTexture(ID3D11Device* device)
 {
-	const int width = 256;
-	const int height = 256;
+	const int width = NOISE_TEXTURE_SIZE;
+	const int height = NOISE_TEXTURE_SIZE;
 	std::vector<uint8_t> noiseData(width * height);
 
 	// シンプルなランダムノイズ生成
@@ -61,9 +83,9 @@ void ModelRenderer::GenerateNoiseTexture(ID3D11Device* device)
 
 			// 複数の周波数を重ねる
 			float noise = 0.0f;
-			noise += (rand() % 256) / 255.0f * 0.5f;
-			noise += sin(fx * 6.28f * 4.0f) * 0.25f + 0.25f;
-			noise += cos(fy * 6.28f * 3.0f) * 0.25f + 0.25f;
+			noise += (rand() % 256) / 255.0f * NOISE_RANDOM_WEIGHT;
+			noise += sin(fx * DirectX::XM_2PI * NOISE_STRIPE_FREQUENCY_X) * NOISE_STRIPE_AMPLITUDE + NOISE_STRIPE_AMPLITUDE;
+			noise += cos(fy * DirectX::XM_2PI * NOISE_STRIPE_FREQUENCY_Y) * NOISE_STRIPE_AMPLITUDE + NOISE_STRIPE_AMPLITUDE;
 
 			noiseData[index] = static_cast<uint8_t>(noise * 255.0f);
 		}
@@ -116,11 +138,11 @@ void ModelRenderer::DrawWithTeleport(ShaderId shaderId, std::shared_ptr<Model> m
 	// テレポートデータを設定
 	drawInfo.teleportData.teleportProgress = teleportProgress;
 	drawInfo.teleportData.teleportTime = teleportTime;
-	drawInfo.teleportData.dissolveEdgeWidth = 0.1f;
-	drawInfo.teleportData.distortionIntensity = 0.5f;
-	drawInfo.teleportData.dissolveEdgeColor = DirectX::XMFLOAT3(0.8f, 0.3f, 1.0f);
+	drawInfo.teleportData.dissolveEdgeWidth = TELEPORT_DISSOLVE_EDGE_WIDTH;
+	drawInfo.teleportData.distortionIntensity = TELEPORT_DISTORTION_INTENSITY;
+	drawInfo.teleportData.dissolveEdgeColor = TELEPORT_DISSOLVE_EDGE_COLOR;
 	drawInfo.teleportData.afterimageAlpha = 0.0f;
-	drawInfo.teleportData.afterimageDarkness = 0.8f;
+	drawInfo.teleportData.afterimageDarkness = TELEPORT_AFTERIMAGE_DARKNESS;
 
 	switch (mode)
 	{
@@ -145,7 +167,7 @@ void ModelRenderer::DrawWithTeleport(ShaderId shaderId, std::shared_ptr<Model> m
 	auto& nodes = model->GetNodes();
 	if (!nodes.empty())
 	{
-		drawInfo.teleportData.teleportCenterY = nodes[0].worldTransform._42 + 1.0f;
+		drawInfo.teleportData.teleportCenterY = nodes[0].worldTransform._42 + TELEPORT_CENTER_HEIGHT;
 	}
 }
 
@@ -290,8 +312,8 @@ void ModelRenderer::Render(const RenderContext& rc)
 		nullptr,
 		teleportConstantBuffer.Get(),
 	};
-	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
-	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
+	dc->VSSetConstantBuffers(ShaderSlot::SKELETON_CONSTANT_BUFFER, _countof(vsConstantBuffers), vsConstantBuffers);
+	dc->PSSetConstantBuffers(ShaderSlot::SCENE_CONSTANT_BUFFER, _countof(psConstantBuffers), psConstantBuffers);
 
 	// サンプラステート設定
 	ID3D11SamplerState* samplerStates[] =
@@ -303,7 +325,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 	dc->PSSetSamplers(0, _countof(samplerStates), samplerStates);
 
 	// ノイズテクスチャをt36にバインド
-	dc->PSSetShaderResources(36, 1, noiseTextureSRV.GetAddressOf());
+	dc->PSSetShaderResources(ShaderSlot::NOISE_TEXTURE, 1, noiseTextureSRV.GetAddressOf());
 
 	// レンダーステート設定
 	dc->OMSetDepthStencilState(rc.renderState->GetDepthStencilState(DepthState::TestAndWrite), 0);
@@ -386,7 +408,7 @@ void ModelRenderer::Render(const RenderContext& rc)
 		// 描画直前に毎回張り直しておく
 		// (張り直さないと2つ目以降の描画予約でノイズが真っ黒になり、
 		//  ステージのディザ透過やディゾルブが効かなくなる)
-		dc->PSSetShaderResources(36, 1, noiseTextureSRV.GetAddressOf());
+		dc->PSSetShaderResources(ShaderSlot::NOISE_TEXTURE, 1, noiseTextureSRV.GetAddressOf());
 
 		// 描画
 		dc->DrawIndexed(static_cast<UINT>(mesh.indices.size()), 0, 0);
@@ -477,8 +499,8 @@ void ModelRenderer::Render(const RenderContext& rc)
 	// 定数バッファ設定解除
 	for (ID3D11Buffer*& vsConstantBuffer : vsConstantBuffers) { vsConstantBuffer = nullptr; }
 	for (ID3D11Buffer*& psConstantBuffer : psConstantBuffers) { psConstantBuffer = nullptr; }
-	dc->VSSetConstantBuffers(6, _countof(vsConstantBuffers), vsConstantBuffers);
-	dc->PSSetConstantBuffers(7, _countof(psConstantBuffers), psConstantBuffers);
+	dc->VSSetConstantBuffers(ShaderSlot::SKELETON_CONSTANT_BUFFER, _countof(vsConstantBuffers), vsConstantBuffers);
+	dc->PSSetConstantBuffers(ShaderSlot::SCENE_CONSTANT_BUFFER, _countof(psConstantBuffers), psConstantBuffers);
 
 	// サンプラステート設定解除
 	for (ID3D11SamplerState*& samplerState : samplerStates) { samplerState = nullptr; }
@@ -486,5 +508,5 @@ void ModelRenderer::Render(const RenderContext& rc)
 
 	// ノイズテクスチャ解除
 	ID3D11ShaderResourceView* nullSRV = nullptr;
-	dc->PSSetShaderResources(36, 1, &nullSRV);
+	dc->PSSetShaderResources(ShaderSlot::NOISE_TEXTURE, 1, &nullSRV);
 }

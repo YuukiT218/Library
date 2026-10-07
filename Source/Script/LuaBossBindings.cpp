@@ -505,13 +505,13 @@ namespace
 
 	int Boss_SetRevengeState(lua_State* L)
 	{
-		RequireBoss(L)->SetRevengeState(OptBool(L, 1, true));
+		RequireBoss(L)->SetRevenge(OptBool(L, 1, true));
 		return 0;
 	}
 
 	int Boss_GetRevengeState(lua_State* L)
 	{
-		lua_pushboolean(L, RequireBoss(L)->GetRevengeState() ? 1 : 0);
+		lua_pushboolean(L, RequireBoss(L)->IsRevenge() ? 1 : 0);
 		return 1;
 	}
 
@@ -523,7 +523,7 @@ namespace
 
 	int Boss_GetSpecialReady(lua_State* L)
 	{
-		lua_pushboolean(L, RequireBoss(L)->GetSpecialReady() ? 1 : 0);
+		lua_pushboolean(L, RequireBoss(L)->IsSpecialReady() ? 1 : 0);
 		return 1;
 	}
 
@@ -535,7 +535,7 @@ namespace
 
 	int Boss_GetPlayedEffect(lua_State* L)
 	{
-		lua_pushboolean(L, RequireBoss(L)->GetPlayedEffect() ? 1 : 0);
+		lua_pushboolean(L, RequireBoss(L)->HasPlayedEffect() ? 1 : 0);
 		return 1;
 	}
 
@@ -777,7 +777,6 @@ namespace
 		{ "GetRight",				Boss_GetRight },
 		{ "SetVerticalVelocity",	Boss_SetVerticalVelocity },
 		{ "SetWarpPosition",		Boss_SetWarpPosition },
-		// EnemyBoss::SetKnockBackPosition は宣言のみで実装が無いため公開していない
 
 		// テレポート
 		{ "CalculateTeleportPosition", Boss_CalculateTeleportPosition },

@@ -4,14 +4,42 @@
 #include "Math/Mathf.h"
 #include "Scene/SceneTitle.h"
 #include "Scene/SceneManager.h"
+#include "System/ScreenSize.h"
 #include <imgui.h>
+
+namespace
+{
+	// スプライトの表示・非表示を切り替えるときのフェード速度
+	constexpr float FADE_SPEED = 6.0f;
+
+	// ポーズ中の背景と選択枠の不透明度
+	constexpr float BACKGROUND_ALPHA = 180.0f / 255.0f;
+	constexpr float SELECT_FRAME_ALPHA = 230.0f / 255.0f;
+	constexpr float SELECT_FRAME_HIGHLIGHT_ALPHA = 220.0f / 255.0f;
+
+	// 選択中・非選択の項目の色
+	const DirectX::XMFLOAT4 SELECTED_COLOR = { 1.0f, 1.0f, 1.0f, 1.0f };
+	const DirectX::XMFLOAT4 UNSELECTED_COLOR = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+	// 選択枠の大きさ
+	const DirectX::XMFLOAT2 SELECT_FRAME_SIZE = { 334.8f, 94.0f };
+
+	// 「ゲームに戻る」を選んでいるときの選択枠の位置
+	const DirectX::XMFLOAT3 GAME_SELECT_FRAME_POSITION = { 1515.0f, 910.0f, 0.1f };
+	const DirectX::XMFLOAT3 GAME_SELECT_HIGHLIGHT_POSITION = { 1524.0f, 917.0f, 0.0f };
+
+	// 「タイトルに戻る」を選んでいるときの選択枠の位置
+	const DirectX::XMFLOAT3 TITLE_SELECT_FRAME_POSITION = { 1515.0f, 790.0f, 0.1f };
+	const DirectX::XMFLOAT3 TITLE_SELECT_HIGHLIGHT_POSITION = { 1525.0f, 797.0f, 0.0f };
+}
 
 void Pause::Initialize()
 {
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
 	//背景用
-	AddSprite("Back", CreateSpriteData(device, "Data/Sprite/Title_Back.png", { 0,0,0 }, { 1920, 1080 }, { 0,0 }, { 1920,1080 }, 0, { 1,1,1,0 }));
+	const DirectX::XMFLOAT2 fullScreenSize = { static_cast<float>(ScreenSize::WIDTH), static_cast<float>(ScreenSize::HEIGHT) };
+	AddSprite("Back", CreateSpriteData(device, "Data/Sprite/Title_Back.png", { 0,0,0 }, fullScreenSize, { 0,0 }, fullScreenSize, 0, { 1,1,1,0 }));
 
 	//操作説明
 	AddSprite("PauseBack1", CreateSpriteData(device, "Data/Sprite/PadInstruction.png", { 145.0f,100.0f,0 }, { 1137.8f, 640.0f }, { 0,0 }, { 1166, 591 }, 0, { 1,1,1,0 }));
@@ -65,9 +93,9 @@ SpriteData Pause::CreateSpriteData(ID3D11Device* device, const char* filepath, c
 void Pause::Update(float elapsedTime)
 {
 	// 共通：入力方式
-	isController = Input::Instance().GetIsLastGamePad();
+	isController = Input::Instance().IsLastGamePad();
 	GamePad& gamepad = Input::Instance().GetGamePad();
-	float fadeSpeed = 6.0f * elapsedTime;
+	float fadeSpeed = FADE_SPEED * elapsedTime;
 
 	auto SetAlphaLerp = [&](const std::string& name, float target)
 		{
@@ -105,7 +133,7 @@ void Pause::Update(float elapsedTime)
 	else
 	{
 		// 背景は淡く表示
-		SetAlphaLerp("Back", 180.0f / 255.0f);
+		SetAlphaLerp("Back", BACKGROUND_ALPHA);
 		SetAlphaLerp("Select0", 1.0f);
 		SetAlphaLerp("Select1", 1.0f);
 		SetAlphaLerp("Select0_jp", 1.0f);
@@ -125,8 +153,8 @@ void Pause::Update(float elapsedTime)
 		SetAlphaLerp("BackCon", isController ? 1.0f : 0.0f);
 		SetAlphaLerp("BackKeyMou", isController ? 0.0f : 1.0f);
 
-		SetAlphaLerp("SelectBo", 230.0f / 255.0f);
-		SetAlphaLerp("SelectBo1", 220.0f / 255.0f);
+		SetAlphaLerp("SelectBo", SELECT_FRAME_ALPHA);
+		SetAlphaLerp("SelectBo1", SELECT_FRAME_HIGHLIGHT_ALPHA);
 
 		UpdatePulse(elapsedTime);
 
@@ -173,25 +201,25 @@ void Pause::Update(float elapsedTime)
 			switch (scene)
 			{
 			case SelectScene::Game:
-				sprite["Select0"].color = { 1, 1, 1, 1 };
-				sprite["Select1"].color = { 0, 0, 0, 1 };
+				sprite["Select0"].color = SELECTED_COLOR;
+				sprite["Select1"].color = UNSELECTED_COLOR;
 
-				sprite["SelectBo"].position = { 1515.f, 910.f, 0.1f };
-				sprite["SelectBo1"].position = { 1524.f, 917.f, 0 };
+				sprite["SelectBo"].position = GAME_SELECT_FRAME_POSITION;
+				sprite["SelectBo1"].position = GAME_SELECT_HIGHLIGHT_POSITION;
 
-				sprite["SelectBo"].size = { 334.8f, 94.0f };
-				sprite["SelectBo1"].size = { 334.8f, 94.0f };
+				sprite["SelectBo"].size = SELECT_FRAME_SIZE;
+				sprite["SelectBo1"].size = SELECT_FRAME_SIZE;
 				baseScale = sprite["SelectBo1"].size;
 				break;
 			case SelectScene::Title:
-				sprite["Select0"].color = { 0, 0, 0, 1 };
-				sprite["Select1"].color = { 1, 1, 1, 1 };
+				sprite["Select0"].color = UNSELECTED_COLOR;
+				sprite["Select1"].color = SELECTED_COLOR;
 
-				sprite["SelectBo"].position = { 1515.0f, 790.f, 0.1f };
-				sprite["SelectBo1"].position = { 1525.f, 797.f, 0 };
+				sprite["SelectBo"].position = TITLE_SELECT_FRAME_POSITION;
+				sprite["SelectBo1"].position = TITLE_SELECT_HIGHLIGHT_POSITION;
 
-				sprite["SelectBo"].size = { 334.8f, 94.0f };
-				sprite["SelectBo1"].size = { 334.8f, 94.0f };
+				sprite["SelectBo"].size = SELECT_FRAME_SIZE;
+				sprite["SelectBo1"].size = SELECT_FRAME_SIZE;
 				baseScale = sprite["SelectBo1"].size;
 				break;
 

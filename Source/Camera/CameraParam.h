@@ -16,9 +16,9 @@ public:
 		return param;
 	}
 
-	void ReversLockOnSwitch() { isLockOn = !isLockOn; }
-	void SetIsLockOn(bool isLockOn) { this->isLockOn = isLockOn; }
-	bool GetIsLockOn() { return isLockOn; }
+	void ToggleLockOn() { isLockOn = !isLockOn; }
+	void SetLockOn(bool isLockOn) { this->isLockOn = isLockOn; }
+	bool IsLockOn() { return isLockOn; }
 
 	void SetLockOnEnemy(Enemy* enemy) { closestEnemy = enemy; }
 	Enemy* GetLockOnEnemy() { return closestEnemy; }

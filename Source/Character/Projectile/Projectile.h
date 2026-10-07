@@ -77,7 +77,7 @@ public:
     void FireAt(const DirectX::XMFLOAT3& targetPos, float newSpeed, bool bakeY);
 
     // 螺旋拡散モードへ切り替え
-    void StartSpiral(float angularSpd, float radialSpd);
+    void StartSpiral(float angularSpeed, float radialSpeed);
 
     // 生存確認用
     bool IsActive() const { return ageTimer < info.lifeTime; }

@@ -38,7 +38,7 @@ public:
 	void SetSlot(int slot) { this->slot = slot; }
 
 	// ボタン入力状態の取得
-	GamePadButton GetButton() const { return buttonState[0]; }
+	GamePadButton GetButton() const { return buttonState[CURRENT_STATE]; }
 
 	// ボタン押下状態の取得
 	GamePadButton GetButtonDown() const { return buttonDown; }
@@ -71,7 +71,11 @@ public:
 	float GetTriggerR() const { return triggerR; }
 
 private:
-	GamePadButton		buttonState[2] = { 0 };
+	// ボタン状態の履歴（今フレームと前フレーム）
+	static constexpr int CURRENT_STATE = 0;
+	static constexpr int PREVIOUS_STATE = 1;
+	static constexpr int STATE_HISTORY_COUNT = 2;
+	GamePadButton		buttonState[STATE_HISTORY_COUNT] = { 0 };
 	GamePadButton		buttonDown = 0;
 	GamePadButton		buttonUp = 0;
 	float				axisLx = 0.0f;

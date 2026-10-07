@@ -3,6 +3,33 @@
 #include "Character/Enemy/EnemyBoss.h"
 #include "Camera/CameraParam.h"
 
+namespace
+{
+    // ガードループへ切り替える時のブレンド時間
+    constexpr float GUARD_LOOP_BLEND_SECONDS = 0.2f;
+
+    // ガード受付時間を表すアニメーション属性のインデックス
+    constexpr int GUARD_WINDOW_ATTRIBUTE_INDEX = 0;
+
+    // ガード成功エフェクトの大きさ
+    constexpr float GUARD_EFFECT_SCALE = 0.2f;
+
+    // カウンター攻撃を突進攻撃にする敵との距離
+    constexpr float COUNTER_RUSH_MIN_DISTANCE = 4.0f;
+
+    // カウンター攻撃を密着攻撃にする敵との距離
+    constexpr float COUNTER_CLOSE_MAX_DISTANCE = 2.0f;
+
+    // 敵の周りを回り込まないよう、これより近いときは旋回しない
+    constexpr float COUNTER_TURN_MIN_DISTANCE = 2.0f;
+
+    // 突進攻撃中、敵にこれ以上離れていれば吸い寄せる
+    constexpr float COUNTER_HOMING_MIN_DISTANCE = 6.0f;
+
+    // 突進攻撃中の吸い寄せ速度
+    constexpr float COUNTER_HOMING_LERP_SPEED = 5.0f;
+}
+
 //-------------------------------------------------------------
 // ガード待機ステート
 //-------------------------------------------------------------
@@ -18,17 +45,17 @@ PlayerGuardIdle::PlayerGuardIdle(Player* player)
 // 開始処理
 void PlayerGuardIdle::Enter()
 {
-    player->SetGravity(-0.0001f);
-    player->SetVerticalVelocity(0);
-    player->SetHorizonVelocity(0);
+    player->SetGravity(HOVER_GRAVITY);
+    player->SetVerticalVelocity(0.0f);
+    player->SetHorizonVelocity(0.0f);
 
-    if (!player->GetPlayerIsGuard())
+    if (!player->IsGuard())
     {
         player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
-        player->GetPlayerModel()->PlayRootMotion(guardStartAnimationIndex, false, true, 0.1f, "Character1_Reference");
+        player->GetPlayerModel()->PlayRootMotion(guardStartAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, REFERENCE_NODE_NAME);
     }
 
-    player->SetPlayerGuard(true);
+    player->SetGuard(true);
 }
 
 // 更新処理
@@ -36,14 +63,14 @@ void PlayerGuardIdle::Update(float elapsedTime)
 {
     if (!player->GetPlayerModel()->IsPlayAnimation())
     {
-        player->GetPlayerModel()->PlayRootMotion(guardLoopAnimationIndex, false, true, 0.2f, "Character1_Reference");
+        player->GetPlayerModel()->PlayRootMotion(guardLoopAnimationIndex, false, true, GUARD_LOOP_BLEND_SECONDS, REFERENCE_NODE_NAME);
         index = player->GetPlayerModel()->GetCurrentAnimationIndex();
-        config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+        config = player->GetPlayerModel()->GetAnimationConfig(ANIMATION_CONFIG_OWNER, index);
         isLoop = true;
         timer = 0.0f;
     }
 
-    if (CameraParam::Instance().GetIsLockOn())
+    if (CameraParam::Instance().IsLockOn())
     {
         // まだ向き終わっていない場合のみ実行
         if (!player->IsTurnCompleted())
@@ -55,16 +82,16 @@ void PlayerGuardIdle::Update(float elapsedTime)
     if (isLoop)
     {
         // ガードカウンターステートに遷移
-        if (player->GetPlayerIsCounter() && InputAction() == InputActionType::LightAttack)
+        if (player->IsStandbyCounter() && InputAction() == InputActionType::LightAttack)
         {
-            player->SetPlayerCounter(false);
-            player->SetPlayerGuard(false);
+            player->SetStandbyCounter(false);
+            player->SetGuard(false);
             ChangeState(PlayerStateId::GuardCounter);
         }
-        else if (player->GetPlayerIsCounter() && InputAction() == InputActionType::Dodge)
+        else if (player->IsStandbyCounter() && InputAction() == InputActionType::Dodge)
         {
-            player->SetPlayerCounter(false);
-            player->SetPlayerGuard(false);
+            player->SetStandbyCounter(false);
+            player->SetGuard(false);
             ChangeState(PlayerStateId::Dodge);
         }
         timer += elapsedTime;
@@ -80,12 +107,12 @@ void PlayerGuardIdle::Update(float elapsedTime)
                 ChangeState(PlayerStateId::Fall);
             }
         }
-        else if (config->attributes[0].endTime <= frame)
+        else if (config->attributes[GUARD_WINDOW_ATTRIBUTE_INDEX].endTime <= frame)
         {
-            player->SetGravity(-0.3f);
-            player->GetPlayerModel()->PlayRootMotion(guardEndAnimationIndex, false, true, 0.1f, "Character1_Reference");
-            player->SetPlayerCounter(false);
-            player->SetPlayerGuard(false);
+            player->SetGravity(Character::DEFAULT_GRAVITY);
+            player->GetPlayerModel()->PlayRootMotion(guardEndAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, REFERENCE_NODE_NAME);
+            player->SetStandbyCounter(false);
+            player->SetGuard(false);
         }
     }
 }
@@ -121,23 +148,20 @@ PlayerGuardHit::PlayerGuardHit(Player* player)
 
 void PlayerGuardHit::Enter()
 {
-    player->GetModel()->PlayRootMotion(guardHitAnimationIndex, false, true, 0.1f, "Character1_Reference");
+    player->GetModel()->PlayRootMotion(guardHitAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, REFERENCE_NODE_NAME);
 
-    player->guardEffect->Play(player->GetPosition(), 0.2f);
+    player->guardEffect->Play(player->GetPosition(), GUARD_EFFECT_SCALE);
 
-    player->SetPlayerGuard(true);
-    player->SetPlayerCounter(true);
+    player->SetGuard(true);
+    player->SetStandbyCounter(true);
     player->ResetTurnCompleted();
-
-    GamePad& gamepad = Input::Instance().GetGamePad();
 }
 
 void PlayerGuardHit::Update(float elapsedTime)
 {
     float frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
     int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
-    GamePad& gamepad = Input::Instance().GetGamePad();
-    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig(ANIMATION_CONFIG_OWNER, index);
 
     if (!player->IsTurnCompleted())
     {
@@ -149,15 +173,15 @@ void PlayerGuardHit::Update(float elapsedTime)
         // ガードカウンターステートに遷移
         if (InputAction() == InputActionType::LightAttack)
         {
-            player->SetPlayerCounter(false);
-            player->SetPlayerGuard(false);
+            player->SetStandbyCounter(false);
+            player->SetGuard(false);
             ChangeState(PlayerStateId::GuardCounter);
         }
         // 回避ステートに遷移
         else if (InputAction() == InputActionType::Dodge)
         {
-            player->SetPlayerCounter(false);
-            player->SetPlayerGuard(false);
+            player->SetStandbyCounter(false);
+            player->SetGuard(false);
             ChangeState(PlayerStateId::Dodge);
         }
     }
@@ -170,7 +194,6 @@ void PlayerGuardHit::Update(float elapsedTime)
 // 終了処理
 void PlayerGuardHit::Exit()
 {
-
 }
 
 //-------------------------------------------------------------
@@ -180,9 +203,9 @@ void PlayerGuardHit::Exit()
 PlayerGuardCounter::PlayerGuardCounter(Player* player)
     : PlayerState(player)
 {
-    guardParryAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Parry_Counter_Attack_R_Seq_0");
-    guardParryAnimationIndex1 = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Wave_05_04_Seq_0");
-    guardParryAnimationIndex2 = player->GetPlayerModel()->GetAnimationIndex("Run_Attack_02_Seq_0");
+    counterMiddleAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Parry_Counter_Attack_R_Seq_0");
+    counterCloseAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Combo_Attack_Wave_05_04_Seq_0");
+    counterRushAnimationIndex = player->GetPlayerModel()->GetAnimationIndex("Run_Attack_02_Seq_0");
 }
 
 void PlayerGuardCounter::Enter()
@@ -193,26 +216,26 @@ void PlayerGuardCounter::Enter()
     float diffX = playerPos.x - enemyPos.x;
     float diffZ = playerPos.z - enemyPos.z;
     float dist = sqrtf(diffX * diffX + diffZ * diffZ);
-    player->SetGravity(-0.3f);
+    player->SetGravity(Character::DEFAULT_GRAVITY);
 
     // 距離に応じたアニメーション分岐
-    if (dist > 4.0f)
+    if (dist > COUNTER_RUSH_MIN_DISTANCE)
     {
         // 遠距離：突進攻撃 (Run Attack)
-        player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex2, false, true, 0.1f, "Character1_Hips");
+        player->GetPlayerModel()->PlayRootMotion(counterRushAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
     }
-    else if (dist < 2.0f)
+    else if (dist < COUNTER_CLOSE_MAX_DISTANCE)
     {
         // 近距離：密着攻撃 (Combo Attack Wave)
-        player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex1, false, true, 0.1f, "Character1_Hips");
+        player->GetPlayerModel()->PlayRootMotion(counterCloseAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
     }
     else
     {
         // 中距離：通常カウンター
-        player->GetPlayerModel()->PlayRootMotion(guardParryAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        player->GetPlayerModel()->PlayRootMotion(counterMiddleAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
     }
 
-    player->SetPlayerRolling(true);
+    player->SetRolling(true);
     player->ResetTurnCompleted();  // プレイヤーの旋回完了フラグをリセット
 
     // 先行入力をリセット（前回のカウンター時の入力を持ち越さない）
@@ -225,11 +248,11 @@ void PlayerGuardCounter::Update(float elapsedTime)
     float frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
     int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
 
-    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig(ANIMATION_CONFIG_OWNER, index);
 
     player->GetSword()->AttackAnimationCollision(player->GetModel(), config, player);
 
-    if (CameraParam::Instance().GetIsLockOn())
+    if (CameraParam::Instance().IsLockOn())
     {
         // 距離計算（XZ平面距離）
         DirectX::XMFLOAT3 playerPos = player->GetPosition();
@@ -238,7 +261,7 @@ void PlayerGuardCounter::Update(float elapsedTime)
         float dist = sqrtf(diffX * diffX + diffZ * diffZ);
 
         // オービット対策
-        if (dist >= 2.0f)
+        if (dist >= COUNTER_TURN_MIN_DISTANCE)
         {
             if (!player->IsTurnCompleted())
             {
@@ -247,11 +270,11 @@ void PlayerGuardCounter::Update(float elapsedTime)
         }
 
         // --- 遠距離突進攻撃(Run_Attack_02)の場合のホーミング処理 ---
-        if (index == guardParryAnimationIndex2 && frame <= config->advanceInputEndFrame)
+        if (index == counterRushAnimationIndex && frame <= config->advanceInputEndFrame)
         {
-            if (dist >= 6.0f)
+            if (dist >= COUNTER_HOMING_MIN_DISTANCE)
             {
-                float lerpRate = 5.0f * elapsedTime;
+                float lerpRate = COUNTER_HOMING_LERP_SPEED * elapsedTime;
                 playerPos.x = Mathf::Lerp(playerPos.x, enemyPos.x, lerpRate);
                 playerPos.z = Mathf::Lerp(playerPos.z, enemyPos.z, lerpRate);
 
@@ -313,7 +336,7 @@ void PlayerGuardCounter::Update(float elapsedTime)
 
 void PlayerGuardCounter::Exit()
 {
-    player->SetPlayerRolling(false);
+    player->SetRolling(false);
 
     // 先行入力をリセット
     nextShiftReady = false;
@@ -328,7 +351,7 @@ void PlayerGuardCounter::DrawDebugGUI()
     if (ImGui::TreeNode(u8"ガードパリィ"))
     {
         ImGui::DragFloat(u8"アニメーションスピード", &guardParryAnimationSpeed, 0.01f, 0.0f, 5.0f);
-        bool parryFlag = player->GetPlayerIsParry();
+        bool parryFlag = player->IsParry();
         ImGui::Checkbox(u8"パリィ判定があるか", &parryFlag);
         ImGui::TreePop();
     }

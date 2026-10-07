@@ -27,6 +27,19 @@ public:
 	virtual void DrawDebugGUI() {}
 
 protected:
+	// ルートモーションの基準ノード名
+	static constexpr const char* HIPS_NODE_NAME = "Character1_Hips";
+	static constexpr const char* REFERENCE_NODE_NAME = "Character1_Reference";
+
+	// アニメーション設定の所有者名
+	static constexpr const char* ANIMATION_CONFIG_OWNER = "Player";
+
+	// アニメーション切り替え時の標準ブレンド時間
+	static constexpr float DEFAULT_BLEND_SECONDS = 0.1f;
+
+	// 空中アクション中に滞空させるための重力
+	static constexpr float HOVER_GRAVITY = -0.0001f;
+
 	// ステート変更
 	void ChangeState(PlayerStateId stateId);
 

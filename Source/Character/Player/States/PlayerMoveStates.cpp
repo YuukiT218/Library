@@ -1,6 +1,16 @@
 ﻿#include "PlayerMoveStates.h"
 #include "Math/Mathf.h"
 
+namespace
+{
+    // 走り・歩き開始時のブレンド時間
+    constexpr float MOVE_START_BLEND_SECONDS = 0.4f;
+
+    // 歩きアニメーション速度の範囲（スティックの傾きで補間）
+    constexpr float WALK_ANIMATION_SPEED_MIN = 0.2f;
+    constexpr float WALK_ANIMATION_SPEED_MAX = 0.8f;
+}
+
 //-------------------------------------------------------------
 // 待機ステート
 //-------------------------------------------------------------
@@ -14,7 +24,7 @@ PlayerIdleState::PlayerIdleState(Player* player)
 // 開始処理
 void PlayerIdleState::Enter()
 {
-    player->GetPlayerModel()->PlayAnimation(idleAnimationIndex, true, 0.1f);
+    player->GetPlayerModel()->PlayAnimation(idleAnimationIndex, true, DEFAULT_BLEND_SECONDS);
 }
 
 // 更新処理
@@ -79,19 +89,19 @@ PlayerWalkState::PlayerWalkState(Player* player)
 // 開始処理
 void PlayerWalkState::Enter()
 {
-    player->GetPlayerModel()->PlayRootMotion(walkFrontAnimationIndex, true, true, 0.4f, "Character1_Hips");
+    player->GetPlayerModel()->PlayRootMotion(walkFrontAnimationIndex, true, true, MOVE_START_BLEND_SECONDS, HIPS_NODE_NAME);
 }
 
 // 更新処理
 void PlayerWalkState::Update(float elapsedTime)
 {
-    player->PlayerMove(elapsedTime, 0);
+    player->PlayerMove(elapsedTime, 0.0f);
 
     float speed = DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(DirectX::XMLoadFloat3(&player->GetMoveVec())));
 
     float t = std::clamp(speed, 0.0f, 1.0f);
 
-    walkAnimationSpeed = Mathf::Lerp(0.2f, 0.8f, t);
+    walkAnimationSpeed = Mathf::Lerp(WALK_ANIMATION_SPEED_MIN, WALK_ANIMATION_SPEED_MAX, t);
 
     // コンボ1ステートに遷移
     if (InputAction() == InputActionType::LightAttack)
@@ -154,18 +164,18 @@ PlayerRunState::PlayerRunState(Player* player)
 // 開始処理
 void PlayerRunState::Enter()
 {
-    player->GetPlayerModel()->PlayRootMotion(runStartAnimationIndex, false, true, 0.4f, "Character1_Hips");
+    player->GetPlayerModel()->PlayRootMotion(runStartAnimationIndex, false, true, MOVE_START_BLEND_SECONDS, HIPS_NODE_NAME);
 }
 
 // 更新処理
 void PlayerRunState::Update(float elapsedTime)
 {
-    player->PlayerMove(elapsedTime, 0);
+    player->PlayerMove(elapsedTime, 0.0f);
     if (!player->GetPlayerModel()->IsPlayAnimation())
     {
-        player->GetPlayerModel()->PlayRootMotion(runLoopAnimationIndex, true, true, 0.1f, "Character1_Hips");
+        player->GetPlayerModel()->PlayRootMotion(runLoopAnimationIndex, true, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
     }
-    //
+
     // コンボ1ステートに遷移
     if (InputAction() == InputActionType::LightAttack)
     {
@@ -189,7 +199,7 @@ void PlayerRunState::Update(float elapsedTime)
     // アイドルステートに遷移
     else if (!InputWalkMove() && !InputRunMove())
     {
-        player->GetPlayerModel()->PlayRootMotion(runEndAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        player->GetPlayerModel()->PlayRootMotion(runEndAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
         ChangeState(PlayerStateId::Idle);
     }
     else if (InputAction() == InputActionType::HeavyAttack)
@@ -227,7 +237,7 @@ void PlayerJumpState::Enter()
 {
     if (player->IsGround())
     {
-        player->GetPlayerModel()->PlayRootMotion(jumpAnimationIndex, false, true, 0.1f, "Character1_Reference");
+        player->GetPlayerModel()->PlayRootMotion(jumpAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, REFERENCE_NODE_NAME);
         player->PlayerJump(jumpPower);
     }
 }
@@ -238,7 +248,7 @@ void PlayerJumpState::Update(float elapsedTime)
     player->PlayerMove(elapsedTime, jumpAnimationMoveRate);
     if (!player->GetPlayerModel()->IsPlayAnimation())
     {
-        player->GetPlayerModel()->PlayRootMotion(fallAnimationIndex, true, true, 0.1f, "Character1_Reference");
+        player->GetPlayerModel()->PlayRootMotion(fallAnimationIndex, true, true, DEFAULT_BLEND_SECONDS, REFERENCE_NODE_NAME);
     }
 
     // コンボ1ステートに遷移
@@ -290,7 +300,7 @@ void PlayerFallState::Enter()
 {
     if (!player->IsGround())
     {
-        player->GetPlayerModel()->PlayRootMotion(fallAnimationIndex, true, true, 0.1f, "Character1_Reference");
+        player->GetPlayerModel()->PlayRootMotion(fallAnimationIndex, true, true, DEFAULT_BLEND_SECONDS, REFERENCE_NODE_NAME);
     }
 }
 
@@ -362,34 +372,28 @@ void PlayerDodgeState::Enter()
         player->SetAngle(angle);
     }
 
-    const Camera& camera = Camera::Instance();
-    const GamePad& gamepad = Input::Instance().GetGamePad();
-
-    DirectX::XMVECTOR Vec;
-    DirectX::XMFLOAT3 vec;
-
     // ワールド進行方向を取得
-    Vec = DirectX::XMLoadFloat3(&player->CharacterForward(player->GetAngle()));
-    Vec = DirectX::XMVector3Normalize(Vec);
-    DirectX::XMStoreFloat3(&vec, Vec);
+    DirectX::XMFLOAT3 forward = Character::CharacterForward(player->GetAngle());
+    DirectX::XMFLOAT3 vec;
+    DirectX::XMStoreFloat3(&vec, DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&forward)));
 
     if (player->IsGround())
     {
-        player->GetPlayerModel()->PlayRootMotion(dodgeAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        player->GetPlayerModel()->PlayRootMotion(dodgeAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
         timer = dodgeAnimationTime;
     }
     else
     {
-        player->SetGravity(-0.0001f);
-        player->SetVerticalVelocity(0);
-        player->GetPlayerModel()->PlayRootMotion(airDodgeAnimationIndex, false, true, 0.1f, "Character1_Hips");
+        player->SetGravity(HOVER_GRAVITY);
+        player->SetVerticalVelocity(0.0f);
+        player->GetPlayerModel()->PlayRootMotion(airDodgeAnimationIndex, false, true, DEFAULT_BLEND_SECONDS, HIPS_NODE_NAME);
         timer = airDodgeAnimationTime;
     }
 
-    player->SetPlayerRolling(true);
+    player->SetRolling(true);
     nextShiftReady = false;
 
-    player->SetMovement(vec, 3.0f);
+    player->SetMovement(vec, static_cast<float>(rollingFrontMovePower));
 }
 
 
@@ -399,7 +403,7 @@ void PlayerDodgeState::Update(float elapsedTime)
     float frame = player->GetPlayerModel()->GetCurrentAnimationSeconds();
     int index = player->GetPlayerModel()->GetCurrentAnimationIndex();
 
-    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig("Player", index);
+    AnimationConfig* config = player->GetPlayerModel()->GetAnimationConfig(ANIMATION_CONFIG_OWNER, index);
 
     timer -= elapsedTime;
     if (frame >= config->advanceInputStartFrame || frame <= config->advanceInputEndFrame)
@@ -451,8 +455,8 @@ void PlayerDodgeState::Update(float elapsedTime)
 void PlayerDodgeState::Exit()
 {
     player->GetPlayerModel()->SetAnimationSpeed(1.0f);
-    player->SetGravity(-0.3f);
-    player->SetPlayerRolling(false);
+    player->SetGravity(Character::DEFAULT_GRAVITY);
+    player->SetRolling(false);
     nextShiftReady = false;
 }
 
@@ -464,7 +468,7 @@ void PlayerDodgeState::DrawDebugGUI()
     if (ImGui::TreeNode(u8"バックステップ回避"))
     {
         ImGui::DragFloat(u8"アニメーション遷移時間", &dodgeBackAnimationTime, 0.01f, 0.0f, 5.0f);
-        ImGui::DragInt(u8"移動距離", &dodgeBackMovePow);
+        ImGui::DragInt(u8"移動距離", &dodgeBackMovePower);
         ImGui::TreePop();
     }
 
@@ -473,7 +477,7 @@ void PlayerDodgeState::DrawDebugGUI()
     if (ImGui::TreeNode(u8"ローリング回避"))
     {
         ImGui::DragFloat(u8"アニメーション遷移時間", &dodgeAnimationTime, 0.01f, 0.0f, 5.0f);
-        ImGui::DragInt(u8"移動距離", &rollingFrontMovePow);
+        ImGui::DragInt(u8"移動距離", &rollingFrontMovePower);
         ImGui::TreePop();
     }
 }

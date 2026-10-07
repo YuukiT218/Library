@@ -27,10 +27,34 @@ public:
 
 protected:
 	// アニメーション設定を引くときのキャラクター名
-	static constexpr const char* ANIM_OWNER_NAME = "EnemyBoss";
+	static constexpr const char* ANIMATION_CONFIG_OWNER = "EnemyBoss";
 
 	// ルートモーションを適用するノード名
-	static constexpr const char* ROOT_MOTION_NODE = "root";
+	static constexpr const char* ROOT_MOTION_NODE_NAME = "root";
+
+	// 戦闘待機アニメーション名
+	static constexpr const char* IDLE_ANIMATION_NAME = "Idle_Combat_Seq_0";
+
+	// 行動中に使うアニメーションのブレンド時間
+	static constexpr float ACTION_BLEND_SECONDS = 0.2f;
+
+	// 空中で滞空させるときの重力
+	static constexpr float HOVER_GRAVITY = -0.001f;
+
+	// 空中から叩きつけるときの重力
+	static constexpr float DIVE_GRAVITY = -1.5f;
+
+	// 素早いテレポートの消失時間
+	static constexpr float QUICK_TELEPORT_FADE_OUT_SECONDS = 0.1f;
+
+	// 光柱をプレイヤーへ撃ち出すときの速さ
+	static constexpr float PILLAR_FIRE_SPEED = 20.0f;
+
+	// 体力がこの割合以下になると、攻撃に光柱の追撃が加わる
+	static constexpr float PILLAR_SUPPORT_HEALTH_RATE = 0.5f;
+
+	// 攻撃予兆エフェクトを出す高さ
+	static constexpr float ATTACK_SIGN_OFFSET_Y = 1.0f;
 
 	//----------------------------------------------------------------
 	// モデル・アニメーション
@@ -45,19 +69,19 @@ protected:
 	AnimationConfig* GetCurrentAnimationConfig() const
 	{
 		Model* model = GetModel();
-		return model->GetAnimationConfig(ANIM_OWNER_NAME, model->GetCurrentAnimationIndex());
+		return model->GetAnimationConfig(ANIMATION_CONFIG_OWNER, model->GetCurrentAnimationIndex());
 	}
 
 	// 指定アニメーションの設定を取得
 	AnimationConfig* GetAnimationConfig(int animationIndex) const
 	{
-		return GetModel()->GetAnimationConfig(ANIM_OWNER_NAME, animationIndex);
+		return GetModel()->GetAnimationConfig(ANIMATION_CONFIG_OWNER, animationIndex);
 	}
 
 	// ルートモーション付きでアニメーションを再生する
 	void PlayRootMotion(int animationIndex, bool loop, float blendSeconds)
 	{
-		GetModel()->PlayRootMotion(animationIndex, loop, true, blendSeconds, ROOT_MOTION_NODE);
+		GetModel()->PlayRootMotion(animationIndex, loop, true, blendSeconds, ROOT_MOTION_NODE_NAME);
 	}
 
 	// ルートモーション付きでアニメーションを再生する（既定のブレンド時間）
@@ -71,6 +95,13 @@ protected:
 	//----------------------------------------------------------------
 
 	static const DirectX::XMFLOAT3& PlayerPosition() { return Player::Instance().GetPosition(); }
+
+	// 自分の位置に攻撃予兆エフェクトを出す
+	void PlayAttackSign()
+	{
+		const DirectX::XMFLOAT3& selfPosition = this->owner->GetPosition();
+		this->owner->attackSign->Play({ selfPosition.x, selfPosition.y + ATTACK_SIGN_OFFSET_Y, selfPosition.z });
+	}
 
 	// 剣の攻撃判定を更新する（プレイヤーが無敵中は行わない）
 	void UpdateAttackCollision()
@@ -205,6 +236,10 @@ protected:
 		constexpr float SIDE_DISTANCE = 3.0f;
 		constexpr float BACK_DISTANCE = 2.0f;
 		constexpr float SPAWN_HEIGHT = -1.0f;
+		constexpr float PILLAR_SCALE = 0.5f;
+		constexpr float PILLAR_HIT_RADIUS = 0.7f;
+		constexpr float PILLAR_LIFE_TIME = 5.0f;
+		constexpr float PILLAR_SPEED = 40.0f;
 
 		const DirectX::XMFLOAT3& angle = this->owner->GetAngle();
 		DirectX::XMFLOAT3 back = this->owner->CharacterBack(angle);
@@ -217,10 +252,10 @@ protected:
 			ProjectileInfo info = ProjectileManager::GetLightPillarInfo();
 			info.owner = this->owner;
 			info.moveType = MovementType::Stationary;
-			info.scale = 0.5f;
-			info.radius = 0.7f;
-			info.lifeTime = 5.0f;
-			info.speed = 40.0f;
+			info.scale = PILLAR_SCALE;
+			info.radius = PILLAR_HIT_RADIUS;
+			info.lifeTime = PILLAR_LIFE_TIME;
+			info.speed = PILLAR_SPEED;
 
 			const DirectX::XMFLOAT3& side = (i == 0) ? left : right;
 			info.spawnPosition =

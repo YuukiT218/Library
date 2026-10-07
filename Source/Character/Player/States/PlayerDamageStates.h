@@ -10,6 +10,7 @@ enum class DamageType
 	Launch,      // 打ち上げ
 	Knockdown    // 打ち落とし
 };
+
 // ダメージステート
 class PlayerDamageState : public PlayerState
 {
@@ -34,6 +35,23 @@ protected:
 	bool nextShiftReady = false;
 
 private:
+	// ダメージ処理の進行段階
+	enum class Step
+	{
+		Start,       // ダメージ開始
+		Reaction,    // 被弾アニメーション再生中
+		AirLoop,     // 空中で着地待ち
+		Landing,     // 着地アニメーション
+		GetUp,       // 起き上がり
+		LaunchApex,  // 打ち上げの最高到達点で停止
+	};
+
+	// 打ち上げ時の水平方向のノックバック量
+	static constexpr float LAUNCH_HORIZONTAL_KNOCKBACK = -1.5f;
+
+	// ダメージ方向をゼロベクトルとみなす長さ
+	static constexpr float DAMAGE_DIRECTION_MIN_LENGTH = 0.001f;
+
 	// アニメーションインデックス
 	struct DamageAnimations
 	{
@@ -48,13 +66,13 @@ private:
 
 	DamageType currentDamageType = DamageType::Normal;
 	float pauseTimer = 0.0f;
-	int step = 0;
+	Step step = Step::Start;
 	DirectX::XMFLOAT3 knockbackTargetPosition = { 0.0f, 0.0f, 0.0f };
 
 	// ダメージタイプ判定
 	DamageType GetCurrentDamageType()
 	{
-		if (player->IsKnockDownDamage())
+		if (player->IsKnockdownDamage())
 			return DamageType::Knockdown;
 		else if (player->IsLaunchDamage())
 			return DamageType::Launch;
@@ -69,6 +87,15 @@ private:
 	// ダメージタイプ別の初期処理
 	void HandleDamageStart(DamageType type, float elapsedTime);
 
+	// ノックバック目標位置へ水平方向に寄せる
+	void MoveTowardKnockbackTarget(float lerpRate);
+
+	// 受付時間内の回避入力を先行入力として記録する
+	void AcceptDodgeInput(float frame, const AnimationConfig* config);
+
+	// 先行入力を消費する。回避ステートへ遷移した場合はtrueを返す
+	bool TryConsumeAdvanceInput(float frame, const AnimationConfig* config);
+
 	DirectX::XMFLOAT3 GetKnockbackPosition(DamageType type)
 	{
 		switch (type)
@@ -81,7 +108,7 @@ private:
 			return player->CalculateKnockbackPosition(player->heavyKnockbackPower);
 		case DamageType::Launch:
 		{
-			DirectX::XMFLOAT3 launchPos = player->CalculateKnockbackPosition(-1.5f);
+			DirectX::XMFLOAT3 launchPos = player->CalculateKnockbackPosition(LAUNCH_HORIZONTAL_KNOCKBACK);
 			launchPos.y = player->GetPosition().y + player->launchKnockbackHeight;
 			return launchPos;
 		}
@@ -98,7 +125,7 @@ private:
 
 		// ダメージ方向がゼロベクトルの場合は処理しない
 		float length = sqrtf(damageDir.x * damageDir.x + damageDir.z * damageDir.z);
-		if (length < 0.001f) return;
+		if (length < DAMAGE_DIRECTION_MIN_LENGTH) return;
 
 		// ダメージ方向を向く角度を計算
 		float targetAngle = atan2f(damageDir.x, damageDir.z);

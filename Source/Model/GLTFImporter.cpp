@@ -13,7 +13,7 @@
 bool LoadImageData(tinygltf::Image*, const int, std::string*,
                    std::string*, int, int,
                    const unsigned char*, int,
-                   void* user_pointer)
+                   void* userPointer)
 {
 	return true;
 }
@@ -76,7 +76,7 @@ void GLTFImporter::LoadNodes(NodeList& nodes)
 
 		if (!gltfNode.matrix.empty())
 		{
-			DirectX::XMFLOAT4X4 m = gltfMatrixToXMFLOAT4X4(gltfNode.matrix);
+			DirectX::XMFLOAT4X4 m = GltfMatrixToXMFLOAT4X4(gltfNode.matrix);
 
 			DirectX::XMVECTOR S, R, T;
 			DirectX::XMMatrixDecompose(&S, &R, &T, DirectX::XMLoadFloat4x4(&m));
@@ -89,15 +89,15 @@ void GLTFImporter::LoadNodes(NodeList& nodes)
 		{
 			if (gltfNode.scale.size() > 0)
 			{
-				node.scale = gltfVector3ToXMFLOAT3(gltfNode.scale);
+				node.scale = GltfVector3ToXMFLOAT3(gltfNode.scale);
 			}
 			if (gltfNode.rotation.size() > 0)
 			{
-				node.rotation = gltfQuaternionToXMFLOAT4(gltfNode.rotation);
+				node.rotation = GltfQuaternionToXMFLOAT4(gltfNode.rotation);
 			}
 			if (gltfNode.translation.size() > 0)
 			{
-				node.position = gltfVector3ToXMFLOAT3(gltfNode.translation);
+				node.position = GltfVector3ToXMFLOAT3(gltfNode.translation);
 			}
 		}
 		// 座標系変換
@@ -704,7 +704,7 @@ void GLTFImporter::LoadAnimations(AnimationList& animations, const NodeList& nod
 }
 
 // gltfVector3 → XMFLOAT3
-DirectX::XMFLOAT3 GLTFImporter::gltfVector3ToXMFLOAT3(const std::vector<double>& gltfValue)
+DirectX::XMFLOAT3 GLTFImporter::GltfVector3ToXMFLOAT3(const std::vector<double>& gltfValue)
 {
 	return DirectX::XMFLOAT3(
 		static_cast<float>(gltfValue.at(0)),
@@ -714,7 +714,7 @@ DirectX::XMFLOAT3 GLTFImporter::gltfVector3ToXMFLOAT3(const std::vector<double>&
 }
 
 // gltfQuaternion → XMFLOAT4
-DirectX::XMFLOAT4 GLTFImporter::gltfQuaternionToXMFLOAT4(const std::vector<double>& gltfValue)
+DirectX::XMFLOAT4 GLTFImporter::GltfQuaternionToXMFLOAT4(const std::vector<double>& gltfValue)
 {
 	return DirectX::XMFLOAT4(
 		static_cast<float>(gltfValue.at(0)),
@@ -725,7 +725,7 @@ DirectX::XMFLOAT4 GLTFImporter::gltfQuaternionToXMFLOAT4(const std::vector<doubl
 }
 
 // gltfMatrix → XMFLOAT4X4
-DirectX::XMFLOAT4X4 GLTFImporter::gltfMatrixToXMFLOAT4X4(const std::vector<double>& gltfValue)
+DirectX::XMFLOAT4X4 GLTFImporter::GltfMatrixToXMFLOAT4X4(const std::vector<double>& gltfValue)
 {
 	return DirectX::XMFLOAT4X4(
 		static_cast<float>(gltfValue.at(0)),

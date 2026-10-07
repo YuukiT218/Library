@@ -12,7 +12,33 @@
 
 #include <stdlib.h>
 
+namespace
+{
+    // カメラの上方向
+    const DirectX::XMFLOAT3 CAMERA_UP = { 0.0f, 1.0f, 0.0f };
 
+    // アニメーション設定の所有者名
+    constexpr const char* ANIMATION_CONFIG_OWNER = "Player";
+
+    // 距離だけを補間するカメライベントの名前
+    constexpr const char* RANGE_ONLY_EVENT_NAME = "RangeOnly";
+
+    // マウスのドラッグ量を回転角に変換する係数
+    constexpr float MOUSE_DRAG_ROTATE_SCALE = 0.02f;
+
+    // 中ボタンを押したときに戻す既定の角度（度）
+    constexpr float DEFAULT_PITCH_DEGREE = 30.0f;
+    constexpr float DEFAULT_YAW_DEGREE = 120.0f;
+
+    // ホイール1目盛りでカメラ距離が変わる量と、その範囲
+    constexpr float WHEEL_ZOOM_SPEED = 2.0f;
+    constexpr float MIN_RANGE = 3.0f;
+    constexpr float MAX_RANGE = 50.0f;
+
+    // 補間に必要なキーフレームの数（線形・Catmull-Rom）
+    constexpr size_t MIN_LINEAR_KEYFRAME_COUNT = 2;
+    constexpr size_t MIN_CATMULL_ROM_KEYFRAME_COUNT = 4;
+}
 
 void EditCameraController::Update(float elapsedTime)
 {
@@ -22,7 +48,7 @@ void EditCameraController::Update(float elapsedTime)
 
     if (currentIndex >= 0)
     {
-        AnimationConfig* config = model->GetAnimationConfig("Player", currentIndex);
+        AnimationConfig* config = model->GetAnimationConfig(ANIMATION_CONFIG_OWNER, currentIndex);
         float animationSeconds = model->GetCurrentAnimationSeconds();
         float secondsLength = model->GetAnimationLength(currentIndex);
 
@@ -34,7 +60,7 @@ void EditCameraController::Update(float elapsedTime)
             if (evt.eventType == EventType::Camera && evt.IsActive(animationSeconds))
             {
                 cameraEventActive = true;
-                if (evt.eventName == "RangeOnly")
+                if (evt.eventName == RANGE_ONLY_EVENT_NAME)
                 {
                     isRangeOnly = true;
                 }
@@ -44,7 +70,7 @@ void EditCameraController::Update(float elapsedTime)
 
         if (isRangeOnly && !config->cameraKeyframes.empty())
         {
-            RangeOnryEvent(config, animationSeconds, secondsLength);
+            RangeOnlyEvent(config, animationSeconds, secondsLength);
         }
         else if (cameraEventActive && !config->cameraKeyframes.empty())
         {
@@ -66,13 +92,13 @@ void EditCameraController::Update(float elapsedTime)
         actualTarget.z - front.z * range
     };
 
-    Camera::Instance().SetLookAt(eye, actualTarget, DirectX::XMFLOAT3(0, 1, 0));
+    Camera::Instance().SetLookAt(eye, actualTarget, CAMERA_UP);
 }
 
-void EditCameraController::ControllUpdate(float elapsedTime)
+void EditCameraController::ControlUpdate(float elapsedTime)
 {
     auto normalizeAngle = [](float angle) {
-        return angle >= 0.f
+        return angle >= 0.0f
             ? fmodf((angle)+DirectX::XM_PI, DirectX::XM_2PI) - DirectX::XM_PI
             : fmodf((angle)-DirectX::XM_PI, DirectX::XM_2PI) + DirectX::XM_PI;
         };
@@ -83,14 +109,14 @@ void EditCameraController::ControllUpdate(float elapsedTime)
     float speed = rollSpeed * elapsedTime;
 
     if (ax) angle.y += ax * speed;
-    if (ay) angle.x += (Input::Instance().GetIsLastGamePad() ? -ay : ay) * speed;
+    if (ay) angle.x += (Input::Instance().IsLastGamePad() ? -ay : ay) * speed;
 
     angle.x = std::clamp(angle.x, minAngleX, maxAngleX);
 
     ImGuiIO io = ImGui::GetIO();
 
-    float moveX = io.MouseDelta.x * 0.02f;
-    float moveY = io.MouseDelta.y * 0.02f;
+    float moveX = io.MouseDelta.x * MOUSE_DRAG_ROTATE_SCALE;
+    float moveY = io.MouseDelta.y * MOUSE_DRAG_ROTATE_SCALE;
     float wheel = io.MouseWheel;
 
     if (io.MouseDown[ImGuiMouseButton_Left]) {
@@ -99,13 +125,13 @@ void EditCameraController::ControllUpdate(float elapsedTime)
         angle.x = std::clamp(angle.x, minAngleX, maxAngleX);
     }
     else if (io.MouseDown[ImGuiMouseButton_Middle]) {
-        angle.x = DirectX::XMConvertToRadians(30);
-        angle.y = DirectX::XMConvertToRadians(120);
+        angle.x = DirectX::XMConvertToRadians(DEFAULT_PITCH_DEGREE);
+        angle.y = DirectX::XMConvertToRadians(DEFAULT_YAW_DEGREE);
     }
 
     if (wheel != 0.0f) {
-        range -= wheel * 2.0f;
-        range = std::clamp(range, 3.f, 50.f);
+        range -= wheel * WHEEL_ZOOM_SPEED;
+        range = std::clamp(range, MIN_RANGE, MAX_RANGE);
     }
 
     angle.y = normalizeAngle(angle.y);
@@ -192,11 +218,11 @@ void EditCameraController::DrawDebugGUI()
     ImGui::End();
 }
 
-void EditCameraController::RangeOnryEvent(AnimationConfig* config, float animationSeconds, float secondsLength)
+void EditCameraController::RangeOnlyEvent(AnimationConfig* config, float animationSeconds, float secondsLength)
 {
     const auto& keyframes = config->cameraKeyframes;
     size_t keyCount = keyframes.size();
-    if (keyCount < 2) return;
+    if (keyCount < MIN_LINEAR_KEYFRAME_COUNT) return;
 
     // 最初のフレーム範囲なら、現在rangeからkey0へ補間
     if (animationSeconds < keyframes[0].time)
@@ -220,7 +246,7 @@ void EditCameraController::RangeOnryEvent(AnimationConfig* config, float animati
             actualTarget.z - front.z * interpRange
         };
 
-        Camera::Instance().SetLookAt(eye, actualTarget, DirectX::XMFLOAT3(0, 1, 0));
+        Camera::Instance().SetLookAt(eye, actualTarget, CAMERA_UP);
         range = interpRange;
         return;
     }
@@ -274,7 +300,7 @@ void EditCameraController::RangeOnryEvent(AnimationConfig* config, float animati
         actualTarget.z - front.z * interpRange
     };
 
-    Camera::Instance().SetLookAt(eye, actualTarget, DirectX::XMFLOAT3(0, 1, 0));
+    Camera::Instance().SetLookAt(eye, actualTarget, CAMERA_UP);
     range = interpRange;
 }
 
@@ -282,7 +308,7 @@ void EditCameraController::HandleCameraEvent(AnimationConfig* config, float anim
 {
     const auto& keyframes = config->cameraKeyframes;
     size_t keyCount = keyframes.size();
-    if (keyCount < 2) return; // 最低2点ないと補間できない
+    if (keyCount < MIN_LINEAR_KEYFRAME_COUNT) return; // 最低2点ないと補間できない
 
     // 対象キーフレームインデックス検索
     size_t keyIndex = 0;
@@ -316,36 +342,36 @@ void EditCameraController::HandleCameraEvent(AnimationConfig* config, float anim
         return val % keyCount;
         };
 
-    auto LoadXMVECTOR = [](const DirectX::XMFLOAT3& f3) {
+    auto loadVector = [](const DirectX::XMFLOAT3& f3) {
         return DirectX::XMLoadFloat3(&f3);
         };
 
     DirectX::XMVECTOR interpTargetVec, interpEyeVec;
 
-    if (keyCount >= 4)
+    if (keyCount >= MIN_CATMULL_ROM_KEYFRAME_COUNT)
     {
         // --- Catmull-Rom補間 ---
-        DirectX::XMVECTOR p0_target = LoadXMVECTOR(keyframes[idx(-1)].targetOffset);
-        DirectX::XMVECTOR p1_target = LoadXMVECTOR(keyframes[idx(0)].targetOffset);
-        DirectX::XMVECTOR p2_target = LoadXMVECTOR(keyframes[idx(1)].targetOffset);
-        DirectX::XMVECTOR p3_target = LoadXMVECTOR(keyframes[idx(2)].targetOffset);
-        interpTargetVec = DirectX::XMVectorCatmullRom(p0_target, p1_target, p2_target, p3_target, t);
+        DirectX::XMVECTOR p0Target = loadVector(keyframes[idx(-1)].targetOffset);
+        DirectX::XMVECTOR p1Target = loadVector(keyframes[idx(0)].targetOffset);
+        DirectX::XMVECTOR p2Target = loadVector(keyframes[idx(1)].targetOffset);
+        DirectX::XMVECTOR p3Target = loadVector(keyframes[idx(2)].targetOffset);
+        interpTargetVec = DirectX::XMVectorCatmullRom(p0Target, p1Target, p2Target, p3Target, t);
 
-        DirectX::XMVECTOR p0_eye = LoadXMVECTOR(keyframes[idx(-1)].eyeOffset);
-        DirectX::XMVECTOR p1_eye = LoadXMVECTOR(keyframes[idx(0)].eyeOffset);
-        DirectX::XMVECTOR p2_eye = LoadXMVECTOR(keyframes[idx(1)].eyeOffset);
-        DirectX::XMVECTOR p3_eye = LoadXMVECTOR(keyframes[idx(2)].eyeOffset);
-        interpEyeVec = DirectX::XMVectorCatmullRom(p0_eye, p1_eye, p2_eye, p3_eye, t);
+        DirectX::XMVECTOR p0Eye = loadVector(keyframes[idx(-1)].eyeOffset);
+        DirectX::XMVECTOR p1Eye = loadVector(keyframes[idx(0)].eyeOffset);
+        DirectX::XMVECTOR p2Eye = loadVector(keyframes[idx(1)].eyeOffset);
+        DirectX::XMVECTOR p3Eye = loadVector(keyframes[idx(2)].eyeOffset);
+        interpEyeVec = DirectX::XMVectorCatmullRom(p0Eye, p1Eye, p2Eye, p3Eye, t);
     }
     else
     {
         // --- 線形補間 ---
-        DirectX::XMVECTOR startTarget = LoadXMVECTOR(keyframes[keyIndex].targetOffset);
-        DirectX::XMVECTOR endTarget = LoadXMVECTOR(keyframes[(keyIndex + 1) % keyCount].targetOffset);
+        DirectX::XMVECTOR startTarget = loadVector(keyframes[keyIndex].targetOffset);
+        DirectX::XMVECTOR endTarget = loadVector(keyframes[(keyIndex + 1) % keyCount].targetOffset);
         interpTargetVec = DirectX::XMVectorLerp(startTarget, endTarget, t);
 
-        DirectX::XMVECTOR startEye = LoadXMVECTOR(keyframes[keyIndex].eyeOffset);
-        DirectX::XMVECTOR endEye = LoadXMVECTOR(keyframes[(keyIndex + 1) % keyCount].eyeOffset);
+        DirectX::XMVECTOR startEye = loadVector(keyframes[keyIndex].eyeOffset);
+        DirectX::XMVECTOR endEye = loadVector(keyframes[(keyIndex + 1) % keyCount].eyeOffset);
         interpEyeVec = DirectX::XMVectorLerp(startEye, endEye, t);
     }
 
@@ -385,7 +411,7 @@ void EditCameraController::HandleCameraEvent(AnimationConfig* config, float anim
         finalTarget.z - eyeDir.z * interpRange
     };
 
-    Camera::Instance().SetLookAt(eye, finalTarget, DirectX::XMFLOAT3(0, 1, 0));
+    Camera::Instance().SetLookAt(eye, finalTarget, CAMERA_UP);
 
     offsetTarget = interpTarget;
     range = interpRange;

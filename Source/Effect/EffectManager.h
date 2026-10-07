@@ -37,9 +37,9 @@ public:
 
 	// パーティクル発生 
 	void EmitGpuParticle(const DirectX::XMFLOAT3& position, const DirectX::XMFLOAT3& velocity,
-		const DirectX::XMFLOAT4& color, float size, float lifeTime, UINT behacviorType);
+		const DirectX::XMFLOAT4& color, float size, float lifeTime, GpuParticleBehavior behavior);
 
-	// Effeckeerマネージャーの取得
+	// Effekseerマネージャーの取得
 	Effekseer::ManagerRef GetEffekseerManager() { return effekseerManager; }
 
 private:

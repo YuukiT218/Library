@@ -30,13 +30,13 @@ public:
 
 private:
 	// gltfVector3 → XMFLOAT3
-	static DirectX::XMFLOAT3 gltfVector3ToXMFLOAT3(const std::vector<double>& gltfValue);
+	static DirectX::XMFLOAT3 GltfVector3ToXMFLOAT3(const std::vector<double>& gltfValue);
 
 	// gltfQuaternion → XMFLOAT4
-	static DirectX::XMFLOAT4 gltfQuaternionToXMFLOAT4(const std::vector<double>& gltfValue);
+	static DirectX::XMFLOAT4 GltfQuaternionToXMFLOAT4(const std::vector<double>& gltfValue);
 
 	// gltfMatrix → XMFLOAT4X4
-	static DirectX::XMFLOAT4X4 gltfMatrixToXMFLOAT4X4(const std::vector<double>& gltfValue);
+	static DirectX::XMFLOAT4X4 GltfMatrixToXMFLOAT4X4(const std::vector<double>& gltfValue);
 
 	// 座標系変換
 	static void ConvertPositionAxisSystem(DirectX::XMFLOAT3& v);

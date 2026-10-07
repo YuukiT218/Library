@@ -35,20 +35,14 @@ public:
 	virtual void DrawDebugGUI();
 	virtual void DrawDebugChildGUI() {};
 
-	// 攻撃フラグ取得
-	bool GetAttackFlg() { return attackFlg; }
-	// 攻撃フラグセット
-	void SetAttackFlg(bool flg) { attackFlg = flg; };
-	virtual void	SetId(int id) { this->id = id; }
-	virtual int		GetId() { return id; }
+	virtual void SetId(int id) { this->id = id; }
+	virtual int GetId() { return id; }
 	// 攻撃範囲取得
 	virtual float GetAttackRange() { return attackRange; }
 
 	virtual void SetTerritory(DirectX::XMFLOAT3 position, float range) {};
 
 	Model* GetModel() { return model.get(); }
-
-	int GetDeathCount() { return deathCount; }
 
 	// パリィやジャスト回避が成功している場合判定をモーション終了まで消す用のフラグ
 	bool isPlayerInvincible = false;
@@ -60,8 +54,6 @@ public:
 
 	// 攻撃判定取得
 	std::vector<NodeHitSphere> GetAttackHitSpheres() { return attackHitSpheres; }
-
-	std::vector<NodeHitSphere> attackNodeHitSpheres;
 
 	virtual void EditUpdate(float elapsedTime);
 
@@ -79,13 +71,10 @@ protected:
 
 protected:
 	std::shared_ptr<Model> model = nullptr;
-	int	state = 0;
-	bool attackFlg = false;
+	int state = 0;
 	int id = 0;
 	float searchRange = 0.0f;
 	float attackRange = 0.0f;
-
-	int deathCount = 0;
 
 	std::vector<NodeHitSphere> attackHitSpheres;
 
@@ -102,16 +91,15 @@ public:
 	bool IsFocus() const { return isFocus; }
 	void SetDamage(bool damage) { isDamage = damage; }
 	bool IsDamage() const { return isDamage; }
-	void SetLightKbDamage(bool damage) { isLightKnockbackDamage = damage; }
-	bool IsLightKbDamage() const { return isLightKnockbackDamage; }
-	void SetHeavyKbDamage(bool damage) { isHeavyKnockbackDamage = damage; }
-	bool IsHeavyKbDamage() const { return isHeavyKnockbackDamage; }
-	void SetLaunchKbDamage(bool damage) { isLaunchKnockbackDamage = damage; }
-	bool IsLaunchKbDamage() const { return isLaunchKnockbackDamage; }
+	void SetLightKnockbackDamage(bool damage) { isLightKnockbackDamage = damage; }
+	bool IsLightKnockbackDamage() const { return isLightKnockbackDamage; }
+	void SetHeavyKnockbackDamage(bool damage) { isHeavyKnockbackDamage = damage; }
+	bool IsHeavyKnockbackDamage() const { return isHeavyKnockbackDamage; }
+	void SetLaunchKnockbackDamage(bool damage) { isLaunchKnockbackDamage = damage; }
+	bool IsLaunchKnockbackDamage() const { return isLaunchKnockbackDamage; }
 	void ResetDamage() { isDamage = isLightKnockbackDamage = isHeavyKnockbackDamage = isLaunchKnockbackDamage = false; }
 	bool IsAnyDamage() const { return isDamage || isLightKnockbackDamage || isHeavyKnockbackDamage || isLaunchKnockbackDamage; }
 	bool actionFlag = true;
-	bool isTeleport = false;
 	std::string name = " ";
 
 	// カメラが追従すべき位置を取得（論理位置）

@@ -44,10 +44,6 @@ public:
 	void SelectedCamera(float elapsedTime);
 
 private:
-	//敵のスポーン位置のランダム生成
-	DirectX::XMFLOAT3 GetRandomPosition();
-
-private:
 	std::unique_ptr<Player> player;
 	std::unique_ptr<EnemyBoss> boss;
 
@@ -55,9 +51,9 @@ private:
 	std::unique_ptr<SkyBox> skyBox;
 	FreeCameraController freeCameraController;
 
-	std::unique_ptr<PostEffect> posteffect;
+	std::unique_ptr<PostEffect> postEffect;
 
-	AudioSource* BGM;
+	AudioSource* bgm;
 
 	// 点光源
 	DirectX::XMFLOAT4 pointColor{ 0.0f / 255.0f, 50.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f };
@@ -88,5 +84,10 @@ private:
 
 	// 演出用ヘルパー関数
 	void UpdateIntroCamera(float elapsedTime);
+
+	// キャラクターの胸元に寄ったカメラを設定する
+	// angleOffsetDegree: キャラクターの正面から回り込む角度
+	// focusShift: 注視点を左右にずらす量（キャラクターを画面の端に寄せる）
+	void SetCloseUpCamera(const Character& character, float chestHeight, float angleOffsetDegree, float eyeDrop, float focusShift);
 	void UpdateEndingCamera(float elapsedTime, Character* deadCharacter);
 };

@@ -3,6 +3,27 @@
 #include <Xinput.h>
 #include "Input/GamePad.h"
 
+namespace
+{
+	// トリガーの最大値（BYTE）
+	constexpr float TRIGGER_MAX = 255.0f;
+
+	// スティックの最大値（SHORT の絶対値）
+	constexpr float THUMB_MAX = static_cast<float>(0x8000);
+
+	// 振動の強さの最大値（WORD）
+	constexpr float VIBRATION_MAX = 65535.0f;
+
+	// GetAsyncKeyState でキーが押されていることを表すビット
+	constexpr SHORT KEY_DOWN_MASK = static_cast<SHORT>(0x8000);
+
+	// キーが押されているか
+	bool IsKeyDown(int virtualKey)
+	{
+		return (GetAsyncKeyState(virtualKey) & KEY_DOWN_MASK) != 0;
+	}
+}
+
 // 更新
 void GamePad::Update()
 {
@@ -52,12 +73,12 @@ void GamePad::Update()
 			pad.sThumbRY = 0;
 		}
 
-		triggerL = static_cast<float>(pad.bLeftTrigger) / 255.0f;
-		triggerR = static_cast<float>(pad.bRightTrigger) / 255.0f;
-		axisLx = static_cast<float>(pad.sThumbLX) / static_cast<float>(0x8000);
-		axisLy = static_cast<float>(pad.sThumbLY) / static_cast<float>(0x8000);
-		axisRx = static_cast<float>(pad.sThumbRX) / static_cast<float>(0x8000);
-		axisRy = static_cast<float>(pad.sThumbRY) / static_cast<float>(0x8000);
+		triggerL = static_cast<float>(pad.bLeftTrigger) / TRIGGER_MAX;
+		triggerR = static_cast<float>(pad.bRightTrigger) / TRIGGER_MAX;
+		axisLx = static_cast<float>(pad.sThumbLX) / THUMB_MAX;
+		axisLy = static_cast<float>(pad.sThumbLY) / THUMB_MAX;
+		axisRx = static_cast<float>(pad.sThumbRX) / THUMB_MAX;
+		axisRy = static_cast<float>(pad.sThumbRY) / THUMB_MAX;
 	}
 	else
 	{
@@ -72,8 +93,8 @@ void GamePad::Update()
 			// 製品IDをチェックしてPS4コントローラーだけ対応する
 			static const WORD PS4_PID = 1476;
 
-			JOYCAPS joy_caps;
-			if (joyGetDevCaps(slot, &joy_caps, sizeof(JOYCAPS)) == JOYERR_NOERROR)
+			JOYCAPS joyCaps;
+			if (joyGetDevCaps(slot, &joyCaps, sizeof(JOYCAPS)) == JOYERR_NOERROR)
 			{
 				// 十字キー
 				if (joyInfo.dwPOV != 0xFFFF)
@@ -92,7 +113,7 @@ void GamePad::Update()
 					int angle = joyInfo.dwPOV / 4500;
 					newButtonState |= povBit[angle];
 				}
-				if (joy_caps.wPid == PS4_PID)
+				if (joyCaps.wPid == PS4_PID)
 				{
 					// ボタン情報
 					if (joyInfo.dwButtons & JOY_BUTTON1)  newButtonState |= BTN_Y;
@@ -136,41 +157,41 @@ void GamePad::Update()
 		float ly = 0.0f;
 		float rx = 0.0f;
 		float ry = 0.0f;
-		if (GetAsyncKeyState('W') & 0x8000) ly = 1.0f;
-		if (GetAsyncKeyState('A') & 0x8000) lx = -1.0f;
-		if (GetAsyncKeyState('S') & 0x8000) ly = -1.0f;
-		if (GetAsyncKeyState('D') & 0x8000) lx = 1.0f;
-		if (GetAsyncKeyState('I') & 0x8000) ry = 1.0f;
-		if (GetAsyncKeyState('J') & 0x8000) rx = -1.0f;
-		if (GetAsyncKeyState('K') & 0x8000) ry = -1.0f;
-		if (GetAsyncKeyState('L') & 0x8000) rx = 1.0f;
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000) newButtonState |= BTN_A;
-		if (GetAsyncKeyState(VK_RETURN) & 0x8000) newButtonState |= BTN_A_EMU;
-		//if (GetAsyncKeyState('P') & 0x8000) newButtonState |= BTN_B;
-		if (GetAsyncKeyState(VK_SHIFT) & 0x8000) newButtonState |= BTN_X;
-		//if (GetAsyncKeyState(VK_CONTROL) & 0x8000) newButtonState |= BTN_Y;
-		if (GetAsyncKeyState(VK_CONTROL) & 0x8000) newButtonState |= BTN_LEFT_THUMB;
-		if (GetAsyncKeyState('Q') & 0x8000) newButtonState |= BTN_RIGHT_SHOULDER;
+		if (IsKeyDown('W')) ly = 1.0f;
+		if (IsKeyDown('A')) lx = -1.0f;
+		if (IsKeyDown('S')) ly = -1.0f;
+		if (IsKeyDown('D')) lx = 1.0f;
+		if (IsKeyDown('I')) ry = 1.0f;
+		if (IsKeyDown('J')) rx = -1.0f;
+		if (IsKeyDown('K')) ry = -1.0f;
+		if (IsKeyDown('L')) rx = 1.0f;
+		if (IsKeyDown(VK_SPACE)) newButtonState |= BTN_A;
+		if (IsKeyDown(VK_RETURN)) newButtonState |= BTN_A_EMU;
+		//if (IsKeyDown('P')) newButtonState |= BTN_B;
+		if (IsKeyDown(VK_SHIFT)) newButtonState |= BTN_X;
+		//if (IsKeyDown(VK_CONTROL)) newButtonState |= BTN_Y;
+		if (IsKeyDown(VK_CONTROL)) newButtonState |= BTN_LEFT_THUMB;
+		if (IsKeyDown('Q')) newButtonState |= BTN_RIGHT_SHOULDER;
 
 		//矢印キーにも対応させる
 		// 上
-		if ((GetAsyncKeyState('W') & 0x8000) || (GetAsyncKeyState(VK_UP) & 0x8000))
+		if (IsKeyDown('W') || IsKeyDown(VK_UP))
 			newButtonState |= BTN_UP;
 
 		// 右
-		if ((GetAsyncKeyState('D') & 0x8000) || (GetAsyncKeyState(VK_RIGHT) & 0x8000))
+		if (IsKeyDown('D') || IsKeyDown(VK_RIGHT))
 			newButtonState |= BTN_RIGHT;
 
 		// 下
-		if ((GetAsyncKeyState('S') & 0x8000) || (GetAsyncKeyState(VK_DOWN) & 0x8000))
+		if (IsKeyDown('S') || IsKeyDown(VK_DOWN))
 			newButtonState |= BTN_DOWN;
 
 		// 左
-		if ((GetAsyncKeyState('A') & 0x8000) || (GetAsyncKeyState(VK_LEFT) & 0x8000))
+		if (IsKeyDown('A') || IsKeyDown(VK_LEFT))
 			newButtonState |= BTN_LEFT;
 
 
-		if (GetAsyncKeyState(VK_ESCAPE) & 0x8000)	newButtonState |= BTN_START;
+		if (IsKeyDown(VK_ESCAPE))	newButtonState |= BTN_START;
 
 #if 0
 		if (newButtonState & BTN_UP)    ly = 1.0f;
@@ -179,14 +200,14 @@ void GamePad::Update()
 		if (newButtonState & BTN_LEFT)  lx = -1.0f;
 #endif
 
-		if (lx >= 1.0f || lx <= -1.0f || ly >= 1.0f || ly <= -1.0)
+		if (lx >= 1.0f || lx <= -1.0f || ly >= 1.0f || ly <= -1.0f)
 		{
 			float power = ::sqrtf(lx * lx + ly * ly);
 			axisLx = lx / power;
 			axisLy = ly / power;
 		}
 
-		if (rx >= 1.0f || rx <= -1.0f || ry >= 1.0f || ry <= -1.0)
+		if (rx >= 1.0f || rx <= -1.0f || ry >= 1.0f || ry <= -1.0f)
 		{
 			float power = ::sqrtf(rx * rx + ry * ry);
 			axisRx = rx / power;
@@ -202,11 +223,11 @@ void GamePad::Update()
 
 	// ボタン情報の更新
 	{
-		buttonState[1] = buttonState[0];	// スイッチ履歴
-		buttonState[0] = newButtonState;
+		buttonState[PREVIOUS_STATE] = buttonState[CURRENT_STATE];	// スイッチ履歴
+		buttonState[CURRENT_STATE] = newButtonState;
 
-		buttonDown = ~buttonState[1] & newButtonState;	// 押した瞬間
-		buttonUp = ~newButtonState & buttonState[1];	// 離した瞬間
+		buttonDown = ~buttonState[PREVIOUS_STATE] & newButtonState;	// 押した瞬間
+		buttonUp = ~newButtonState & buttonState[PREVIOUS_STATE];	// 離した瞬間
 	}
 }
 
@@ -214,8 +235,8 @@ void GamePad::Update()
 void GamePad::Vibrate(float leftMotor, float rightMotor)
 {
 	XINPUT_VIBRATION vibration = {};
-	vibration.wLeftMotorSpeed = static_cast<WORD>(leftMotor * 65535.0f);	// 0～65535
-	vibration.wRightMotorSpeed = static_cast<WORD>(rightMotor * 65535.0f);	// 0～65535
+	vibration.wLeftMotorSpeed = static_cast<WORD>(leftMotor * VIBRATION_MAX);
+	vibration.wRightMotorSpeed = static_cast<WORD>(rightMotor * VIBRATION_MAX);
 
 	XInputSetState(slot, &vibration);	// slotはコントローラー番号(0～3)
 }

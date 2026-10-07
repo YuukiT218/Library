@@ -23,13 +23,13 @@ public:
 protected:
 	void ClearShaderResourceViews(int startSlot, ID3D11DeviceContext* dc)
 	{
-		ID3D11ShaderResourceView* clear_shader_resource_view[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
-		dc->VSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-		dc->HSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-		dc->DSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-		dc->GSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-		dc->PSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
-		dc->CSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clear_shader_resource_view);
+		ID3D11ShaderResourceView* clearShaderResourceViews[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
+		dc->VSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+		dc->HSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+		dc->DSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+		dc->GSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+		dc->PSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
+		dc->CSSetShaderResources(startSlot, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, clearShaderResourceViews);
 	}
 
 	void ClearShaderSlots(ID3D11DeviceContext* dc)

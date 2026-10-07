@@ -82,28 +82,28 @@ public:
 	void SetLockOnCamera(Enemy* enemy) { lockOnEnemy = enemy; }
 
 	// プレイヤーの回避状態取得
-	bool GetPlayerIsRolling() { return isRolling; }
+	bool IsRolling() { return isRolling; }
 
 	// プレイヤーの回避状態設定
-	void SetPlayerRolling(bool rollingFlag) { isRolling = rollingFlag; }
+	void SetRolling(bool rollingFlag) { isRolling = rollingFlag; }
 
 	// プレイヤーのガード状態取得
-	bool GetPlayerIsGuard() { return isGuard; }
+	bool IsGuard() { return isGuard; }
 
 	// プレイヤーのガード状態設定
-	void SetPlayerGuard(bool guardFlag) { isGuard = guardFlag; }
+	void SetGuard(bool guardFlag) { isGuard = guardFlag; }
 
 	// ガードカウンター可能か状態取得
-	bool GetPlayerIsCounter() { return isStandbyCounter; }
+	bool IsStandbyCounter() { return isStandbyCounter; }
 
 	// ガードカウンター可能か状態設定
-	void SetPlayerCounter(bool flag) { isStandbyCounter = flag; }
+	void SetStandbyCounter(bool flag) { isStandbyCounter = flag; }
 
 	// プレイヤーのパリィ状態取得
-	bool GetPlayerIsParry() { return isParry; }
+	bool IsParry() { return isParry; }
 
 	// プレイヤーのパリィ状態設定
-	void SetPlayerParry(bool flag) { isParry = flag; }
+	void SetParry(bool flag) { isParry = flag; }
 
 	// モデル取得
 	std::shared_ptr<Model> GetPlayerModel() { return model; }
@@ -112,7 +112,7 @@ public:
 	void ChangeState(PlayerStateId stateId);
 
 	// 現在のステートID取得 (追加)
-	PlayerStateId GetCurrentStateId() const { return currentStateID; }
+	PlayerStateId GetCurrentStateId() const { return currentStateId; }
 
 	// 移動処理
 	void PlayerMove(float elapsedTime, float moveRate = 1.0f, float turnRate = 1.0f);
@@ -139,7 +139,7 @@ public:
 	}
 
 	// 移動設定
-	void SetMovement(DirectX::XMFLOAT3& Vec, float moveRate);
+	void SetMovement(DirectX::XMFLOAT3& vec, float moveRate);
 
 	// 摩擦力設定
 	void SetFriction(float friction) { this->friction = friction; }
@@ -167,18 +167,15 @@ public:
 	DeathMenuOption currentSelection = DeathMenuOption::Continue;
 	int GetCurrentSelection() { return static_cast<int>(currentSelection); }
 
-	// ノックバック位置
+	// 敵をノックバック・テレポートさせる位置（プレイヤー前方）
 	DirectX::SimpleMath::Vector3 knockbackPosition;
-	float knockBackPower = 2.0f;
+	float knockbackDistance = 2.0f;
 	DirectX::SimpleMath::Vector3 lightKnockbackPosition;
-	float lightKnockBackPower = 4.3f;
+	float lightKnockbackDistance = 4.3f;
 	DirectX::SimpleMath::Vector3 heavyKnockbackPosition;
-	float heavyKnockBackPower = 7.0f;
+	float heavyKnockbackDistance = 7.0f;
 	DirectX::SimpleMath::Vector3 launchKnockbackPosition;
-	float launchKnockBackPower = 3.0f;
-
-	// コンボのY座標補正実行判定の閾値
-	DirectX::SimpleMath::Vector3 epsilon {1000.0f, 0.8f, 1000.0f};
+	float launchKnockbackRise = 3.0f;
 
 	// ノックバック強度
 	float normalKnockbackPower = -1.0f;
@@ -200,13 +197,13 @@ public:
 	bool IsLaunchDamage() const { return isLaunchDamage; }
 	void SetLaunchDamage(bool flag) { isLaunchDamage = flag; }
 
-	bool IsKnockDownDamage() const { return isKnockDownDamage; }
-	void SetKnockDownDamage(bool flag) { isKnockDownDamage = flag; }
+	bool IsKnockdownDamage() const { return isKnockdownDamage; }
+	void SetKnockdownDamage(bool flag) { isKnockdownDamage = flag; }
 
 	// 任意のダメージを受けているか
 	bool IsAnyDamage() const
 	{
-		return isDamage || isLightDamage || isHeavyDamage || isLaunchDamage || isKnockDownDamage;
+		return isDamage || isLightDamage || isHeavyDamage || isLaunchDamage || isKnockdownDamage;
 	}
 
 	// 攻撃を受けた方向を記録
@@ -234,34 +231,20 @@ protected:
 private:
 	std::unique_ptr<Sword> sword;
 
-	float nodeRadius[11] =
-	{
-		0.15f,
-		0.15f,
-		0.2f,
-		0.15f,
-		0.1f,
-		0.1f,
-		0.2f,
-		0.1f,
-		0.1f,
-		0.1f,
-		0.1f,
-	};
-
+	// 全身の当たり判定（ノード名と半径）
 	std::vector<NodeHitSphere> nodeHitSpheres =
 	{
-		{"Character1_LeftLeg", nodeRadius[0]},
-		{"Character1_RightLeg", nodeRadius[1]},
-		{"Character1_Spine", nodeRadius[2]},
-		{"Character1_Head", nodeRadius[3]},
-		{"Character1_LeftForeArm", nodeRadius[4]},
-		{"Character1_RightForeArm", nodeRadius[5]},
-		{"Character1_Spine2", nodeRadius[6]},
-		{"Character1_LeftShoulder", nodeRadius[7]},
-		{"Character1_RightShoulder", nodeRadius[8]},
-		{"Character1_LeftFoot", nodeRadius[9]},
-		{"Character1_RightFoot", nodeRadius[10]},
+		{"Character1_LeftLeg", 0.15f},
+		{"Character1_RightLeg", 0.15f},
+		{"Character1_Spine", 0.2f},
+		{"Character1_Head", 0.15f},
+		{"Character1_LeftForeArm", 0.1f},
+		{"Character1_RightForeArm", 0.1f},
+		{"Character1_Spine2", 0.2f},
+		{"Character1_LeftShoulder", 0.1f},
+		{"Character1_RightShoulder", 0.1f},
+		{"Character1_LeftFoot", 0.1f},
+		{"Character1_RightFoot", 0.1f},
 	};
 
 private:
@@ -281,15 +264,6 @@ private:
 	// プレイヤーとエネミーの衝突処理
 	void CollisionPlayerVsEnemies();
 
-	// 攻撃入力処理
-	bool InputAttack();
-
-	// 体力ゲージ表示
-	void DisplayHealthBar();
-
-	// ヒットストップ処理
-	void HitStop(float elapsedTime);
-
 	// ノックバック位置設定
 	void SetKnockbackPosition();
 
@@ -301,7 +275,7 @@ private:
 
 private:
 	float moveSpeed = 7.0f;
-	float turnSpeed = DirectX::XMConvertToRadians(1080);
+	float turnSpeed = DirectX::XMConvertToRadians(1080.0f);
 	float jumpSpeed = 20.0f;
 	int jumpCount = 0;
 	int jumpLimit = 2;
@@ -316,7 +290,7 @@ private:
 	bool isLightDamage = false;
 	bool isHeavyDamage = false;
 	bool isLaunchDamage = false;
-	bool isKnockDownDamage = false;
+	bool isKnockdownDamage = false;
 
 	// 攻撃を受けた方向
 	DirectX::XMFLOAT3 damageDirection = { 0.0f, 0.0f, 0.0f };
@@ -328,8 +302,8 @@ private:
 	Enemy* lockOnEnemy = nullptr;
 
 	// アニメーション変数
-	PlayerStateId currentStateID = PlayerStateId::EnumCount;
-	PlayerStateId lastStateID = PlayerStateId::EnumCount;
+	PlayerStateId currentStateId = PlayerStateId::EnumCount;
+	PlayerStateId lastStateId = PlayerStateId::EnumCount;
 	std::unique_ptr<PlayerState> states[static_cast<int>(PlayerStateId::EnumCount)];
 };
 

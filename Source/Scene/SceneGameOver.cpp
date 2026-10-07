@@ -6,11 +6,25 @@
 #include "SceneManager.h"
 #include "Input/Input.h"
 #include "Graphics/GpuResourceUtils.h"
+#include "System/ScreenSize.h"
 #include <map>
 
 // メモリリーク検出用
 
 #include <stdlib.h>
+
+namespace
+{
+	// 全画面の1枚絵の画像サイズ
+	constexpr float FULL_SCREEN_TEXTURE_WIDTH = static_cast<float>(ScreenSize::WIDTH);
+	constexpr float FULL_SCREEN_TEXTURE_HEIGHT = static_cast<float>(ScreenSize::HEIGHT);
+
+	// 遷移直後の誤入力を防ぐため、入力を受け付けない時間
+	constexpr float INPUT_WAIT_SECONDS = 0.5f;
+
+	// 画面クリア色（ゲームオーバーなので黒）
+	const DirectX::XMFLOAT4 CLEAR_COLOR = { 0.0f, 0.0f, 0.0f, 1.0f };
+}
 
 
 
@@ -19,12 +33,12 @@ void SceneGameOver::Initialize()
 	ID3D11Device* device = Graphics::Instance().GetDevice();
 
 	// スプライト初期化
-	// 全て1920x1080のサイズと仮定
-	Back = std::make_unique<Sprite>(device, "Data/Sprite/Title_Back.png"); // ファイル名は適宜調整してください
-	Retry = std::make_unique<Sprite>(device, "Data/Sprite/Retry.png");
-	Retry1 = std::make_unique<Sprite>(device, "Data/Sprite/Retry1.png");
-	BackTitle = std::make_unique<Sprite>(device, "Data/Sprite/BackTitle.png");
-	BackTitle1 = std::make_unique<Sprite>(device, "Data/Sprite/BackTitle1.png");
+	// 全て画面と同じサイズの1枚絵
+	backSprite = std::make_unique<Sprite>(device, "Data/Sprite/Title_Back.png");
+	retrySprite = std::make_unique<Sprite>(device, "Data/Sprite/Retry.png");
+	retrySelectedSprite = std::make_unique<Sprite>(device, "Data/Sprite/Retry1.png");
+	backTitleSprite = std::make_unique<Sprite>(device, "Data/Sprite/BackTitle.png");
+	backTitleSelectedSprite = std::make_unique<Sprite>(device, "Data/Sprite/BackTitle1.png");
 
 	// 初期状態はリトライ選択
 	isRetrySelected = true;
@@ -40,8 +54,8 @@ void SceneGameOver::Update(float elapsedTime)
 {
 	timer += elapsedTime;
 
-	// 遷移直後の誤入力を防ぐため、少し待機時間を設ける（任意）
-	if (timer < 0.5f) return;
+	// 遷移直後の誤入力を防ぐため、少し待機時間を設ける
+	if (timer < INPUT_WAIT_SECONDS) return;
 
 	GamePad& gamePad = Input::Instance().GetGamePad();
 	Mouse& mouse = Input::Instance().GetMouse();
@@ -75,12 +89,11 @@ void SceneGameOver::Render(float elapsedTime)
 	ID3D11DeviceContext* dc = graphics.GetDeviceContext();
 
 	// 画面クリア＆レンダーターゲット設定
-	DirectX::XMFLOAT4 color = { 0.0f, 0.0f, 0.0f, 1.0f }; // ゲームオーバーなので黒背景クリア等が一般的
 	std::map<FrameBufferId, FrameBuffer*> buffers;
 	for (int i = 0; i < static_cast<int>(FrameBufferId::EnumCount); i++)
 	{
 		buffers[static_cast<FrameBufferId>(i)] = Graphics::Instance().GetFrameBuffer(static_cast<FrameBufferId>(i));
-		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, color);
+		buffers[static_cast<FrameBufferId>(i)]->Clear(dc, CLEAR_COLOR);
 	}
 	buffers[FrameBufferId::Display]->SetRenderTargets(dc);
 
@@ -107,29 +120,29 @@ void SceneGameOver::Render(float elapsedTime)
 	// --- 描画実行 ---
 
 	// 背景描画
-	if (Back)
+	if (backSprite)
 	{
-		Back->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, 1920, 1080, 0, 1, 1, 1, 1);
+		backSprite->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, FULL_SCREEN_TEXTURE_WIDTH, FULL_SCREEN_TEXTURE_HEIGHT, 0, 1, 1, 1, 1);
 	}
 
 	// 選択肢の描画
 	if (isRetrySelected)
 	{
 		// リトライが選択されている場合
-		// Retry1 (選択中:ハイライト版) を描画
-		if (Retry1) Retry1->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, 1920, 1080, 0, 1, 1, 1, 1);
+		// retrySelectedSprite (選択中:ハイライト版) を描画
+		if (retrySelectedSprite) retrySelectedSprite->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, FULL_SCREEN_TEXTURE_WIDTH, FULL_SCREEN_TEXTURE_HEIGHT, 0, 1, 1, 1, 1);
 
-		// BackTitle (未選択:通常版) を描画
-		if (BackTitle) BackTitle->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, 1920, 1080, 0, 1, 1, 1, 1);
+		// backTitleSprite (未選択:通常版) を描画
+		if (backTitleSprite) backTitleSprite->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, FULL_SCREEN_TEXTURE_WIDTH, FULL_SCREEN_TEXTURE_HEIGHT, 0, 1, 1, 1, 1);
 	}
 	else
 	{
 		// タイトルへ戻るが選択されている場合
-		// Retry (未選択:通常版) を描画
-		if (Retry) Retry->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, 1920, 1080, 0, 1, 1, 1, 1);
+		// retrySprite (未選択:通常版) を描画
+		if (retrySprite) retrySprite->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, FULL_SCREEN_TEXTURE_WIDTH, FULL_SCREEN_TEXTURE_HEIGHT, 0, 1, 1, 1, 1);
 
-		// BackTitle1 (選択中:ハイライト版) を描画
-		if (BackTitle1) BackTitle1->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, 1920, 1080, 0, 1, 1, 1, 1);
+		// backTitleSelectedSprite (選択中:ハイライト版) を描画
+		if (backTitleSelectedSprite) backTitleSelectedSprite->Render(dc, 0, 0, 0, screenW, screenH, 0, 0, FULL_SCREEN_TEXTURE_WIDTH, FULL_SCREEN_TEXTURE_HEIGHT, 0, 1, 1, 1, 1);
 	}
 
 #ifdef _DEBUG

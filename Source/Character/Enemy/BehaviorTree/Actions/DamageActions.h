@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "EnemyActionBase.h"
 #include "Character/Player/Player.h"
-#include "Math\Mathf.h"
+#include "Math/Mathf.h"
 
 // ダメージの種類を定義
-enum class DamageType
+enum class EnemyDamageType
 {
 	Normal,      // 通常ダメージ
 	Light,       // 軽いノックバック
@@ -34,9 +34,57 @@ public:
 		int getUp;
 	} anims;
 
-	DamageType currentDamageType = DamageType::Normal;
+	EnemyDamageType currentDamageType = EnemyDamageType::Normal;
 	bool animationsInitialized = false;
 	float pauseTimer = 0.0f;
+
+	// 地面からこれ以上離れていれば空中で被弾したとみなす
+	static constexpr float AIR_DAMAGE_MIN_HEIGHT = 0.5f;
+
+	// 打ち上げ関連のアニメーションのブレンド時間
+	static constexpr float LAUNCH_BLEND_SECONDS = 0.1f;
+
+	// 空中で被弾した時の重力と浮き上がり速度
+	static constexpr float AIR_DAMAGE_GRAVITY = -0.15f;
+	static constexpr float AIR_DAMAGE_RISE_VELOCITY = 2.0f;
+
+	// 重攻撃を空中で受けた時の重力
+	static constexpr float AIR_HEAVY_DAMAGE_GRAVITY = -0.2f;
+
+	// 重攻撃を地上で受けた時の浮き上がり速度
+	static constexpr float GROUND_HEAVY_DAMAGE_RISE_VELOCITY = 1.5f;
+
+	// 打ち上げ初速の計算係数（v = sqrt(係数 * |g| * h)）
+	static constexpr float LAUNCH_VELOCITY_COEFFICIENT = 100.0f;
+
+	// 打ち上げの最高到達点で停止する時間
+	static constexpr float LAUNCH_APEX_PAUSE_SECONDS = 0.3f;
+
+	// ノックバック位置へ寄せる補間率
+	static constexpr float NORMAL_AIR_KNOCKBACK_LERP = 0.15f;
+	static constexpr float LIGHT_AIR_KNOCKBACK_LERP = 0.4f;
+	static constexpr float GROUND_KNOCKBACK_LERP = 0.25f;
+	static constexpr float HEAVY_AIR_KNOCKBACK_LERP = 0.3f;
+	static constexpr float HEAVY_GROUND_KNOCKBACK_LERP = 0.2f;
+	static constexpr float LAUNCH_START_KNOCKBACK_LERP = 0.5f;
+	static constexpr float LAUNCH_CONTINUOUS_KNOCKBACK_LERP = 0.3f;
+
+	// 指定位置へ水平方向に寄せる
+	void MoveTowardHorizontally(const DirectX::XMFLOAT3& target, float lerpRate)
+	{
+		const DirectX::XMFLOAT3& position = owner->GetPosition();
+		owner->SetPosition({
+			Mathf::Lerp(position.x, target.x, lerpRate),
+			position.y,
+			Mathf::Lerp(position.z, target.z, lerpRate)
+			});
+	}
+
+	// 空中で被弾したか
+	bool IsAirborneDamage()
+	{
+		return !owner->IsGround() && owner->GetDistanceFromGround() > AIR_DAMAGE_MIN_HEIGHT;
+	}
 
 	// 初期化処理
 	void InitializeAnimations()
@@ -55,33 +103,33 @@ public:
 	}
 
 	// ダメージタイプ判定
-	DamageType GetCurrentDamageType()
+	EnemyDamageType GetCurrentDamageType()
 	{
-		if (owner->IsLaunchKbDamage())
-			return DamageType::Launch;
-		else if (owner->IsHeavyKbDamage())
-			return DamageType::Heavy;
-		else if (owner->IsLightKbDamage())
-			return DamageType::Light;
+		if (owner->IsLaunchKnockbackDamage())
+			return EnemyDamageType::Launch;
+		else if (owner->IsHeavyKnockbackDamage())
+			return EnemyDamageType::Heavy;
+		else if (owner->IsLightKnockbackDamage())
+			return EnemyDamageType::Light;
 		else
-			return DamageType::Normal;
+			return EnemyDamageType::Normal;
 	}
 
 	// ダメージタイプ別の初期処理
-	void HandleDamageStart(DamageType type, float elapsedTime);
+	void HandleDamageStart(EnemyDamageType type, float elapsedTime);
 
 	// ノックバック位置の取得
-	DirectX::XMFLOAT3 GetKnockbackPosition(DamageType type)
+	DirectX::XMFLOAT3 GetKnockbackPosition(EnemyDamageType type)
 	{
 		switch (type)
 		{
-		case DamageType::Normal:
+		case EnemyDamageType::Normal:
 			return Player::Instance().knockbackPosition;
-		case DamageType::Light:
+		case EnemyDamageType::Light:
 			return Player::Instance().lightKnockbackPosition;
-		case DamageType::Heavy:
+		case EnemyDamageType::Heavy:
 			return Player::Instance().heavyKnockbackPosition;
-		case DamageType::Launch:
+		case EnemyDamageType::Launch:
 			return Player::Instance().launchKnockbackPosition;
 		default:
 			return Player::Instance().knockbackPosition;
@@ -98,6 +146,10 @@ public:
 	DeadAction(ActorType* actor) : EnemyActionBase<ActorType>(actor) {}
 	State Run(float elapsedTime);
 private:
+	// 死亡エフェクトの表示位置の高さと大きさ
+	static constexpr float DEATH_EFFECT_OFFSET_Y = 1.0f;
+	static constexpr float DEATH_EFFECT_SCALE = 0.5f;
+
 	Effekseer::Handle handle = -1;
 };
 
@@ -105,101 +157,73 @@ private:
 // ダメージ
 // ダメージタイプ別の初期処理
 template <typename ActorType>
-void UnifiedDamageAction<ActorType>::HandleDamageStart(DamageType type, float elapsedTime)
+void UnifiedDamageAction<ActorType>::HandleDamageStart(EnemyDamageType type, float elapsedTime)
 {
 	owner->SetTargetPosition(Player::Instance().GetPosition());
 	owner->TurnToTarget(elapsedTime, TurnSpeed::INSTANT);
 
 	// ダメージフラグをリセット
 	owner->SetDamage(false);
-	owner->SetLightKbDamage(false);
-	owner->SetHeavyKbDamage(false);
-	owner->SetLaunchKbDamage(false);
+	owner->SetLightKnockbackDamage(false);
+	owner->SetHeavyKnockbackDamage(false);
+	owner->SetLaunchKnockbackDamage(false);
 
 	DirectX::XMFLOAT3 knockbackPos = GetKnockbackPosition(type);
 
 	switch (type)
 	{
-	case DamageType::Normal:
-		if (!owner->IsGround() && owner->GetDistanceFromGround() > 0.5f)
+	case EnemyDamageType::Normal:
+		if (IsAirborneDamage())
 		{
 			// 空中ダメージ
-			owner->SetGravity(-0.15f);
-			owner->SetPosition({
-				Mathf::Lerp(owner->GetPosition().x, knockbackPos.x, 0.15f),
-				owner->GetPosition().y,
-				Mathf::Lerp(owner->GetPosition().z, knockbackPos.z, 0.15f)
-				});
-			owner->SetVerticalVelocity(2.0f);
-			owner->GetModel()->PlayRootMotion(anims.airStart, false, true, 0.2f, "root");
+			owner->SetGravity(AIR_DAMAGE_GRAVITY);
+			MoveTowardHorizontally(knockbackPos, NORMAL_AIR_KNOCKBACK_LERP);
+			owner->SetVerticalVelocity(AIR_DAMAGE_RISE_VELOCITY);
+			this->PlayRootMotion(anims.airStart, false, this->ACTION_BLEND_SECONDS);
 		}
 		else
 		{
 			// 地上ダメージ
-			owner->SetPosition({
-				Mathf::Lerp(owner->GetPosition().x, knockbackPos.x, 0.25f),
-				owner->GetPosition().y,
-				Mathf::Lerp(owner->GetPosition().z, knockbackPos.z, 0.25f)
-				});
-			owner->GetModel()->PlayRootMotion(anims.normalGround, false, true, owner->GetBlendSeconds(), "root");
+			MoveTowardHorizontally(knockbackPos, GROUND_KNOCKBACK_LERP);
+			this->PlayRootMotion(anims.normalGround, false);
 		}
 		break;
 
-	case DamageType::Light:
-		if (!owner->IsGround() && owner->GetDistanceFromGround() > 0.5f)
+	case EnemyDamageType::Light:
+		if (IsAirborneDamage())
 		{
-			owner->SetGravity(-0.15f);
-			owner->SetPosition({
-				Mathf::Lerp(owner->GetPosition().x, knockbackPos.x, 0.4f),
-				owner->GetPosition().y,
-				Mathf::Lerp(owner->GetPosition().z, knockbackPos.z, 0.4f)
-				});
-			owner->SetVerticalVelocity(2.0f);
-			owner->GetModel()->PlayRootMotion(anims.airStart, false, true, 0.2f, "root");
+			owner->SetGravity(AIR_DAMAGE_GRAVITY);
+			MoveTowardHorizontally(knockbackPos, LIGHT_AIR_KNOCKBACK_LERP);
+			owner->SetVerticalVelocity(AIR_DAMAGE_RISE_VELOCITY);
+			this->PlayRootMotion(anims.airStart, false, this->ACTION_BLEND_SECONDS);
 		}
 		else
 		{
-			owner->SetPosition({
-				Mathf::Lerp(owner->GetPosition().x, knockbackPos.x, 0.25f),
-				owner->GetPosition().y,
-				Mathf::Lerp(owner->GetPosition().z, knockbackPos.z, 0.25f)
-				});
-			owner->GetModel()->PlayRootMotion(anims.lightGround, false, true, owner->GetBlendSeconds(), "root");
+			MoveTowardHorizontally(knockbackPos, GROUND_KNOCKBACK_LERP);
+			this->PlayRootMotion(anims.lightGround, false);
 		}
 		break;
 
-	case DamageType::Heavy:
-		if (!owner->IsGround() && owner->GetDistanceFromGround() > 0.5f)
+	case EnemyDamageType::Heavy:
+		if (IsAirborneDamage())
 		{
-			owner->SetGravity(-0.2f);
-			owner->SetPosition({
-				Mathf::Lerp(owner->GetPosition().x, knockbackPos.x, 0.3f),
-				owner->GetPosition().y,
-				Mathf::Lerp(owner->GetPosition().z, knockbackPos.z, 0.3f)
-				});
+			owner->SetGravity(AIR_HEAVY_DAMAGE_GRAVITY);
+			MoveTowardHorizontally(knockbackPos, HEAVY_AIR_KNOCKBACK_LERP);
 		}
 		else
 		{
-			owner->SetPosition({
-				Mathf::Lerp(owner->GetPosition().x, knockbackPos.x, 0.2f),
-				owner->GetPosition().y,
-				Mathf::Lerp(owner->GetPosition().z, knockbackPos.z, 0.2f)
-				});
-			owner->SetVerticalVelocity(1.5f);
+			MoveTowardHorizontally(knockbackPos, HEAVY_GROUND_KNOCKBACK_LERP);
+			owner->SetVerticalVelocity(GROUND_HEAVY_DAMAGE_RISE_VELOCITY);
 		}
-		owner->GetModel()->PlayRootMotion(anims.heavyGround, false, true, owner->GetBlendSeconds(), "root");
+		this->PlayRootMotion(anims.heavyGround, false);
 		break;
 
-	case DamageType::Launch:
+	case EnemyDamageType::Launch:
 		// 打ち上げアニメーション再生
-		owner->GetModel()->PlayRootMotion(anims.airStart, false, true, 0.1f, "root");
+		this->PlayRootMotion(anims.airStart, false, LAUNCH_BLEND_SECONDS);
 
 		// 水平方向の位置を補間で移動
-		owner->SetPosition({
-			Mathf::Lerp(owner->GetPosition().x, knockbackPos.x, 0.5f),
-			owner->GetPosition().y,
-			Mathf::Lerp(owner->GetPosition().z, knockbackPos.z, 0.5f)
-			});
+		MoveTowardHorizontally(knockbackPos, LAUNCH_START_KNOCKBACK_LERP);
 
 		// 目標高度までの距離を計算
 		float targetHeight = knockbackPos.y;
@@ -207,7 +231,7 @@ void UnifiedDamageAction<ActorType>::HandleDamageStart(DamageType type, float el
 		float heightDiff = targetHeight - currentHeight;
 
 		// 打ち上げに必要な初速度を計算
-		float launchVelocity = sqrtf(100.0f * fabsf(owner->GetGravity()) * heightDiff);
+		float launchVelocity = sqrtf(LAUNCH_VELOCITY_COEFFICIENT * fabsf(owner->GetGravity()) * heightDiff);
 		owner->SetVerticalVelocity(launchVelocity);
 		break;
 	}
@@ -230,22 +254,22 @@ typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(f
 
 	case 1: // アニメーション再生中
 		// Normal/Lightダメージで地上アニメーションが終了した場合
-		if ((currentDamageType == DamageType::Normal || currentDamageType == DamageType::Light) &&
+		if ((currentDamageType == EnemyDamageType::Normal || currentDamageType == EnemyDamageType::Light) &&
 			owner->IsGround() &&
 			!owner->GetModel()->IsPlayAnimation())
 		{
-			owner->SetGravity(-0.3f);
+			owner->SetGravity(Character::DEFAULT_GRAVITY);
 			step = 0;
 			return State::Complete;
 		}
 
 		// Heavyダメージで地上着地した場合、起き上がりへ
-		if (currentDamageType == DamageType::Heavy &&
+		if (currentDamageType == EnemyDamageType::Heavy &&
 			owner->IsGround() &&
 			!owner->GetModel()->IsPlayAnimation())
 		{
 			owner->SetVerticalVelocity(0.0f);
-			owner->GetModel()->PlayRootMotion(anims.getUp, false, true, owner->GetBlendSeconds(), "root");
+			this->PlayRootMotion(anims.getUp, false);
 			step = 4; // 起き上がりステップへ
 			break;
 		}
@@ -253,27 +277,22 @@ typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(f
 		// 空中からのダメージでアニメーションが終了
 		if (!owner->IsGround() && !owner->GetModel()->IsPlayAnimation())
 		{
-			owner->GetModel()->PlayRootMotion(anims.airLoop, true, true, 0.2f, "root");
+			this->PlayRootMotion(anims.airLoop, true, this->ACTION_BLEND_SECONDS);
 			step++;
 		}
 
 		// Launchダメージの場合の特別処理
-		if (currentDamageType == DamageType::Launch)
+		if (currentDamageType == EnemyDamageType::Launch)
 		{
 			// 水平方向の位置を継続的に補間
-			DirectX::XMFLOAT3 launchPos = Player::Instance().launchKnockbackPosition;
-			owner->SetPosition({
-				Mathf::Lerp(owner->GetPosition().x, launchPos.x, 0.3f),
-				owner->GetPosition().y,
-				Mathf::Lerp(owner->GetPosition().z, launchPos.z, 0.3f)
-				});
+			MoveTowardHorizontally(Player::Instance().launchKnockbackPosition, LAUNCH_CONTINUOUS_KNOCKBACK_LERP);
 
 			// 最高高度に到達したか確認
 			if (owner->GetVelocity().y <= 0.0f)
 			{
 				owner->SetVerticalVelocity(0.0f);
 				owner->SetGravity(0.0f);
-				pauseTimer = 0.3f;
+				pauseTimer = LAUNCH_APEX_PAUSE_SECONDS;
 				owner->SetRunTimer(pauseTimer);
 				step = 5; // 打ち上げ専用ステップへ
 			}
@@ -281,7 +300,7 @@ typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(f
 			// アニメーション終了でループに切り替え
 			if (!owner->GetModel()->IsPlayAnimation())
 			{
-				owner->GetModel()->PlayRootMotion(anims.airLoop, true, true, 0.1f, "root");
+				this->PlayRootMotion(anims.airLoop, true, LAUNCH_BLEND_SECONDS);
 			}
 		}
 		break;
@@ -289,7 +308,7 @@ typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(f
 	case 2: // 空中ループ中（着地待ち）
 		if (owner->IsGround())
 		{
-			owner->GetModel()->PlayRootMotion(anims.airEnd, false, true, 0.2f, "root");
+			this->PlayRootMotion(anims.airEnd, false, this->ACTION_BLEND_SECONDS);
 			step++;
 		}
 		break;
@@ -297,7 +316,7 @@ typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(f
 	case 3: // 着地アニメーション
 		if (!owner->GetModel()->IsPlayAnimation())
 		{
-			owner->GetModel()->PlayRootMotion(anims.getUp, false, true, 0.2f, "root");
+			this->PlayRootMotion(anims.getUp, false, this->ACTION_BLEND_SECONDS);
 			step++;
 		}
 		break;
@@ -306,7 +325,7 @@ typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(f
 		if (!owner->GetModel()->IsPlayAnimation())
 		{
 			step = 0;
-			owner->SetGravity(-0.3f);
+			owner->SetGravity(Character::DEFAULT_GRAVITY);
 			return State::Complete;
 		}
 		break;
@@ -316,17 +335,17 @@ typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(f
 
 		if (pauseTimer >= 0.0f)
 		{
-			owner->SetGravity(-0.3f);
-			owner->GetModel()->PlayRootMotion(anims.airLoop, true, true, 0.1f, "root");
+			owner->SetGravity(Character::DEFAULT_GRAVITY);
+			this->PlayRootMotion(anims.airLoop, true, LAUNCH_BLEND_SECONDS);
 			step = 2; // 落下処理へ
 		}
 		break;
 	}
 
 	// ダメージを受けた場合は即座に遷移
-	if (owner->IsAnyDamage() || owner->GetRevengeState() || owner->IsDeathFlag())
+	if (owner->IsAnyDamage() || owner->IsRevenge() || owner->IsDeathFlag())
 	{
-		owner->SetGravity(-0.3f);
+		owner->SetGravity(Character::DEFAULT_GRAVITY);
 		owner->SetVerticalVelocity(0.0f);
 		step = 0;
 		return State::Complete;
@@ -341,11 +360,13 @@ typename EnemyActionBase<ActorType>::State UnifiedDamageAction<ActorType>::Run(f
 template <typename ActorType>
 typename EnemyActionBase<ActorType>::State DeadAction<ActorType>::Run(float elapsedTime)
 {
+	const DirectX::XMFLOAT3& position = owner->GetPosition();
+	const DirectX::XMFLOAT3 effectPosition = { position.x, position.y + DEATH_EFFECT_OFFSET_Y, position.z };
 	if (handle == -1)
 	{
-		handle = owner->deathEffect->Play({ owner->GetPosition().x, owner->GetPosition().y + 1.0f, owner->GetPosition().z }, 0.5f);
+		handle = owner->deathEffect->Play(effectPosition, DEATH_EFFECT_SCALE);
 	}
-	owner->deathEffect->SetPosition(handle, { owner->GetPosition().x, owner->GetPosition().y + 1.0f, owner->GetPosition().z });
+	owner->deathEffect->SetPosition(handle, effectPosition);
 	// 実行中を返す
 	return State::Run;
 }

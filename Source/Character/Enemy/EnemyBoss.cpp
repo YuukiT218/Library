@@ -36,6 +36,51 @@ namespace
 	// 当たり判定の大きさ
 	constexpr float BODY_RADIUS = 0.5f;
 	constexpr float BODY_HEIGHT = 1.0f;
+
+	// 移動可能範囲の半径
+	constexpr float AREA_LIMIT_RADIUS = 21.0f;
+
+	// 使用するアセット
+	constexpr const char* SWORD_MODEL_PATH = "Data/Model/Weapon/Katana/RedKatana.gltf";
+	constexpr const char* LIGHT_BALL_EFFECT_PATH = "Data/Effect/LightBall.efkefc";
+	constexpr const char* TELEPORT_EFFECT_PATH = "Data/Effect/Teleport.efkefc";
+	constexpr const char* ATTACK_SIGN_EFFECT_PATH = "Data/Effect/AttackSign.efkefc";
+	constexpr const char* MAGIC_CIRCLE_EFFECT_PATH = "Data/Effect/MagicCircle.efkefc";
+	constexpr const char* DEATH_EFFECT_PATH = "Data/Effect/Death.efkefc";
+
+	// 刀を持たせるノード名
+	constexpr const char* SWORD_ATTACH_NODE_NAME = "middle_01_r";
+
+	// 死亡時のアニメーションとルートモーションの基準ノード
+	constexpr const char* DEATH_ANIMATION_NAME = "Hit_Large_Combat_Death_Seq_0";
+	constexpr const char* ROOT_NODE_NAME = "root";
+	constexpr float DEATH_BLEND_SECONDS = 0.1f;
+
+	// アニメーションの長さをゼロとみなす閾値
+	constexpr float MIN_ANIMATION_LENGTH = 0.0001f;
+
+	// ベクトルをゼロベクトルとみなす長さ
+	constexpr float DIRECTION_MIN_LENGTH = 0.001f;
+
+	// ターゲットの方向を向ききったとみなす角度差
+	constexpr float TURN_COMPLETE_TOLERANCE_DEGREE = 10.0f;
+
+	// デバッグGUIから試すテレポートの消失時間
+	constexpr float DEBUG_TELEPORT_FADE_OUT_SECONDS = 0.2f;
+
+	// デバッグ表示する円柱の高さ
+	constexpr float DEBUG_CYLINDER_HEIGHT = 1.0f;
+
+	// ワープ候補位置の、プレイヤー方向と横方向へのオフセット
+	// x成分とz成分で別の倍率を使っている
+	struct WarpOffset
+	{
+		DirectX::XMFLOAT2 forward;  // プレイヤー方向へのオフセット (x, z)
+		DirectX::XMFLOAT2 side;     // 横方向へのオフセット (x, z)
+	};
+	constexpr WarpOffset WARP_RIGHT_OFFSET = { { 5.0f, 3.0f }, { 10.0f, 4.0f } };
+	constexpr WarpOffset WARP_LEFT_OFFSET = { { 5.0f, 5.0f }, { 10.0f, 7.0f } };
+	constexpr WarpOffset WARP_FRONT_OFFSET = { { 10.0f, 10.0f }, { 0.0f, 0.0f } };
 }
 
 static EnemyBoss* instance = nullptr;
@@ -55,12 +100,12 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	model->SetAdMetalness(1.0f);
 	model->SetAdRoughness(1.0f);
 
-	sword = std::make_unique<EnemySword>(device, "Data/Model/Weapon/Katana/RedKatana.gltf");
-	lightBall = std::make_unique<Effect>("Data/Effect/LightBall.efkefc");
-	teleportEffect = std::make_unique<Effect>("Data/Effect/Teleport.efkefc");
-	attackSign = std::make_unique<Effect>("Data/Effect/AttackSign.efkefc");
-	magicCircle = std::make_unique<Effect>("Data/Effect/MagicCircle.efkefc");
-	deathEffect = std::make_shared<Effect>("Data/Effect/Death.efkefc");
+	sword = std::make_unique<EnemySword>(device, SWORD_MODEL_PATH);
+	lightBall = std::make_unique<Effect>(LIGHT_BALL_EFFECT_PATH);
+	teleportEffect = std::make_unique<Effect>(TELEPORT_EFFECT_PATH);
+	attackSign = std::make_unique<Effect>(ATTACK_SIGN_EFFECT_PATH);
+	magicCircle = std::make_unique<Effect>(MAGIC_CIRCLE_EFFECT_PATH);
+	deathEffect = std::make_shared<Effect>(DEATH_EFFECT_PATH);
 
 	radius = BODY_RADIUS;
 	height = BODY_HEIGHT;
@@ -77,18 +122,18 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	// エディタ（Behavior Tree ウィンドウ）で編集して、その場で組み直せる。
 	LoadBehaviorTree();
 
-	// 衝突判定用のノードを設定
+	// 衝突判定用のノードを設定（ノード名と半径）
 	nodeHitSpheres =
 	{
-		{"pelvis", nodeRadius[0]},
-		{"spine_01", nodeRadius[1]},
-		{"spine_02", nodeRadius[2]},
-		{"neck_01", nodeRadius[3]},
-		{"head", nodeRadius[4]},
-		{"calf_l", nodeRadius[5]},
-		{"foot_l", nodeRadius[6]},
-		{"calf_r", nodeRadius[7]},
-		{"foot_r", nodeRadius[8]},
+		{"pelvis", 0.4f},
+		{"spine_01", 0.3f},
+		{"spine_02", 0.3f},
+		{"neck_01", 0.3f},
+		{"head", 0.25f},
+		{"calf_l", 0.25f},
+		{"foot_l", 0.25f},
+		{"calf_r", 0.25f},
+		{"foot_r", 0.25f},
 	};
 
 	SetPosition(SPAWN_POSITION);
@@ -104,14 +149,14 @@ EnemyBoss::EnemyBoss(ID3D11Device* device, const char* filename, float scale)
 	const std::vector<ModelResource::Animation>& animations = model->GetResource()->GetAnimations();
 	for (int i = 0; i < animations.size(); i++)
 	{
-		const AnimationConfig* config = AnimationConfigLoader::GetConfig("EnemyBoss", i);
+		const AnimationConfig* config = AnimationConfigLoader::GetConfig(ANIMATION_CONFIG_OWNER, i);
 		if (config != nullptr)
 		{
 			model->SetAnimationConfig(*config);
 		}
 	}
 
-	areaSize = 21.0f;
+	areaSize = AREA_LIMIT_RADIUS;
 }
 
 // ビヘイビアツリー読み込み
@@ -204,14 +249,14 @@ void EnemyBoss::UpdateEnemySpecific(float elapsedTime)
 		currentIndex >= 0 &&
 		currentIndex < static_cast<int>(resource->GetAnimations().size()))
 	{
-		const AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", currentIndex);
+		const AnimationConfig* config = model->GetAnimationConfig(ANIMATION_CONFIG_OWNER, currentIndex);
 		float animationSeconds = model->GetCurrentAnimationSeconds();
 
 		// 安全に長さを取得
 		float secondsLength = model->GetAnimationLength(currentIndex);
 
 		// ゼロ除算防止（長さが極端に短い、または0の場合は計算しない）
-		if (secondsLength > 0.0001f)
+		if (secondsLength > MIN_ANIMATION_LENGTH)
 		{
 			float t = animationSeconds / secondsLength;
 			t = std::clamp(t, 0.0f, 1.0f);  // 0.0～1.0 にクランプ
@@ -223,7 +268,7 @@ void EnemyBoss::UpdateEnemySpecific(float elapsedTime)
 	// 反撃値チェック
 	if (GetRevengeValue() > revengeTolerance)
 	{
-		SetRevengeState(true);
+		SetRevenge(true);
 		SetSuperArmor(true);
 		ResetRevengeValue();
 	}	
@@ -234,10 +279,7 @@ void EnemyBoss::UpdateEnemySpecific(float elapsedTime)
 		ResetDamage();
 	}
 
-	if (isTeleporting)
-		SetInvincible(true);
-	else
-		SetInvincible(false);
+	SetInvincible(isTeleporting);
 
 	// 現在実行されているノードが無ければ
 	if (actionFlag)
@@ -261,7 +303,7 @@ void EnemyBoss::UpdateEnemySpecific(float elapsedTime)
 	}
 
 	// アタッチメント
-	sword->Attach("middle_01_r", model.get());
+	sword->Attach(SWORD_ATTACH_NODE_NAME, model.get());
 
 	SetWarpPosition();
 
@@ -274,7 +316,7 @@ void EnemyBoss::UpdateEnemySpecific(float elapsedTime)
 void EnemyBoss::EditUpdate(float elapsedTime)
 {
 	int currentIndex = model->GetCurrentAnimationIndex();
-	AnimationConfig* config = model->GetAnimationConfig("EnemyBoss", currentIndex);
+	AnimationConfig* config = model->GetAnimationConfig(ANIMATION_CONFIG_OWNER, currentIndex);
 	if (currentIndex >= 0) {
 		
 		float animationSeconds = model->GetCurrentAnimationSeconds();
@@ -287,7 +329,7 @@ void EnemyBoss::EditUpdate(float elapsedTime)
 	}
 	sword->AttackAnimationCollision(model.get(), config, this);
 
-	sword->Attach("middle_01_r", model.get());
+	sword->Attach(SWORD_ATTACH_NODE_NAME, model.get());
 
 	sword->Update(elapsedTime);
 
@@ -330,25 +372,9 @@ void EnemyBoss::Render(const RenderContext& rc, ShaderId shaderId)
 	// キャラクター本体の描画
 	TeleportPhase phase = GetTeleportPhase();
 
-	if (phase == TeleportPhase::FadeOut)
+	// テレポート中（消失・移動・出現）は本体を描かず、残像の分解だけを見せる
+	if (phase == TeleportPhase::None)
 	{
-		// FadeOut: 残像を残して消える（エフェクトなし）
-		// 単純にアルファ値を下げて消えていく
-		float progress = GetTeleportProgress();
-		float alpha = 1.0f - progress;  // 1.0 → 0.0
-	}
-	else if (phase == TeleportPhase::Moving)
-	{
-		// Moving: 描画しない
-		return;
-	}
-	else if (phase == TeleportPhase::FadeIn)
-	{
-
-	}
-	else
-	{
-		// 通常状態
 		modelRenderer->Draw(shaderId, model);
 		sword->Render(rc, shaderId);
 	}
@@ -376,7 +402,7 @@ void EnemyBoss::ShadowRender(const RenderContext& rc, ShadowMap* shadowMap)
 void EnemyBoss::OnDead()
 {
 	SetDeathFlag(true);
-	GetModel()->PlayRootMotion(GetModel()->GetAnimationIndex("Hit_Large_Combat_Death_Seq_0"), false, true, 0.1f, "root");
+	GetModel()->PlayRootMotion(GetModel()->GetAnimationIndex(DEATH_ANIMATION_NAME), false, true, DEATH_BLEND_SECONDS, ROOT_NODE_NAME);
 }
 
 void EnemyBoss::DrawDebugPrimitive()
@@ -388,18 +414,19 @@ void EnemyBoss::DrawDebugPrimitive()
 
 		ShapeRenderer* debugRenderer = Graphics::Instance().GetShapeRenderer();
 
-		debugRenderer->DrawSphere(WarpPosition[0], radius, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-		debugRenderer->DrawSphere(WarpPosition[1], radius, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-		debugRenderer->DrawSphere(WarpPosition[2], radius, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+		for (const DirectX::SimpleMath::Vector3& warpPosition : warpPositions)
+		{
+			debugRenderer->DrawSphere(warpPosition, radius, DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+		}
 
 		// 縄張り範囲をデバッグ円柱描画
-		debugRenderer->DrawCylinder(territoryOrigin, territoryRange, 1.0f, DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+		debugRenderer->DrawCylinder(territoryOrigin, territoryRange, DEBUG_CYLINDER_HEIGHT, DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
 
 		// ターゲット位置をデバッグ球描画
 		debugRenderer->DrawSphere(targetPosition, radius, DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f));
 
 		// 索敵範囲をデバッグ円柱描画
-		debugRenderer->DrawCylinder(position, searchRange, 1.0f, DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+		debugRenderer->DrawCylinder(position, searchRange, DEBUG_CYLINDER_HEIGHT, DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
 	}
 
 	AddCollisionSpheres(model, nodeHitSpheres);
@@ -411,6 +438,7 @@ void EnemyBoss::SetTerritory(const DirectX::XMFLOAT3& origin, float range)
 	territoryOrigin = origin;
 	territoryRange = range;
 }
+
 // ターゲット位置をランダム設定
 void EnemyBoss::SetRandomTargetPosition()
 {
@@ -422,9 +450,9 @@ void EnemyBoss::SetRandomTargetPosition()
 }
 
 // 移動設定
-void EnemyBoss::SetMovement(DirectX::XMFLOAT3& Vec, float speedRate)
+void EnemyBoss::SetMovement(DirectX::XMFLOAT3& vec, float speedRate)
 {
-	Move(Vec.x, Vec.z, moveSpeed * speedRate);
+	Move(vec.x, vec.z, moveSpeed * speedRate);
 }
 
 // 目的地点へ移動
@@ -452,7 +480,7 @@ void EnemyBoss::TurnToTarget(float elapsedTime, float speed)
 
 	// 進行ベクトルがゼロベクトルの場合は処理する必要なし
 	float length = sqrtf(vx * vx + vz * vz);
-	if (length < 0.001f)return;
+	if (length < DIRECTION_MIN_LENGTH) return;
 
 	// 進行ベクトルを単位ベクトル化
 	vx /= length;
@@ -537,7 +565,7 @@ bool EnemyBoss::IsTurnToTarget(float vx, float vz)
 
 	// ターゲット方向ベクトルを単位ベクトル化
 	float length = sqrtf(vx * vx + vz * vz);
-	if (length < 0.001f) return false; // ゼロベクトルの場合は向ききっていないと判定
+	if (length < DIRECTION_MIN_LENGTH) return false; // ゼロベクトルの場合は向ききっていないと判定
 	vx /= length;
 	vz /= length;
 
@@ -547,8 +575,8 @@ bool EnemyBoss::IsTurnToTarget(float vx, float vz)
 	// 内積から角度を計算（ラジアン）
 	float angleDifference = acosf(std::clamp(dot, -1.0f, 1.0f));
 
-	// 許容誤差（例: 10度 = 10 * π / 180）
-	const float tolerance = DirectX::XMConvertToRadians(10.0f);
+	// 許容誤差
+	const float tolerance = DirectX::XMConvertToRadians(TURN_COMPLETE_TOLERANCE_DEGREE);
 
 	// 角度差が許容範囲内であれば向ききったと判定
 	return angleDifference <= tolerance;
@@ -606,7 +634,7 @@ void EnemyBoss::DrawDebugGUI()
 			if (ImGui::Button("Test Teleport"))
 			{
 				DirectX::XMFLOAT3 targetPos = position;
-				StartTeleport(targetPos, 0.2f);
+				StartTeleport(targetPos, DEBUG_TELEPORT_FADE_OUT_SECONDS);
 			}
 
 			ImGui::TreePop();
@@ -622,10 +650,7 @@ void EnemyBoss::DrawDebugGUI()
 			ImGui::Text(nodeHitSpheres[i].nodeName);
 
 			// 半径の編集
-			if (ImGui::DragFloat("Radius", &nodeHitSpheres[i].radius, 0.01f, 0.0f, 10.0f))
-			{
-				nodeRadius[i] = nodeHitSpheres[i].radius; // nodeRadius 配列も更新
-			}
+			ImGui::DragFloat("Radius", &nodeHitSpheres[i].radius, 0.01f, 0.0f, 10.0f);
 
 			ImGui::PopID();
 		}
@@ -663,31 +688,26 @@ void EnemyBoss::SetWarpPosition()
 		-toPlayer.x
 	};
 
-	// ワープ位置を設定
-	// 位置0: プレイヤー方向 + 右側
-	WarpPosition[0] = DirectX::SimpleMath::Vector3{
-		position.x + toPlayer.x * 5.0f + rightVec.x * 10.0f,
-		position.y,
-		position.z + toPlayer.z * 3.0f + rightVec.z * 4.0f
+	// プレイヤー方向と横方向へのオフセットからワープ位置を求める
+	auto computeWarpPosition = [&](const WarpOffset& offset, const DirectX::SimpleMath::Vector3& sideVec)
+	{
+		DirectX::SimpleMath::Vector3 warpPosition = DirectX::SimpleMath::Vector3{
+			position.x + toPlayer.x * offset.forward.x + sideVec.x * offset.side.x,
+			position.y,
+			position.z + toPlayer.z * offset.forward.y + sideVec.z * offset.side.y
+		};
+		KeepAreaLimit(warpPosition);
+		return warpPosition;
 	};
+
+	// 位置0: プレイヤー方向 + 右側
+	warpPositions[0] = computeWarpPosition(WARP_RIGHT_OFFSET, rightVec);
 
 	// 位置1: プレイヤー方向 + 左側
-	WarpPosition[1] = DirectX::SimpleMath::Vector3{
-		position.x + toPlayer.x * 5.0f + leftVec.x * 10.0f,
-		position.y,
-		position.z + toPlayer.z * 5.0f + leftVec.z * 7.0f
-	};
+	warpPositions[1] = computeWarpPosition(WARP_LEFT_OFFSET, leftVec);
 
 	// 位置2: プレイヤー方向の前方
-	WarpPosition[2] = DirectX::SimpleMath::Vector3{
-		position.x + toPlayer.x * 10.0f,
-		position.y,
-		position.z + toPlayer.z * 10.0f
-	};
-
-	KeepAreaLimit(WarpPosition[0]);
-	KeepAreaLimit(WarpPosition[1]);
-	KeepAreaLimit(WarpPosition[2]);
+	warpPositions[2] = computeWarpPosition(WARP_FRONT_OFFSET, rightVec);
 }
 
 void EnemyBoss::OnTeleportPhaseChanged(TeleportPhase newPhase)
@@ -696,10 +716,6 @@ void EnemyBoss::OnTeleportPhaseChanged(TeleportPhase newPhase)
 	{
 		if (teleportEffect)
 		{
-			if (!playedFadeEffect)
-			{
-
-			}
 			playedFadeEffect = true;
 		}
 	}

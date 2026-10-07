@@ -53,7 +53,7 @@ public:
 	void SetRandomTargetPosition();
 
 	// 移動設定
-	void SetMovement(DirectX::XMFLOAT3& Vec, float speedRate);
+	void SetMovement(DirectX::XMFLOAT3& vec, float speedRate);
 
 	// 目標地点へ移動
 	void MoveToTarget(float elapsedTime, float speedRate);
@@ -113,18 +113,18 @@ public:
 	void ResetRevengeValue() { revengeValue = 0; }
 
 	// 反撃状態設定
-	void SetRevengeState(bool state) { isRevenge = state; }
+	void SetRevenge(bool state) { isRevenge = state; }
 
 	// 反撃状態取得
-	bool GetRevengeState() { return isRevenge; }
+	bool IsRevenge() { return isRevenge; }
 
 	void SetSpecialReady(bool flag) { specialReady = flag; }
-	bool GetSpecialReady() { return specialReady; }
+	bool IsSpecialReady() { return specialReady; }
 
 	void SetSearchRange(float range) { searchRange = range; }
 
 	void SetPlayedEffect(bool flag) { playedEffect = flag; }
-	bool GetPlayedEffect() { return playedEffect; }
+	bool HasPlayedEffect() { return playedEffect; }
 
 	float GetBlendSeconds() { return blendSeconds; }
 
@@ -134,9 +134,12 @@ public:
 
 	void SetWarpPosition();
 
-	void SetKnockBackPosition();
+	// ワープ候補位置の数
+	static constexpr int WARP_POSITION_COUNT = 3;
+	DirectX::SimpleMath::Vector3 warpPositions[WARP_POSITION_COUNT];
 
-	DirectX::SimpleMath::Vector3 WarpPosition[3];
+	// アニメーション設定の所有者名
+	static constexpr const char* ANIMATION_CONFIG_OWNER = "EnemyBoss";
 
 	EnemySword* GetSword() { return sword.get(); }
 	Character* GetCharacter() { return this; }
@@ -169,17 +172,11 @@ public:
 
 	// 索敵を待たずに戦闘状態へ入れる。
 	// エディタで特定の行動をすぐ試したいときに使う。
-	void SetBattleState(bool battle) { isBattle = battle; }
-	bool GetBattleState() const { return isBattle; }
+	void SetBattle(bool battle) { isBattle = battle; }
+	bool IsBattle() const { return isBattle; }
 
 	// 実行中の行動を中断してツリーの推論からやり直す
 	void ResetBehaviorState();
-
-	// ノード当たり判定半径配列
-	float nodeRadius[9] =
-	{
-		0.4f, 0.3f, 0.3f, 0.3f, 0.25f, 0.25f, 0.25f, 0.25f, 0.25f
-	};
 
 	std::unique_ptr<Effect> lightBall = nullptr;
 	std::unique_ptr<Effect> attackSign = nullptr;
@@ -198,18 +195,17 @@ private:
 	DirectX::XMFLOAT3	territoryOrigin = { 0.0f,0.0f,0.0f };
 	float				territoryRange = 255.0f;
 	float				moveSpeed = 2.5f;
-	float				turnSpeed = DirectX::XMConvertToRadians(360);
+	float				turnSpeed = DirectX::XMConvertToRadians(360.0f);
 	float				searchRange = 25.0f;
 	float				attackRange = 5.0f;
 	float				runTimer = 0.0f;
-	float 			    blendSeconds = 0.1f;
-	float 				teleportOffset = 17.5f;
-	bool 				isBattle = false;
+	float				blendSeconds = 0.1f;
+	float				teleportOffset = 17.5f;
+	bool				isBattle = false;
 	bool				isRevenge = false;
 	bool				playedEffect = false;
 	bool				specialReady = true;
-	int 				step = 0;
-	int 				revengeValue = 0;		// 反撃値
+	int					revengeValue = 0;		// 反撃値
 	int					revengeTolerance = 30;	// 反撃許容値
 
 	BehaviorTreeAsset	behaviorAsset;
@@ -222,5 +218,4 @@ private:
 	SequenceState<EnemyBoss>* sequenceState = nullptr;
 	std::unique_ptr<RootState<EnemyBoss>> rootState = nullptr;
 	std::unique_ptr<EnemySword> sword;
-	std::vector<std::string> NodeName;
 };

@@ -10,23 +10,41 @@
 
 #include <stdlib.h>
 
-
-
-// t: 0?1の値
-float EaseInOutQuad(float t)
+namespace
 {
-	return t < 0.5f ? 2.0f * t * t : -1.0f + (4.0f - 2.0f * t) * t;
-}
+	// Backイージングの行き過ぎ量（一般的な既定値）
+	constexpr float BACK_EASING_OVERSHOOT = 1.70158f;
 
-float EaseOutBack(float t, float s = 1.70158f)
-{
-	t = t - 1.0f;
-	return (t * t * ((s + 1.0f) * t + s) + 1.0f);
-}
+	// スプライトの表示・非表示を切り替えるときのフェード速度
+	constexpr float FADE_SPEED = 6.0f;
 
-float EaseInBack(float t, float s = 1.70158f)
-{
-	return t * t * ((s + 1.0f) * t - s);
+	// 画面右上からのロード中アイコンの位置
+	constexpr float LOADING_ICON_OFFSET_X = -250.0f;
+	constexpr float LOADING_ICON_OFFSET_Y = -250.0f;
+
+	// ロード中アイコンの回転速度（度/秒）
+	constexpr float LOADING_ICON_ROTATE_SPEED = 180.0f;
+	constexpr float LOADING_ICON_BACK_ROTATE_SPEED = 60.0f;
+
+	// 画面クリア色
+	const DirectX::XMFLOAT4 CLEAR_COLOR = { 0.2f, 0.2f, 0.2f, 1.0f };
+
+	// ヒント文の移動（画面外 → 画面左 → 画面外）
+	const DirectX::XMFLOAT3 HINT_START_POSITION = { 2200.0f, 880.0f, 0.0f };
+	const DirectX::XMFLOAT3 HINT_MID_POSITION = { 50.0f, 880.0f, 0.0f };
+	const DirectX::XMFLOAT3 HINT_END_POSITION = { -1000.0f, 880.0f, 0.0f };
+
+	// t: 0～1の値
+	float EaseOutBack(float t, float s = BACK_EASING_OVERSHOOT)
+	{
+		t = t - 1.0f;
+		return (t * t * ((s + 1.0f) * t + s) + 1.0f);
+	}
+
+	float EaseInBack(float t, float s = BACK_EASING_OVERSHOOT)
+	{
+		return t * t * ((s + 1.0f) * t - s);
+	}
 }
 
 // 初期化
@@ -47,15 +65,15 @@ void SceneLoading::Initialize()
 	AddSprite("Hint", CreateSpriteData(device, "Data/Sprite/Hint1.png", { 2200.0f,880.0f,0 }, { 900,105 }, { 0,0 }, { 900,105 }, 0, { 1,1,1,1 }));
 	AddSprite("Hint1", CreateSpriteData(device, "Data/Sprite/Hint2.png", { 2200.0f,880.0f,0 }, { 918,105 }, { 0,0 }, { 918,105 }, 0, { 1,1,1,1 }));
 
-	bool isController = true;
+	isController = true;
 
-	hintStartPos = { 2200.0f,880.0f,0 };
-	hintMidPos = { 50.0f,880.0f,0 };
-	hintEndPos = { -1000.0f,880.0f,0 };
+	hintStartPos = HINT_START_POSITION;
+	hintMidPos = HINT_MID_POSITION;
+	hintEndPos = HINT_END_POSITION;
 
-	hint1StartPos = { 2200.0f,880.0f,0 };
-	hint1MidPos = { 50.0f,880.0f,0 };
-	hint1EndPos = { -1000.0f,880.0f,0 };
+	hint1StartPos = HINT_START_POSITION;
+	hint1MidPos = HINT_MID_POSITION;
+	hint1EndPos = HINT_END_POSITION;
 
 	// スレッド開始
 	thread = new std::thread(LoadingThread, this);
@@ -76,8 +94,8 @@ void SceneLoading::Finalize()
 // 更新処理
 void SceneLoading::Update(float elapsedTime)
 {
-	isController = Input::Instance().GetIsLastGamePad();
-	float fadeSpeed = 6.0f * elapsedTime;
+	isController = Input::Instance().IsLastGamePad();
+	float fadeSpeed = FADE_SPEED * elapsedTime;
 
 	// 画面サイズ取得
 	float screenWidth = static_cast<float>(Graphics::Instance().GetScreenWidth());
@@ -87,21 +105,18 @@ void SceneLoading::Update(float elapsedTime)
 	sprite["Back"].size = { screenWidth, screenHeight };
 
 	// アイコンを背景の右上基準で配置
-	const float iconOffsetX = -250.0f;
-	const float iconOffsetY = -250.0f;
-
-	sprite["LoadingIcon"].position.x = screenWidth + iconOffsetX;
-	sprite["LoadingIcon"].position.y = iconOffsetY;
-	sprite["LoadingIconB"].position.x = screenWidth + iconOffsetX;
-	sprite["LoadingIconB"].position.y = iconOffsetY;
+	sprite["LoadingIcon"].position.x = screenWidth + LOADING_ICON_OFFSET_X;
+	sprite["LoadingIcon"].position.y = LOADING_ICON_OFFSET_Y;
+	sprite["LoadingIconB"].position.x = screenWidth + LOADING_ICON_OFFSET_X;
+	sprite["LoadingIconB"].position.y = LOADING_ICON_OFFSET_Y;
 
 	auto SetAlphaLerp = [&](const std::string& name, float target)
 		{
 			sprite[name].color.w = Mathf::Lerp(sprite[name].color.w, target, fadeSpeed);
 		};
 
-	sprite["LoadingIcon"].angle -= 180.0f * elapsedTime;
-	sprite["LoadingIconB"].angle -= 60.0f * elapsedTime;
+	sprite["LoadingIcon"].angle -= LOADING_ICON_ROTATE_SPEED * elapsedTime;
+	sprite["LoadingIconB"].angle -= LOADING_ICON_BACK_ROTATE_SPEED * elapsedTime;
 
 	SetAlphaLerp("PadInst", isController ? 1.0f : 0.0f);
 	SetAlphaLerp("KeyMouInst", isController ? 0.0f : 1.0f);
@@ -122,9 +137,8 @@ void SceneLoading::Render(float elapsedTime)
 {
 	ID3D11DeviceContext* dc = Graphics::Instance().GetDeviceContext();
 	// 画面クリア＆レンダーターゲット設定
-	DirectX::XMFLOAT4 color = { 0.2f, 0.2f, 0.2f, 1.0f };    // RGBA(0.0～1.0);
 	FrameBuffer* display = Graphics::Instance().GetFrameBuffer(FrameBufferId::Display);
-	display->Clear(dc, color);
+	display->Clear(dc, CLEAR_COLOR);
 	display->SetRenderTargets(dc);
 	RenderState* renderState = Graphics::Instance().GetRenderState();
 
@@ -347,7 +361,7 @@ void SceneLoading::MoveHintText(float elapsedTime)
 	case MovePhase::MoveIn:
 	{
 		hintTimer += elapsedTime;
-		float t = min(hintTimer / moveDuration, 1.0f);
+		float t = min(hintTimer / HINT_MOVE_DURATION, 1.0f);
 		float easedT = EaseOutBack(t);
 		float newPos = Mathf::Lerp(hintStartPos.x, hintMidPos.x, easedT);
 		sprite["Hint"].position.x = newPos;
@@ -362,7 +376,7 @@ void SceneLoading::MoveHintText(float elapsedTime)
 	case MovePhase::Wait:
 	{
 		hintTimer += elapsedTime;
-		if (hintTimer >= waitDuration)
+		if (hintTimer >= HINT_WAIT_DURATION)
 		{
 			hintPhase = MovePhase::MoveOut;
 			hintTimer = 0.0f;
@@ -372,7 +386,7 @@ void SceneLoading::MoveHintText(float elapsedTime)
 	case MovePhase::MoveOut:
 	{
 		hintTimer += elapsedTime;
-		float t = min(hintTimer / moveDuration, 1.0f);
+		float t = min(hintTimer / HINT_MOVE_DURATION, 1.0f);
 		float easedT = EaseInBack(t);
 		float newPos = Mathf::Lerp(hintMidPos.x, hintEndPos.x, easedT);
 		sprite["Hint"].position.x = newPos;
@@ -398,7 +412,7 @@ void SceneLoading::MoveHintText(float elapsedTime)
 	case MovePhase::MoveIn:
 	{
 		hint1Timer += elapsedTime;
-		float t = min(hint1Timer / moveDuration, 1.0f);
+		float t = min(hint1Timer / HINT_MOVE_DURATION, 1.0f);
 		float easedT = EaseOutBack(t);
 		float newPos = Mathf::Lerp(hint1StartPos.x, hint1MidPos.x, easedT);
 		sprite["Hint1"].position.x = newPos;
@@ -413,7 +427,7 @@ void SceneLoading::MoveHintText(float elapsedTime)
 	case MovePhase::Wait:
 	{
 		hint1Timer += elapsedTime;
-		if (hint1Timer >= waitDuration)
+		if (hint1Timer >= HINT_WAIT_DURATION)
 		{
 			hint1Phase = MovePhase::MoveOut;
 			hint1Timer = 0.0f;
@@ -423,8 +437,8 @@ void SceneLoading::MoveHintText(float elapsedTime)
 	case MovePhase::MoveOut:
 	{
 		hint1Timer += elapsedTime;
-		float t = min(hint1Timer / moveDuration, 1.0f);
-		float easedT = EaseInBack(t); // ここ！
+		float t = min(hint1Timer / HINT_MOVE_DURATION, 1.0f);
+		float easedT = EaseInBack(t);
 		float newPos = Mathf::Lerp(hint1MidPos.x, hint1EndPos.x, easedT);
 		sprite["Hint1"].position.x = newPos;
 

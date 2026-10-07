@@ -36,11 +36,11 @@ public:
     const DirectX::XMFLOAT4X4& GetProjection() const { return projection; }
 
     // 視点取得・設定
-    void SetEye(const DirectX::XMFLOAT3 Eye) { eye = Eye; }
+    void SetEye(const DirectX::XMFLOAT3& eye) { this->eye = eye; }
     const DirectX::XMFLOAT3& GetEye() const { return eye; }
 
     // 注視点取得・設定
-    void SetFocus(const DirectX::XMFLOAT3 Focus) { focus = Focus; }
+    void SetFocus(const DirectX::XMFLOAT3& focus) { this->focus = focus; }
     const DirectX::XMFLOAT3& GetFocus() const { return focus; }
 
     // 方向ベクトル取得
@@ -52,8 +52,8 @@ public:
     const DirectX::XMFLOAT4& GetRotation() const { return rotation; }
 
     // 画角設定・取得
-    void SetFov(float Fov) { fov = Fov; }
-    const float GetFov() const { return fov; }
+    void SetFov(float fov) { this->fov = fov; }
+    float GetFov() const { return fov; }
 
     // プロジェクション設定取得
     float GetAspect() const { return aspect; }
@@ -68,18 +68,21 @@ public:
 
     // フリーカメラフラグ
     void SetFreeCameraFlag(bool freeFlag) { freeCameraFlag = freeFlag; }
-    const bool GetFreeCameraFlag() const { return freeCameraFlag; }
+    bool IsFreeCamera() const { return freeCameraFlag; }
 
     // カメラシェイク
     void SetCameraShakeSwitch(bool shake, float timer = 0.5f, float power = 1.0f)
     {
-        shakeflag = shake;
-        shaketimer = timer;
-        shakepower = power;
+        isShaking = shake;
+        shakeTimer = timer;
+        shakePower = power;
     }
-    const bool GetCameraShakeSwitch() { return shakeflag; }
-    float GetCameraShakeTimer() { return shaketimer; }
-    float GetCameraShakePower() { return shakepower; }
+    bool IsCameraShaking() const { return isShaking; }
+    float GetCameraShakeTimer() const { return shakeTimer; }
+    float GetCameraShakePower() const { return shakePower; }
+
+    // 視錐台の頂点の数
+    static constexpr int FRUSTUM_CORNER_COUNT = 8;
 
     // 視錐台の8つの頂点をワールド座標で取得
     void GetFrustumCorners(float zNear, float zFar, DirectX::XMFLOAT3* corners) const;
@@ -94,14 +97,14 @@ private:
     DirectX::XMFLOAT3 right;
 
     // クォータニオン
-    DirectX::XMFLOAT4 rotation = { 0, 0, 0, 1 };
+    DirectX::XMFLOAT4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f };
 
     bool freeCameraFlag = false;
-    bool shakeflag = false;
+    bool isShaking = false;
 
-    float fov{ DirectX::XMConvertToRadians(45) };
-    float shaketimer = 0;
-    float shakepower = 0;
+    float fov{ DirectX::XMConvertToRadians(45.0f) };
+    float shakeTimer = 0.0f;
+    float shakePower = 0.0f;
     float aspect = 1280.0f / 720.0f;
     float nearZ = 0.1f;
     float farZ = 1000.0f;

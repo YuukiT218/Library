@@ -87,9 +87,9 @@ private:
     std::unique_ptr<Sprite> lockOnPoint;
 
     // プレイヤー用
-    std::unique_ptr<Sprite> spritePlayerHP_Back;   // HPGauge.png
-    std::unique_ptr<Sprite> spritePlayerHP_Fill;   // HPBar.png
-    std::unique_ptr<Sprite> spritePlayerHP_Mask;   // HPBarMask.png (テクスチャとして使用)
+    std::unique_ptr<Sprite> spritePlayerHPBack;   // HPGauge.png
+    std::unique_ptr<Sprite> spritePlayerHPFill;   // HPBar.png
+    std::unique_ptr<Sprite> spritePlayerHPMask;   // HPBarMask.png (テクスチャとして使用)
     std::unique_ptr<Sprite> portraitNormal;        // portrait_kohaku_01.png (平常時)
     std::unique_ptr<Sprite> portraitDamage;        // portrait_kohaku_06.png (被弾時)
     std::unique_ptr<Sprite> counter;
@@ -98,14 +98,14 @@ private:
     std::unique_ptr<Sprite> launcherPC;
 
     // ボス用
-    std::unique_ptr<Sprite> spriteBossHP_Back;     // BossHPGauge.png
-    std::unique_ptr<Sprite> spriteBossHP_Fill;     // BossHPBar.png
-    std::unique_ptr<Sprite> spriteBossStock_Back;  // HPStockGauge.png
-    std::unique_ptr<Sprite> spriteBossStock_Fill;  // HPStockBar.png
+    std::unique_ptr<Sprite> spriteBossHPBack;     // BossHPGauge.png
+    std::unique_ptr<Sprite> spriteBossHPFill;     // BossHPBar.png
+    std::unique_ptr<Sprite> spriteBossStockBack;  // HPStockGauge.png
+    std::unique_ptr<Sprite> spriteBossStockFill;  // HPStockBar.png
 
     // 操作説明
     std::unique_ptr<Sprite> padInstructionUI;
-    std::unique_ptr<Sprite> keyMouInstructionUI;
+    std::unique_ptr<Sprite> keyMouseInstructionUI;
 
     // --- シェーダー関連 ---
     Microsoft::WRL::ComPtr<ID3D11Buffer> gaugeConstantBuffer;       // 定数バッファ
@@ -152,9 +152,9 @@ private:
     float bossStockScale = 1.1f;                           // ストックスケール
 
     // ロックオンパラメータ
-    Enemy* lockonEnemy = nullptr;
-    float lockonAngle = 0.0f;
-    DirectX::XMFLOAT2 lockonScale = { 40.0f, 40.0f }; // 動的に変化
+    Enemy* lockOnEnemy = nullptr;
+    float lockOnAngle = 0.0f;
+    DirectX::XMFLOAT2 lockOnScale = { 40.0f, 40.0f }; // 動的に変化
 
     DirectX::XMFLOAT2 instructionPos = { 1455.0f, 800.0f }; // 位置
     float instructionScale = 1.1f;                         // スケール

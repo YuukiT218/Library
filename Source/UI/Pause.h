@@ -68,14 +68,14 @@ public:
 	//描画関数
 	void Render(float elapsedTime, ID3D11DeviceContext* dc);
 
-	bool GetIsPause() { return isPause; };
+	bool IsPause() { return isPause; };
 
 	// デバッグ用GUI描画
 	void DrawDebugGUI();
 public:
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> sprite_vertex_shader;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> sprite_input_layout;
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> sprite_pixel_shader;
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> spriteVertexShader;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> spriteInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> spritePixelShader;
 private:
 	std::unordered_map<std::string, SpriteData> sprite;
 	std::unordered_map<std::string, SpriteData> previousSpriteState;

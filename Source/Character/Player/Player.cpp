@@ -1,4 +1,4 @@
-﻿#include "player.h"
+﻿#include "Player.h"
 #include "States/PlayerState.h"
 #include "States/PlayerAttackStates.h"
 #include "States/PlayerGuardStates.h"
@@ -21,6 +21,41 @@ namespace
 
     // 体力
     constexpr int MAX_HEALTH = 300;
+
+    // 移動可能範囲の半径
+    constexpr float AREA_LIMIT_RADIUS = 21.75f;
+
+    // 使用するアセット
+    constexpr const char* SWORD_MODEL_PATH = "Data/Model/Weapon/Katana/GreenKatana.gltf";
+    constexpr const char* GUARD_EFFECT_PATH = "Data/Effect/Guard.efkefc";
+    constexpr const char* DEATH_EFFECT_PATH = "Data/Effect/Death.efkefc";
+
+    // 刀を持たせるノード名
+    constexpr const char* SWORD_ATTACH_NODE_NAME = "Character1_RightHand";
+
+    // カメラ前方向のXZ成分がこれ以下なら、真上・真下を向いているとみなす
+    constexpr float CAMERA_FRONT_XZ_MIN_LENGTH = 0.01f;
+
+    // カメラ上方向のXZ成分をゼロとみなす閾値
+    constexpr float CAMERA_UP_XZ_MIN_LENGTH = 0.001f;
+
+    // ロックオン旋回時の旋回速度倍率
+    constexpr float LOCK_ON_TURN_SPEED_SCALE = 10.0f;
+
+    // ターゲットとの距離の2乗がこれ以下なら重なっているとみなす
+    constexpr float LOCK_ON_MIN_DISTANCE_SQ = 0.00001f;
+
+    // これ以下の回転量は回転させない
+    constexpr float LOCK_ON_MIN_ROTATION = 0.0001f;
+
+    // ダメージ方向ベクトルが未設定とみなす長さ
+    constexpr float DAMAGE_DIRECTION_MIN_LENGTH = 0.001f;
+
+    // 打ち上げ時に敵を配置する前方距離
+    constexpr float LAUNCH_KNOCKBACK_DISTANCE = 1.5f;
+
+    // 移動範囲デバッグ表示用円柱の高さ
+    constexpr float AREA_DEBUG_CYLINDER_HEIGHT = 5.0f;
 }
 
 static Player* instance = nullptr;
@@ -47,9 +82,9 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     // アニメーションスピード設定
     InitAnimSpeed();
 
-    sword = std::make_unique<Sword>(device, "Data/Model/Weapon/Katana/GreenKatana.gltf");
-    guardEffect = std::make_unique<Effect>("Data/Effect/Guard.efkefc");
-    deathEffect = std::make_shared<Effect>("Data/Effect/Death.efkefc");
+    sword = std::make_unique<Sword>(device, SWORD_MODEL_PATH);
+    guardEffect = std::make_unique<Effect>(GUARD_EFFECT_PATH);
+    deathEffect = std::make_shared<Effect>(DEATH_EFFECT_PATH);
 
     // プレイヤーの最大体力と体力設定
     maxHealth = MAX_HEALTH;
@@ -92,91 +127,17 @@ Player::Player(ID3D11Device* device, const char* filename, float scale)
     }
 
     // プレイヤーの範囲制限
-    areaSize = 21.75f;
+    areaSize = AREA_LIMIT_RADIUS;
 }
 
 Player::~Player()
 {
-    // 今は何もしない
-
-}
-
-#include <DirectXMath.h>
-#include <random>
-#include <chrono>
-
-// 名前空間の省略
-using namespace DirectX;
-
-// ランダムカラーを返す関数
-XMFLOAT4 GetRandomColorEvery1Seconds() {
-    // 静的に乱数エンジンと分布を初期化（1回だけ初期化される）
-    static std::mt19937 rng(static_cast<unsigned int>(
-        std::chrono::steady_clock::now().time_since_epoch().count()));
-    static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-
-    // 現在の時間を取得
-    static auto lastUpdate = std::chrono::steady_clock::now();
-    auto now = std::chrono::steady_clock::now();
-
-    // 経過時間が3秒以上かチェック
-    static XMFLOAT4 currentColor = { dist(rng), dist(rng), dist(rng), 1.0f };
-    if (std::chrono::duration_cast<std::chrono::seconds>(now - lastUpdate).count() >= 1) {
-        // 新しいランダムカラーを生成
-        currentColor = { dist(rng), dist(rng), dist(rng), 1.0f };
-        lastUpdate = now;
-    }
-
-    return currentColor;
-}
-
-// ランダムカラーを生成する関数
-XMFLOAT4 GenerateRandomColor() {
-    static std::mt19937 rng(static_cast<unsigned int>(
-        std::chrono::steady_clock::now().time_since_epoch().count()));
-    static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
-
-    return XMFLOAT4(dist(rng), dist(rng), dist(rng), 1.0f); // RGBA
-}
-
-// 滑らかに変化するカラーを返す関数
-XMFLOAT4 GetSmoothChangingColor() {
-    // 静的な変数で前回のカラー、次のカラー、時間管理
-    static XMFLOAT4 currentColor = GenerateRandomColor();
-    static XMFLOAT4 nextColor = GenerateRandomColor();
-    static auto lastUpdate = std::chrono::steady_clock::now();
-
-    // 現在の時間を取得
-    auto now = std::chrono::steady_clock::now();
-    float elapsedTime = std::chrono::duration<float>(now - lastUpdate).count();
-
-    // ラープの進行度（0.0～1.0）
-    const float transitionTime = 2400.0f; // 3秒で次の色へ移行
-    float t = elapsedTime / transitionTime;
-
-    if (t >= 1.0f) {
-        // 次のカラーに完全に到達した場合、新しいランダムカラーを生成
-        currentColor = nextColor;
-        nextColor = GenerateRandomColor();
-        lastUpdate = now;
-        t = 0.0f; // ラープ進行度をリセット
-    }
-
-    // XMVECTOR に変換してラープ計算
-    XMVECTOR currentVec = XMLoadFloat4(&currentColor);
-    XMVECTOR nextVec = XMLoadFloat4(&nextColor);
-    XMVECTOR lerpedVec = XMVectorLerp(currentVec, nextVec, t);
-
-    // 結果を XMFLOAT4 に変換して返す
-    XMFLOAT4 smoothColor;
-    XMStoreFloat4(&smoothColor, lerpedVec);
-    return smoothColor;
 }
 
 
 void Player::Update(float elapsedTime)
 {
-    if (currentStateID != PlayerStateId::EnumCount)
+    if (currentStateId != PlayerStateId::EnumCount)
     {
 #if _DEBUG
         // エディタの Game View にフォーカスがあるときは、
@@ -184,10 +145,10 @@ void Player::Update(float elapsedTime)
         // （全画面ドックスペースではカーソルが常に ImGui 上にあるため）
         ImGuiIO& io = ImGui::GetIO();
         if (inputForced || (!io.WantCaptureMouse && !io.WantCaptureKeyboard)) {
-            GetState(currentStateID).Update(elapsedTime);
+            GetState(currentStateId).Update(elapsedTime);
         }
 #else
-        GetState(currentStateID).Update(elapsedTime);
+        GetState(currentStateId).Update(elapsedTime);
 #endif
     }
 
@@ -211,7 +172,7 @@ void Player::Update(float elapsedTime)
     CollisionPlayerVsEnemies();
 
     // アタッチメント
-    sword->Attach("Character1_RightHand", model.get());
+    sword->Attach(SWORD_ATTACH_NODE_NAME, model.get());
 
     // オブジェクト行列を更新
     UpdateTransform();
@@ -251,7 +212,7 @@ void Player::EditUpdate(float elapsedTime)
     CollisionPlayerVsEnemies();
 
     // アタッチメント
-    sword->Attach("Character1_RightHand", model.get());
+    sword->Attach(SWORD_ATTACH_NODE_NAME, model.get());
 
     // オブジェクト行列を更新
     UpdateTransform();
@@ -297,8 +258,8 @@ DirectX::XMFLOAT3 Player::GetMoveVec() const
     float cameraFrontZ = cameraFront.z;
     float cameraFrontLength = sqrtf(cameraFrontX * cameraFrontX + cameraFrontZ * cameraFrontZ);
 
-    // 閾値を少し大きめ(0.01f)に設定して、完全に0でなくても垂直に近いなら回避処理を行う
-    if (cameraFrontLength > 0.01f)
+    // 閾値を少し大きめに設定して、完全に0でなくても垂直に近いなら回避処理を行う
+    if (cameraFrontLength > CAMERA_FRONT_XZ_MIN_LENGTH)
     {
         // 通常時：単位ベクトル化
         cameraFrontX /= cameraFrontLength;
@@ -315,7 +276,7 @@ DirectX::XMFLOAT3 Player::GetMoveVec() const
         float cameraUpZ = cameraUp.z;
         float cameraUpLength = sqrtf(cameraUpX * cameraUpX + cameraUpZ * cameraUpZ);
 
-        if (cameraUpLength > 0.001f)
+        if (cameraUpLength > CAMERA_UP_XZ_MIN_LENGTH)
         {
             cameraFrontX = cameraUpX / cameraUpLength;
             cameraFrontZ = cameraUpZ / cameraUpLength;
@@ -358,12 +319,12 @@ void Player::ForwardMove(float speed, float elapsedTime)
 void Player::BackMove(float speed, float elapsedTime)
 {
     // 後ろベクトルを計算
-    float BackX = -sinf(angle.y);
-    float BackZ = -cosf(angle.y);
+    float backX = -sinf(angle.y);
+    float backZ = -cosf(angle.y);
 
-    // 前方向に移動
-    position.x += BackX * speed * elapsedTime;
-    position.z += BackZ * speed * elapsedTime;
+    // 後ろ方向に移動
+    position.x += backX * speed * elapsedTime;
+    position.z += backZ * speed * elapsedTime;
 }
 
 // プレイヤーとエネミーとの衝突処理
@@ -427,16 +388,16 @@ void Player::CollisionPlayerVsEnemies()
 // ステート切り替え
 void Player::ChangeState(PlayerStateId stateId)
 {
-    if (currentStateID != stateId)
+    if (currentStateId != stateId)
     {
-        lastStateID = currentStateID;
-        if (lastStateID != PlayerStateId::EnumCount)
+        lastStateId = currentStateId;
+        if (lastStateId != PlayerStateId::EnumCount)
         {
-            GetState(lastStateID).Exit();
+            GetState(lastStateId).Exit();
         }
 
-        currentStateID = stateId;
-        GetState(currentStateID).Enter();
+        currentStateId = stateId;
+        GetState(currentStateId).Enter();
     }
 }
 
@@ -479,7 +440,7 @@ bool Player::LockOnTurnToEnemy(float elapsedTime)
         return true;
     }
 
-    float turn = turnSpeed * 10 * elapsedTime;
+    float turn = turnSpeed * LOCK_ON_TURN_SPEED_SCALE * elapsedTime;
     EnemyBoss& boss = EnemyBoss::Instance();
 
     // ターゲットに向く処理
@@ -492,7 +453,7 @@ bool Player::LockOnTurnToEnemy(float elapsedTime)
     float lengthSq;
     DirectX::XMStoreFloat(&lengthSq, LengthSq);
 
-    if (lengthSq > 0.00001f)
+    if (lengthSq > LOCK_ON_MIN_DISTANCE_SQ)
     {
         // ターゲットまでのベクトルを単位ベクトル化
         Vec = DirectX::XMVector3Normalize(Vec);
@@ -530,7 +491,7 @@ bool Player::LockOnTurnToEnemy(float elapsedTime)
         }
 
         // 回転処理があるなら回転処理をする
-        if (fabsf(rot) > 0.0001f)
+        if (fabsf(rot) > LOCK_ON_MIN_ROTATION)
         {
             // 回転軸を算出
             DirectX::XMVECTOR Axis = DirectX::XMVector3Cross(Direction, Vec);
@@ -563,9 +524,9 @@ bool Player::LockOnTurnToEnemy(float elapsedTime)
 }
 
 // 移動設定
-void Player::SetMovement(DirectX::XMFLOAT3& Vec, float moveRate)
+void Player::SetMovement(DirectX::XMFLOAT3& vec, float moveRate)
 {
-    Move(Vec.x * moveRate, Vec.z * moveRate, moveSpeed * moveRate);
+    Move(vec.x * moveRate, vec.z * moveRate, moveSpeed * moveRate);
 }
 
 void Player::SetDamageDirection(const DirectX::XMFLOAT3& attackerPos)
@@ -589,7 +550,7 @@ DirectX::XMFLOAT3 Player::CalculateKnockbackPosition(float power)
 
     float dirLength = sqrtf(damageDirection.x * damageDirection.x + damageDirection.z * damageDirection.z);
 
-    if (dirLength > 0.001f)
+    if (dirLength > DAMAGE_DIRECTION_MIN_LENGTH)
     {
         // ダメージを受けた方向の逆方向（後方）に移動
         knockbackPos.x = position.x + damageDirection.x * power;
@@ -667,27 +628,26 @@ bool Player::InputJump()
 // ノックバック位置設定
 void Player::SetKnockbackPosition()
 {
-    SimpleMath::Vector3 vec;
-    vec = CharacterForward(angle);
+    DirectX::SimpleMath::Vector3 vec = CharacterForward(angle);
 	knockbackPosition = DirectX::SimpleMath::Vector3{
-		position.x + vec.x * knockBackPower,
+		position.x + vec.x * knockbackDistance,
 		position.y,
-		position.z + vec.z * knockBackPower
+		position.z + vec.z * knockbackDistance
 	};
     lightKnockbackPosition = DirectX::SimpleMath::Vector3{
-        position.x + vec.x * lightKnockBackPower,
+        position.x + vec.x * lightKnockbackDistance,
         position.y,
-        position.z + vec.z * lightKnockBackPower
+        position.z + vec.z * lightKnockbackDistance
     };
     heavyKnockbackPosition = DirectX::SimpleMath::Vector3{
-        position.x + vec.x * heavyKnockBackPower,
+        position.x + vec.x * heavyKnockbackDistance,
         position.y,
-        position.z + vec.z * heavyKnockBackPower
+        position.z + vec.z * heavyKnockbackDistance
     };
     launchKnockbackPosition = DirectX::SimpleMath::Vector3{
-        position.x + vec.x * 1.5f,
-        position.y + launchKnockBackPower,
-        position.z + vec.z * 1.5f
+        position.x + vec.x * LAUNCH_KNOCKBACK_DISTANCE,
+        position.y + launchKnockbackRise,
+        position.z + vec.z * LAUNCH_KNOCKBACK_DISTANCE
     };
 }
 
@@ -724,7 +684,7 @@ void Player::DrawDebugPrimitive()
     	// 衝突判定用のデバック円柱を描画
     	shapeRenderer->DrawCylinder(position, radius, height, DirectX::XMFLOAT4(0, 0, 0, 1));
 
-    	shapeRenderer->DrawCylinder(areaCenter, areaSize, 5.0f, { 0.0, 0.0f, 0.0f, 1.0f });
+    	shapeRenderer->DrawCylinder(areaCenter, areaSize, AREA_DEBUG_CYLINDER_HEIGHT, { 0.0f, 0.0f, 0.0f, 1.0f });
 	}
 
     // 全身に当たり判定を付与する
@@ -741,10 +701,10 @@ void Player::DrawDebugGUI()
 
         if (ImGui::CollapsingHeader(u8"敵ノックバック、テレポート位置設定", ImGuiTreeNodeFlags_DefaultOpen))
         {
-	        ImGui::DragFloat("KnockbackPosition", &knockBackPower, 0.01f, 0, 5.0f);
-        	ImGui::DragFloat("LightKnockbackPosition", &lightKnockBackPower, 0.01f, 0, 5.0f);
-        	ImGui::DragFloat("HeavyKnockbackPosition", &heavyKnockBackPower, 0.01f, 0, 10.0f);
-        	ImGui::DragFloat("LaunchKnockbackPosition", &launchKnockBackPower, 0.01f, 0, 5.0f);
+	        ImGui::DragFloat("KnockbackPosition", &knockbackDistance, 0.01f, 0, 5.0f);
+        	ImGui::DragFloat("LightKnockbackPosition", &lightKnockbackDistance, 0.01f, 0, 5.0f);
+        	ImGui::DragFloat("HeavyKnockbackPosition", &heavyKnockbackDistance, 0.01f, 0, 10.0f);
+        	ImGui::DragFloat("LaunchKnockbackPosition", &launchKnockbackRise, 0.01f, 0, 5.0f);
         }
 
         if (ImGui::CollapsingHeader(u8"ノックバック設定", ImGuiTreeNodeFlags_DefaultOpen))
@@ -784,15 +744,11 @@ void Player::DrawDebugGUI()
             if (ImGui::Button(u8"叩き落としテスト"))
             {
                 SetDamageDirection(EnemyBoss::Instance().GetPosition());
-                SetKnockDownDamage(true);
+                SetKnockdownDamage(true);
             }
         }
 
         // 回転
-        DirectX::XMFLOAT3 a;
-        a.x = DirectX::XMConvertToDegrees(angle.x);
-        a.y = DirectX::XMConvertToDegrees(angle.y);
-        a.z = DirectX::XMConvertToDegrees(angle.z);
         ImGui::DragFloat3("angle", &angle.x, 0.01f);
 
         ImGui::DragFloat(u8"無敵時間", &invincibleTimer);
@@ -804,7 +760,7 @@ void Player::DrawDebugGUI()
         ImGui::Text(u8"体力 %zu", health);  // 体力
         ImGui::Text(u8"最大体力 %zu", maxHealth);  // 最大体力
 
-        int state = static_cast<int>(currentStateID);
+        int state = static_cast<int>(currentStateId);
         ImGui::DragInt("State", &state);
 
         for (int i = 0; i < static_cast<int>(PlayerStateId::EnumCount); ++i)
@@ -845,10 +801,7 @@ void Player::DrawDebugGUI()
                 ImGui::Text(nodeHitSpheres[i].nodeName);
 
                 // 半径の編集
-                if (ImGui::DragFloat("Radius", &nodeHitSpheres[i].radius, 0.01f, 0.0f, 10.0f))
-                {
-                    nodeRadius[i] = nodeHitSpheres[i].radius; // nodeRadius 配列も更新
-                }
+                ImGui::DragFloat("Radius", &nodeHitSpheres[i].radius, 0.01f, 0.0f, 10.0f);
 
                 ImGui::PopID();
             }

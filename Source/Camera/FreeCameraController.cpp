@@ -1,10 +1,21 @@
 ﻿#include <imgui.h>
 #include "FreeCameraController.h"
-
-
 #include <stdlib.h>
 
+namespace
+{
+	// マウスの移動量をカメラ操作量に変換する係数
+	constexpr float MOUSE_MOVE_SCALE = 0.02f;
 
+	// 回転速度の係数
+	constexpr float ROTATE_SPEED_SCALE = 0.5f;
+
+	// 平行移動の速さ（注視点までの距離に対する割合）
+	constexpr float PAN_SPEED_SCALE = 0.035f;
+
+	// ズームの速さ（注視点までの距離に対する割合）
+	constexpr float ZOOM_SPEED_SCALE = 0.1f;
+}
 
 // カメラからコントローラーへパラメータを同期する
 void FreeCameraController::SyncCameraToController(const Camera& camera)
@@ -62,14 +73,14 @@ void FreeCameraController::Update()
 	ImGuiIO io = ImGui::GetIO();
 
 	// マウスカーソルの移動量を求める
-	float moveX = io.MouseDelta.x * 0.02f;
-	float moveY = io.MouseDelta.y * 0.02f;
+	float moveX = io.MouseDelta.x * MOUSE_MOVE_SCALE;
+	float moveY = io.MouseDelta.y * MOUSE_MOVE_SCALE;
 
 	// マウス左ボタン押下中
 	if (io.MouseDown[ImGuiMouseButton_Right])
 	{
 		// Y軸回転
-		angleY += moveX * 0.5f;
+		angleY += moveX * ROTATE_SPEED_SCALE;
 		if (angleY > DirectX::XM_PI)
 		{
 			angleY -= DirectX::XM_2PI;
@@ -79,7 +90,7 @@ void FreeCameraController::Update()
 			angleY += DirectX::XM_2PI;
 		}
 		// X軸回転
-		angleX += moveY * 0.5f;
+		angleX += moveY * ROTATE_SPEED_SCALE;
 		if (angleX > DirectX::XM_PI)
 		{
 			angleX -= DirectX::XM_2PI;
@@ -93,7 +104,7 @@ void FreeCameraController::Update()
 	else if (io.MouseDown[ImGuiMouseButton_Middle])
 	{
 		// 平行移動
-		float s = distance * 0.035f;
+		float s = distance * PAN_SPEED_SCALE;
 		float x = moveX * s;
 		float y = moveY * s;
 
@@ -109,13 +120,13 @@ void FreeCameraController::Update()
 	else if (io.MouseDown[ImGuiMouseButton_Left] && io.MouseDown[ImGuiMouseButton_Right])
 	{
 		// ズーム
-		distance += (-moveY - moveX) * distance * 0.1f;
+		distance += (-moveY - moveX) * distance * ZOOM_SPEED_SCALE;
 	}
 	// マウスホイール
-	else if (io.MouseWheel != 0)
+	else if (io.MouseWheel != 0.0f)
 	{
 		// ズーム
-		distance -= io.MouseWheel * distance * 0.1f;
+		distance -= io.MouseWheel * distance * ZOOM_SPEED_SCALE;
 	}
 
 	float sx = ::sinf(angleX);
@@ -125,7 +136,7 @@ void FreeCameraController::Update()
 
 	// カメラの方向を算出
 	DirectX::XMVECTOR Front = DirectX::XMVectorSet(-cx * sy, -sx, -cx * cy, 0.0f);
-	DirectX::XMVECTOR Right = DirectX::XMVectorSet(cy, 0, -sy, 0.0f);
+	DirectX::XMVECTOR Right = DirectX::XMVectorSet(cy, 0.0f, -sy, 0.0f);
 	DirectX::XMVECTOR Up = DirectX::XMVector3Cross(Right, Front);
 	// カメラの視点＆注視点を算出
 	DirectX::XMVECTOR Focus = DirectX::XMLoadFloat3(&focus);

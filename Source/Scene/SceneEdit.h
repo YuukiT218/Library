@@ -45,17 +45,17 @@ public:
 
 	void DrawAnimationControlUI(Model* model, bool& isPlaying, int animationIndex, bool animationLoop, float& animationSeconds, float secondsLength);
 
-	void DrawAnimationSpeedGraphBackground(ImDrawList* draw_list, ImVec2 graphStart, ImVec2 graphEnd, float secondsLength, float graphWidth, float graphHeight, float labelMargin);
+	void DrawAnimationSpeedGraphBackground(ImDrawList* drawList, ImVec2 graphStart, ImVec2 graphEnd, float secondsLength, float graphWidth, float graphHeight, float labelMargin);
 
-	void DrawSpeedCurveEditor(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex, float secondsLength, Model* model);
+	void DrawSpeedCurveEditor(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex, float secondsLength, Model* model);
 
-	void DrawSpeedCurvePoints(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex);
+	void DrawSpeedCurvePoints(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex);
 
-	void DrawSpeedCurveLines(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, float graphWidth, float graphHeight);
+	void DrawSpeedCurveLines(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, float graphWidth, float graphHeight);
 
-	void DrawCurrentSpeedIndicator(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, float graphWidth, float graphHeight, float secondsLength, Model* model);
+	void DrawCurrentSpeedIndicator(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, float graphWidth, float graphHeight, float secondsLength, Model* model);
 
-	void DrawAttributeHandles(ImDrawList* draw_list, AnimationConfig* config, int animIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength);
+	void DrawAttributeHandles(ImDrawList* drawList, AnimationConfig* config, int animIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength);
 
 	void DrawAnimationEventsUI(AnimationConfig* config, Model* model, int animationIndex);
 
@@ -72,9 +72,9 @@ public:
 	void DrawAttributeListSection(AnimationConfig* config, int& selectedAttributeIndex);
 	void HandleSequencerInput(AnimationConfig* config, float secondsLength, float& animationSeconds, int& selectedEventIndex, int& currentFrame, float timelineWidth);
 
-	void DrawCameraKeyframePoints(AnimationConfig* config, ImDrawList* draw_list, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex);
+	void DrawCameraKeyframePoints(AnimationConfig* config, ImDrawList* drawList, ImVec2 graphStart, ImVec2 graphEnd, float graphWidth, float graphHeight, int& selectedKeyIndex);
 
-	void DrawEventHandles(ImDrawList* draw_list, AnimationConfig* config, int animationIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength);
+	void DrawEventHandles(ImDrawList* drawList, AnimationConfig* config, int animationIndex, const ImVec2& graphStart, const ImVec2& graphEnd, float graphWidth, float secondsLength);
 
 	//----------------------------------------------------------------
 	// 再生（AI を実際に動かすモード）
@@ -107,10 +107,10 @@ private:
 	std::unique_ptr<EditCameraController> cameraController;
 	std::unique_ptr<CameraController> playCameraController;
 	std::unique_ptr<SkyBox> skyBox;
-	FreeCameraController freecameraController;
+	FreeCameraController freeCameraController;
 	Model::DissolveConstants enemysupport;
 
-	std::unique_ptr<PostEffect> posteffect;
+	std::unique_ptr<PostEffect> postEffect;
 
 	// 点光源
 	DirectX::XMFLOAT4 pointColor{ 0.0f / 255.0f, 50.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f };

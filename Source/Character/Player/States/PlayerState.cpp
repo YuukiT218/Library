@@ -7,7 +7,20 @@
 
 #include <stdlib.h>
 
+namespace
+{
+    // スティックの傾きがこれより大きければ歩き入力とみなす
+    constexpr float WALK_INPUT_THRESHOLD = 0.2f;
 
+    // スティックの傾きがこれより大きければ走り入力とみなす
+    constexpr float RUN_INPUT_THRESHOLD = 0.5f;
+
+    // ストレイフ時に入力ありとみなすスティックの傾き
+    constexpr float STRAFE_INPUT_THRESHOLD = 0.1f;
+
+    // アニメーション未選択を表すインデックス
+    constexpr int NO_ANIMATION_INDEX = -1;
+}
 
 //-------------------------------------------------------------
 // ステート基盤
@@ -61,7 +74,7 @@ bool PlayerState::InputWalkMove() const
 {
     const GamePad& gamepad = Input::Instance().GetGamePad();
 
-    return gamepad.GetLAxisPower() > 0.2f && gamepad.GetLAxisPower() < 0.5f;
+    return gamepad.GetLAxisPower() > WALK_INPUT_THRESHOLD && gamepad.GetLAxisPower() < RUN_INPUT_THRESHOLD;
 }
 
 // 走り移動入力
@@ -69,51 +82,41 @@ bool PlayerState::InputRunMove() const
 {
     const GamePad& gamepad = Input::Instance().GetGamePad();
 
-    return gamepad.GetLAxisPower() > 0.5f;
+    return gamepad.GetLAxisPower() > RUN_INPUT_THRESHOLD;
 }
 
 // ロックオンしている場合はストレイフ
 void PlayerState::LockOnStrafe(int rightIndex, int leftIndex, int frontIndex, int backIndex)
 {
-    if (CameraParam::Instance().GetIsLockOn())
+    if (CameraParam::Instance().IsLockOn())
     {
         const GamePad& gamepad = Input::Instance().GetGamePad();
-        if (gamepad.GetLAxisPower() > 0.1f)
+        if (gamepad.GetLAxisPower() > STRAFE_INPUT_THRESHOLD)
         {
             float axisX = gamepad.GetAxisLX();
             float axisY = gamepad.GetAxisLY();
 
-            int newAnimationIndex = -1;
+            const bool isFront = axisY > STRAFE_INPUT_THRESHOLD;
+            const bool isBack = axisY < -STRAFE_INPUT_THRESHOLD;
+            const bool isRight = axisX > STRAFE_INPUT_THRESHOLD;
+            const bool isLeft = axisX < -STRAFE_INPUT_THRESHOLD;
 
-            // 右前
-            if (axisY > 0.1f && axisX > 0.1f)
+            int newAnimationIndex = NO_ANIMATION_INDEX;
+
+            // 斜め入力は左右のアニメーションを優先する
+            if (isRight)
                 newAnimationIndex = rightIndex;
-            // 左前
-            else if (axisY > 0.1f && axisX < -0.1f)
+            else if (isLeft)
                 newAnimationIndex = leftIndex;
-            // 右後ろ
-            else if (axisY < -0.1f && axisX > 0.1f)
-                newAnimationIndex = rightIndex;
-            // 左後ろ
-            else if (axisY < -0.1f && axisX < -0.1f)
-                newAnimationIndex = leftIndex;
-            // 前
-            else if (axisY > 0.1f)
+            else if (isFront)
                 newAnimationIndex = frontIndex;
-            // 後ろ
-            else if (axisY < -0.1f)
+            else if (isBack)
                 newAnimationIndex = backIndex;
-            // 右
-            else if (axisX > 0.1f)
-                newAnimationIndex = rightIndex;
-            // 左
-            else if (axisX < -0.1f)
-                newAnimationIndex = leftIndex;
 
-            if (newAnimationIndex != -1 &&
+            if (newAnimationIndex != NO_ANIMATION_INDEX &&
                 newAnimationIndex != player->GetPlayerModel()->GetCurrentAnimationIndex())
             {
-                player->GetPlayerModel()->PlayAnimation(newAnimationIndex, true, 0.1f);
+                player->GetPlayerModel()->PlayAnimation(newAnimationIndex, true, DEFAULT_BLEND_SECONDS);
             }
         }
     }
@@ -121,7 +124,7 @@ void PlayerState::LockOnStrafe(int rightIndex, int leftIndex, int frontIndex, in
     {
         if (frontIndex != player->GetPlayerModel()->GetCurrentAnimationIndex())
         {
-            player->GetPlayerModel()->PlayAnimation(frontIndex, true, 0.1f);
+            player->GetPlayerModel()->PlayAnimation(frontIndex, true, DEFAULT_BLEND_SECONDS);
         }
     }
 }

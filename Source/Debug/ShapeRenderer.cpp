@@ -2,6 +2,18 @@
 #include "Graphics/GpuResourceUtils.h"
 #include "ShapeRenderer.h"
 
+namespace
+{
+	// 球・半球・円柱を何分割の線で描くか
+	constexpr int SHAPE_SUBDIVISIONS = 32;
+
+	// 骨メッシュの太さ（長さに対する割合）
+	constexpr float BONE_WIDTH_RATE = 0.25f;
+
+	// 円柱の底面の高さ（中心を原点にするため半分下げる）
+	constexpr float CYLINDER_BOTTOM = -0.5f;
+}
+
 // コンストラクタ
 ShapeRenderer::ShapeRenderer(ID3D11Device* device)
 {
@@ -36,13 +48,13 @@ ShapeRenderer::ShapeRenderer(ID3D11Device* device)
 	CreateBoxMesh(device, 1.0f, 1.0f, 1.0f);
 
 	// 球メッシュ生成
-	CreateSphereMesh(device, 1.0f, 32);
+	CreateSphereMesh(device, 1.0f, SHAPE_SUBDIVISIONS);
 
 	// 半球メッシュ生成
-	CreateHalfSphereMesh(device, 1.0f, 32);
+	CreateHalfSphereMesh(device, 1.0f, SHAPE_SUBDIVISIONS);
 
 	// 円柱メッシュ生成
-	CreateCylinderMesh(device, 1.0f, 1.0f, -0.5f, 1.0f, 32);
+	CreateCylinderMesh(device, 1.0f, 1.0f, CYLINDER_BOTTOM, 1.0f, SHAPE_SUBDIVISIONS);
 
 	// 骨メッシュ生成
 	CreateBoneMesh(device, 1.0f);
@@ -297,14 +309,14 @@ void ShapeRenderer::CreateHalfSphereMesh(ID3D11Device* device, float radius, int
 {
 	std::vector<DirectX::XMFLOAT3> vertices;
 
-	float theta_step = DirectX::XM_2PI / subdivisions;
+	float thetaStep = DirectX::XM_2PI / subdivisions;
 
 	// XZ平面
 	for (int i = 0; i < subdivisions; ++i)
 	{
 		for (int j = 0; j < 2; ++j)
 		{
-			float theta = theta_step * ((i + j) % subdivisions);
+			float theta = thetaStep * ((i + j) % subdivisions);
 
 			DirectX::XMFLOAT3& v = vertices.emplace_back();
 
@@ -318,7 +330,7 @@ void ShapeRenderer::CreateHalfSphereMesh(ID3D11Device* device, float radius, int
 	{
 		for (int j = 0; j < 2; ++j)
 		{
-			float theta = theta_step * ((i + j) % subdivisions) - DirectX::XM_PIDIV2;
+			float theta = thetaStep * ((i + j) % subdivisions) - DirectX::XM_PIDIV2;
 
 			DirectX::XMFLOAT3& v = vertices.emplace_back();
 
@@ -332,7 +344,7 @@ void ShapeRenderer::CreateHalfSphereMesh(ID3D11Device* device, float radius, int
 	{
 		for (int j = 0; j < 2; ++j)
 		{
-			float theta = theta_step * ((i + j) % subdivisions);
+			float theta = thetaStep * ((i + j) % subdivisions);
 
 			DirectX::XMFLOAT3& v = vertices.emplace_back();
 
@@ -351,14 +363,14 @@ void ShapeRenderer::CreateCylinderMesh(ID3D11Device* device, float radius1, floa
 {
 	std::vector<DirectX::XMFLOAT3> vertices;
 
-	float theta_step = DirectX::XM_2PI / subdivisions;
+	float thetaStep = DirectX::XM_2PI / subdivisions;
 
 	// XZ平面
 	for (int i = 0; i < subdivisions; ++i)
 	{
 		for (int j = 0; j < 2; ++j)
 		{
-			float theta = theta_step * ((i + j) % subdivisions);
+			float theta = thetaStep * ((i + j) % subdivisions);
 
 			DirectX::XMFLOAT3& v = vertices.emplace_back();
 
@@ -371,7 +383,7 @@ void ShapeRenderer::CreateCylinderMesh(ID3D11Device* device, float radius1, floa
 	{
 		for (int j = 0; j < 2; ++j)
 		{
-			float theta = theta_step * ((i + j) % subdivisions);
+			float theta = thetaStep * ((i + j) % subdivisions);
 
 			DirectX::XMFLOAT3& v = vertices.emplace_back();
 
@@ -402,7 +414,7 @@ void ShapeRenderer::CreateCylinderMesh(ID3D11Device* device, float radius1, floa
 // 骨メッシュ作成
 void ShapeRenderer::CreateBoneMesh(ID3D11Device* device, float length)
 {
-	float width = length * 0.25f;
+	float width = length * BONE_WIDTH_RATE;
 	DirectX::XMFLOAT3 positions[8] =
 	{
 		{ -0.00f,  0.00f,  0.00f},

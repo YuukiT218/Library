@@ -3,11 +3,26 @@
 #include "GpuResourceUtils.h"
 #include "Graphics/Graphics.h"
 #include <map>
-
-
 #include <stdlib.h>
 
+namespace
+{
+	// フルスクリーンクアッド（三角形ストリップ）の頂点数
+	constexpr UINT FULL_SCREEN_QUAD_VERTEX_COUNT = 4;
 
+	// ブラー用バッファのクリア色
+	const DirectX::XMFLOAT4 BLUR_CLEAR_COLOR = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	// ビネットの設定値をシェーダーに渡す値へ変換する係数
+	constexpr float VIGNETTE_INTENSITY_SCALE = 3.0f;
+	constexpr float VIGNETTE_SMOOTHNESS_SCALE = 5.0f;
+	constexpr float VIGNETTE_MIN_SMOOTHNESS = 0.000001f;
+	constexpr float VIGNETTE_MAX_ROUNDNESS = 6.0f;
+
+	// ガウスフィルターをかけるテクスチャのサイズ
+	constexpr float GAUSSIAN_TEXTURE_WIDTH = 1280.0f;
+	constexpr float GAUSSIAN_TEXTURE_HEIGHT = 720.0f;
+}
 
 PostEffect::PostEffect(ID3D11Device* device)
 {
@@ -48,7 +63,7 @@ PostEffect::PostEffect(ID3D11Device* device)
 	GpuResourceUtils::CreateConstantBuffer(
 		device,
 		sizeof(CbGaussianFilter),
-		gaussianconstantBuffer.GetAddressOf());
+		gaussianConstantBuffer.GetAddressOf());
 
 	// トーンマッピングピクセルシェーダー読み込み
 	GpuResourceUtils::LoadPixelShader(
@@ -84,31 +99,31 @@ PostEffect::PostEffect(ID3D11Device* device)
 	GpuResourceUtils::LoadPixelShader(
 		device,
 		"Data/Shader/FinalPostPS.cso",
-		FinalPostPS.GetAddressOf());
+		finalPostPS.GetAddressOf());
 
 	// ラジアルブラーピクセルシェーダー読み込み
 	GpuResourceUtils::LoadPixelShader(
 		device,
 		"Data/Shader/RadialBlurPS.cso",
-		RadialBlurPS.GetAddressOf());
+		radialBlurPS.GetAddressOf());
 	// 色収差ピクセルシェーダー読み込み
 	GpuResourceUtils::LoadPixelShader(
 		device,
 		"Data/Shader/ChromaticAberrationPS.cso",
-		ChromaticPS.GetAddressOf());
+		chromaticPS.GetAddressOf());
 
 	// 定数バッファ作成
 	GpuResourceUtils::CreateConstantBuffer(
 		device,
 		sizeof(CbFpost),
-		cbFpostconstantBuffer.GetAddressOf());
+		cbFpostConstantBuffer.GetAddressOf());
 
 	uint32_t width = static_cast<uint32_t>(Graphics::Instance().GetScreenWidth());
 	uint32_t height = static_cast<uint32_t>(Graphics::Instance().GetScreenHeight());
-	for (size_t downsampled_index = 0; downsampled_index < downsampled_count; ++downsampled_index)
+	for (size_t downsampledIndex = 0; downsampledIndex < DOWNSAMPLED_COUNT; ++downsampledIndex)
 	{
-		gaussian_blur[downsampled_index][0] = std::make_unique<FrameBuffer>(device, width >> downsampled_index, height >> downsampled_index);
-		gaussian_blur[downsampled_index][1] = std::make_unique<FrameBuffer>(device, width >> downsampled_index, height >> downsampled_index);
+		gaussianBlur[downsampledIndex][0] = std::make_unique<FrameBuffer>(device, width >> downsampledIndex, height >> downsampledIndex);
+		gaussianBlur[downsampledIndex][1] = std::make_unique<FrameBuffer>(device, width >> downsampledIndex, height >> downsampledIndex);
 	}
 
 	//CbPostEffect
@@ -124,9 +139,6 @@ PostEffect::PostEffect(ID3D11Device* device)
 	//cbGaussianFilter
 	cbGaussianFilter.kernelSize = 0;
 	cbGaussianFilter.texcel = { 0,0 };
-	int kernelSize{ 1 };
-	float sigma{ 10.0f };
-	DirectX::XMFLOAT2 textureSize = { 0, 0 };
 	gaussianFilterDatas.kernelSize = 1;
 	gaussianFilterDatas.sigma = 10.0f;
 	gaussianFilterDatas.textureSize = { 0,0 };
@@ -265,8 +277,8 @@ void PostEffect::Begin(const RenderContext& rc)
 	ID3D11Buffer* buffers[] =
 	{
 		constantBuffer.Get(),
-		gaussianconstantBuffer.Get(),
-		cbFpostconstantBuffer.Get(),
+		gaussianConstantBuffer.Get(),
+		cbFpostConstantBuffer.Get(),
 	};
 
 	// 定数バッファ設定
@@ -292,7 +304,7 @@ void PostEffect::LuminanceExtraction(const RenderContext& rc, ID3D11ShaderResour
 
 	// 描画
 	// 4頂点で描画をする
-	dc->Draw(4, 0);
+	dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 }
 
 // ブルーム処理
@@ -309,14 +321,14 @@ void PostEffect::Bloom(const RenderContext& rc, ID3D11ShaderResourceView* colorM
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 
 	// 描画
-	dc->Draw(4, 0);
+	dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 }
 
 //ブラー
 void PostEffect::KawaseBloom(const RenderContext& rc, ID3D11ShaderResourceView* colorMap, ID3D11ShaderResourceView* luminanceMap, FrameBuffer* display)
 {
 	ID3D11DeviceContext* dc = rc.deviceContext;
-	ID3D11ShaderResourceView* null_shader_resource_view{};
+	ID3D11ShaderResourceView* nullShaderResourceView{};
 	
 	 // サンプラステート設定
 	ID3D11SamplerState* samplers[] =
@@ -333,16 +345,16 @@ void PostEffect::KawaseBloom(const RenderContext& rc, ID3D11ShaderResourceView* 
 	dc->PSSetShader(downSamplePS.Get(), 0, 0);
 
 	FrameBuffer* buffer;
-	ID3D11ShaderResourceView* shadermap;
+	ID3D11ShaderResourceView* shaderMap;
 
 	auto DrawBuffer = [&](int x, int y, ID3D11ShaderResourceView* map)
 		{
-			buffer = gaussian_blur[x][y].get();
+			buffer = gaussianBlur[x][y].get();
 			buffer->SetRenderTargets(dc);
-			buffer->Clear(dc, DirectX::XMFLOAT4(1, 1, 1, 1));
-			ID3D11ShaderResourceView* resourcemap = map;
-			dc->PSSetShaderResources(0, 1, &resourcemap);
-			dc->Draw(4, 0);
+			buffer->Clear(dc, BLUR_CLEAR_COLOR);
+			ID3D11ShaderResourceView* resourceMap = map;
+			dc->PSSetShaderResources(0, 1, &resourceMap);
+			dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 		};
 
 	DrawBuffer(0, 0, luminanceMap);
@@ -353,74 +365,74 @@ void PostEffect::KawaseBloom(const RenderContext& rc, ID3D11ShaderResourceView* 
 
 	dc->PSSetShader(verticalPS.Get(), 0, 0);
 
-	DrawBuffer(0, 0, gaussian_blur[0][1]->GetColorMap());
+	DrawBuffer(0, 0, gaussianBlur[0][1]->GetColorMap());
 
-	for (size_t downsampled_index = 1; downsampled_index < downsampled_count; ++downsampled_index)
+	for (size_t downsampledIndex = 1; downsampledIndex < DOWNSAMPLED_COUNT; ++downsampledIndex)
 	{
 		// Downsampling
 		dc->PSSetShader(downSamplePS.Get(), 0, 0);
 
-		DrawBuffer(static_cast<int>(downsampled_index), 0, gaussian_blur[downsampled_index - 1][0]->GetColorMap());
+		DrawBuffer(static_cast<int>(downsampledIndex), 0, gaussianBlur[downsampledIndex - 1][0]->GetColorMap());
 
 		// Ping-pong gaussian blur
 		dc->PSSetShader(horizontalPS.Get(), 0, 0);
 
-		DrawBuffer(static_cast<int>(downsampled_index), 1, gaussian_blur[downsampled_index][0]->GetColorMap());
-		dc->PSSetShaderResources(0, 1, &null_shader_resource_view);
+		DrawBuffer(static_cast<int>(downsampledIndex), 1, gaussianBlur[downsampledIndex][0]->GetColorMap());
+		dc->PSSetShaderResources(0, 1, &nullShaderResourceView);
 
 		dc->PSSetShader(verticalPS.Get(), 0, 0);
 
-		DrawBuffer(static_cast<int>(downsampled_index), 0, gaussian_blur[downsampled_index][1]->GetColorMap());
+		DrawBuffer(static_cast<int>(downsampledIndex), 0, gaussianBlur[downsampledIndex][1]->GetColorMap());
 
 	}
 
 	// DownSampling
 	FrameBuffer* luminance = Graphics::Instance().GetFrameBuffer(FrameBufferId::Luminance);
 	luminance->SetRenderTargets(dc);
-	luminance->Clear(dc, DirectX::XMFLOAT4(1, 1, 1, 1));
+	luminance->Clear(dc, BLUR_CLEAR_COLOR);
 
 	dc->PSSetShader(upSamplePS.Get(), 0, 0);
 
 	//// シェーダーリソース設定
-	std::vector<ID3D11ShaderResourceView*> shader_resource_views;
-	for (size_t downsampled_index = 0; downsampled_index < downsampled_count; ++downsampled_index)
+	std::vector<ID3D11ShaderResourceView*> shaderResourceViews;
+	for (size_t downsampledIndex = 0; downsampledIndex < DOWNSAMPLED_COUNT; ++downsampledIndex)
 	{
-		shader_resource_views.push_back(gaussian_blur[downsampled_index][0]->GetColorMap());
+		shaderResourceViews.push_back(gaussianBlur[downsampledIndex][0]->GetColorMap());
 	}
-	dc->PSSetShaderResources(0, static_cast<UINT>(shader_resource_views.size()), shader_resource_views.data());
+	dc->PSSetShaderResources(0, static_cast<UINT>(shaderResourceViews.size()), shaderResourceViews.data());
 
-	dc->Draw(4, 0);
+	dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 
-	for (int i = 0; i < downsampled_count; ++i)
+	for (int i = 0; i < DOWNSAMPLED_COUNT; ++i)
 	{
-		dc->PSSetShaderResources(i, 1, &null_shader_resource_view);
+		dc->PSSetShaderResources(i, 1, &nullShaderResourceView);
 	}
 
 
 	// 最終的に合成
 	display->SetRenderTargets(dc);
-	display->Clear(dc, DirectX::XMFLOAT4(1, 1, 1, 1));
+	display->Clear(dc, BLUR_CLEAR_COLOR);
 
-	dc->PSSetShader(FinalPostPS.Get(), 0, 0);
+	dc->PSSetShader(finalPostPS.Get(), 0, 0);
 
-	VigenetteDatas constant;
+	VignetteDatas constant;
 	constant.vignetteColor = vignetteSetData.vignetteColor;
 	constant.vignetteCenter = vignetteSetData.vignetteCenter;
-	constant.vignetteIntensity = vignetteSetData.vignetteIntensity * 3.0f;
-	constant.vignetteSmoothness = max(0.000001f, vignetteSetData.vignetteSmoothness * 5.0f);
+	constant.vignetteIntensity = vignetteSetData.vignetteIntensity * VIGNETTE_INTENSITY_SCALE;
+	constant.vignetteSmoothness = max(VIGNETTE_MIN_SMOOTHNESS, vignetteSetData.vignetteSmoothness * VIGNETTE_SMOOTHNESS_SCALE);
 	constant.vignetteRounded = vignetteSetData.vignetteRounded ? 1.0f : 0.0f;
-	constant.vignetteRoundness = 6.0f * (1.0f - vignetteSetData.vignetteRoundness) + vignetteSetData.vignetteRoundness;
+	constant.vignetteRoundness = VIGNETTE_MAX_ROUNDNESS * (1.0f - vignetteSetData.vignetteRoundness) + vignetteSetData.vignetteRoundness;
 
 	cbFpost.vignetteData = constant;
 	cbFpost.radialBlurDatas.radius = radialRadius;
-	dc->UpdateSubresource(cbFpostconstantBuffer.Get(), 0, 0, &cbFpost, 0, 0);
+	dc->UpdateSubresource(cbFpostConstantBuffer.Get(), 0, 0, &cbFpost, 0, 0);
 
-	shadermap = luminance->GetColorMap();
+	shaderMap = luminance->GetColorMap();
 	// シェーダーリソース設定
-	ID3D11ShaderResourceView* srvs[] = { colorMap, shadermap };
+	ID3D11ShaderResourceView* srvs[] = { colorMap, shaderMap };
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 
-	dc->Draw(4, 0);
+	dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 }
 
 void PostEffect::GaussianFilter(const RenderContext& rc, ID3D11ShaderResourceView* colorMap)
@@ -440,8 +452,8 @@ void PostEffect::GaussianFilter(const RenderContext& rc, ID3D11ShaderResourceVie
 	if (kernelSize % 2 == 0)
 		kernelSize++;
 
-	gaussianFilterDatas.textureSize.x = 1280;
-	gaussianFilterDatas.textureSize.y = 720;
+	gaussianFilterDatas.textureSize.x = GAUSSIAN_TEXTURE_WIDTH;
+	gaussianFilterDatas.textureSize.y = GAUSSIAN_TEXTURE_HEIGHT;
 
 	cbGaussianFilter.kernelSize = static_cast<float>(kernelSize);
 	cbGaussianFilter.texcel.x = 1.0f / gaussianFilterDatas.textureSize.x;
@@ -466,10 +478,10 @@ void PostEffect::GaussianFilter(const RenderContext& rc, ID3D11ShaderResourceVie
 		cbGaussianFilter.weights[i].z /= sum;
 	}
 
-	dc->UpdateSubresource(gaussianconstantBuffer.Get(), 0, 0, &cbGaussianFilter, 0, 0);
+	dc->UpdateSubresource(gaussianConstantBuffer.Get(), 0, 0, &cbGaussianFilter, 0, 0);
 
 	// 描画
-	dc->Draw(4, 0);
+	dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 }
 
 void PostEffect::ToneMapping(const RenderContext& rc, ID3D11ShaderResourceView* colorMap, ID3D11ShaderResourceView* blurMap)
@@ -485,7 +497,7 @@ void PostEffect::ToneMapping(const RenderContext& rc, ID3D11ShaderResourceView* 
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 
 	// 描画
-	dc->Draw(4, 0);
+	dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 }
 
 void PostEffect::RadialBlur(const RenderContext& rc, ID3D11ShaderResourceView* colorMap)
@@ -494,14 +506,14 @@ void PostEffect::RadialBlur(const RenderContext& rc, ID3D11ShaderResourceView* c
 
 	// シェーダー設定
 	dc->VSSetShader(fullscreenQuadVS.Get(), 0, 0);
-	dc->PSSetShader(RadialBlurPS.Get(), 0, 0);
+	dc->PSSetShader(radialBlurPS.Get(), 0, 0);
 
 	// シェーダーリソース設定
 	ID3D11ShaderResourceView* srvs[] = { colorMap };
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 
 	// 描画
-	dc->Draw(4, 0);
+	dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 }
 
 void PostEffect::ChromaticAberration(const RenderContext& rc, ID3D11ShaderResourceView* colorMap)
@@ -510,14 +522,14 @@ void PostEffect::ChromaticAberration(const RenderContext& rc, ID3D11ShaderResour
 
 	// シェーダー設定
 	dc->VSSetShader(fullscreenQuadVS.Get(), 0, 0);
-	dc->PSSetShader(ChromaticPS.Get(), 0, 0);
+	dc->PSSetShader(chromaticPS.Get(), 0, 0);
 
 	// シェーダーリソース設定
 	ID3D11ShaderResourceView* srvs[] = { colorMap };
 	dc->PSSetShaderResources(0, _countof(srvs), srvs);
 
 	// 描画
-	dc->Draw(4, 0);
+	dc->Draw(FULL_SCREEN_QUAD_VERTEX_COUNT, 0);
 }
 
 void PostEffect::Draw(const RenderContext& rc)
@@ -627,9 +639,9 @@ void PostEffect::DrawDebugGUI()
 		if (ImGui::TreeNode("ConcentratedLineDatas"))
 		{
 			ImGui::DragFloat("Intensity", &cbFpost.concentratedLineDatas.intensity, 0.1f);// 色調補正適応量
-			static bool UseAnimation = false;
-			ImGui::Checkbox("UseAnimation", &UseAnimation); // アニメーション使用フラグ
-			cbFpost.concentratedLineDatas.useAnimation = (UseAnimation) ? 1.0f : 0.0f;
+			static bool useAnimation = false;
+			ImGui::Checkbox("UseAnimation", &useAnimation); // アニメーション使用フラグ
+			cbFpost.concentratedLineDatas.useAnimation = (useAnimation) ? 1.0f : 0.0f;
 			ImGui::DragFloat("AnimationSpeed", &cbFpost.concentratedLineDatas.animationSpeed, 0.1f);// アニメーション速度
 			ImGui::DragFloat("PatternSeed", &cbFpost.concentratedLineDatas.patternSeed, 0.1f);// パターンシード値
 

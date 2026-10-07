@@ -23,13 +23,13 @@ public:
 	// マウス取得
 	Mouse& GetMouse() { return mouse; }
 
-	bool GetAnyButton() { return anyKeyPressed; }
+	bool IsAnyButtonPressed() { return anyKeyPressed; }
 
 	void OnKeyDown() { anyKeyPressed = true; }
 	void OnKeyUp() { anyKeyPressed = false; }
 
-	void SetIsLastGamePad(bool button) { pushGamePad = button; }
-	bool GetIsLastGamePad() { return pushGamePad; }
+	void SetLastGamePad(bool button) { pushGamePad = button; }
+	bool IsLastGamePad() { return pushGamePad; }
 
 
 	void IsThumbStickMoved();

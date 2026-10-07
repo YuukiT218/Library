@@ -4,6 +4,19 @@
 
 #include <stdlib.h>
 
+namespace
+{
+	// Effekseerで同時に描画・再生できる最大数
+	constexpr int EFFEKSEER_MAX_SPRITE_COUNT = 2048;
+	constexpr int EFFEKSEER_MAX_INSTANCE_COUNT = 2048;
+
+	// アクション用GPUパーティクルの最大数
+	constexpr int ACTION_PARTICLE_MAX_COUNT = 100000;
+
+	// Effekseerは60fps基準のフレーム数で時間を進める
+	constexpr float EFFEKSEER_FRAMES_PER_SECOND = 60.0f;
+}
+
 // 初期化
 void EffectManager::Initialize()
 {
@@ -13,10 +26,10 @@ void EffectManager::Initialize()
 	effekseerRenderer = EffekseerRendererDX11::Renderer::Create(
 		graphics.GetDevice(),
 		graphics.GetDeviceContext(),
-		2048);
+		EFFEKSEER_MAX_SPRITE_COUNT);
 
 	// Effekseerマネージャー生成
-	effekseerManager = Effekseer::Manager::Create(2048);
+	effekseerManager = Effekseer::Manager::Create(EFFEKSEER_MAX_INSTANCE_COUNT);
 
 	// Effekseerレンダラー設定
 	effekseerManager->SetSpriteRenderer(
@@ -45,7 +58,7 @@ void EffectManager::Initialize()
 	actionParticles = std::make_unique<GpuParticleSystem>();
 	actionParticles->Initialize(
 		Graphics::Instance().GetDevice(),
-		100000);
+		ACTION_PARTICLE_MAX_COUNT);
 	actionParticles->SetRespawnEnable(false);
 }
 
@@ -75,7 +88,7 @@ void EffectManager::Update(float elapsedTime)
 {
 	if (effekseerManager != nullptr)
 	{
-		effekseerManager->Update(elapsedTime * 60.0f);
+		effekseerManager->Update(elapsedTime * EFFEKSEER_FRAMES_PER_SECOND);
 	}
 
 	if (ambientParticles)
@@ -136,7 +149,7 @@ void EffectManager::EmitGpuParticle(
 	const DirectX::XMFLOAT4& color,
 	float size,
 	float lifeTime,
-	UINT behaviorType)
+	GpuParticleBehavior behavior)
 {
 	if (ambientParticles)
 	{
@@ -147,7 +160,7 @@ void EffectManager::EmitGpuParticle(
 			color,
 			size,
 			lifeTime,
-			behaviorType);
+			behavior);
 	}
 
 	if (actionParticles)
@@ -159,6 +172,6 @@ void EffectManager::EmitGpuParticle(
 			color,
 			size,
 			lifeTime,
-			behaviorType);
+			behavior);
 	}
 }

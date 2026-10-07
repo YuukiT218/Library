@@ -34,5 +34,5 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> sceneConstantBuffer;
 
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specular_pmrem_shader_resource_view;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> specularPmremShaderResourceView;
 };

@@ -104,6 +104,9 @@ public:
 	// 無敵時間取得
 	float GetInvincibleTimer() const { return invincibleTimer; }
 
+	// 通常時の重力
+	static constexpr float DEFAULT_GRAVITY = -0.3f;
+
 	// 名前取得
 	virtual std::string GetName() = 0;
 
@@ -193,7 +196,7 @@ protected:
 	DirectX::XMFLOAT3 velocity = { 0, 0, 0 };
 
 	float radius = 0.5f;
-	float gravity = -0.3f;
+	float gravity = DEFAULT_GRAVITY;
 	float invincibleTimer = 1.0f;
 	float height = 2.0f;
 	int health = 1000000;

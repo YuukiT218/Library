@@ -26,9 +26,9 @@ public:
 	float GetEnemyTimeScale() { return enemyTimeScale; }
 
 	// プレイヤーヒットストップ状態取得
-	bool GetPlayerHitStop() { return playerHitStop; }
+	bool IsPlayerHitStop() { return playerHitStop; }
 	// エネミーヒットストップ状態取得
-	bool GetEnemyHitStop() { return enemyHitStop; }
+	bool IsEnemyHitStop() { return enemyHitStop; }
 
 private:
 	// ヒットストップに必要な変数
